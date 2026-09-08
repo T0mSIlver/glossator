@@ -1,7 +1,8 @@
 """Rebuild a run's README and figures from its records.
 
-D-023 asks for charts rendered by a script so they can be regenerated. Two kinds
-of run write directories now -- dataset generation and answer evaluation -- and
+D-023 asks for charts rendered by a script so they can be regenerated. Several kinds
+of run write directories -- dataset generation, translation, answer evaluation,
+retrieval grids and floor calibration -- and
 `make eval-report run=<dir>` has to work on either without being told which, so
 the run's own `config.json` names its kind and this module dispatches on it.
 """
@@ -66,8 +67,13 @@ def run_kind(run_dir: Path) -> str:
 
 def rebuild(run_dir: Path) -> dict[str, Any]:
     """Regenerate metrics.json, README.md and figures/ for one run directory."""
-    if run_kind(run_dir) == ANSWER_EVAL_KIND:
+    kind = run_kind(run_dir)
+    if kind == ANSWER_EVAL_KIND:
         return answer_eval.regenerate(run_dir)
+    if kind not in ("generate", "translate"):
+        from glossator.eval.retrieval_report import rebuild_by_kind
+
+        return rebuild_by_kind(kind, run_dir)
     metrics = regenerate(run_dir)
     render_figures(metrics, run_dir / "figures")
     return metrics
@@ -82,12 +88,14 @@ def _summary(run_dir: Path, metrics: Mapping[str, Any]) -> dict[str, Any]:
             "questions": metrics["questions"],
             "figures": figures,
         }
-    return {
-        "run_dir": str(run_dir),
-        "kept": metrics["kept"],
-        "candidates": metrics["candidates"],
-        "figures": figures,
-    }
+    if "kept" in metrics and "candidates" in metrics:
+        return {
+            "run_dir": str(run_dir),
+            "kept": metrics["kept"],
+            "candidates": metrics["candidates"],
+            "figures": figures,
+        }
+    return {"run_dir": str(run_dir), "kind": metrics.get("kind"), "figures": figures}
 
 
 def main() -> None:

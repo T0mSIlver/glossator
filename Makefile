@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check dev-set eval-report eval-answers
+.PHONY: corpus-refresh corpus-check dev-set eval-report eval-answers eval-retrieval calibrate-floors
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -89,6 +89,21 @@ eval-answers:
 		$(if $(judge_model),--judge-model $(judge_model),) \
 		$(if $(note),--note "$(note)",) \
 		$(if $(skip_judge),--skip-judge,)
+## Run every question through every retrieval configuration in the grid
+## Usage: make eval-retrieval dataset=eval/dev.jsonl name=dev [configs=a,b] [limit=N]
+eval-retrieval:
+	uv run python -m glossator.eval.retrieval_grid \
+		--dataset $(dataset) \
+		--grid $(or $(grid),eval/configs/retrieval-grid.yaml) \
+		--name $(name) \
+		$(if $(configs),--configs $(configs),) \
+		$(if $(limit),--limit $(limit),)
+
+## Measure the similarity corridor between real and junk questions (D-030)
+## Usage: make calibrate-floors dataset=eval/dev.jsonl name=dev [variant=sec1024]
+calibrate-floors:
+	uv run python -m glossator.eval.calibrate_floors \
+		--dataset $(dataset) --name $(name) $(if $(variant),--variant $(variant),)
 
 ## Regenerate a run's README and figures from its records
 ## Usage: make eval-report run=eval/runs/2026-09-08-2312-dev-smoke

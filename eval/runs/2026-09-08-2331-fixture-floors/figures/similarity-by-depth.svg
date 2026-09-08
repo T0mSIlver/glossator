@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" width="720" height="260" role="img" aria-label="Median cosine similarity by result depth">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:11px;opacity:.75}.g{stroke:currentColor;opacity:.18}</style>
+<text class="t" x="16" y="22">Median cosine similarity by result depth</text>
+<line class="g" x1="50" y1="214.0" x2="514" y2="214.0"/>
+<text class="v" x="16" y="218.0">0.00</text>
+<line class="g" x1="50" y1="169.0" x2="514" y2="169.0"/>
+<text class="v" x="16" y="173.0">0.25</text>
+<line class="g" x1="50" y1="124.0" x2="514" y2="124.0"/>
+<text class="v" x="16" y="128.0">0.50</text>
+<line class="g" x1="50" y1="79.0" x2="514" y2="79.0"/>
+<text class="v" x="16" y="83.0">0.75</text>
+<line class="g" x1="50" y1="34.0" x2="514" y2="34.0"/>
+<text class="v" x="16" y="38.0">1.00</text>
+<text class="v" x="50.0" y="232.0" text-anchor="middle">1</text>
+<text class="v" x="204.7" y="232.0" text-anchor="middle">5</text>
+<text class="v" x="359.3" y="232.0" text-anchor="middle">20</text>
+<text class="v" x="514.0" y="232.0" text-anchor="middle">50</text>
+<polyline points="50.0,62.8 204.7,70.2 359.3,77.7 514.0,92.5" fill="none" stroke="#3b6fd4" stroke-width="2"/>
+<circle cx="50.0" cy="62.8" r="2.5" fill="#3b6fd4"/>
+<circle cx="204.7" cy="70.2" r="2.5" fill="#3b6fd4"/>
+<circle cx="359.3" cy="77.7" r="2.5" fill="#3b6fd4"/>
+<circle cx="514.0" cy="92.5" r="2.5" fill="#3b6fd4"/>
+<line x1="526" y1="42" x2="536" y2="42" stroke="#3b6fd4" stroke-width="2"/>
+<text class="v" x="539" y="46">real</text>
+<polyline points="50.0,104.4 204.7,109.9 359.3,115.8 514.0,125.0" fill="none" stroke="#c05621" stroke-width="2"/>
+<circle cx="50.0" cy="104.4" r="2.5" fill="#c05621"/>
+<circle cx="204.7" cy="109.9" r="2.5" fill="#c05621"/>
+<circle cx="359.3" cy="115.8" r="2.5" fill="#c05621"/>
+<circle cx="514.0" cy="125.0" r="2.5" fill="#c05621"/>
+<line x1="526" y1="58" x2="536" y2="58" stroke="#c05621" stroke-width="2"/>
+<text class="v" x="539" y="62">junk</text>
+</svg>

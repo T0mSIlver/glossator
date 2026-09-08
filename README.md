@@ -77,6 +77,44 @@ make search query="which models support function calling" variant=sec1024 top_k=
 Each hit prints its citation URL (the page, deep-linked to the section when the
 heading has an anchor), the score, the heading path and a preview.
 
+Before the first query of a process, the embedding model is checked against five
+fixed question/passage pairs and two unrelated passages, and one stored chunk is
+re-embedded and compared with its indexed vector. A model whose weights no longer
+mean anything passes every shape check and fails this one; the command aborts and
+names the variant and the model. `--skip-probe` skips it.
+
+Three optional flags change what comes back:
+
+```bash
+make search query="which models support function calling" variant=sec1024 top_k=10
+uv run python -m glossator.retrieval "how do I stream a chat completion" --rerank
+uv run python -m glossator.retrieval "what causes feline hyperthyroidism" --footing
+```
+
+`--rerank` spends one model call on reordering the top 20 candidates: the query
+and each candidate's citation, heading path and first ~300 tokens go to the model,
+which returns the candidates in relevance order with a short reason for the best
+few. The reordered hits carry both scores, `rerank_score` and `retrieval_score`. A
+malformed ranking keeps the retrieval order and says so; it never raises. The
+model and temperature are `RetrievalConfig.rerank_model` and
+`rerank_temperature`; the serving default is Mistral Small 4.
+
+`--footing` reports whether any content word of the query occurs anywhere in the
+corpus. It is what makes "the documentation does not cover this" reachable: with
+vector search alone, every query matches something.
+
+`RetrievalConfig` also carries an absolute cosine floor and a relative margin
+below the query's best hit. Both default to off until they are calibrated against
+the live index:
+
+```bash
+make calibrate-floors dataset=eval/dev.jsonl name=dev
+```
+
+That run searches the real questions and 15 junk questions from unrelated domains,
+records the similarity at ranks 1, 5, 20 and 50 for each, and proposes a floor and
+a margin only when the two distributions leave a corridor between them.
+
 ### Ask a question
 
 Retrieval, grounded generation and citation verification in one call. Three
@@ -127,6 +165,32 @@ are also the checkpoint: re-running the same `name` skips the questions already
 recorded and pays only for the rest. `limit=N` takes a stratified sample that
 keeps every question type represented. Regenerate a run's README and figures from
 its records with `make eval-report run=<dir>`.
+### Compare retrieval configurations
+
+Every question of a dataset through every configuration of a grid, with the ranked
+hits of each run kept so any number in the report can be traced to the hits it
+came from.
+
+```bash
+make eval-retrieval dataset=eval/dev.jsonl name=dev
+make eval-retrieval dataset=eval/dev.jsonl name=quick configs=sec1024-shipped limit=20
+```
+
+The grid is `eval/configs/retrieval-grid.yaml`: a cross product of index variants
+and ranking weight sets, plus the reranked rows named at the bottom of the file.
+Results are reported at two matchings — the hit's URL against the gold URL, and
+the hit's URL *and* anchor against a gold URL and anchor — because most markdown
+headings in this corpus carry no anchor, so a question whose gold has none is
+scored at page level only. Unanswerable questions are excluded from recall and
+reported on their own.
+
+The run writes `eval/runs/<date>-<name>/` with `config.json`, `records.jsonl`,
+`calls.jsonl`, `metrics.json`, `figures/` and a README. Both are regenerated from
+the recorded rows by:
+
+```bash
+make eval-report run=eval/runs/2026-09-08-2329-fixture-grid
+```
 
 ### Run the tests
 
@@ -198,10 +262,13 @@ make generate-vespa-lock
 src/glossator/
 ├── index/            # Vespa application: variant table + schema migrations
 ├── ingest/           # pages → sections → chunks → embed → index (make ingest)
-├── retrieval/        # config, retriever, engine (make search)
-└── answer/           # context assembly, grounded generation, citations (make ask)
+├── retrieval/        # config, retriever, engine, reranker, embedding probe (make search)
+├── answer/           # context assembly, grounded generation, citations (make ask)
+└── eval/             # datasets, retrieval grid, floor calibration, reports
 src/entrypoints/
 └── mcp_server.py     # read-only MCP server over glossator.retrieval
+eval/configs/         # the retrieval grid definition
+eval/runs/            # one committed directory per evaluation run
 tests/                # make test; tests/fixtures/corpus/ is the sample corpus
 .mcp.json             # MCP server config (auto-loaded by Claude Code)
 .vibe/config.toml     # MCP server config (auto-loaded by Vibe CLI)

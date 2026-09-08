@@ -3,7 +3,8 @@
 D-023 asks for charts rendered by a script so they can be regenerated. Hand-written
 SVG has no fonts to find, no backend to select, and nothing to download, which is
 worth more here than a plotting library's flexibility: every figure in this project
-is a bar chart or a scatter of a dozen points.
+is a bar chart, a line per configuration over a few k values, or a scatter of a
+dozen points.
 """
 
 from __future__ import annotations
@@ -18,10 +19,21 @@ BAR_HEIGHT = 16
 LABEL_WIDTH = 240
 MARGIN = 16
 TITLE_HEIGHT = 34
+PLOT_HEIGHT = 180
+LEGEND_WIDTH = 190
 
 # Chosen for contrast in both light and dark viewers; the SVG carries no
 # background, so it inherits the page's.
 SERIES_COLORS = ("#3b6fd4", "#c05621", "#2f855a", "#805ad5")
+
+# Applied in turn each time the colours wrap, so a line chart of more than four
+# series stays readable. The empty first entry is a solid line.
+DASH_PATTERNS = (
+    "",
+    ' stroke-dasharray="6 3"',
+    ' stroke-dasharray="2 3"',
+    ' stroke-dasharray="9 3 2 3"',
+)
 
 _FONT = (
     '<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}'
@@ -131,3 +143,69 @@ def scatter(
 
 
 __all__ = ["SERIES_COLORS", "bar_chart", "scatter"]
+
+
+def line_chart(
+    title: str,
+    x_labels: Sequence[str],
+    series: Sequence[tuple[str, Sequence[float]]],
+    *,
+    y_max: float = 1.0,
+) -> str:
+    """A line per series over shared x positions, for a metric measured at several k."""
+    height = TITLE_HEIGHT + PLOT_HEIGHT + 46
+    left = MARGIN + 34
+    plot_width = WIDTH - left - MARGIN - LEGEND_WIDTH
+    steps = max(len(x_labels) - 1, 1)
+
+    def point(index: int, value: float) -> tuple[float, float]:
+        x = left + index / steps * plot_width
+        y = TITLE_HEIGHT + PLOT_HEIGHT * (1 - min(max(value, 0.0), y_max) / (y_max or 1.0))
+        return x, y
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {height}" '
+        f'width="{WIDTH}" height="{height}" role="img" aria-label="{escape(title)}">',
+        '<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}'
+        ".t{font-weight:600;font-size:14px}.v{font-size:11px;opacity:.75}"
+        ".g{stroke:currentColor;opacity:.18}</style>",
+        f'<text class="t" x="{MARGIN}" y="22">{escape(title)}</text>',
+    ]
+    for step in range(5):
+        value = y_max * step / 4
+        y = TITLE_HEIGHT + PLOT_HEIGHT * (1 - step / 4)
+        parts.append(
+            f'<line class="g" x1="{left}" y1="{y:.1f}" x2="{left + plot_width}" y2="{y:.1f}"/>'
+        )
+        parts.append(f'<text class="v" x="{MARGIN}" y="{y + 4:.1f}">{value:.2f}</text>')
+    for index, label in enumerate(x_labels):
+        x, _y = point(index, 0)
+        parts.append(
+            f'<text class="v" x="{x:.1f}" y="{TITLE_HEIGHT + PLOT_HEIGHT + 18:.1f}" '
+            f'text-anchor="middle">{escape(label)}</text>'
+        )
+    for order, (name, values) in enumerate(series):
+        color = SERIES_COLORS[order % len(SERIES_COLORS)]
+        # A grid is a dozen or more rows and there are four colours, so the dash
+        # pattern changes each time the colours wrap: sixteen series stay apart,
+        # and a reader can follow one line without counting.
+        dash = DASH_PATTERNS[(order // len(SERIES_COLORS)) % len(DASH_PATTERNS)]
+        points = " ".join(
+            f"{x:.1f},{y:.1f}" for x, y in (point(i, v) for i, v in enumerate(values))
+        )
+        parts.append(
+            f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"{dash}/>'
+        )
+        for x, y in (point(i, v) for i, v in enumerate(values)):
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.5" fill="{color}"/>')
+        legend_y = TITLE_HEIGHT + 12 + order * 16
+        parts.append(
+            f'<line x1="{left + plot_width + 12}" y1="{legend_y - 4}" '
+            f'x2="{left + plot_width + 22}" y2="{legend_y - 4}" stroke="{color}" '
+            f'stroke-width="2"{dash}/>'
+        )
+        parts.append(
+            f'<text class="v" x="{left + plot_width + 25}" y="{legend_y}">{escape(name)}</text>'
+        )
+    parts.append("</svg>")
+    return "\n".join(parts) + "\n"
