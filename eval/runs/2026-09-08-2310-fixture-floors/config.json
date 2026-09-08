@@ -1,0 +1,16 @@
+{
+  "corpus_dir": "tests/fixtures/corpus",
+  "dataset": "tests/fixtures/retrieval-dev.jsonl",
+  "dataset_sha256": "f0744c029c3fee49d7168ab0ec00a11e07d116d0738ad49eb90aee0bfbc6933a",
+  "depths": [
+    1,
+    5,
+    20,
+    50
+  ],
+  "junk_questions": 15,
+  "kind": "floor-calibration",
+  "real_questions": 12,
+  "top_k": 50,
+  "variant": "sec1024"
+}

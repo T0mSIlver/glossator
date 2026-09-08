@@ -24,13 +24,15 @@ _BAR_HEIGHT = 16
 _LABEL_WIDTH = 240
 _MARGIN = 16
 _TITLE_HEIGHT = 34
+_PLOT_HEIGHT = 180
+_LEGEND_WIDTH = 190
 
 # Chosen for contrast in both light and dark viewers; the SVG carries no
 # background, so it inherits the page's.
-_SERIES_COLORS = ("#3b6fd4", "#c05621", "#2f855a", "#805ad5")
+SERIES_COLORS = ("#3b6fd4", "#c05621", "#2f855a", "#805ad5")
 
 
-def _bar_chart(
+def bar_chart(
     title: str,
     rows: Sequence[tuple[str, Sequence[float]]],
     series_names: Sequence[str],
@@ -58,7 +60,7 @@ def _bar_chart(
         offset = top + (_ROW_HEIGHT - bar * series_count) / 2
         for series, value in enumerate(values):
             width = max(0.0, value) / largest * plot_width
-            color = _SERIES_COLORS[series % len(_SERIES_COLORS)]
+            color = SERIES_COLORS[series % len(SERIES_COLORS)]
             parts.append(
                 f'<rect x="{_LABEL_WIDTH + 8}" y="{offset + series * bar:.1f}" '
                 f'width="{width:.1f}" height="{bar - 1}" fill="{color}"/>'
@@ -72,7 +74,7 @@ def _bar_chart(
         legend_y = height - 8
         x = _MARGIN
         for series, name in enumerate(series_names):
-            color = _SERIES_COLORS[series % len(_SERIES_COLORS)]
+            color = SERIES_COLORS[series % len(SERIES_COLORS)]
             parts.append(
                 f'<rect x="{x}" y="{legend_y - 9}" width="10" height="10" fill="{color}"/>'
             )
@@ -122,16 +124,91 @@ def render_figures(metrics: Mapping[str, Any], figures_dir: Path) -> list[Path]:
         ),
     ):
         path = figures_dir / name
-        path.write_text(_bar_chart(title, rows, series))
+        path.write_text(bar_chart(title, rows, series))
         written.append(path)
     return written
 
 
+def line_chart(
+    title: str,
+    x_labels: Sequence[str],
+    series: Sequence[tuple[str, Sequence[float]]],
+    *,
+    y_max: float = 1.0,
+) -> str:
+    """A line per series over shared x positions, for a metric measured at several k."""
+    height = _TITLE_HEIGHT + _PLOT_HEIGHT + 46
+    left = _MARGIN + 34
+    plot_width = _WIDTH - left - _MARGIN - _LEGEND_WIDTH
+    steps = max(len(x_labels) - 1, 1)
+
+    def point(index: int, value: float) -> tuple[float, float]:
+        x = left + index / steps * plot_width
+        y = _TITLE_HEIGHT + _PLOT_HEIGHT * (1 - min(max(value, 0.0), y_max) / (y_max or 1.0))
+        return x, y
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_WIDTH} {height}" '
+        f'width="{_WIDTH}" height="{height}" role="img" aria-label="{escape(title)}">',
+        '<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}'
+        ".t{font-weight:600;font-size:14px}.v{font-size:11px;opacity:.75}"
+        ".g{stroke:currentColor;opacity:.18}</style>",
+        f'<text class="t" x="{_MARGIN}" y="22">{escape(title)}</text>',
+    ]
+    for step in range(5):
+        value = y_max * step / 4
+        y = _TITLE_HEIGHT + _PLOT_HEIGHT * (1 - step / 4)
+        parts.append(
+            f'<line class="g" x1="{left}" y1="{y:.1f}" x2="{left + plot_width}" y2="{y:.1f}"/>'
+        )
+        parts.append(f'<text class="v" x="{_MARGIN}" y="{y + 4:.1f}">{value:.2f}</text>')
+    for index, label in enumerate(x_labels):
+        x, _y = point(index, 0)
+        parts.append(
+            f'<text class="v" x="{x:.1f}" y="{_TITLE_HEIGHT + _PLOT_HEIGHT + 18:.1f}" '
+            f'text-anchor="middle">{escape(label)}</text>'
+        )
+    for order, (name, values) in enumerate(series):
+        color = SERIES_COLORS[order % len(SERIES_COLORS)]
+        points = " ".join(
+            f"{x:.1f},{y:.1f}" for x, y in (point(i, v) for i, v in enumerate(values))
+        )
+        parts.append(f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"/>')
+        for x, y in (point(i, v) for i, v in enumerate(values)):
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.5" fill="{color}"/>')
+        legend_y = _TITLE_HEIGHT + 12 + order * 16
+        parts.append(
+            f'<rect x="{left + plot_width + 12}" y="{legend_y - 8}" width="9" height="9" '
+            f'fill="{color}"/>'
+        )
+        parts.append(
+            f'<text class="v" x="{left + plot_width + 25}" y="{legend_y}">{escape(name)}</text>'
+        )
+    parts.append("</svg>")
+    return "\n".join(parts) + "\n"
+
+
 def rebuild(run_dir: Path) -> dict[str, Any]:
-    """Regenerate metrics.json, README.md and figures/ for one run directory."""
+    """Regenerate metrics.json, README.md and figures/ for one run directory.
+
+    Runs of different kinds answer different questions and get different READMEs,
+    so the run says which kind it is in its own ``config.json`` and this dispatches
+    on that. A run written before the field existed is a dataset generation run.
+    """
+    kind = _kind(run_dir)
+    if kind is not None:
+        from glossator.eval.retrieval_report import rebuild_by_kind
+
+        return rebuild_by_kind(kind, run_dir)
     metrics = regenerate(run_dir)
     render_figures(metrics, run_dir / "figures")
     return metrics
+
+
+def _kind(run_dir: Path) -> str | None:
+    config = json.loads((run_dir / "config.json").read_text())
+    kind = config.get("kind")
+    return str(kind) if kind else None
 
 
 def main() -> None:
@@ -145,8 +222,7 @@ def main() -> None:
         json.dumps(
             {
                 "run_dir": str(args.run_dir),
-                "kept": metrics["kept"],
-                "candidates": metrics["candidates"],
+                "kind": metrics.get("kind", "dataset-generation"),
                 "figures": sorted(path.name for path in (args.run_dir / "figures").glob("*.svg")),
             }
         )

@@ -37,6 +37,8 @@ logger = structlog.get_logger(__name__)
 
 CONTENT_PREVIEW_CHARS = 240
 
+EMBEDDER_MAX_RETRY = 8
+
 
 @dataclass(frozen=True, slots=True)
 class Navigation:
@@ -213,6 +215,11 @@ class SearchEngine:
         self.embedder = embedder or MistralEmbedder(
             client=Mistral(api_key=_api_key()),
             model_name=config.index_variant.embedding_model_name,
+            # The embedding API rate-limits on the free tier, and the toolkit's
+            # three default retries are not enough for a batch of queries in a
+            # row: a query that runs out of retries is a search that failed
+            # (D-011a found the same thing on the ingest side).
+            max_retry=EMBEDDER_MAX_RETRY,
         )
         self.retriever = DocsRetriever(self.index, self.embedder, config)
         self._llm = llm
@@ -231,10 +238,11 @@ class SearchEngine:
         top_k: int | None = None,
         *,
         rerank: bool | None = None,
+        embedding: list[float] | None = None,
     ) -> list[Hit]:
         """Hits for a query. ``top_k`` overrides the configured depth for one call."""
         hits, _trace = await self.search_with_trace(
-            query, exclude_ids=exclude_ids, top_k=top_k, rerank=rerank
+            query, exclude_ids=exclude_ids, top_k=top_k, rerank=rerank, embedding=embedding
         )
         return hits
 
@@ -245,23 +253,26 @@ class SearchEngine:
         top_k: int | None = None,
         *,
         rerank: bool | None = None,
+        embedding: list[float] | None = None,
     ) -> tuple[list[Hit], SearchTrace]:
         """The same search, with the record of what it did to the result set.
 
         Two callers want different things from one search: an answer strategy
         wants the hits, an evaluation wants why there are that many of them. The
         trace is built either way, so the two can never disagree.
+
+        ``embedding`` is the query's vector when the caller already has it. A
+        query's embedding depends on the model, not on the ranking weights, so an
+        evaluation that runs one question through a dozen weight sets embeds it
+        once and pays one request instead of a dozen.
         """
         started = time.perf_counter()
         depth = top_k or self.config.top_k
         reranking = self.config.rerank if rerank is None else rerank
         candidates = max(depth, self.config.rerank_candidates) if reranking else depth
 
-        embedding = (
-            await self.retriever.embed_query(query, context=self.context)
-            if self.config.scores_similarity
-            else None
-        )
+        if embedding is None and self.config.scores_similarity:
+            embedding = await self.retriever.embed_query(query, context=self.context)
         results = await self.retriever.retrieve(
             query, top_k=candidates, exclude_ids=exclude_ids, embedding=embedding
         )
@@ -270,7 +281,7 @@ class SearchEngine:
 
         best_similarity: float | None = None
         dropped_floor = dropped_margin = 0
-        if embedding is not None and hits:
+        if self.config.scores_similarity and embedding is not None and hits:
             hits, best_similarity, dropped_floor, dropped_margin = await self._apply_floors(
                 embedding, hits
             )

@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" width="720" height="260" role="img" aria-label="Recall at k, page-level matching">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:11px;opacity:.75}.g{stroke:currentColor;opacity:.18}</style>
+<text class="t" x="16" y="22">Recall at k, page-level matching</text>
+<line class="g" x1="50" y1="214.0" x2="514" y2="214.0"/>
+<text class="v" x="16" y="218.0">0.00</text>
+<line class="g" x1="50" y1="169.0" x2="514" y2="169.0"/>
+<text class="v" x="16" y="173.0">0.25</text>
+<line class="g" x1="50" y1="124.0" x2="514" y2="124.0"/>
+<text class="v" x="16" y="128.0">0.50</text>
+<line class="g" x1="50" y1="79.0" x2="514" y2="79.0"/>
+<text class="v" x="16" y="83.0">0.75</text>
+<line class="g" x1="50" y1="34.0" x2="514" y2="34.0"/>
+<text class="v" x="16" y="38.0">1.00</text>
+<text class="v" x="50.0" y="232.0" text-anchor="middle">1</text>
+<text class="v" x="204.7" y="232.0" text-anchor="middle">3</text>
+<text class="v" x="359.3" y="232.0" text-anchor="middle">5</text>
+<text class="v" x="514.0" y="232.0" text-anchor="middle">10</text>
+<polyline points="50.0,74.9 204.7,50.4 359.3,34.0 514.0,34.0" fill="none" stroke="#3b6fd4" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#3b6fd4"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#3b6fd4"/>
+<circle cx="359.3" cy="34.0" r="2.5" fill="#3b6fd4"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#3b6fd4"/>
+<rect x="526" y="38" width="9" height="9" fill="#3b6fd4"/>
+<text class="v" x="539" y="46">page128-shipped</text>
+<polyline points="50.0,74.9 204.7,50.4 359.3,50.4 514.0,34.0" fill="none" stroke="#c05621" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#c05621"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#c05621"/>
+<circle cx="359.3" cy="50.4" r="2.5" fill="#c05621"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#c05621"/>
+<rect x="526" y="54" width="9" height="9" fill="#c05621"/>
+<text class="v" x="539" y="62">page128-vector-heavy</text>
+<polyline points="50.0,58.6 204.7,42.2 359.3,34.0 514.0,34.0" fill="none" stroke="#2f855a" stroke-width="2"/>
+<circle cx="50.0" cy="58.6" r="2.5" fill="#2f855a"/>
+<circle cx="204.7" cy="42.2" r="2.5" fill="#2f855a"/>
+<circle cx="359.3" cy="34.0" r="2.5" fill="#2f855a"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#2f855a"/>
+<rect x="526" y="70" width="9" height="9" fill="#2f855a"/>
+<text class="v" x="539" y="78">page128-lexical-heavy</text>
+<polyline points="50.0,74.9 204.7,50.4 359.3,50.4 514.0,34.0" fill="none" stroke="#805ad5" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#805ad5"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#805ad5"/>
+<circle cx="359.3" cy="50.4" r="2.5" fill="#805ad5"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#805ad5"/>
+<rect x="526" y="86" width="9" height="9" fill="#805ad5"/>
+<text class="v" x="539" y="94">sec128-shipped</text>
+<polyline points="50.0,74.9 204.7,50.4 359.3,50.4 514.0,50.4" fill="none" stroke="#3b6fd4" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#3b6fd4"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#3b6fd4"/>
+<circle cx="359.3" cy="50.4" r="2.5" fill="#3b6fd4"/>
+<circle cx="514.0" cy="50.4" r="2.5" fill="#3b6fd4"/>
+<rect x="526" y="102" width="9" height="9" fill="#3b6fd4"/>
+<text class="v" x="539" y="110">sec128-vector-heavy</text>
+<polyline points="50.0,91.3 204.7,66.7 359.3,66.7 514.0,50.4" fill="none" stroke="#c05621" stroke-width="2"/>
+<circle cx="50.0" cy="91.3" r="2.5" fill="#c05621"/>
+<circle cx="204.7" cy="66.7" r="2.5" fill="#c05621"/>
+<circle cx="359.3" cy="66.7" r="2.5" fill="#c05621"/>
+<circle cx="514.0" cy="50.4" r="2.5" fill="#c05621"/>
+<rect x="526" y="118" width="9" height="9" fill="#c05621"/>
+<text class="v" x="539" y="126">sec128-lexical-heavy</text>
+<polyline points="50.0,74.9 204.7,50.4 359.3,34.0 514.0,34.0" fill="none" stroke="#2f855a" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#2f855a"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#2f855a"/>
+<circle cx="359.3" cy="34.0" r="2.5" fill="#2f855a"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#2f855a"/>
+<rect x="526" y="134" width="9" height="9" fill="#2f855a"/>
+<text class="v" x="539" y="142">sec128-heading-path-off</text>
+<polyline points="50.0,91.3 204.7,66.7 359.3,66.7 514.0,34.0" fill="none" stroke="#805ad5" stroke-width="2"/>
+<circle cx="50.0" cy="91.3" r="2.5" fill="#805ad5"/>
+<circle cx="204.7" cy="66.7" r="2.5" fill="#805ad5"/>
+<circle cx="359.3" cy="66.7" r="2.5" fill="#805ad5"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#805ad5"/>
+<rect x="526" y="150" width="9" height="9" fill="#805ad5"/>
+<text class="v" x="539" y="158">sec1024-shipped</text>
+<polyline points="50.0,107.6 204.7,66.7 359.3,66.7 514.0,50.4" fill="none" stroke="#3b6fd4" stroke-width="2"/>
+<circle cx="50.0" cy="107.6" r="2.5" fill="#3b6fd4"/>
+<circle cx="204.7" cy="66.7" r="2.5" fill="#3b6fd4"/>
+<circle cx="359.3" cy="66.7" r="2.5" fill="#3b6fd4"/>
+<circle cx="514.0" cy="50.4" r="2.5" fill="#3b6fd4"/>
+<rect x="526" y="166" width="9" height="9" fill="#3b6fd4"/>
+<text class="v" x="539" y="174">sec1024-vector-heavy</text>
+<polyline points="50.0,91.3 204.7,66.7 359.3,66.7 514.0,50.4" fill="none" stroke="#c05621" stroke-width="2"/>
+<circle cx="50.0" cy="91.3" r="2.5" fill="#c05621"/>
+<circle cx="204.7" cy="66.7" r="2.5" fill="#c05621"/>
+<circle cx="359.3" cy="66.7" r="2.5" fill="#c05621"/>
+<circle cx="514.0" cy="50.4" r="2.5" fill="#c05621"/>
+<rect x="526" y="182" width="9" height="9" fill="#c05621"/>
+<text class="v" x="539" y="190">sec1024-lexical-heavy</text>
+<polyline points="50.0,74.9 204.7,50.4 359.3,34.0 514.0,34.0" fill="none" stroke="#2f855a" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#2f855a"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#2f855a"/>
+<circle cx="359.3" cy="34.0" r="2.5" fill="#2f855a"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#2f855a"/>
+<rect x="526" y="198" width="9" height="9" fill="#2f855a"/>
+<text class="v" x="539" y="206">sec1024-heading-path-off</text>
+<polyline points="50.0,91.3 204.7,50.4 359.3,50.4 514.0,34.0" fill="none" stroke="#805ad5" stroke-width="2"/>
+<circle cx="50.0" cy="91.3" r="2.5" fill="#805ad5"/>
+<circle cx="204.7" cy="50.4" r="2.5" fill="#805ad5"/>
+<circle cx="359.3" cy="50.4" r="2.5" fill="#805ad5"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#805ad5"/>
+<rect x="526" y="214" width="9" height="9" fill="#805ad5"/>
+<text class="v" x="539" y="222">sec1024-shipped+rerank</text>
+<polyline points="50.0,74.9 204.7,34.0 359.3,34.0 514.0,34.0" fill="none" stroke="#3b6fd4" stroke-width="2"/>
+<circle cx="50.0" cy="74.9" r="2.5" fill="#3b6fd4"/>
+<circle cx="204.7" cy="34.0" r="2.5" fill="#3b6fd4"/>
+<circle cx="359.3" cy="34.0" r="2.5" fill="#3b6fd4"/>
+<circle cx="514.0" cy="34.0" r="2.5" fill="#3b6fd4"/>
+<rect x="526" y="230" width="9" height="9" fill="#3b6fd4"/>
+<text class="v" x="539" y="238">sec1024-vector-heavy+rerank</text>
+</svg>

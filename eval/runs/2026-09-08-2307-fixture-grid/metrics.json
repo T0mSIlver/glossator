@@ -1,0 +1,3183 @@
+{
+  "best": {
+    "page": {
+      "configuration": "page128-lexical-heavy",
+      "margin": 0.0,
+      "ranking": [
+        {
+          "configuration": "page128-lexical-heavy",
+          "recall@5": 1.0
+        },
+        {
+          "configuration": "page128-shipped",
+          "recall@5": 1.0
+        },
+        {
+          "configuration": "sec1024-heading-path-off",
+          "recall@5": 1.0
+        },
+        {
+          "configuration": "sec1024-vector-heavy+rerank",
+          "recall@5": 1.0
+        },
+        {
+          "configuration": "sec128-heading-path-off",
+          "recall@5": 1.0
+        },
+        {
+          "configuration": "page128-vector-heavy",
+          "recall@5": 0.9091
+        },
+        {
+          "configuration": "sec1024-shipped+rerank",
+          "recall@5": 0.9091
+        },
+        {
+          "configuration": "sec128-shipped",
+          "recall@5": 0.9091
+        },
+        {
+          "configuration": "sec128-vector-heavy",
+          "recall@5": 0.9091
+        },
+        {
+          "configuration": "sec1024-lexical-heavy",
+          "recall@5": 0.8182
+        },
+        {
+          "configuration": "sec1024-shipped",
+          "recall@5": 0.8182
+        },
+        {
+          "configuration": "sec1024-vector-heavy",
+          "recall@5": 0.8182
+        },
+        {
+          "configuration": "sec128-lexical-heavy",
+          "recall@5": 0.8182
+        }
+      ],
+      "recall@5": 1.0,
+      "runner_up": "page128-shipped"
+    },
+    "ranked_on": "recall@5 over the 12 questions",
+    "section": {
+      "configuration": "sec1024-heading-path-off",
+      "margin": 0.0,
+      "ranking": [
+        {
+          "configuration": "sec1024-heading-path-off",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec1024-lexical-heavy",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec1024-shipped",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec1024-shipped+rerank",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec1024-vector-heavy",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec1024-vector-heavy+rerank",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec128-heading-path-off",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec128-lexical-heavy",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec128-shipped",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "sec128-vector-heavy",
+          "recall@5": 0.6667
+        },
+        {
+          "configuration": "page128-lexical-heavy",
+          "recall@5": 0.0
+        },
+        {
+          "configuration": "page128-shipped",
+          "recall@5": 0.0
+        },
+        {
+          "configuration": "page128-vector-heavy",
+          "recall@5": 0.0
+        }
+      ],
+      "recall@5": 0.6667,
+      "runner_up": "sec1024-lexical-heavy"
+    }
+  },
+  "common_questions": 12,
+  "configuration_order": [
+    "page128-shipped",
+    "page128-vector-heavy",
+    "page128-lexical-heavy",
+    "sec128-shipped",
+    "sec128-vector-heavy",
+    "sec128-lexical-heavy",
+    "sec128-heading-path-off",
+    "sec1024-shipped",
+    "sec1024-vector-heavy",
+    "sec1024-lexical-heavy",
+    "sec1024-heading-path-off",
+    "sec1024-shipped+rerank",
+    "sec1024-vector-heavy+rerank"
+  ],
+  "configurations": {
+    "page128-lexical-heavy": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 3.0,
+          "bm25_heading_path_max": 1.0,
+          "bm25_page_title": 1.0,
+          "content_embedding_closeness": 0.5,
+          "content_embedding_cosine_similarity_score": 1.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "page128"
+      },
+      "errors": 0,
+      "median_latency_ms": 7.6,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9386,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 0.75,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.9545,
+              "ndcg@10": 0.9553,
+              "questions": 11,
+              "recall@1": 0.8636,
+              "recall@10": 1.0,
+              "recall@3": 0.9545,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 5,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9386,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 0.75,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.9545,
+              "ndcg@10": 0.9553,
+              "questions": 11,
+              "recall@1": 0.8636,
+              "recall@10": 1.0,
+              "recall@3": 0.9545,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 5,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "capability": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "overall": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 9,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "single_page": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 5,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "capability": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "overall": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 9,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "single_page": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 5,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            }
+          }
+        }
+      },
+      "name": "page128-lexical-heavy",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 8.7,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "page128",
+      "weights": "lexical-heavy"
+    },
+    "page128-shipped": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {},
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "page128"
+      },
+      "errors": 0,
+      "median_latency_ms": 8.5,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8818,
+              "ndcg@10": 0.9034,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.84,
+              "ndcg@10": 0.8774,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8818,
+              "ndcg@10": 0.9034,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.84,
+              "ndcg@10": 0.8774,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "capability": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "overall": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 9,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "single_page": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 5,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "capability": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "overall": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 9,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "single_page": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 5,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            }
+          }
+        }
+      },
+      "name": "page128-shipped",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 9.3,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "page128",
+      "weights": "shipped"
+    },
+    "page128-vector-heavy": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 0.3,
+          "content_embedding_closeness": 8.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "page128"
+      },
+      "errors": 0,
+      "median_latency_ms": 7.6,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8766,
+              "ndcg@10": 0.9058,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.8286,
+              "ndcg@10": 0.8667,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8766,
+              "ndcg@10": 0.9058,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.8286,
+              "ndcg@10": 0.8667,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "capability": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "overall": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 9,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "single_page": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 5,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "capability": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "overall": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 9,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            },
+            "single_page": {
+              "mrr": 0.0,
+              "ndcg@10": 0.0,
+              "questions": 5,
+              "recall@1": 0.0,
+              "recall@10": 0.0,
+              "recall@3": 0.0,
+              "recall@5": 0.0
+            }
+          }
+        }
+      },
+      "name": "page128-vector-heavy",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 9.8,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "page128",
+      "weights": "vector-heavy"
+    },
+    "sec1024-heading-path-off": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_heading_path_avg": 0.0,
+          "bm25_heading_path_max": 0.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 9.2,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.625,
+              "ndcg@10": 0.7153,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8864,
+              "ndcg@10": 0.9147,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.625,
+              "ndcg@10": 0.7153,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8864,
+              "ndcg@10": 0.9147,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec1024-heading-path-off",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 9.7,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec1024",
+      "weights": "heading-path-off"
+    },
+    "sec1024-lexical-heavy": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 3.0,
+          "bm25_heading_path_max": 1.0,
+          "bm25_page_title": 1.0,
+          "content_embedding_closeness": 0.5,
+          "content_embedding_cosine_similarity_score": 1.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 8.3,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.3333,
+              "ndcg@10": 0.4936,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.7879,
+              "ndcg@10": 0.817,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 0.9091,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8,
+              "ndcg@10": 0.8,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 0.8,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.3333,
+              "ndcg@10": 0.4936,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.7879,
+              "ndcg@10": 0.817,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 0.9091,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8,
+              "ndcg@10": 0.8,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 0.8,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.1667,
+              "ndcg@10": 0.25,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.1667,
+              "ndcg@10": 0.25,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec1024-lexical-heavy",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 8.9,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec1024",
+      "weights": "lexical-heavy"
+    },
+    "sec1024-shipped": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {},
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 9.2,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.3214,
+              "ndcg@10": 0.4821,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8009,
+              "ndcg@10": 0.8473,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 1.0,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8333,
+              "ndcg@10": 0.8712,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.3214,
+              "ndcg@10": 0.4821,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8009,
+              "ndcg@10": 0.8473,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 1.0,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8333,
+              "ndcg@10": 0.8712,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.25,
+              "ndcg@10": 0.3155,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6111,
+              "ndcg@10": 0.6257,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.25,
+              "ndcg@10": 0.3155,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6111,
+              "ndcg@10": 0.6257,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec1024-shipped",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 10.2,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec1024",
+      "weights": "shipped"
+    },
+    "sec1024-shipped+rerank": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {},
+        "rerank": true,
+        "rerank_candidates": 20,
+        "rerank_model": "ministral-14b-2512",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 5397.0,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5714,
+              "ndcg@10": 0.6667,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8009,
+              "ndcg@10": 0.8412,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.8667,
+              "ndcg@10": 0.9,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5714,
+              "ndcg@10": 0.6667,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8009,
+              "ndcg@10": 0.8412,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.8667,
+              "ndcg@10": 0.9,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec1024-shipped+rerank",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 6529.9,
+      "questions_run": 12,
+      "rerank": true,
+      "rerank_applied": 11,
+      "rerank_cost_usd": 0.008838,
+      "rerank_fallbacks": 1,
+      "rerank_usage": {
+        "completion_tokens": 4920,
+        "prompt_tokens": 54001
+      },
+      "variant": "sec1024",
+      "weights": "shipped"
+    },
+    "sec1024-vector-heavy": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 0.3,
+          "content_embedding_closeness": 8.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 8.4,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.25,
+              "ndcg@10": 0.3155,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.7424,
+              "ndcg@10": 0.7762,
+              "questions": 11,
+              "recall@1": 0.5909,
+              "recall@10": 0.9091,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8333,
+              "ndcg@10": 0.8712,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.25,
+              "ndcg@10": 0.3155,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.7424,
+              "ndcg@10": 0.7762,
+              "questions": 11,
+              "recall@1": 0.5909,
+              "recall@10": 0.9091,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8333,
+              "ndcg@10": 0.8712,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.25,
+              "ndcg@10": 0.3155,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5556,
+              "ndcg@10": 0.5847,
+              "questions": 9,
+              "recall@1": 0.4444,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.75,
+              "ndcg@10": 0.8155,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.25,
+              "ndcg@10": 0.3155,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5556,
+              "ndcg@10": 0.5847,
+              "questions": 9,
+              "recall@1": 0.4444,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec1024-vector-heavy",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 9.9,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec1024",
+      "weights": "vector-heavy"
+    },
+    "sec1024-vector-heavy+rerank": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 0.3,
+          "content_embedding_closeness": 8.0
+        },
+        "rerank": true,
+        "rerank_candidates": 20,
+        "rerank_model": "ministral-14b-2512",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 5182.3,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8788,
+              "ndcg@10": 0.9018,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.8667,
+              "ndcg@10": 0.9,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8788,
+              "ndcg@10": 0.9018,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.8667,
+              "ndcg@10": 0.9,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.75,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec1024-vector-heavy+rerank",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 5746.4,
+      "questions_run": 12,
+      "rerank": true,
+      "rerank_applied": 10,
+      "rerank_cost_usd": 0.009138,
+      "rerank_fallbacks": 2,
+      "rerank_usage": {
+        "completion_tokens": 4673,
+        "prompt_tokens": 56248
+      },
+      "variant": "sec1024",
+      "weights": "vector-heavy"
+    },
+    "sec128-heading-path-off": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_heading_path_avg": 0.0,
+          "bm25_heading_path_max": 0.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec128"
+      },
+      "errors": 0,
+      "median_latency_ms": 5.5,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.625,
+              "ndcg@10": 0.7153,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8864,
+              "ndcg@10": 0.9147,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.625,
+              "ndcg@10": 0.7153,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 1.0
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8864,
+              "ndcg@10": 0.9147,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 1.0
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec128-heading-path-off",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 6.1,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec128",
+      "weights": "heading-path-off"
+    },
+    "sec128-lexical-heavy": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 3.0,
+          "bm25_heading_path_max": 1.0,
+          "bm25_page_title": 1.0,
+          "content_embedding_closeness": 0.5,
+          "content_embedding_cosine_similarity_score": 1.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec128"
+      },
+      "errors": 0,
+      "median_latency_ms": 5.7,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.3333,
+              "ndcg@10": 0.4936,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.7879,
+              "ndcg@10": 0.817,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 0.9091,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8,
+              "ndcg@10": 0.8,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 0.8,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.3333,
+              "ndcg@10": 0.4936,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.7879,
+              "ndcg@10": 0.817,
+              "questions": 11,
+              "recall@1": 0.6818,
+              "recall@10": 0.9091,
+              "recall@3": 0.8182,
+              "recall@5": 0.8182
+            },
+            "single_page": {
+              "mrr": 0.8,
+              "ndcg@10": 0.8,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 0.8,
+              "recall@3": 0.8,
+              "recall@5": 0.8
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.1667,
+              "ndcg@10": 0.25,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.1667,
+              "ndcg@10": 0.25,
+              "questions": 2,
+              "recall@1": 0.0,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.5926,
+              "ndcg@10": 0.6111,
+              "questions": 9,
+              "recall@1": 0.5556,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec128-lexical-heavy",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 7.5,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec128",
+      "weights": "lexical-heavy"
+    },
+    "sec128-shipped": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {},
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec128"
+      },
+      "errors": 0,
+      "median_latency_ms": 6.3,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5714,
+              "ndcg@10": 0.6667,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8766,
+              "ndcg@10": 0.9058,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5714,
+              "ndcg@10": 0.6667,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 1.0,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8766,
+              "ndcg@10": 0.9058,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 1.0,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec128-shipped",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 7.5,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec128",
+      "weights": "shipped"
+    },
+    "sec128-vector-heavy": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 0.3,
+          "content_embedding_closeness": 8.0
+        },
+        "rerank": false,
+        "rerank_candidates": 20,
+        "rerank_model": "mistral-small-2603",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec128"
+      },
+      "errors": 0,
+      "median_latency_ms": 6.2,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8636,
+              "ndcg@10": 0.8682,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 0.9091,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "cross_page": {
+              "mrr": 1.0,
+              "ndcg@10": 0.9599,
+              "questions": 2,
+              "recall@1": 0.75,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "overall": {
+              "mrr": 0.8636,
+              "ndcg@10": 0.8682,
+              "questions": 11,
+              "recall@1": 0.7727,
+              "recall@10": 0.9091,
+              "recall@3": 0.9091,
+              "recall@5": 0.9091
+            },
+            "single_page": {
+              "mrr": 0.9,
+              "ndcg@10": 0.9262,
+              "questions": 5,
+              "recall@1": 0.8,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
+              "questions": 2,
+              "recall@1": 1.0,
+              "recall@10": 1.0,
+              "recall@3": 1.0,
+              "recall@5": 1.0
+            },
+            "capability": {
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
+              "questions": 2,
+              "recall@1": 0.5,
+              "recall@10": 0.5,
+              "recall@3": 0.5,
+              "recall@5": 0.5
+            },
+            "overall": {
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
+              "questions": 9,
+              "recall@1": 0.6667,
+              "recall@10": 0.6667,
+              "recall@3": 0.6667,
+              "recall@5": 0.6667
+            },
+            "single_page": {
+              "mrr": 0.6,
+              "ndcg@10": 0.6,
+              "questions": 5,
+              "recall@1": 0.6,
+              "recall@10": 0.6,
+              "recall@3": 0.6,
+              "recall@5": 0.6
+            }
+          }
+        }
+      },
+      "name": "sec128-vector-heavy",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 6.8,
+      "questions_run": 12,
+      "rerank": false,
+      "rerank_applied": 0,
+      "rerank_cost_usd": 0.0,
+      "rerank_fallbacks": 0,
+      "rerank_usage": {
+        "completion_tokens": 0,
+        "prompt_tokens": 0
+      },
+      "variant": "sec128",
+      "weights": "vector-heavy"
+    }
+  },
+  "errors": [],
+  "kind": "retrieval-grid",
+  "page_scoreable": 11,
+  "question_types": [
+    "api_reference",
+    "capability",
+    "cross_page",
+    "single_page",
+    "unanswerable"
+  ],
+  "questions": 12,
+  "rerank_calls": 21,
+  "rerank_cost_usd": 0.017976,
+  "rerank_fallbacks": 3,
+  "section_scoreable": 9,
+  "status": "complete",
+  "unanswerable": {
+    "no_lexical_footing": 0,
+    "questions": 1,
+    "rows": [
+      {
+        "configuration": "page128-shipped",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "1e3e9945-9510-5f88-8337-ef840bb68867",
+          "heading_path": [
+            "Function calling"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 15.651158336834953,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "page128-vector-heavy",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "1e3e9945-9510-5f88-8337-ef840bb68867",
+          "heading_path": [
+            "Function calling"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 12.882027823616582,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "page128-lexical-heavy",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "f8de4d4e-b93e-5181-a9f0-c35873831c62",
+          "heading_path": [
+            "Create chat completion"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 66.48815689325174,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/chat-completions"
+        }
+      },
+      {
+        "configuration": "sec128-shipped",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 18.758667299370074,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "sec128-vector-heavy",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 15.398515010384518,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "sec128-lexical-heavy",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 78.85917582583346,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "sec128-heading-path-off",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "function-calling",
+          "chunk_id": "a0e2d5bf-fa7b-538b-82c1-6dbe09e6ac5c",
+          "heading_path": [
+            "Known limitations",
+            "Function calling"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 18.461559867058018,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/known-limitations"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 21.343901478336825,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 18.28876605331663,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "sec1024-lexical-heavy",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 80.76707683555054,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      },
+      {
+        "configuration": "sec1024-heading-path-off",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "function-calling",
+          "chunk_id": "a0e2d5bf-fa7b-538b-82c1-6dbe09e6ac5c",
+          "heading_path": [
+            "Known limitations",
+            "Function calling"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": null,
+          "score": 20.496805910026577,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/known-limitations"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "function-calling",
+          "chunk_id": "a0e2d5bf-fa7b-538b-82c1-6dbe09e6ac5c",
+          "heading_path": [
+            "Known limitations",
+            "Function calling"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.496805910026577,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/known-limitations"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of tool calls a single assistant message may contain?",
+        "question_id": "fx-012",
+        "top_hit": {
+          "anchor": "parallel-tool-calls",
+          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "heading_path": [
+            "Function calling",
+            "The call loop",
+            "Parallel tool calls"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 18.28876605331663,
+          "score": 18.28876605331663,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/capabilities/function-calling"
+        }
+      }
+    ],
+    "with_a_top_hit": 13
+  }
+}
