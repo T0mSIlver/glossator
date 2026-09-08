@@ -29,7 +29,6 @@ When providing instructions, there are two levels of input you can give the mode
 > If you cannot control the `system` prompt, you can still include the general context and instructions in the `user` prompt by concatenating them with the actual query.
 > **Role-Separated Example:**
 >
->
 > ```json
 > {
 >     "role": "system",
@@ -41,9 +40,7 @@ When providing instructions, there are two levels of input you can give the mode
 > }
 > ```
 >
->
 > **Concatenated Example:**
->
 >
 > ```json
 > {

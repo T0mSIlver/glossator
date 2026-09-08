@@ -153,6 +153,13 @@ def test_table_cells_keep_their_content_and_flatten_br(tmp_path: Path) -> None:
     assert "https://docs.mistral.ai/models/mistral-large-3-25-12" in row
 
 
+def test_a_stray_close_br_is_still_a_break(tmp_path: Path) -> None:
+    output = render(tmp_path, "# Example\n\n| A | B |\n|---|---|\n| one </br> two | three |\n")
+    row = next(line for line in output.split("\n") if line.startswith("| one"))
+    assert "</br>" not in row
+    assert "one" in row and "two" in row
+
+
 def test_fences_are_never_rewritten(tmp_path: Path) -> None:
     body = (
         "# Example\n\n"

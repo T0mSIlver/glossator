@@ -35,15 +35,9 @@ Native reasoning models always generate thinking traces without any extra parame
 >
 > - `-2506` **(old)**: Used `<think>\n` and `\n</think>\n` tags as strings to encapsulate the thinking traces for input and output within the same content type.
 >
->
->
 > **2509/2507 (new)**
 >
->
->
 > The new format has the thinking chunks properly separated from the final answer of the model, allowing for a more structured and easier to parse input/output.
->
->
 >
 > ```json
 > [
@@ -95,16 +89,9 @@ Native reasoning models always generate thinking traces without any extra parame
 > ]
 > ```
 >
->
->
->
 > **2506 (old)**
 >
->
->
 > The old format had the thinking chunks and the final answer within the same content type, making it harder to parse the input/output.
->
->
 >
 > ```json
 > [

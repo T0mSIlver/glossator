@@ -1095,7 +1095,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/inference/prompting/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "2e8a684026e26ed0af25dbc39c72cdc6b8acd9a4d89ca51e1acb12a39d505fa8"
+    "sha256": "231a2a417d1b9ff852616d7f84bec61b5eda8249e6dfe4638645d6d7c3606488"
   },
   {
     "url": "https://docs.mistral.ai/inference/regional-inference",
@@ -1113,7 +1113,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/inference/sampling/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "4d004050ba2914d327a07d121a5834171e61fd7eca8429ce988dac799da9886c"
+    "sha256": "c55c20a374c2bb708ab31fa0a7125b472779ee31ae7580fb845a4136cdd6f8af"
   },
   {
     "url": "https://docs.mistral.ai/models",
@@ -1779,7 +1779,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/resources/deprecated/native-reasoning/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a418a9339638221b0abccbeefc43dc7df4fcc78e69d23619fbabd55ffbd854ce"
+    "sha256": "4a860d72d92ffe2f16e8ae947f33bd2894ba49ed0dfe9d270ebc37f0cab68988"
   },
   {
     "url": "https://docs.mistral.ai/resources/error-glossary",
@@ -2013,7 +2013,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/audio/speech_to_text/realtime_transcription/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "11d0771b420eed409fbd5f2f5ea4297ca11b6626a920350915124662aec2186e"
+    "sha256": "381b20978868d11cbc644b48b566cfdb82c117dc92789b72d9d59eff18782684"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/speech_to_text/realtime_transcription/client_auth",
@@ -2166,7 +2166,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/chat-completion/prompting/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "285ddb9858437bc3484434b8897dd68ca5bcab6a10eaa1d92c5e0abb4f1c8075"
+    "sha256": "e6e79acc6b3d70e6120aa3b15c18069b598f1be9c4b69017d5e051065a18142d"
   },
   {
     "url": "https://docs.mistral.ai/studio/conversations/citations",
@@ -2220,7 +2220,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/structured-output/custom/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "20918b84bddd2c430f8e4c9e86ea2624cd10669066986e53e5683cb3a4da3fe4"
+    "sha256": "c09091b9327d38d6bd1eb4a5234f96bffefea2e8b3f97c426963db2e944be1b5"
   },
   {
     "url": "https://docs.mistral.ai/studio/conversations/structured-output/json_mode",

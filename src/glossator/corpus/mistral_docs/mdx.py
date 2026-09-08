@@ -140,8 +140,11 @@ class MdxNormalizer:
 
     def render_page(self, path: Path, title: str | None = None) -> PageRender:
         body = self._render_file(path, _FileScope(path.parent, {}, 0))
-        body = _apply_directives(body)
+        # Links first: blockquoting a directive would otherwise indent its fenced code
+        # behind a `>` prefix before the rewrite had a chance to skip it.
         body = self._absolutize_links(body)
+        body = collapse_blank_lines(body)
+        body = _apply_directives(body)
         body = collapse_blank_lines(body)
         body = _ensure_h1(body, title)
         return PageRender(

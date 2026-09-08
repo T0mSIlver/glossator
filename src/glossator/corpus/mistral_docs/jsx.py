@@ -238,6 +238,15 @@ def _parse_nodes(source: str, index: int, stop_tag: str | None) -> tuple[list[No
                 if name_match is not None and name_match.group(0) == stop_tag:
                     flush()
                     return nodes, index
+                if name_match is not None and name_match.group(0).lower() in VOID_TAGS:
+                    # `</br>` is a common typo for `<br/>`; the browser treats it as
+                    # a break, so it must not survive as literal text in a table cell.
+                    end = source.find(">", index)
+                    if end != -1:
+                        flush()
+                        nodes.append(Element(name_match.group(0), {}, []))
+                        index = end + 1
+                        continue
                 # A stray close tag: keep it as text rather than losing content.
                 buffer.append(char)
                 index += 1

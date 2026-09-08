@@ -30,8 +30,6 @@ Realtime transcription allows you to transcribe audio as it is being spoken or r
 >
 > **Python Version**: Before running the following script, ensure you have installed the `mistralai[realtime]` package:
 >
->
->
 > ```bash
 > pip install mistralai[realtime]
 > ```

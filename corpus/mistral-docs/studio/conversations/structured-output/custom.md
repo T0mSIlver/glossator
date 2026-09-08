@@ -300,13 +300,9 @@ console.log(chatResponse.choices[0].message.parsed);
 >
 > To better guide the model, the following is being always prepended to the System Prompt when using this method:
 >
->
->
 > ```
 > Your output should be an instance of a JSON object following this schema: {{ json_schema }}
 > ```
->
->
 >
 > However, it is recommended to add more explanations and iterate on your system prompt to better clarify the expected schema and behavior.
 

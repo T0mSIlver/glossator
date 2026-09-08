@@ -10,7 +10,9 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Iterator
 
-FENCE_RE = re.compile(r"^(?P<indent>[ \t]*)(?P<delim>`{3,}|~{3,})(?P<info>.*)$")
+# The prefix allows blockquote markers so a fence inside a converted `:::` callout
+# is still recognized as code.
+FENCE_RE = re.compile(r"^(?P<indent>[ \t]*(?:>[ \t]*)*)(?P<delim>`{3,}|~{3,})(?P<info>.*)$")
 
 
 def iter_lines(text: str) -> Iterator[tuple[str, bool]]:
