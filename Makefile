@@ -87,6 +87,7 @@ eval-answers:
 		$(if $(limit),--limit $(limit),) \
 		$(if $(model),--model $(model),) \
 		$(if $(judge_model),--judge-model $(judge_model),) \
+		$(if $(note),--note "$(note)",) \
 		$(if $(skip_judge),--skip-judge,)
 
 ## Regenerate a run's README and figures from its records

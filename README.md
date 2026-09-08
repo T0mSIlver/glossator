@@ -106,6 +106,28 @@ the answer, each citation with its status, the trace, token usage, latency and t
 USD the run cost. `--record` writes every model request and response verbatim as
 JSON lines.
 
+### Evaluate the answers
+
+Runs every question of a dataset through each strategy against one index variant
+and scores each answer twice: deterministic checks that need no model (did a
+verified citation land on a gold page, did the quotes survive the verifier, was
+the refusal correct, what did it cost), and an LLM judge for correctness,
+groundedness and citation relevance. The judge never sees which strategy wrote
+the answer.
+
+```bash
+make eval-answers dataset=eval/dev.jsonl name=answers-dev
+make eval-answers dataset=tests/fixtures/answer-questions.jsonl name=answers-fixture \
+  strategies=single_pass variant=sec128 limit=4
+```
+
+Each run writes `eval/runs/<date>-<name>/` with `config.json`, `calls.jsonl`,
+`records.jsonl`, `metrics.json`, a README of tables and `figures/`. The records
+are also the checkpoint: re-running the same `name` skips the questions already
+recorded and pays only for the rest. `limit=N` takes a stratified sample that
+keeps every question type represented. Regenerate a run's README and figures from
+its records with `make eval-report run=<dir>`.
+
 ### Run the tests
 
 ```bash

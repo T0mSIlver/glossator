@@ -118,8 +118,12 @@ def stratified_subset(
     for pool in pools.values():
         rng.shuffle(pool)
     # Rarest first: a type with two rows loses its only chance of appearing if a
-    # type with fifty is served first.
-    order = sorted(pools, key=lambda name: (len(pools[name]), name))
+    # type with fifty is served first. Ties are broken by the seed rather than by
+    # name, because alphabetical tie-breaking would make every small subset in
+    # the project's history start with `api_reference`.
+    order = sorted(pools)
+    rng.shuffle(order)
+    order.sort(key=lambda name: len(pools[name]))
     chosen: list[EvalQuestion] = []
     while len(chosen) < n and any(pools[name] for name in order):
         for name in order:

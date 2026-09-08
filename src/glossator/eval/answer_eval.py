@@ -413,6 +413,10 @@ def question_metrics(record: QuestionRecord) -> dict[str, float | None]:
         "citations_fabricated": float(fabricated),
         "citations_cosmetic": float(cosmetic),
         "citations_normalized": float(normalized),
+        "distinct_sources_cited": float(len({citation.n for citation in record.citations})),
+        "unmatched_markers_per_answer": float(
+            len(record.trace.unmatched_markers) if record.trace else 0
+        ),
         "unverified_citations_per_answer": float(len(record.unverified_citations)),
         "refusal_correct": float(record.insufficient_evidence == (not answerable)),
         "insufficient_evidence": float(record.insufficient_evidence),
@@ -447,6 +451,8 @@ def reference_cost_usd(usage: AnswerTokenUsage) -> float:
 MEAN_METRICS: dict[str, int] = {
     "cited_url_match": 2,
     "cited_anchor_match": 2,
+    "distinct_sources_cited": 2,
+    "unmatched_markers_per_answer": 2,
     "unverified_citations_per_answer": 2,
     "refusal_correct": 2,
     "correctness": 2,
@@ -969,12 +975,16 @@ FAMILIES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
         "Whether the quotes the model wrote are in the sources it named. A "
         "fabricated rejection is a sentence that is not in the source at all; a "
         "cosmetic one is a quote too short to be evidence. The two are reported "
-        "apart because averaging them hides both (D-027a).",
+        "apart because averaging them hides both (D-027a). Distinct sources are "
+        "counted beside the citations because an answer that cites `[1]` five "
+        "times looks well cited and is not.",
         (
             ("citation_verification_rate", "verified citations over emitted citations"),
             ("unverified_citations_per_answer", "rejected citations per answer"),
             ("fabricated_per_answer", "fabricated rejections per answer"),
             ("cosmetic_per_answer", "cosmetic rejections per answer"),
+            ("distinct_sources_cited", "different sources cited per answer"),
+            ("unmatched_markers_per_answer", "`[n]` markers with no citation behind them"),
         ),
     ),
     (
@@ -1103,6 +1113,11 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
         for metric, strategy in metrics["winners"].items()
         if strategy is not None
     ]
+    # Notes are the one part of the README an operator writes, and they are
+    # written on the command line so that the README stays fully generated: a
+    # sentence typed into a rendered file is lost the next time it is rendered.
+    notes = "\n".join(f"- {note}" for note in config.get("notes") or [])
+    notes_section = f"\n\n## Notes on this run\n\n{notes}" if notes else ""
     family_sections = []
     for title, blurb, metric_list in FAMILIES:
         tables = [
@@ -1142,13 +1157,13 @@ records: {metrics["records"]}
 - Judge prompt hashes: {json.dumps(JUDGE_PROMPT_HASHES, sort_keys=True)}
 
 `config.json` holds every other parameter, including the price table the USD
-columns were computed with.
+columns were computed with.{notes_section}
 
 ## Results
 
 {judged} {totals["errors"]} answer(s) ended in an error and are recorded with it.
 
-{chr(10).join(f"{section}" for section in family_sections)}
+{(chr(10) * 2).join(family_sections)}
 
 ## Cost and latency
 
@@ -1321,6 +1336,13 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=AnswerConfig().top_k)
     parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
     parser.add_argument(
+        "--note",
+        action="append",
+        default=[],
+        dest="notes",
+        help="A sentence of context to render in the run README; repeatable",
+    )
+    parser.add_argument(
         "--quota-ceiling",
         type=int,
         default=QUOTA_CEILING_PERCENT,
@@ -1366,6 +1388,7 @@ async def _run(args: argparse.Namespace) -> None:
         "answer_config": settings.model_dump(mode="json"),
         "unpriced_models": sorted(UNPRICED_MODELS),
         "reference_pricing_model": REFERENCE_PRICING_MODEL,
+        "notes": list(args.notes),
     }
     run_dir = RunDirectory.open(run_path, config)
     try:
