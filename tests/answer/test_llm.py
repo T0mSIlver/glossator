@@ -25,7 +25,8 @@ from mistralai.client.models import (
 from pydantic import BaseModel, ConfigDict
 
 from glossator.answer.config import MISTRAL_MEDIUM_3_5, AnswerConfig, ModelPrice
-from glossator.answer.llm import Completion, JsonlCallRecorder, LLMCall, Message, MistralLLM
+from glossator.answer.llm import Completion, JsonlCallRecorder, Message, MistralLLM
+from tests.answer.conftest import Collector
 
 
 class Shape(BaseModel):
@@ -87,14 +88,6 @@ class FakeChat:
 class FakeClient:
     def __init__(self, script: list[Any]) -> None:
         self.chat = FakeChat(script)
-
-
-class Collector:
-    def __init__(self) -> None:
-        self.calls: list[LLMCall] = []
-
-    def record(self, call: LLMCall) -> None:
-        self.calls.append(call)
 
 
 def build(
@@ -221,7 +214,7 @@ def test_every_field_of_every_call_reaches_the_recorder(tmp_path: Path) -> None:
     assert len(lines) == 2
 
     failed, succeeded = lines
-    assert failed["error"].startswith("boom")
+    assert failed["error"].startswith("SDKError: boom")
     assert failed["attempt"] == 1
     assert failed["response"] is None
 

@@ -1,5 +1,6 @@
 """Doubles for the answer layer: an index and a model that never touch the network."""
 
+import itertools
 import json
 from collections.abc import Callable, Sequence
 from typing import Any
@@ -74,20 +75,31 @@ def word_tokens(text: str) -> int:
 
 
 class FakePage:
-    """One page's navigation operations, backed by a list of hits."""
+    """One page's navigation operations, backed by a list of hits.
 
-    def __init__(self, hits: Sequence[Hit]) -> None:
+    ``raises`` makes it behave like the real index does for a source_id it does
+    not hold: the toolkit raises rather than returning nothing.
+    """
+
+    def __init__(self, hits: Sequence[Hit], raises: Exception | None = None) -> None:
         self.hits = list(hits)
+        self.raises = raises
         self.calls: list[tuple[str, object]] = []
+
+    def _check(self) -> None:
+        if self.raises is not None:
+            raise self.raises
 
     async def around(self, window: int = 2) -> list[Hit]:
         self.calls.append(("around", window))
+        self._check()
         return self.hits
 
     async def read(
         self, start: int | None = None, end: int | None = None, top_k: int = 20
     ) -> list[Hit]:
         self.calls.append(("read", (start, end)))
+        self._check()
         return [
             hit
             for hit in self.hits
@@ -99,6 +111,7 @@ class FakePage:
         self, pattern: str, mode: GrepMode = GrepMode.PHRASE, top_k: int = 5
     ) -> list[Hit]:
         self.calls.append(("grep", pattern))
+        self._check()
         return [hit for hit in self.hits if pattern.lower() in hit.content.lower()][:top_k]
 
 
@@ -110,10 +123,12 @@ class FakeIndex:
         results: Sequence[Sequence[Hit]] | None = None,
         pages: dict[str, Sequence[Hit]] | None = None,
         variant: str = "sec1024",
+        raises: Exception | None = None,
     ) -> None:
         self.config = RetrievalConfig(variant=variant)
         self._results = [list(batch) for batch in (results or [])]
-        self._pages = {url: FakePage(hits) for url, hits in (pages or {}).items()}
+        self._raises = raises
+        self._pages = {url: FakePage(hits, raises=raises) for url, hits in (pages or {}).items()}
         self.queries: list[tuple[str, int | None, frozenset[str]]] = []
 
     async def search(
@@ -127,7 +142,7 @@ class FakeIndex:
         return [hit for hit in batch if hit.chunk_id not in (exclude_ids or set())]
 
     def navigation_at(self, source_id: str, start_offset: int = 0, end_offset: int = 0) -> FakePage:
-        return self._pages.setdefault(source_id, FakePage([]))
+        return self._pages.setdefault(source_id, FakePage([], raises=self._raises))
 
     async def get_chunk(self, chunk_id: str) -> Hit | None:
         for page in self._pages.values():
@@ -210,15 +225,36 @@ def completion(
     )
 
 
+_call_ids = itertools.count(1)
+
+
 def invocation(name: str, **arguments: Any) -> ToolInvocation:
+    """One tool call, with a unique id as the API always sends."""
     return ToolInvocation(
-        id=f"call_{name}",
+        id=f"call_{name}_{next(_call_ids)}",
         name=name,
         arguments=arguments,
         raw_arguments=json.dumps(arguments),
     )
 
 
+class Collector:
+    """A `CallRecorder` that keeps what it was handed."""
+
+    def __init__(self) -> None:
+        self.calls: list[LLMCall] = []
+
+    def record(self, call: LLMCall) -> None:
+        self.calls.append(call)
+
+
 @pytest.fixture
 def config() -> AnswerConfig:
-    return AnswerConfig(top_k=4, context_token_budget=4000, round_cap=2, page_cap=2)
+    return AnswerConfig(
+        top_k=4,
+        context_token_budget=4000,
+        round_cap=2,
+        searches_per_round=2,
+        page_cap=2,
+        page_read_top_k=8,
+    )
