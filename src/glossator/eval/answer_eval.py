@@ -517,7 +517,37 @@ def cell(records: Sequence[QuestionRecord]) -> dict[str, Any]:
     aggregate["tokens_out_total"] = int(sum(column("tokens_out")))
     aggregate["usd_total"] = sum(column("usd"))
     aggregate["reference_usd_total"] = sum(column("reference_usd"))
+    aggregate.update(judge_spend(records))
     return aggregate
+
+
+def judge_spend(records: Sequence[QuestionRecord]) -> dict[str, Any]:
+    """What judging cost, counted apart from what answering cost.
+
+    The judge runs on the z.ai coding plan, which bills nothing against the
+    Mistral budget (D-020), so its tokens would vanish if they were added to the
+    answer totals. They are counted anyway: "free" is a statement about this
+    month's plan, not about the work, and a Mistral judge would be priced from
+    exactly these numbers.
+    """
+    judged = [record.judge for record in records if record.judge is not None]
+    prompt = sum(judgement.usage.prompt_tokens for judgement in judged)
+    completion = sum(judgement.usage.completion_tokens for judgement in judged)
+    reasoning = sum(judgement.usage.reasoning_tokens for judgement in judged)
+    price = PRICES[REFERENCE_PRICING_MODEL]
+    return {
+        "judge_calls": len(judged),
+        "judge_failures": sum(1 for judgement in judged if judgement.verdict is None),
+        "judge_tokens_in": prompt,
+        "judge_tokens_out": completion,
+        "judge_reasoning_tokens": reasoning,
+        "judge_latency_s_mean": (_mean([judgement.latency_ms for judgement in judged]) or 0.0)
+        / 1000,
+        "judge_reference_usd_total": (
+            prompt * price.input_usd_per_mtok + completion * price.output_usd_per_mtok
+        )
+        / 1_000_000,
+    }
 
 
 def aggregate(records: Sequence[QuestionRecord], config: Mapping[str, Any]) -> dict[str, Any]:
@@ -1116,6 +1146,19 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     # Notes are the one part of the README an operator writes, and they are
     # written on the command line so that the README stays fully generated: a
     # sentence typed into a rendered file is lost the next time it is rendered.
+    judge_cost = (
+        f"Judging spent {totals['judge_tokens_in']} prompt and "
+        f"{totals['judge_tokens_out']} completion tokens over {totals['judge_calls']} "
+        f"call(s) ({totals['judge_reasoning_tokens']} of them reasoning tokens, with "
+        "thinking disabled), at a mean of "
+        f"{totals['judge_latency_s_mean']:.1f} s per judgement and "
+        f"{totals['judge_failures']} verdict(s) that did not validate. The z.ai coding "
+        "plan bills nothing against the Mistral budget (D-020); the same judging on "
+        f"{REFERENCE_PRICING_MODEL} would have cost "
+        f"{totals['judge_reference_usd_total']:.4f} USD."
+        if totals["judge_calls"]
+        else "Nothing was judged in this run."
+    )
     notes = "\n".join(f"- {note}" for note in config.get("notes") or [])
     notes_section = f"\n\n## Notes on this run\n\n{notes}" if notes else ""
     family_sections = []
@@ -1173,6 +1216,8 @@ The run made {metrics["records"]} answers over {metrics["questions"]} questions:
 {totals["reference_usd_total"]:.4f} USD at {REFERENCE_PRICING_MODEL} prices. Median
 answer latency was {_format(totals["latency_p50_s"], "latency_p50_s")} s, 95th
 percentile {_format(totals["latency_p95_s"], "latency_p95_s")} s.{price_note}
+
+{judge_cost}
 
 ## Winner per metric
 

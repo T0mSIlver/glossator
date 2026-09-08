@@ -43,6 +43,7 @@ from glossator.eval.datasets import (
     QuestionType,
     stratified_subset,
 )
+from glossator.eval.providers import TokenUsage as ProviderTokenUsage
 from glossator.eval.providers import extract_json_object
 from glossator.eval.report import rebuild, run_kind
 
@@ -276,6 +277,40 @@ def test_latency_percentiles_and_token_totals_come_from_the_records() -> None:
     assert summary["latency_p95_s"] == pytest.approx(10.0)
     assert summary["tokens_in_total"] == 5500
     assert summary["tokens_in"] == pytest.approx(550.0)
+
+
+def test_what_judging_spent_is_counted_apart_from_what_answering_spent() -> None:
+    judged = verdict("correct").model_copy(
+        update={
+            "usage": ProviderTokenUsage(
+                prompt_tokens=2000, completion_tokens=100, reasoning_tokens=40
+            ),
+            "latency_ms": 2000.0,
+        }
+    )
+    summary = cell([record(judge=judged), record(question_id="q2")])
+    assert summary["judge_calls"] == 1
+    assert summary["judge_tokens_in"] == 2000
+    assert summary["judge_reasoning_tokens"] == 40
+    assert summary["judge_failures"] == 0
+    # The judge's tokens never reach the answer totals: the run pays for them on
+    # another plan (D-020) and adding them would misprice both.
+    assert summary["tokens_in_total"] == 2000
+    assert summary["judge_reference_usd_total"] == pytest.approx(0.003 + 0.00075)
+
+
+def test_a_verdict_that_never_validated_is_counted_as_a_judge_failure() -> None:
+    failed = JudgeRecord(
+        model="glm-5.3",
+        prompt_version=JUDGE_VERSION,
+        input_text="rendered",
+        error="the judge's output did not validate",
+    )
+    summary = cell([record(judge=failed)])
+    assert summary["judge_calls"] == 1
+    assert summary["judge_failures"] == 1
+    assert summary["judged"] == 0
+    assert summary["correctness"] is None
 
 
 def test_the_reference_cost_prices_the_recorded_tokens_at_the_shipped_model() -> None:

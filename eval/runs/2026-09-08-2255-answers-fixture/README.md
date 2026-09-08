@@ -189,6 +189,8 @@ percentile 4.3 s.
 
 `ministral-14b-2512` has no published price, so the USD column of this run is zero by construction. The row beside it prices the same recorded tokens at mistral-medium-2604 rates (D-017), which is what the shipped configuration would have cost.
 
+Judging spent 6278 prompt and 543 completion tokens over 4 call(s) (109 of them reasoning tokens, with thinking disabled), at a mean of 2.3 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.0135 USD.
+
 ## Winner per metric
 
 - `cited_url_match`: **single_pass**
