@@ -43,7 +43,7 @@ class Element:
 
     name: str
     attrs: dict[str, str | None] = field(default_factory=dict)
-    children: list["Node"] = field(default_factory=list)
+    children: list[Node] = field(default_factory=list)
 
     def attr(self, name: str) -> str | None:
         return self.attrs.get(name)

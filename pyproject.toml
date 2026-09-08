@@ -30,6 +30,7 @@ dev = [
     "mypy>=1.15",
     # `make test` round-trips a document through the backend; see tests/.
     "pytest>=8.0",
+    "types-pyyaml>=6.0.12.20260815",
 ]
 
 [tool.uv]
@@ -54,6 +55,17 @@ packages = ["src/entrypoints", "src/glossator", "src/search_app", "src/examples"
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
+# Only Python: ruff also formats code blocks in markdown, and the vendored corpus
+# and the skill notes are not ours to rewrite.
+include = ["*.py", "*.pyi", "pyproject.toml"]
+# Starter-template code, owned elsewhere; formatting it here would churn their diffs.
+extend-exclude = [
+    "src/entrypoints",
+    "src/examples",
+    "src/search_app",
+    "tests/test_mcp_tools.py",
+    "tests/test_search_roundtrip.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

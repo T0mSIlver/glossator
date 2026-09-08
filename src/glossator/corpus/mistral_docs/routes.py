@@ -298,7 +298,5 @@ def _cross_check_breadcrumbs(
             continue
         if expected != route.breadcrumbs:
             result.breadcrumb_mismatches.append(
-                BreadcrumbMismatch(
-                    route=route.route, computed=route.breadcrumbs, expected=expected
-                )
+                BreadcrumbMismatch(route=route.route, computed=route.breadcrumbs, expected=expected)
             )

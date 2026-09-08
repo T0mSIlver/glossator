@@ -1,0 +1,114 @@
+---
+url: https://docs.mistral.ai/studio/workflows/interacting-with-workflows/queries
+title: Queries
+breadcrumbs: [Studio, Workflows, Interacting with Workflows]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/workflows/interacting-with-workflows/queries/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Queries
+
+Queries allow external systems to read the current state of a running workflow synchronously.
+
+## Key characteristics {#key-characteristics}
+
+Queries use synchronous communication and are read-only — they should not modify workflow state. They can be called at any time during execution but must return quickly, making them unsuitable for long-running operations.
+
+## Exposing queries {#basic-example}
+
+The workflow below tracks its own progress as it runs. The `get_status` query handler reads that state and returns it immediately to the caller — without interrupting or modifying the running workflow.
+
+**Python**
+
+```python
+import mistralai.workflows as workflows
+
+@workflows.workflow.define(name="processing_workflow")
+class ProcessingWorkflow:
+    def __init__(self):
+        self.progress = 0.0
+        self.completed = False
+
+    @workflows.workflow.query(name="get_status")
+    def get_status(self) -> dict:
+        return {
+            "progress": self.progress,
+            "completed": self.completed
+        }
+
+    @workflows.workflow.entrypoint
+    async def run(self) -> None:
+        # Simulate work
+        for i in range(1, 11):
+            self.progress = i * 10
+            await asyncio.sleep(1)
+        self.completed = True
+```
+
+## Input validation {#input-validation}
+
+Query handlers can accept parameters just like any other handler, and the SDK validates the payload before invoking the handler. Queries validate incoming payloads against their declared parameters. Incoming data is checked against the expected types, and any extra fields not declared in the handler signature are rejected. Validation failures return HTTP 422 (Unprocessable Entity) with a descriptive error message.
+
+For complex input structures, use Pydantic models. This lets you pass structured parameters to a query handler while keeping full type safety:
+
+**Python**
+
+```python
+import pydantic
+
+class StatusRequest(pydantic.BaseModel):
+    include_details: bool = False
+
+@workflows.workflow.query(name="get_status")
+def get_status(self, req: StatusRequest) -> dict:
+    result = {"progress": self.progress}
+    if req.include_details:
+        result["steps"] = self.completed_steps
+    return result
+```
+
+## Sending a query {#sending-a-query}
+
+Once your workflow is running, you can query its state at any time from the outside using the SDK or the API.
+
+**Python**
+
+```python
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your_api_key")
+
+result = client.workflows.executions.query_workflow_execution(
+    execution_id="my-execution-id",
+    name="get_status",
+)
+print(result.model_dump_json(indent=2))
+```
+
+**cURL**
+
+```bash
+curl -X POST https://api.mistral.ai/v1/workflows/executions/{execution_id}/queries \
+  -H "Authorization: Bearer $MISTRAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "get_status"}'
+```
+
+**Output**
+
+```json
+{
+  "query_name": "get_status",
+  "result": {"progress": 60.0, "completed": false}
+}
+```
+
+## Comparison {#comparison}
+
+| Feature | Communication Type | Modifies State | Returns Value | Can Execute Activities |
+| ------- | ------------------ | -------------- | ------------- | ---------------------- |
+| Signal  | Asynchronous       | Yes            | No            | No                     |
+| Query   | Synchronous        | No             | Yes           | No                     |
+| Update  | Synchronous        | Yes            | Yes           | Yes                    |

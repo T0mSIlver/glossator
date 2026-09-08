@@ -1,0 +1,200 @@
+---
+url: https://docs.mistral.ai/vibe/code/cli/configuration
+title: Configuration
+breadcrumbs: [Vibe, Code, CLI]
+kind: doc
+locale: en
+source_path: src/content/en/docs/vibe/code/cli/configuration/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Configuration
+
+The Vibe Code CLI is configured through a **`config.toml` file**. This page explains where the file lives, how to open it, and the most common settings you'll touch.
+
+> **Info**
+>
+> For an exhaustive list of every key in `config.toml` and the agent-definition files, see the [Configuration reference](https://docs.mistral.ai/vibe/code/cli/configuration-reference).
+
+## Configuration file locations {#file-locations}
+
+The CLI looks for `config.toml` in this order:
+
+1. `./.vibe/config.toml` in the current working directory (**project-level**).
+2. `~/.vibe/config.toml` in your home directory (**user-level**).
+
+Project-level configuration takes precedence over user-level configuration. Project configuration is loaded only when the working directory is [trusted](https://docs.mistral.ai/vibe/code/safety-approvals-permissions#trusted-folders).
+
+## Open your configuration file {#open}
+
+Open `~/.vibe/config.toml` with your default editor:
+
+```bash
+# macOS
+open ~/.vibe/config.toml
+
+# Linux
+xdg-open ~/.vibe/config.toml
+
+# Windows (PowerShell)
+Invoke-Item ~\.vibe\config.toml
+```
+
+You can also open the configuration menu from inside a session with the `/config` slash command.
+
+## Vibe home directory {#vibe-home}
+
+By default, the CLI stores its configuration and state in `~/.vibe/`. Override the location with the `VIBE_HOME` environment variable:
+
+```bash
+export VIBE_HOME="/path/to/custom/vibe/home"
+```
+
+`VIBE_HOME` affects the location of:
+
+- `config.toml`: main configuration.
+- `.env`: API keys and provider credentials.
+- `agents/`: custom agent profiles.
+- `prompts/`: custom system prompts.
+- `skills/`: custom skills.
+- `tools/`: custom tools.
+- `logs/`: session and application logs.
+
+## Working directory {#working-directory}
+
+Use `--workdir` to point the CLI at a project that is not your current directory:
+
+```bash
+vibe --workdir /path/to/project
+```
+
+Use `--add-dir` to give the CLI read access to an extra directory for a single session.
+
+## Common configuration sections {#common-sections}
+
+`config.toml` accepts many top-level keys and table sections. The most common ones are listed here, each one linking to a dedicated page.
+
+### Default agent {#default-agent}
+
+Set the default interactive agent:
+
+```toml
+default_agent = "plan"
+```
+
+This applies to interactive sessions only. Programmatic mode falls back to `auto-approve` when `--agent` is not provided. See [Agents](https://docs.mistral.ai/vibe/code/cli/agents).
+
+### Providers and models {#providers-models}
+
+Define provider presets, model presets, and the active model.
+
+The following chat-capable models are available through Mistral's API (la Plateforme). Use the **model ID** as the `name` value in a `[[models]]` block, or pass it directly with `--model`:
+
+| Model | Model ID | Best for |
+|---|---|---|
+| Mistral Medium 3.5 (recommended) | `mistral-medium-latest` | Flagship reasoning and code |
+| Z.ai GLM 5.2 | `zai-glm-5-2` | Advanced reasoning and code |
+| Mistral Large 3 | `mistral-large-latest` | Complex tasks, large context |
+| Mistral Small 4 | `mistral-small-latest` | Fast, cost-effective general use |
+| Codestral | `codestral-latest` | Code generation and completion |
+| Ministral 3 14B | `ministral-14b-latest` | Balanced edge model |
+| Ministral 3 8B | `ministral-8b-latest` | Lightweight edge model |
+| Ministral 3 3B | `ministral-3b-latest` | Smallest edge model |
+
+You can also pin to a specific version by replacing `-latest` with a date suffix (for example, `mistral-medium-3-5` or `codestral-2508`). See the [models overview](https://docs.mistral.ai/models) for all available versions.
+
+To use a model through a third-party provider such as OpenRouter, define a custom provider and model preset:
+
+```toml
+active_model = "codestral-openrouter"
+
+[[providers]]
+name = "openrouter"
+api_base = "https://openrouter.ai/api/v1"
+api_key_env_var = "OPENROUTER_API_KEY"
+api_style = "openai"
+backend = "generic"
+
+[[models]]
+name = "mistralai/codestral"
+provider = "openrouter"
+alias = "codestral-openrouter"
+```
+
+See [API keys and profiles](https://docs.mistral.ai/vibe/code/cli/api-keys-profiles).
+
+### MCP servers {#mcp-servers}
+
+Add Model Context Protocol servers under `mcp_servers`. See [MCP servers](https://docs.mistral.ai/vibe/code/cli/mcp-servers).
+
+### Skills {#skills}
+
+Enable, disable, or add skill paths:
+
+```toml
+skill_paths = ["/path/to/custom/skills"]
+enabled_skills = ["code-review", "test-*"]
+disabled_skills = ["experimental-*"]
+```
+
+`enabled_skills` and `disabled_skills` interact as follows:
+
+- If `enabled_skills` is **set and non-empty**, only skills whose name matches a pattern in that list are available.
+- Otherwise, every discovered skill is available, minus any skill whose name matches a pattern in `disabled_skills`.
+
+See [Skills](https://docs.mistral.ai/vibe/code/cli/skills).
+
+### Tool permissions and filters {#tool-permissions}
+
+Restrict which tools the agent can use:
+
+```toml
+enabled_tools = ["serena_*"]
+disabled_tools = ["mcp_*", "grep"]
+```
+
+Tool filters support **exact names**, **glob patterns**, and **regex** with the `re:` prefix. Per-tool permissions can also be set in `[tools.<tool_name>]` blocks. See [Safety, approvals, and permissions](https://docs.mistral.ai/vibe/code/safety-approvals-permissions#tool-permissions).
+
+### Hooks {#hooks}
+
+Run arbitrary shell commands before or after tool calls, or after each assistant turn, to gate, audit, or rewrite agent behavior. Declare hooks in a separate `hooks.toml` file. See [Hooks](https://docs.mistral.ai/vibe/code/cli/hooks).
+
+### Update and telemetry settings {#updates-telemetry}
+
+Control auto-updates, notifications, and telemetry:
+
+```toml
+enable_auto_update = true
+enable_notifications = true
+enable_telemetry = true
+```
+
+| Setting | Default | Details |
+|---|---|---|
+| `enable_auto_update` | `true` | Vibe checks for new releases and updates itself in the background. **We strongly recommend keeping this enabled** so you always run the latest fixes. You can also rerun the install script at any time to update manually. |
+| `enable_notifications` | `true` | OS-level notifications when Vibe finishes a long-running task or needs your input (for example, when an approval prompt is waiting). |
+| `enable_telemetry` | `true` | Sends anonymous usage and error telemetry to Mistral. Used to improve the product (crash diagnostics, feature usage, performance). No prompts, file contents, or model outputs are sent. Disable if you require an offline-only setup. |
+
+## Admin-managed configuration {#admin-config}
+
+Your Organization can distribute a Vibe Code CLI configuration to all users. Admin-managed settings take precedence over command-line flags, environment variables, and the project and user `config.toml` files.
+
+When admin config is active:
+
+- Admin-managed settings in `/config` appear dim with a `⚿` lock glyph and list `your administrator` as the origin. A legend at the bottom of the screen reads `⚿ Settings are managed by your organization`.
+- Admin-managed fields are read-only in `/config`. Attempts to edit or reset them have no effect. If you switch models while `active_model` is admin-managed, the model picker shows a warning.
+- The CLI fetches admin config at the start of each session and keeps it in memory. It never writes admin config to your local `config.toml`.
+
+> **Info**
+>
+> Admin config is a distribution mechanism, not a security control. Users who control their local CLI environment can bypass its settings. Administrators must enable this Organization-level feature. See [Admin config](https://docs.mistral.ai/vibe/code/cli/admin-config) for setup and rollout instructions.
+
+## Configuration precedence {#precedence}
+
+When the same setting is defined in multiple places, the CLI applies them in this order, from **highest to lowest priority**:
+
+1. **Admin config**, when your Organization provides one. See [Admin config](https://docs.mistral.ai/vibe/code/cli/admin-config).
+2. **Command-line flags** (for example, `--agent`, `--workdir`).
+3. **Environment variables** (for example, `MISTRAL_API_KEY`, `VIBE_HOME`).
+4. **Project** `./.vibe/config.toml`.
+5. **User** `~/.vibe/config.toml`.

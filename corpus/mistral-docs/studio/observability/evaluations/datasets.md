@@ -1,0 +1,282 @@
+---
+url: https://docs.mistral.ai/studio/observability/evaluations/datasets
+title: Datasets
+breadcrumbs: [Studio, Observability, Offline evaluations]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/observability/evaluations/datasets/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+hidden: true
+---
+
+# Datasets
+
+A dataset is the set of test cases that drives an offline evaluation. In the [Evaluation SDK](../evaluations#installation), a dataset is a **list of Python dicts** where each dict is an input record, and you define the keys to match what your task function expects.
+
+## Record structure {#record-structure}
+
+Each record is a plain dict. The keys are up to you:
+
+```python
+dataset = [
+    {"sentence": "Hello, how are you?", "groundtruth": "English"},
+    {"sentence": "Bonjour, comment ça va?", "groundtruth": "French"},
+    {"sentence": "Hola, ¿cómo estás?", "groundtruth": "Spanish"},
+]
+```
+
+In your task and scorer, access the record via `ctx.input_record`:
+
+```python
+from mistralai.observability import TaskContext, ScorerContext
+
+async def task(ctx: TaskContext) -> str:
+    return ctx.input_record["sentence"]  # access any key you defined
+
+def scorer(ctx: ScorerContext) -> int:
+    return 1 if ctx.input_record["groundtruth"].lower() == str(ctx.output).lower() else 0
+```
+
+## Fetch records from a Studio Dataset {#fetch-from-studio}
+
+If you curate records in Studio, fetch them with the Mistral SDK and adapt each record's `payload` into the list of dicts expected by `evaluation.run()`.
+
+For the language detection example, use Studio records shaped like this:
+
+```python
+payload = {"sentence": "Bonjour, comment ça va?", "groundtruth": "French"}
+```
+
+When importing those records from JSONL, wrap each payload in the Studio Dataset import format:
+
+```json
+{"payload":{"sentence":"Bonjour, comment ça va?","groundtruth":"French"},"properties":{}}
+```
+
+The list endpoint is paginated. This helper fetches every page and validates records into the same `LangItem` shape used by the evaluation:
+
+```python
+from typing import Any, TypedDict
+
+from mistralai.observability import Mistral
+
+class LangItem(TypedDict):
+    sentence: str
+    groundtruth: str
+
+def as_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if hasattr(value, "model_dump"):
+        return value.model_dump(mode="json")
+    return dict(value)
+
+def require_string(value: Any, *, record_id: str, field: str) -> str:
+    if isinstance(value, str) and value:
+        return value
+    raise ValueError(f"Dataset record {record_id} is missing {field}")
+
+def to_lang_item(record: Any) -> LangItem:
+    payload = as_dict(record.payload)
+
+    return {
+        "sentence": require_string(payload.get("sentence"), record_id=record.id, field="payload.sentence"),
+        "groundtruth": require_string(
+            payload.get("groundtruth"),
+            record_id=record.id,
+            field="payload.groundtruth",
+        ),
+    }
+
+async def fetch_eval_dataset(client: Mistral, dataset_id: str) -> list[LangItem]:
+    dataset: list[LangItem] = []
+    page = 1
+    page_size = 100
+
+    while True:
+        result = await client.beta.observability.datasets.list_records_async(
+            dataset_id=dataset_id,
+            page_size=page_size,
+            page=page,
+        )
+        records = result.records.results
+
+        dataset.extend(to_lang_item(record) for record in records)
+
+        if not result.records.next:
+            break
+        page += 1
+
+    return dataset
+```
+
+Then use the fetched records in an evaluation:
+
+```python
+import asyncio
+import os
+
+from mistralai.observability import (
+    Evaluation, Evaluator, Mistral, Project, ScorerContext, TaskContext,
+)
+
+client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+
+async def task(ctx: TaskContext) -> str:
+    response = await client.chat.complete_async(
+        model="mistral-small-latest",
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "What language is this sentence in? Reply with ONLY the language name. "
+                    f"Sentence: {ctx.input_record['sentence']}"
+                ),
+            }
+        ],
+    )
+    return str(response.choices[0].message.content)
+
+def scorer(ctx: ScorerContext) -> int:
+    groundtruth = ctx.input_record["groundtruth"].lower()
+    predicted = str(ctx.output).lower()
+    return 1 if groundtruth == predicted else 0
+
+async def main():
+    dataset_id = os.environ["MISTRAL_DATASET_ID"]
+    dataset = await fetch_eval_dataset(client, dataset_id=dataset_id)
+
+    run = await client.evaluation.run(
+        project=Project(name="Language Detection"),
+        evaluation=Evaluation(name="Managed Dataset Eval"),
+        dataset=dataset,
+        task=task,
+        evaluators=[
+            Evaluator(
+                name="accuracy",
+                description="1 if the detected language matches the groundtruth.",
+                scorer=scorer,
+            ),
+        ],
+        metadata={
+            "studio_dataset_id": dataset_id,
+            "record_count": len(dataset),
+        },
+    )
+    run.show(level="records")
+
+asyncio.run(main())
+```
+
+If your task expects a different schema, transform each managed record explicitly in the same way: validate the fields you need from `record.payload`, then return the exact dict shape your task and scorers expect.
+
+## Type safety with TypedDict {#type-safety}
+
+Use `TypedDict` to make record schemas explicit and get IDE autocompletion:
+
+```python
+from typing import TypedDict
+
+class LanguageRecord(TypedDict):
+    sentence: str
+    groundtruth: str
+
+dataset: list[LanguageRecord] = [
+    {"sentence": "Hello, how are you?", "groundtruth": "English"},
+    {"sentence": "Bonjour, comment ça va?", "groundtruth": "French"},
+]
+```
+
+## What to include in records {#what-to-include}
+
+Records can contain anything your task or scorer needs:
+
+| Field type | Purpose | Example |
+|------------|---------|---------|
+| Task inputs | What the task processes | `prompt`, `context`, `text`, `question` |
+| Ground truth | Reference output for scoring | `expected`, `groundtruth`, `reference_answer` |
+| Metadata | Extra context for scorers or LLM judges | `category`, `difficulty`, `grading_guidance` |
+
+Include ground truth in records when you want to compare the task output against a known-good answer:
+
+```python
+dataset = [
+    {
+        "prompt": "What is the capital of France?",
+        "expected": "Paris",
+        "difficulty": "easy",
+    },
+    {
+        "prompt": "Explain the difference between precision and recall.",
+        "expected": "Precision measures true positives over predicted positives; recall measures true positives over actual positives.",
+        "difficulty": "medium",
+    },
+]
+
+def accuracy_scorer(ctx: ScorerContext) -> int:
+    return 1 if ctx.input_record["expected"].lower() in str(ctx.output).lower() else 0
+```
+
+## Best practices {#best-practices}
+
+### Keep datasets focused
+
+A dataset built around a single task or capability produces clearer signals than a broad, mixed-topic collection. Maintain separate datasets for distinct evaluation goals (for example, `language_detection`, `qa_factual`, `code_generation`).
+
+### Curate for representativeness
+
+- Include edge cases and failure modes, not easy examples alone.
+- Balance your dataset: if 90% of records are easy cases, the evaluation won't reveal real problems.
+- Remove records where even a human couldn't reliably score the response (ambiguous inputs add noise).
+
+### Version your datasets
+
+Freeze your dataset between runs if you want to track performance over time. Even small changes to records can make runs incomparable. Use meaningful names like `qa_baseline_2025_06` rather than `test_data`.
+
+### Ground truth quality matters
+
+Inaccurate or ambiguous ground truth produces noisy scores. If you use an LLM judge (see [Judges](../evaluations/judges)), include a `grading_guidance` field to give the judge explicit scoring instructions per record.
+
+## Organizing in Studio {#organizing-in-studio}
+
+The Evaluation SDK organizes results using **Projects**, **Evaluations**, and **Runs** in Studio, not by the dataset itself. Pass your dataset directly to `evaluation.run()`:
+
+```python
+from mistralai.observability import Evaluation, Project
+
+run = await client.evaluation.run(
+    project=Project(name="Language Detection"),
+    evaluation=Evaluation(name="Accuracy Eval"),
+    dataset=dataset,  # your list of dicts
+    task=task,
+    evaluators=[...],
+)
+```
+
+Tags and metadata on the run help you trace back which dataset version was used:
+
+```python
+run = await client.evaluation.run(
+    ...
+    tags=["dataset:qa_baseline_2025_06", "model:mistral-small"],
+    metadata={"dataset_version": "2025-06", "record_count": len(dataset)},
+)
+```
+
+## FAQ {#faq}
+
+### How large can my dataset be? {#how-large-can-my-dataset-be}
+
+There is no hard limit enforced by the SDK. In practice, keep datasets small enough to run during iteration. Use `local=True` to test on a subset before a full run.
+
+### Can I pass a Studio Dataset ID directly to evaluation.run()? {#can-i-pass-a-studio-dataset-id-directly-to-evaluationrun}
+
+Not currently. `evaluation.run()` expects records in memory. Fetch records from Studio first, transform them into your evaluation record shape, then pass the resulting list to `dataset`.
+
+### Can I load records from a file? {#can-i-load-records-from-a-file}
+
+Yes. Load any file format (JSONL, CSV, and other formats) into a list of dicts before passing to `evaluation.run()`. The SDK only requires a Python list.
+
+### My scores are noisy. Is it the dataset or the scorer? {#my-scores-are-noisy-is-it-the-dataset-or-the-scorer}
+
+Start with the dataset. Inspect low-scoring records: are the inputs ambiguous? Is the ground truth accurate? Fix the dataset first, then tune the scorer or judge instructions.

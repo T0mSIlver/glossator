@@ -1,0 +1,106 @@
+---
+url: https://docs.mistral.ai/api/endpoint/classifiers
+title: Classifiers API
+breadcrumbs: [API, Classifiers]
+kind: api
+locale: en
+source_path: openapi.yaml
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+openapi_md5: 316010c8ca4ddeb962becf11df72be9e
+openapi_url: /tmp/claude-1000/-home-dev-work-glossator--claude-worktrees-valiant-hugging-codd/6d539ee6-ce5b-457d-adc5-7e53a6f3c066/scratchpad/corpus/live-openapi.yaml
+---
+
+# Classifiers API
+
+Reference for the Classifiers endpoints of the Mistral API, generated from the OpenAPI specification.
+
+## Moderations {#operation-moderations_v1_moderations_post}
+
+`POST /v1/moderations`
+
+- Operation id: `moderations_v1_moderations_post`
+- Tag: classifiers
+
+### Request body
+
+`application/json` (required), schema `ClassificationRequest`
+
+- `model` (string, required) — ID of the model to use.
+- `metadata` (object or null, optional)
+- `input` (object, required) — Text to classify.
+  - one of (anyOf):
+    - string
+    - array of string
+
+### Responses
+
+- `200` — Successful Response (application/json, schema ModerationResponse)
+- `422` — Validation Error (application/json, schema HTTPValidationError)
+
+## Chat Moderations {#operation-chat_moderations_v1_chat_moderations_post}
+
+`POST /v1/chat/moderations`
+
+- Operation id: `chat_moderations_v1_chat_moderations_post`
+- Tag: classifiers
+
+### Request body
+
+`application/json` (required), schema `ChatModerationRequest`
+
+- `input` (object, required) — Chat to classify
+  - one of (anyOf):
+    - array of object
+    - array of array of object
+- `model` (string, required)
+
+### Responses
+
+- `200` — Successful Response (application/json, schema ModerationResponse)
+- `422` — Validation Error (application/json, schema HTTPValidationError)
+
+## Classifications {#operation-classifications_v1_classifications_post}
+
+`POST /v1/classifications`
+
+- Operation id: `classifications_v1_classifications_post`
+- Tag: classifiers
+
+### Request body
+
+`application/json` (required), schema `ClassificationRequest`
+
+- `model` (string, required) — ID of the model to use.
+- `metadata` (object or null, optional)
+- `input` (object, required) — Text to classify.
+  - one of (anyOf):
+    - string
+    - array of string
+
+### Responses
+
+- `200` — Successful Response (application/json, schema ClassificationResponse)
+- `422` — Validation Error (application/json, schema HTTPValidationError)
+
+## Chat Classifications {#operation-chat_classifications_v1_chat_classifications_post}
+
+`POST /v1/chat/classifications`
+
+- Operation id: `chat_classifications_v1_chat_classifications_post`
+- Tag: classifiers
+
+### Request body
+
+`application/json` (required), schema `ChatClassificationRequest`
+
+- `model` (string, required)
+- `input` (ChatClassificationRequestInputs, required) — Chat to classify
+  - one of (anyOf):
+    - InstructRequest
+      - `messages` (array of object, required)
+    - array of InstructRequest
+
+### Responses
+
+- `200` — Successful Response (application/json, schema ClassificationResponse)
+- `422` — Validation Error (application/json, schema HTTPValidationError)

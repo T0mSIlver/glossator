@@ -89,7 +89,9 @@ _TRANSPARENT = frozenset(
 )
 
 # Inline HTML that markdown either carries natively or does not need.
-_INLINE_UNWRAP = frozenset({"abbr", "b", "em", "font", "i", "kbd", "mark", "small", "sub", "sup", "u"})
+_INLINE_UNWRAP = frozenset(
+    {"abbr", "b", "em", "font", "i", "kbd", "mark", "small", "sub", "sup", "u"}
+)
 
 
 @dataclass
@@ -207,9 +209,7 @@ class MdxNormalizer:
             return ""
         level = section_tab_level(element.attr("as"), element.attr("variant"))
         section_id = element.attr("sectionId")
-        anchor = (
-            self.anchors.reserve(section_id) if section_id else self.anchors.allocate(text)
-        )
+        anchor = self.anchors.reserve(section_id) if section_id else self.anchors.allocate(text)
         self.emitted.append(EmittedAnchor(anchor=anchor, text=text, kind="section-tab"))
         return _block(f"{'#' * level} {text} {{#{anchor}}}")
 
@@ -335,19 +335,15 @@ class MdxNormalizer:
         header: list[str] = []
         rows: list[list[str]] = []
         for row in _find_elements(element, {"TableRow"}):
-            heads = [
-                self._cell(cell, scope) for cell in _find_elements(row, {"TableHead"})
-            ]
-            cells = [
-                self._cell(cell, scope) for cell in _find_elements(row, {"TableCell"})
-            ]
+            heads = [self._cell(cell, scope) for cell in _find_elements(row, {"TableHead"})]
+            cells = [self._cell(cell, scope) for cell in _find_elements(row, {"TableCell"})]
             if heads and not header:
                 header = heads
             elif cells:
                 rows.append(cells)
         if not header and not rows:
             return _block(self._children(element, scope))
-        width = max([len(header), *(len(row) for row in rows)] or [0])
+        width = max(len(header), *(len(row) for row in rows), 0)
         header = header or [""] * width
         lines = [
             "| " + " | ".join(_pad(header, width)) + " |",
