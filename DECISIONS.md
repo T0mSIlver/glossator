@@ -374,3 +374,15 @@ Observed on the real corpus: phase-1 BM25 is overweighted for paraphrased questi
 **Decision.** The starter's `ingest(uri)` and `delete(source_id)` MCP tools are removed. The index is built from the vendored corpus by `make ingest`; the MCP surface exposes search, navigation, and (later) `ask`.
 
 **Facts.** The starter's ingest tool routes any URL or file through OCR or plain-text extraction with page-level chunks and no `url`, `anchor`, or `kind` metadata. Chunks written that way land in the serving variant and can never be cited or filtered (review finding on the S3 changes, 2026-09-08). A client-facing documentation engine should not let an agent push arbitrary content into the index it answers from; corpus changes go through the adapter, the manifest, and the link check.
+
+---
+
+## D-027 · Answer contract: structured answer with verifiable quotes, no streaming in v1
+
+**Status:** decided · 2026-09-09
+
+**Decision.** Every strategy returns the same `Answer`: markdown text with inline `[n]` markers, a list of citations `{n, url, anchor, chunk_id, quote, verified}`, an `insufficient_evidence` flag, the retrieval or tool trace, token usage, latency, and cost. The model produces the answer as structured output (JSON schema) whose citations carry a verbatim quote from the numbered source; a verifier checks each quote against the cited chunk's content after whitespace normalization and drops citations that fail, marking them in the trace. An answer with no verified citation is returned as insufficient evidence. Answers are not streamed in v1.
+
+**Facts.** A citation that only names a source cannot be checked without a judge; a quote can be checked in code for free and is the primary "citation correctness" number (D-016). Streaming a JSON object token by token would make the quote check possible only after the stream ends, which removes the point of streaming; the API can add a streamed text-first mode later if latency numbers justify it. Mistral Medium 3.5 supports structured outputs and function calling (model card, 2026-09-08).
+
+**Strategies compared** (named by what differs, D-016): `single_pass` (one retrieval, one generation), `search_loop` (tool-use loop over search, open, grep, read with a round cap and seen-chunk deduplication), `outline` (the model picks pages from the site outline, reads their sections, then answers).
