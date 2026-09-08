@@ -31,6 +31,15 @@ _LEGEND_WIDTH = 190
 # background, so it inherits the page's.
 SERIES_COLORS = ("#3b6fd4", "#c05621", "#2f855a", "#805ad5")
 
+# Applied in turn each time the colours wrap, so a line chart of more than four
+# series stays readable. The empty first entry is a solid line.
+DASH_PATTERNS = (
+    "",
+    ' stroke-dasharray="6 3"',
+    ' stroke-dasharray="2 3"',
+    ' stroke-dasharray="9 3 2 3"',
+)
+
 
 def bar_chart(
     title: str,
@@ -170,16 +179,23 @@ def line_chart(
         )
     for order, (name, values) in enumerate(series):
         color = SERIES_COLORS[order % len(SERIES_COLORS)]
+        # A grid is a dozen or more rows and there are four colours, so the dash
+        # pattern changes each time the colours wrap: sixteen series stay apart,
+        # and a reader can follow one line without counting.
+        dash = DASH_PATTERNS[(order // len(SERIES_COLORS)) % len(DASH_PATTERNS)]
         points = " ".join(
             f"{x:.1f},{y:.1f}" for x, y in (point(i, v) for i, v in enumerate(values))
         )
-        parts.append(f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"/>')
+        parts.append(
+            f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"{dash}/>'
+        )
         for x, y in (point(i, v) for i, v in enumerate(values)):
             parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.5" fill="{color}"/>')
         legend_y = _TITLE_HEIGHT + 12 + order * 16
         parts.append(
-            f'<rect x="{left + plot_width + 12}" y="{legend_y - 8}" width="9" height="9" '
-            f'fill="{color}"/>'
+            f'<line x1="{left + plot_width + 12}" y1="{legend_y - 4}" '
+            f'x2="{left + plot_width + 22}" y2="{legend_y - 4}" stroke="{color}" '
+            f'stroke-width="2"{dash}/>'
         )
         parts.append(
             f'<text class="v" x="{left + plot_width + 25}" y="{legend_y}">{escape(name)}</text>'
