@@ -308,3 +308,59 @@ Breadcrumbs reproduce the site's own search index exactly (0 mismatches on the 2
 **Facts.** The starter migration calls `set_app_name(COLLECTION_NAME)` with the copier value `mistral_docs`. In the pinned toolkit, `VespaAppDefinition.name` is constrained to `^[a-z]+$` (lowercase letters only; `plugins/vespa/app/schemas/app.py`), while schema document types allow `^[a-z_]+$`. Any collection name containing an underscore, which copier accepts, makes `make setup-vespa` fail at validation. Found by the eval worker's offline test configuration; verified in the source.
 
 **Decision.** The index package names the Vespa app with letters only (`glossator`) and keeps schema names separate from the app name (D-010, S3). Candidate for the fork notes (D-018).
+
+---
+
+## D-010a · Chunking measured on the full corpus
+
+**Status:** decided · 2026-09-08 · refines D-010
+
+**Facts** (411 pages, section chunker: target 600 Mistral tokens, hard cap 1024, whole-block packing, no split across headings, context line `page_title > H2 > H3` prefixed to the embedded text but excluded from the located span so `content == prefix + body[start:end]`):
+
+| strategy | chunks | per page | tokens min / median / mean / max | with anchor |
+|---|---|---|---|---|
+| section | 4,430 | 10.8 | 9 / 135 / 219 / 5,737 | 2,360 (53%) |
+| page (starter splitter, 4096 chars) | 1,022 | 2.5 | 4 / 972 / 889 / 2,593 | 0 |
+
+- 110 section chunks exceed the cap; each is a table or code fence kept whole. Four corpus blocks exceed the embedder's 8,192-token input limit (largest 39k tokens); the chunker keeps blocks whole up to 7,000 tokens and cuts above, otherwise those blocks would never be indexed.
+- The `/models` capability table is one 4,827-token chunk; on "which models support function calling" it loses to a migration-guide FAQ. D-006's matrix needs per-feature sections, not one table.
+- The corpus contains an XML-illegal code point (`0x08` in a security advisory); Vespa rejects the whole document. Sanitization is applied at ingest and belongs in the corpus adapter as well.
+
+---
+
+## D-011a · Embedding cost and model availability, measured
+
+**Status:** decided · 2026-09-08 · refines D-011
+
+**Facts.** Full corpus into the section variant: 983,093 tokens, about 0.10 USD per variant; all three variants about 0.30 USD. Both `mistral-embed` (1024) and `mistral-embed-dim128-2510` (128) accept requests on the project key. On the 8-page fixture, 128 and 1024 dimensions order results almost identically; the comparison needs the eval set. The embedding API rate-limits a full run: at concurrency 8 with the embedder's default 3 retries, 81 of 411 pages were lost to 429s; at concurrency 3, 8 retries, plus one sequential retry pass, none.
+
+---
+
+## D-012a · Default ranking weights, with phases
+
+**Status:** decided, to be tuned · 2026-09-08 · implements D-012
+
+| feature | weight | phase | role |
+|---|---|---|---|
+| `bm25_content` | 0.5 | 1 | lexical relevance of the chunk body |
+| `content_embedding_closeness` | 5.0 | 1 | vector term in candidate selection (0 in the starter) |
+| `bm25_page_title` | 0.3 | 1 | question names the page |
+| `bm25_heading_path_max` | 0.3 | 1 | best-matching heading in the path |
+| `match_content` | 0.5 | 2 | proximity-aware field match |
+| `content_embedding_cosine_similarity_score` | 5.0 | 2 | exact cosine on the rerank window |
+
+Observed on the real corpus: phase-1 BM25 is overweighted for paraphrased questions ("how do I stream a chat completion" ranks the right section 2nd or 3rd, vector-only ranks it 1st); heading-path BM25 matches question-shaped headings regardless of subject ("what is the rate limit for the embeddings endpoint" returns a vision FAQ first); several chunks of one section crowd the top. These are the tuning targets for the retrieval grid.
+
+---
+
+## D-025 · Toolkit and Vespa facts from the index build
+
+**Status:** decided · 2026-09-08
+
+- Name constraints: app name `^[a-z]+$`, schema document type `^[a-z_]+$` (no digits). Variants are named `docs_page_lowdim`, `docs_section_lowdim`, `docs_section_fulldim`; the dimension lives in the config table.
+- One Vespa application cannot serve two embedding dimensions unless every query restricts itself to its schema: `query(embedding)`'s type is resolved across all rank profiles, and the YQL `from` clause does not disambiguate. `model.restrict` passed through the retrieval context does.
+- `VespaSearchQuery.ranking_weights` keys need the `_weight` suffix while `set_default_ranking_weights` keys do not. A bare feature name at query time is accepted and has no effect: four weight configurations produced byte-identical scores until the suffix was added. Fork-note candidate (D-018).
+- The Vespa plugin hardcodes euclidean HNSW regardless of the embedding model's declared cosine metric. Fork-note candidate.
+- An all-zero query embedding yields NaN relevance and a "Malformed search hit" error from the response parser.
+- Retrieval uses the query-builder path with no named profile; the schema's generated default profile still carries the baked-in weights, so `exclude_ids` and filters work alongside tuned ranking (resolves D-014).
+- The host disk sat at 90% during the build, above Vespa's 80% feed-block limit; the local deployment was patched with a higher resource limit outside the repository. A reviewer's machine below 80% is unaffected; the README should mention the limit.
