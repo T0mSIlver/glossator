@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 226" width="720" height="226" role="img" aria-label="Candidates accepted and dropped, by question type">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Candidates accepted and dropped, by question type</text>
+<text x="240" y="51.0" text-anchor="end">api_reference</text>
+<rect x="248" y="39.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">16 / 16</text>
+<text x="240" y="77.0" text-anchor="end">capability</text>
+<rect x="248" y="65.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="73.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="77.0">16 / 16</text>
+<text x="240" y="103.0" text-anchor="end">cross_page</text>
+<rect x="248" y="91.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="99.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="103.0">16 / 16</text>
+<text x="240" y="129.0" text-anchor="end">post_cutoff</text>
+<rect x="248" y="117.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="125.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="129.0">16 / 16</text>
+<text x="240" y="155.0" text-anchor="end">single_page</text>
+<rect x="248" y="143.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="151.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="155.0">16 / 16</text>
+<text x="240" y="181.0" text-anchor="end">unanswerable</text>
+<rect x="248" y="169.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="177.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="181.0">16 / 16</text>
+<rect x="16" y="209" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="218">accepted</text>
+<rect x="100" y="209" width="10" height="10" fill="#c05621"/>
+<text class="v" x="114" y="218">dropped</text>
+</svg>
