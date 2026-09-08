@@ -70,8 +70,9 @@ rerank:
 
   # One call per question per reranked configuration, so this is the whole
   # reranker spend of a run. 400 is about 0.35 USD of Mistral Small 4 at the
-  # measured 4.1k prompt and 0.4k completion tokens per call.
-  max_calls: 400
+  # measured 4.1k prompt and 0.4k completion tokens per call; 600 covers two
+  # reranked rows over a 300-question set without skipping any row.
+  max_calls: 600
 
   # sec1024 only: the reranker reorders what retrieval found, so running it on a
   # variant that found less measures the variant, not the reranker.
