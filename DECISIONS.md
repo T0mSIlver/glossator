@@ -236,3 +236,13 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 The listwise reranker (D-015) is part of the serving path, so its shipped configuration and reported numbers use a Mistral model; GLM may be used only while iterating on the reranker prompt.
 
 **Facts.** Judge cost on Mistral Medium 3.5 would be about 3.60 USD for 600 judgements (D-017 prices), a fifth of the budget, for a component that never ships.
+
+---
+
+## D-022 · Starter defaults the collection name inconsistently
+
+**Status:** default, flagged · 2026-09-08
+
+**Facts.** The generated `.env` sets only `MISTRAL_API_KEY`. `src/entrypoints/*.py` default `COLLECTION_NAME` to `exampledocs`; `src/search_app/migrations/001_*.py` defaults it to `mistral_docs` (the copier answer). Without `COLLECTION_NAME` in `.env`, the starter as generated indexes and searches a schema that the migration never created.
+
+**Decision.** Schema names are owned by the index package (D-010, S3), not by an environment variable; `.env` carries only secrets and ports. Candidate for the fork notes (D-018).
