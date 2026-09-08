@@ -298,3 +298,13 @@ Breadcrumbs reproduce the site's own search index exactly (0 mismatches on the 2
 **Facts.** `/resources/release-notes`, `/resources/glossary`, `/inference/model-selection-guide`, `/admin`, `/inference`, `/resources`, `/community` render React widgets from data files with no MDX children; after conversion their bodies are 17 to 344 bytes. Release notes come from `src/data/releases/en/*.json` and the glossary from a term list. The model catalog pages are already covered by the 66 generated model pages.
 
 **Revisit criterion.** A dev-set or held-out question that needs release notes or glossary content; then synthesize those two pages from their data files the way model pages are.
+
+---
+
+## D-022a · The generated starter cannot migrate: its app name is invalid
+
+**Status:** default, flagged · 2026-09-08 · extends D-022
+
+**Facts.** The starter migration calls `set_app_name(COLLECTION_NAME)` with the copier value `mistral_docs`. In the pinned toolkit, `VespaAppDefinition.name` is constrained to `^[a-z]+$` (lowercase letters only; `plugins/vespa/app/schemas/app.py`), while schema document types allow `^[a-z_]+$`. Any collection name containing an underscore, which copier accepts, makes `make setup-vespa` fail at validation. Found by the eval worker's offline test configuration; verified in the source.
+
+**Decision.** The index package names the Vespa app with letters only (`glossator`) and keeps schema names separate from the app name (D-010, S3). Candidate for the fork notes (D-018).
