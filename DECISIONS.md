@@ -449,3 +449,32 @@ Rules that vidtheque paid for in two consumer evaluations (a tool-design bench w
 **Facts.** vidtheque's two evaluations found their defects by giving real tasks to agents that were not told they were evaluating anything, on a weaker model than the author's, with every wrong turn treated as a surface defect until proven otherwise, every server-side claim reproduced by hand with the command printed, a severity scale (wrong or unreachable answer; extra calls; friction), and a byte-identical re-run after fixes to show regressions honestly.
 
 **Decision.** Before the tag, run the same protocol on glossator's MCP server: several personas (first contact, exhaustive reader, unanswerable questions, stress tester, a coding agent integrating the SDK), on codex or GLM clients connected as ordinary consumers, transcripts kept, findings classified and fixed in prose or code, then re-run. Tom's own hand test on his private questions is the final pass.
+
+---
+
+## D-017a · Model ids and the free-tier model allowlist
+
+**Status:** decided, blocked on account provisioning · 2026-09-09
+
+**Facts** (verified against the project key, 2026-09-08 22:00 to 2026-09-09 00:30 UTC).
+- `client.models.list()` returns 46 ids. Mistral Medium 3.5's fixed id is `mistral-medium-2604`, aliased by `mistral-medium-latest`, `mistral-medium-3-5`, `magistral-medium-latest` and five others. Mistral Small 4 is `mistral-small-2603`. No `mistral-large-*` id exists on this account, so the Large 3 price line in D-017 has no reachable model.
+- On this key, every request to `mistral-medium-*`, `mistral-small-*` and `magistral-*` returns HTTP 429 with `x-ratelimit-limit-req-minute: 0`, a configured quota of zero, while `ministral-3b/8b/14b-2512`, `codestral-2508` and `mistral-embed` answer normally in the same second. Backoff cannot get through a zero limit. Tom's account had not been provisioned for paid use when this was observed.
+- The answer-layer smoke therefore ran on `ministral-8b-2512`: 27 calls, 89,582 prompt and 10,679 completion tokens, 0.015 USD; the same tokens on Medium 3.5 prices would be 0.21 USD.
+
+**Decision.** Until the account is provisioned, evaluations run on the largest reachable Mistral model (`ministral-14b-2512`) and the generation model is an explicit column of every answer eval, so the Medium 3.5 numbers are one re-run of the same records when the quota opens. The shipped default stays Medium 3.5 (D-017); the README states which model produced which table.
+
+---
+
+## D-027a · What the first answer-layer smoke showed
+
+**Status:** decided · 2026-09-09 · refines D-027
+
+**Facts** (five questions, three strategies, Ministral 8B, `eval/runs/2026-09-09-answer-smoke/`).
+- A verified quote does not make a correct answer: on the unanswerable question "maximum number of tool calls in one response", two strategies answered "128", citing the genuine sentence "Maximum number of tools per request: 128", which is about declared tools. The quote verifier cannot see this; only the judge (D-016) can. `outline` alone refused.
+- When the answer is a table (which models support function calling), one retrieval of eight chunks lost it; reading the page (`outline`) or opening the chunk's neighbourhood (`search_loop`) kept it.
+- Roughly half the rejected citations were paraphrases presented as quotes; the verifier dropped 14 of 50 citations across the run.
+- `single_pass` assembled 1.9k to 3.0k context tokens against a 6,000-token budget with `top_k` 8; `outline` overflowed the budget with four pages. `search_loop` cost 2.6 times `single_pass` and often stopped after its seed search.
+- Markers are parsed outside code only and numbering starts at 1, because `choices[0]` in a code block was read as a citation.
+- Serving-path calls are recorded but never cached; a cached answer to a repeated question would be a different product. The AGENTS.md convention applies to offline tools only.
+
+**Consequence.** The answer eval grid varies `top_k`, the context budget, and the page cap, and reports distinct cited sources rather than citation counts. Anchorless first chunks should fall back to the nearest following anchor when one exists.
