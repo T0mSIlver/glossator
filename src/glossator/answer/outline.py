@@ -99,10 +99,28 @@ async def answer(
             },
         ],
         response_schema=PagePick,
-        max_tokens=300,
+        max_tokens=config.picker_max_tokens,
         purpose=f"{NAME}:pick_pages",
     )
     run.spent(completion)
+
+    if not isinstance(completion.parsed, PagePick):
+        # The picker is this strategy's entire retrieval step. When it fails the
+        # schema twice, the index was never asked, so the answer must not read as
+        # "the documentation does not cover this": that would count a bug as a
+        # refusal in the eval's refusal rate.
+        logger.warning("Outline picker did not parse", finish_reason=completion.finish_reason)
+        run.event("outline", "unparsed", note=completion.finish_reason)
+        return await run.finish(
+            question,
+            [],
+            llm=llm,
+            config=config,
+            no_sources_message=(
+                "No pages were read: the step that picks pages from the site outline did "
+                "not return a usable answer, so the documentation was never searched."
+            ),
+        )
 
     picked = _picked(completion.parsed, entries, config.page_cap)
     run.event(
@@ -110,7 +128,7 @@ async def answer(
         "pick_pages",
         arguments={"pages": len(entries), "cap": config.page_cap},
         result_ids=[entry.url for entry in picked],
-        note=completion.parsed.reason if isinstance(completion.parsed, PagePick) else None,
+        note=completion.parsed.reason,
     )
 
     hits: list[Hit] = []
@@ -131,12 +149,8 @@ async def answer(
     return await run.finish(question, hits, llm=llm, config=config)
 
 
-def _picked(
-    parsed: BaseModel | None, entries: tuple[OutlineEntry, ...], cap: int
-) -> list[OutlineEntry]:
+def _picked(parsed: PagePick, entries: tuple[OutlineEntry, ...], cap: int) -> list[OutlineEntry]:
     """The pages the model named, in its order, ignoring numbers that do not exist."""
-    if not isinstance(parsed, PagePick):
-        return []
     by_number = {entry.number: entry for entry in entries}
     seen: set[int] = set()
     picked: list[OutlineEntry] = []

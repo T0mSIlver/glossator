@@ -45,6 +45,13 @@ async def ask(
     builds the index client once instead of once per question."""
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown strategy {strategy!r}; available: {sorted(STRATEGIES)}")
+    if llm is not None and recorder is not None:
+        # Silently dropping the recorder here would leave an eval run -- the one
+        # caller that injects a shared client -- with no record at all (D-023).
+        raise ValueError(
+            "pass either llm or recorder, not both: an injected llm already owns "
+            "its recorder, so this one would be ignored"
+        )
     settings = config or AnswerConfig()
     index = engine or SearchEngine(RetrievalConfig(variant=variant, top_k=settings.top_k))
     generator = llm or MistralLLM(settings, client=build_client(), recorder=recorder)
