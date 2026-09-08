@@ -55,12 +55,29 @@ class AnswerConfig(BaseModel):
     top_k: Annotated[int, Field(ge=1, le=50)] = 8
 
     context_token_budget: int = 6000
-    """Ceiling on the assembled context. Roughly a third of a 20k-token page set,
-    which keeps a single_pass question near 8k prompt tokens."""
+    """Ceiling on the assembled context. A `single_pass` question at ``top_k`` 8
+    measured 1.9k-3.0k prompt tokens against this budget in the 2026-09-09 smoke,
+    so the budget binds only for `outline`, which reads whole pages."""
+
+    min_quote_chars: int = 8
+    """A quote shorter than this verifies against almost any chunk, so it is not
+    evidence that the model read the source."""
 
     round_cap: int = 4
     searches_per_round: int = 4
     tool_top_k: int = 4
+    max_tool_top_k: int = 10
+    """Ceiling on what one search call may return, whatever the model asks for."""
+
+    max_open_window: int = 5
+    """Ceiling on `open`'s window. Each step of it is another positional query."""
+
+    loop_max_tokens: int = 800
+    """The loop's turns are tool calls and a one-line stop, not prose."""
+
+    picker_max_tokens: int = 300
+    """The outline picker returns a handful of numbers and one sentence."""
+
     tool_result_chars: int = 600
     """Tool results are previews. The loop only has to decide what to look at
     next; the final generation re-reads the full chunks through context

@@ -85,12 +85,16 @@ strategies differ only in how evidence is gathered:
 | strategy | how it gathers evidence |
 |---|---|
 | `single_pass` | one hybrid search, one generation |
-| `search_loop` | the model drives `search` / `open` / `grep` / `read` as tools, up to four rounds |
-| `outline` | the model picks up to four pages from the site outline and reads them whole |
+| `search_loop` | the model drives `search` / `open` / `grep` / `read` as tools, over a capped number of rounds |
+| `outline` | the model picks pages from the site outline and reads them whole |
+
+Round cap, page cap, `top_k`, the context budget and the model all live in
+`AnswerConfig` (`src/glossator/answer/config.py`).
 
 ```bash
 make ask question="how do I create a conversational workflow"
 make ask question="what models support function calling" strategy=search_loop
+make ask question="how do I stream" model=ministral-8b-2512
 uv run python -m glossator.answer "comment marche le mode JSON ?" --strategy outline --record calls.jsonl
 ```
 
