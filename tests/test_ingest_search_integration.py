@@ -24,6 +24,7 @@ from dotenv import load_dotenv
 from mistralai.search.toolkit.search import VectorSearchQuery
 
 from glossator.index import get_index, get_variant
+from glossator.ingest.pages import iter_page_paths, load_page
 from glossator.ingest.pipeline import ingest_corpus
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.context import restrict_to
@@ -82,9 +83,17 @@ async def _ingest_and_search(corpus_dir: Path) -> Indexed:
     # next line already means the whole fixture corpus is indexed.
     report = await ingest_corpus(corpus_dir, VARIANT, concurrency=4)
 
-    engine = SearchEngine(RetrievalConfig(variant=VARIANT.name, top_k=5))
-    hits = {query: await engine.search(query) for query in QUERIES}
+    # The variant is shared with whatever else was ingested into it (the full corpus,
+    # another test run), so search deep and keep only the fixture's own pages: the
+    # assertions are about ranking among the fixture, not about a global top-5.
+    fixture_urls = {load_page(path).url for path in iter_page_paths(corpus_dir)}
+    engine = SearchEngine(RetrievalConfig(variant=VARIANT.name, top_k=50))
+    hits = {
+        query: [hit for hit in await engine.search(query) if hit.url in fixture_urls][:5]
+        for query in QUERIES
+    }
 
+    # The kind filter is a property of the whole index, so it is asserted globally.
     filtered_engine = SearchEngine(
         RetrievalConfig(variant=VARIANT.name, top_k=5, kinds=frozenset({"api"}))
     )
