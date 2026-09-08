@@ -1,21 +1,25 @@
+"""The durable record of one run: config, every call, every candidate, metrics.
+
+D-023: a number that cannot be traced back to raw model output cannot be
+defended. The run directory holds that trace, and the README is rendered from
+it -- no sentence in the README is written by hand or preserved across a
+regeneration.
+"""
+
 from __future__ import annotations
 
 import json
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from pydantic import BaseModel
 
-from glossator.eval.providers import (
-    Message,
-    ProviderName,
-    ThinkingMode,
-    TokenUsage,
-)
+from glossator.eval.pricing import estimate_usd, price_for
+from glossator.eval.providers import Message, ProviderName, ThinkingMode, TokenUsage
 
 RUN_NAME_RE = re.compile(r"[^a-z0-9-]+")
 STATUS_IN_PROGRESS = "in progress"
@@ -24,6 +28,12 @@ STATUS_FAILED = "failed"
 
 
 class RunRecorder:
+    """Writes the run directory as the run happens.
+
+    Rows are appended as they are produced so that a run killed halfway still
+    leaves everything it paid for.
+    """
+
     def __init__(self, run_dir: Path, config: Mapping[str, Any]) -> None:
         self.run_dir = run_dir
         self.config = dict(config)
@@ -33,22 +43,28 @@ class RunRecorder:
         self.readme_path = run_dir / "README.md"
         self.call_rows: list[dict[str, Any]] = []
         self.record_rows: list[dict[str, Any]] = []
+
+    @classmethod
+    def start(cls, run_dir: Path, config: Mapping[str, Any]) -> Self:
+        """Create the run directory and write the configuration into it."""
+        recorder = cls(run_dir, config)
         run_dir.mkdir(parents=True, exist_ok=False)
         (run_dir / "figures").mkdir()
         (run_dir / "config.json").write_text(
-            json.dumps(self.config, indent=2, sort_keys=True) + "\n"
+            json.dumps(recorder.config, indent=2, sort_keys=True) + "\n"
         )
-        self.calls_path.touch()
-        self.records_path.touch()
-        # An interrupted run must not claim completion; regenerate() rebuilds
-        # this summary from the row files once the outcome is known.
-        self._write_summary(status=STATUS_IN_PROGRESS, dataset=None, error=None)
+        recorder.calls_path.touch()
+        recorder.records_path.touch()
+        # An interrupted run must not claim completion.
+        recorder._write_summary(status=STATUS_IN_PROGRESS, dataset=None, error=None)
+        return recorder
 
     def record_call(
         self,
         *,
         provider: ProviderName,
         model: str,
+        endpoint: str,
         messages: Sequence[Message],
         response_text: str | None,
         parsed: BaseModel | None,
@@ -57,46 +73,78 @@ class RunRecorder:
         latency_ms: float,
         error: str | None,
         thinking: ThinkingMode | None,
+        temperature: float,
+        max_tokens: int,
+        response_format: dict[str, Any] | None,
+        schema_name: str | None,
+        schema_hash: str | None,
+        seed: int | None,
+        finish_reason: str | None,
+        candidate_id: str | None,
+        call_kind: str | None,
     ) -> None:
         row = {
             "timestamp": datetime.now(UTC).isoformat(),
+            "candidate_id": candidate_id,
+            "call_kind": call_kind or "other",
             "provider": provider,
+            "endpoint": endpoint,
             "model": model,
             "thinking": thinking,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "seed": seed,
+            "response_format": response_format,
+            "schema_name": schema_name,
+            "schema_hash": schema_hash,
             "request_messages": [dict(message) for message in messages],
             "raw_response_text": response_text,
             "parsed_result": parsed.model_dump(mode="json") if parsed else None,
             "usage": usage.model_dump(mode="json"),
             "cached": cached,
-            "latency_ms": round(latency_ms, 3),
+            "finish_reason": finish_reason,
+            "call_ms": round(latency_ms, 3),
             "error": error,
         }
         self.call_rows.append(row)
         self._append(self.calls_path, row)
 
-    def record_candidate(self, candidate: BaseModel | Mapping[str, Any]) -> None:
-        row = (
-            candidate.model_dump(mode="json")
-            if isinstance(candidate, BaseModel)
-            else dict(candidate)
-        )
+    def record_candidate(self, candidate: BaseModel) -> None:
+        row = candidate.model_dump(mode="json")
         self.record_rows.append(row)
         self._append(self.records_path, row)
+
+    def usage_line(self) -> dict[str, Any]:
+        """The one-line usage summary the CLI prints."""
+        metrics = summarize(self.call_rows, self.record_rows, self.config)
+        return {
+            "calls": metrics["calls"],
+            "cached_calls": metrics["cached_calls"],
+            "usage": metrics["usage"],
+            "uncached_usage": metrics["uncached_usage"],
+            "estimated_usd": metrics["estimated_usd"],
+        }
 
     def finalize(
         self,
         *,
         dataset_path: Path | None,
         error: str | None,
-        status: str | None = None,
+        shortfalls: Mapping[str, int] | None = None,
+        requested_by_type: Mapping[str, int] | None = None,
     ) -> None:
-        if status is None:
-            status = STATUS_FAILED if error else STATUS_COMPLETE
+        if shortfalls is not None:
+            self.config["shortfalls"] = dict(shortfalls)
+        if requested_by_type is not None:
+            self.config["requested_by_type"] = dict(requested_by_type)
+        if shortfalls is not None or requested_by_type is not None:
+            (self.run_dir / "config.json").write_text(
+                json.dumps(self.config, indent=2, sort_keys=True) + "\n"
+            )
+        status = STATUS_FAILED if error else STATUS_COMPLETE
         self._write_summary(status=status, dataset=dataset_path, error=error)
 
-    def _write_summary(
-        self, *, status: str, dataset: Path | str | None, error: str | None
-    ) -> None:
+    def _write_summary(self, *, status: str, dataset: Path | str | None, error: str | None) -> None:
         write_summary(
             self.run_dir,
             self.config,
@@ -116,21 +164,43 @@ class RunRecorder:
 def summarize(
     call_rows: Sequence[Mapping[str, Any]],
     record_rows: Sequence[Mapping[str, Any]],
+    config: Mapping[str, Any],
 ) -> dict[str, Any]:
+    """Every number the README and the figures are built from."""
     candidate_types = Counter(row["generator_type"] for row in record_rows)
     kept_types = Counter(row["generator_type"] for row in record_rows if row["kept"])
     dropped_reasons: Counter[str] = Counter()
     for row in record_rows:
         if not row["kept"]:
             dropped_reasons.update(row["drop_reasons"])
+
     usage = TokenUsage()
     uncached_usage = TokenUsage()
+    by_kind: dict[str, TokenUsage] = defaultdict(TokenUsage)
+    calls_by_kind: Counter[str] = Counter()
+    finish_reasons: Counter[str] = Counter()
+    failed_calls = 0
     for row in call_rows:
         call_usage = TokenUsage.model_validate(row["usage"])
         usage = usage.plus(call_usage)
+        kind = str(row.get("call_kind") or "other")
+        calls_by_kind[kind] += 1
+        by_kind[kind] = by_kind[kind].plus(call_usage)
         if not row["cached"]:
             uncached_usage = uncached_usage.plus(call_usage)
+        if row.get("finish_reason"):
+            finish_reasons[str(row["finish_reason"])] += 1
+        if row.get("error"):
+            failed_calls += 1
+
+    model = str(config.get("model", ""))
+    requested = dict(config.get("requested_by_type") or {})
+    shortfalls = dict(config.get("shortfalls") or {})
     return {
+        "requested": int(config.get("n", 0)),
+        "requested_by_type": requested,
+        "shortfall_by_type": shortfalls,
+        "shortfall": sum(shortfalls.values()),
         "candidates": len(record_rows),
         "kept": sum(bool(row["kept"]) for row in record_rows),
         "dropped": sum(not row["kept"] for row in record_rows),
@@ -139,9 +209,16 @@ def summarize(
         "dropped_by_reason": dict(sorted(dropped_reasons.items())),
         "calls": len(call_rows),
         "cached_calls": sum(bool(row["cached"]) for row in call_rows),
+        "failed_calls": failed_calls,
+        "calls_by_kind": dict(sorted(calls_by_kind.items())),
         "usage": usage.model_dump(mode="json"),
         "uncached_usage": uncached_usage.model_dump(mode="json"),
-        "latency_ms": round(sum(float(row["latency_ms"]) for row in call_rows), 3),
+        "usage_by_kind": {kind: by_kind[kind].model_dump(mode="json") for kind in sorted(by_kind)},
+        "finish_reasons": dict(sorted(finish_reasons.items())),
+        "model": model,
+        "estimated_usd": estimate_usd(model, uncached_usage),
+        # Sum of per-call durations, not elapsed time: the calls run concurrently.
+        "call_ms_total": round(sum(float(row.get("call_ms", 0.0)) for row in call_rows), 3),
     }
 
 
@@ -159,13 +236,57 @@ def write_summary(
         "status": status,
         "error": error,
         "dataset": str(dataset) if dataset else None,
-        **summarize(call_rows, record_rows),
+        **summarize(call_rows, record_rows, config),
     }
-    (run_dir / "metrics.json").write_text(
-        json.dumps(metrics, indent=2, sort_keys=True) + "\n"
-    )
+    (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
     (run_dir / "README.md").write_text(render_readme(config, metrics))
     return metrics
+
+
+def _conclusion(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
+    """The run's conclusion, computed from its own numbers."""
+    if metrics["status"] == STATUS_IN_PROGRESS:
+        return "The run had not finished when this summary was last written."
+    if metrics["status"] == STATUS_FAILED:
+        return f"{_as_sentence(metrics['error'])} No dataset was written."
+
+    parts: list[str] = []
+    requested = metrics["requested"] or metrics["kept"]
+    parts.append(
+        f"The run asked for {requested} questions and accepted {metrics['kept']} of "
+        f"{metrics['candidates']} candidates."
+    )
+    shortfalls = metrics["shortfall_by_type"]
+    if shortfalls:
+        listed = ", ".join(f"{name} short by {count}" for name, count in sorted(shortfalls.items()))
+        parts.append(
+            f"{metrics['shortfall']} question(s) could not be filled from the corpus: {listed}. "
+            "The dataset holds what was accepted."
+        )
+    else:
+        parts.append("Every question type was filled.")
+    reasons = sorted(metrics["dropped_by_reason"].items(), key=lambda item: (-item[1], item[0]))
+    if reasons:
+        top = ", ".join(f"{reason} ({count})" for reason, count in reasons[:3])
+        parts.append(f"The largest drop reasons were {top}.")
+    uncached = metrics["uncached_usage"]
+    cost = metrics["estimated_usd"]
+    price = price_for(metrics["model"])
+    if cost is None:
+        cost_sentence = f"No price is recorded for {metrics['model']}, so the cost is unknown."
+    elif cost == 0.0 and price is not None and price.note:
+        cost_sentence = (
+            f"{uncached['prompt_tokens']} prompt and {uncached['completion_tokens']} completion "
+            f"tokens were paid for at 0.00 USD against the Mistral budget ({price.note})."
+        )
+    else:
+        cost_sentence = (
+            f"{uncached['prompt_tokens']} prompt and {uncached['completion_tokens']} completion "
+            f"tokens cost an estimated {cost:.4f} USD."
+        )
+    parts.append(cost_sentence)
+    parts.append("The dataset feeds the retrieval and answer evaluations in D-016.")
+    return " ".join(parts)
 
 
 def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
@@ -175,44 +296,37 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     type_lines = []
     for question_type, candidates in metrics["candidates_by_type"].items():
         kept = metrics["kept_by_type"].get(question_type, 0)
-        candidate_label = "candidate" if candidates == 1 else "candidates"
+        asked = metrics["requested_by_type"].get(question_type)
+        asked_label = f"{asked} asked, " if asked is not None else ""
         type_lines.append(
-            f"- {question_type}: {candidates} {candidate_label}, {kept} kept, "
+            f"- {question_type}: {asked_label}{candidates} candidates, {kept} kept, "
             f"{candidates - kept} dropped"
         )
     if not type_lines:
         type_lines = ["- No candidates were generated"]
+    kind_lines = [
+        f"- {kind}: {count} calls, {metrics['usage_by_kind'][kind]['prompt_tokens']} prompt "
+        f"+ {metrics['usage_by_kind'][kind]['completion_tokens']} completion tokens"
+        for kind, count in metrics["calls_by_kind"].items()
+    ] or ["- No calls were made"]
     usage = metrics["usage"]
+    uncached = metrics["uncached_usage"]
     dataset = metrics["dataset"] or "No dataset was written"
-    if metrics["status"] == STATUS_COMPLETE:
-        conclusion = (
-            "Status: complete. The records support the dataset-generation choice "
-            "in D-020 and the record requirements in D-023."
-        )
-    elif metrics["status"] == STATUS_FAILED:
-        conclusion = (
-            f"Status: failed. {_as_sentence(metrics['error'])} No dataset was written."
-        )
-    else:
-        conclusion = (
-            "Status: in progress. The run had not finished when this summary was "
-            "last written."
-        )
     return (
         "# Dataset generation run\n\n"
         f"This run asked {config['model']} to generate documentation questions from "
-        f"{config['corpus']}. It tested whether prompt {config['prompt_version']} "
-        "produces standalone questions supported by their assigned sources.\n\n"
+        f"{config['corpus']}. It measures how many valid questions of each type the "
+        f"generators produce, and what they cost.\n\n"
         "## Question\n\n"
-        "Does this generator configuration produce valid questions whose assigned sources "
-        "are all necessary for the answer?\n\n"
+        "Does this generator configuration produce standalone questions whose assigned "
+        "sources are all necessary for the answer, in the numbers the development set needs?\n\n"
         "## Configuration\n\n"
-        "The run used one provider and prompt configuration. `config.json` records every "
-        "parameter and prompt hash.\n\n"
+        "`config.json` records every parameter and prompt hash.\n\n"
         f"- Provider: {config['provider']}\n"
         f"- Model: {config['model']}\n"
         f"- Thinking: {config['thinking']}\n"
         f"- Seed: {config['seed']}\n"
+        f"- Prompt version: {config['prompt_version']}\n"
         f"- Corpus commit: {config['corpus_commit']}\n"
         f"- Requested questions: {config['n']}\n"
         f"- Dataset: {dataset}\n\n"
@@ -222,13 +336,22 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
         + "\n".join(type_lines)
         + "\n\nDropped candidates by reason:\n\n"
         + "\n".join(reason_lines)
-        + "\n\n"
-        f"The provider handled {metrics['calls']} calls, including "
-        f"{metrics['cached_calls']} cache hits. Recorded usage was "
-        f"{usage['prompt_tokens']} prompt tokens, {usage['completion_tokens']} completion "
-        f"tokens, and {usage['reasoning_tokens']} reasoning tokens.\n\n"
+        + "\n\n## Calls and usage\n\n"
+        f"The provider handled {metrics['calls']} calls, of which {metrics['cached_calls']} "
+        f"were cache hits and {metrics['failed_calls']} returned an error that was retried "
+        "or recorded.\n\n" + "\n".join(kind_lines) + "\n\n"
+        f"Total tokens: {usage['prompt_tokens']} prompt, {usage['completion_tokens']} completion, "
+        f"{usage['reasoning_tokens']} reasoning. Paid for in this run (uncached): "
+        f"{uncached['prompt_tokens']} prompt, {uncached['completion_tokens']} completion, "
+        f"{uncached['reasoning_tokens']} reasoning.\n\n"
+        "## Figures\n\n"
+        "`figures/` holds the charts, regenerated from `metrics.json` by "
+        "`make eval-report run=<dir>`.\n\n"
+        "- `figures/accepted-by-type.svg`: accepted against dropped, per question type\n"
+        "- `figures/drop-reasons.svg`: how many candidates each drop reason accounts for\n"
+        "- `figures/tokens-by-call-kind.svg`: tokens spent on generating against checking\n\n"
         "## Conclusion\n\n"
-        f"{conclusion}\n"
+        f"{_conclusion(config, metrics)}\n"
     )
 
 
@@ -243,22 +366,17 @@ def _as_sentence(text: str | None) -> str:
 
 
 def regenerate(run_dir: Path) -> dict[str, Any]:
-    """Rebuild metrics.json and README.md from the committed row files.
+    """Rebuild metrics.json and README.md from the recorded rows.
 
-    The terminal status, error, and dataset path are preserved from the
-    existing metrics.json because they cannot be derived from the rows.
+    Only the terminal status and the failure message cannot be derived from the
+    rows; everything the README says about the run comes from the rows and the
+    configuration, so a README can never drift from the records under it.
     """
     config = json.loads((run_dir / "config.json").read_text())
     previous = json.loads((run_dir / "metrics.json").read_text())
     call_rows = _read_jsonl(run_dir / "calls.jsonl")
     record_rows = _read_jsonl(run_dir / "records.jsonl")
     dataset = previous.get("dataset")
-    if dataset is None and previous.get("status") == STATUS_COMPLETE:
-        out = config.get("out")
-        # Summaries written before the dataset field existed; a completed run
-        # wrote exactly the configured output path.
-        if isinstance(out, str) and Path(out).exists():
-            dataset = out
     (run_dir / "figures").mkdir(exist_ok=True)
     return write_summary(
         run_dir,
@@ -272,14 +390,19 @@ def regenerate(run_dir: Path) -> dict[str, Any]:
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text().splitlines()]
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
 def create_run_directory(name: str, *, root: Path = Path("eval/runs")) -> Path:
+    """A fresh directory named for the moment the run started, in UTC.
+
+    UTC because every timestamp inside the directory is UTC; a local-time name
+    over a directory of UTC rows reads as a different run.
+    """
     safe_name = RUN_NAME_RE.sub("-", name.casefold()).strip("-")
     if not safe_name:
         raise ValueError("run name must contain a letter or digit")
-    timestamp = datetime.now().astimezone().strftime("%Y-%m-%d-%H%M")
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d-%H%M")
     candidate = root / f"{timestamp}-{safe_name}"
     suffix = 2
     while candidate.exists():

@@ -75,6 +75,9 @@ ignore = [
 # Corpus fixtures reproduce upstream MDX and TypeScript lines verbatim; wrapping
 # them would stop them from being the thing under test.
 "tests/corpus/*" = ["E501"]
+# One paragraph per line: these are prompts sent to a model, and their text is
+# hashed into every question generated from them, so rewrapping rewrites data.
+"src/glossator/eval/prompts.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

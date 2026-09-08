@@ -1,14 +1,21 @@
+"""The evaluation set: what a question is, how it is stored, how it is checked.
+
+A dataset row is only useful if its gold sources still exist in the corpus, so
+validation against the manifest and the pages is part of this module rather than
+of whatever wrote the row.
+"""
+
 from __future__ import annotations
 
-import json
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from enum import StrEnum
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from glossator.eval.corpus_reader import CorpusPage, ManifestEntry
+from glossator.ingest.pages import CorpusPage
+from glossator.ingest.sections import parse_sections
 
 
 class QuestionType(StrEnum):
@@ -43,7 +50,7 @@ class EvalQuestion(BaseModel):
     reference_answer: str
     language: Literal["en", "fr"]
     source: QuestionSource
-    generator: dict[str, object] | None = None
+    generator: dict[str, Any] | None = None
 
     @model_validator(mode="after")
     def validate_gold_and_answer_length(self) -> EvalQuestion:
@@ -85,13 +92,22 @@ def write_jsonl(path: Path, questions: Iterable[EvalQuestion]) -> None:
 
 def validate_against_corpus(
     questions: Sequence[EvalQuestion],
-    manifest: Sequence[ManifestEntry] | Path,
+    manifest: Sequence[Mapping[str, Any]],
     pages: Sequence[CorpusPage],
 ) -> list[CorpusValidationIssue]:
-    entries = read_manifest_entries(manifest)
-    manifest_urls = {entry.url for entry in entries}
+    """Gold sources that no longer name a page, or an anchor the page lacks.
+
+    Anchors come from the section parser rather than a private scan, so a
+    question is checked against the same section boundaries ingestion indexes.
+    """
+    manifest_urls = {str(entry.get("url", "")) for entry in manifest}
     anchors_by_url = {
-        page.url: {section.anchor for section in page.sections} for page in pages
+        page.url: {
+            section.anchor
+            for section in parse_sections(page.body, page_title=page.title)
+            if section.anchor is not None
+        }
+        for page in pages
     }
     issues: list[CorpusValidationIssue] = []
     for question in questions:
@@ -106,9 +122,7 @@ def validate_against_corpus(
                     )
                 )
                 continue
-            if gold.anchor is not None and gold.anchor not in anchors_by_url.get(
-                gold.url, set()
-            ):
+            if gold.anchor is not None and gold.anchor not in anchors_by_url.get(gold.url, set()):
                 issues.append(
                     CorpusValidationIssue(
                         question_id=question.id,
@@ -118,12 +132,3 @@ def validate_against_corpus(
                     )
                 )
     return issues
-
-
-def read_manifest_entries(
-    manifest: Sequence[ManifestEntry] | Path,
-) -> list[ManifestEntry]:
-    if isinstance(manifest, Path):
-        data = json.loads(manifest.read_text())
-        return [ManifestEntry.model_validate(item) for item in data]
-    return list(manifest)

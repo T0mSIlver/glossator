@@ -1,3 +1,12 @@
+"""Question generators for the development set.
+
+Six kinds of question, one generator each, all drawing on the vendored corpus and
+all recorded: every candidate the model produced, why it was kept or dropped, and
+every call behind it (D-023). A generator is only allowed to be wrong loudly --
+a candidate that cannot be checked is dropped and recorded, never silently
+turned into a dataset row.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -8,19 +17,19 @@ import random
 import re
 from collections import defaultdict
 from collections.abc import Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Protocol, cast
-from urllib.parse import urljoin, urlparse
+from typing import Literal, Protocol, TypeVar, cast
 
 import structlog
 from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from glossator.eval.corpus_reader import (
-    CorpusPage,
-    CorpusSection,
-    read_corpus,
-    read_manifest,
+from glossator.eval.corpus import (
+    CorpusDocument,
+    block_text,
+    estimate_tokens,
+    load_documents,
 )
 from glossator.eval.datasets import (
     EvalQuestion,
@@ -30,43 +39,85 @@ from glossator.eval.datasets import (
     validate_against_corpus,
     write_jsonl,
 )
+from glossator.eval.lexical import LexicalIndex
+from glossator.eval.prompts import (
+    API_REFERENCE_INSTRUCTIONS,
+    CAPABILITY_INSTRUCTIONS,
+    CLOSED_BOOK_INSTRUCTIONS,
+    CORPUS_CHECK_INSTRUCTIONS,
+    CROSS_PAGE_INSTRUCTIONS,
+    FILTER_INSTRUCTIONS,
+    PAGE_ALONE_INSTRUCTIONS,
+    POST_CUTOFF_INSTRUCTIONS,
+    PROMPT_HASHES,
+    PROMPT_VERSION,
+    SINGLE_SECTION_INSTRUCTIONS,
+    UNANSWERABLE_INSTRUCTIONS,
+)
 from glossator.eval.providers import (
     Completion,
     Message,
     OpenAICompatibleProvider,
+    ProviderCallError,
     ProviderName,
     ThinkingMode,
+    call_scope,
+    candidate_scope,
 )
 from glossator.eval.run_records import RunRecorder, create_run_directory
+from glossator.ingest.links import extract_links
+from glossator.ingest.pages import read_manifest
+from glossator.ingest.sections import Section
 
 logger = structlog.get_logger(__name__)
-PROMPT_VERSION = "s2-v3"
-LINK_RE = re.compile(r"\[[^]]+\]\((?P<href>[^)#]+)(?:#[^)]+)?\)")
-SINGLE_SECTION_INSTRUCTIONS = """Write one realistic question that a developer would ask and that the supplied documentation section fully answers.
 
-The question must stand alone. It must not say "this page", "this section", "the example above", or assume that the reader sees the source. The page title alone must not answer it. Use details from the body, not merely the heading. Preserve API fields, model names, and other identifiers exactly as written. Keep the reference answer to no more than two lines."""
-CROSS_PAGE_INSTRUCTIONS = """Write one developer question whose complete answer requires facts from both documentation pages below. Reject any idea that one page can answer by itself.
+# One truncation constant, applied once per page or section text handed to a
+# model. Different limits in generation and filtering let the filter reject a
+# fact the generator legitimately used.
+MAX_SOURCE_CHARS = 8000
 
-Choose one fact that appears only in Page A and one fact that appears only in Page B. Do not build the question around facts repeated by both pages. Before returning the candidate, verify that removing either page leaves one part unanswered.
+MIN_SECTION_TOKENS = 80
 
-Make the question standalone and specific. Do not mention pages, supplied text, examples above, or documentation structure. Ask for a comparison, integration, or multi-step decision that combines the two source-exclusive facts. The reference answer must have exactly two short lines. Each line must state its source-exclusive contribution. Set fully_answered to true only if both supplied pages together support the whole answer."""
-UNANSWERABLE_INSTRUCTIONS = """Write one plausible developer question related to the supplied section that the documentation does not answer. Ask about a nonexistent feature, an unstated limit, or an unsupported behavior. Do not ask something that ordinary reasoning can infer from the text.
+GENERATION_TEMPERATURE = 0.7
+GENERATION_MAX_TOKENS = 700
+CHECK_TEMPERATURE = 0.0
+CHECK_MAX_TOKENS = 500
+PROBE_MAX_TOKENS = 400
 
-The question must stand alone and must not refer to a page, section, or example. The reference answer must state exactly what information the documentation does not provide, in no more than two lines. Set fully_answered to false."""
-FILTER_INSTRUCTIONS = """Audit this generated evaluation question. Be strict.
+# How many corpus sections an unanswerable candidate is checked against.
+UNANSWERABLE_CHECK_TOP_K = 5
 
-Set standalone to false if the question refers to unseen context. Check the required gold condition. Set not_answerable_from_title_alone to false if a source title reveals the answer without reading its body. Check whether every assigned source is necessary. Reject misspelled, truncated, or invented API fields and model identifiers. List short, concrete failure reasons. Use an empty list only when every check passes."""
-PAGE_ALONE_INSTRUCTIONS = """Decide whether the single supplied page can fully answer the generated question. Judge the whole question, not one clause. Set fully_answerable to true only when no fact from another source is needed. Give one concrete reason."""
-PROMPT_HASHES = {
-    name: hashlib.sha256(prompt.encode()).hexdigest()
-    for name, prompt in {
-        "single_section": SINGLE_SECTION_INSTRUCTIONS,
-        "cross_page": CROSS_PAGE_INSTRUCTIONS,
-        "unanswerable": UNANSWERABLE_INSTRUCTIONS,
-        "filter": FILTER_INSTRUCTIONS,
-        "page_alone": PAGE_ALONE_INSTRUCTIONS,
-    }.items()
-}
+# A generated question naming one of these is about somebody else's product; the
+# filter model has been observed to pass such a question (review finding H5), so
+# the check is deterministic rather than asked.
+FOREIGN_VENDORS = (
+    "OpenAI",
+    "GPT",
+    "Gemini",
+    "Anthropic",
+    "Claude",
+    "Cohere",
+    "Llama",
+    "Bedrock",
+    "Vertex",
+    "Azure OpenAI",
+)
+_FOREIGN_VENDOR_RE = re.compile(
+    r"\b(" + "|".join(re.escape(name) for name in FOREIGN_VENDORS) + r")\b",
+    re.IGNORECASE,
+)
+
+
+DROP_PROVIDER_ERROR = "provider_error"
+
+Language = Literal["en", "fr"]
+
+T = TypeVar("T")
+
+
+def _language(locale: str) -> Language:
+    """The dataset language for a page locale. Only the two mirrors exist (D-008)."""
+    return "fr" if locale == "fr" else "en"
 
 
 class ChatProvider(Protocol):
@@ -79,6 +130,7 @@ class ChatProvider(Protocol):
         max_tokens: int,
         response_schema: type[BaseModel] | None,
         thinking: ThinkingMode | None,
+        cache_nonce: str | None,
     ) -> Completion: ...
 
 
@@ -97,6 +149,15 @@ class CandidateOutput(BaseModel):
         return value
 
 
+class CrossPageOutput(CandidateOutput):
+    page_a_contribution: str
+    page_b_contribution: str
+
+
+class CapabilityOutput(CandidateOutput):
+    names_single_model: bool
+
+
 class FilterOutput(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -104,22 +165,30 @@ class FilterOutput(BaseModel):
     gold_condition_met: bool
     not_answerable_from_title_alone: bool
     uses_every_gold_source: bool
+    about_the_documented_product: bool
     reasons: list[str]
-
-    @property
-    def accepted(self) -> bool:
-        return (
-            self.standalone
-            and self.gold_condition_met
-            and self.not_answerable_from_title_alone
-            and self.uses_every_gold_source
-        )
 
 
 class PageAloneOutput(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     fully_answerable: bool
+    reason: str
+
+
+class PageAloneVerdict(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    url: str
+    title: str
+    fully_answerable: bool
+    reason: str
+
+
+class CorpusCheckOutput(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    answered_by_corpus: bool
     reason: str
 
 
@@ -133,720 +202,892 @@ class SampledSource(BaseModel):
     content: str
 
 
-class GenerationAttempt(BaseModel):
+class SourceContribution(BaseModel):
+    """Which page supplies which half of a cross-page answer.
+
+    Kept on the record only: the reference answer a judge scores against stays a
+    natural answer, with no page labels to score formatting on.
+    """
+
     model_config = ConfigDict(frozen=True)
 
+    url: str
+    contribution: str
+
+
+class GenerationAttempt(BaseModel):
+    """One row of ``records.jsonl``: every candidate, kept or not."""
+
+    model_config = ConfigDict(frozen=True)
+
+    candidate_id: str
     generator_type: str
     seed: list[str]
-    candidate: CandidateOutput
-    filter: FilterOutput
-    page_a_alone: PageAloneOutput | None
-    page_b_alone: PageAloneOutput | None
-    duplicate: bool
+    candidate: CandidateOutput | None = None
+    filter: FilterOutput | None = None
+    page_alone: list[PageAloneVerdict] = []
+    corpus_check: CorpusCheckOutput | None = None
+    consulted_sections: list[str] = []
+    closed_book_answer: str | None = None
+    contributions: list[SourceContribution] = []
+    foreign_vendors: list[str] = []
+    duplicate: bool = False
     kept: bool
     drop_reasons: list[str]
     sampled_sources: list[SampledSource]
-    question: EvalQuestion | None
+    question: EvalQuestion | None = None
+    error: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AttemptPlan:
+    """What one attempt will ask about, decided before any model is called."""
+
+    question_type: QuestionType
+    documents: tuple[CorpusDocument, ...]
+    sources: tuple[SampledSource, ...]
+    gold: tuple[GoldSource, ...]
+    language: Language
+    nonce: int
+
+    @property
+    def candidate_id(self) -> str:
+        material = {
+            "type": self.question_type.value,
+            "sources": [(source.url, source.anchor) for source in self.sources],
+            "nonce": self.nonce,
+        }
+        digest = hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()
+        return f"cand-{digest[:16]}"
+
+
+@dataclass(slots=True)
+class AttemptOutcome:
+    """What the model calls produced, before duplicate detection."""
+
+    plan: AttemptPlan
+    candidate: CandidateOutput | None = None
+    filter: FilterOutput | None = None
+    page_alone: list[PageAloneVerdict] = field(default_factory=list)
+    corpus_check: CorpusCheckOutput | None = None
+    consulted_sections: list[str] = field(default_factory=list)
+    closed_book_answer: str | None = None
+    contributions: list[SourceContribution] = field(default_factory=list)
+    foreign_vendors: list[str] = field(default_factory=list)
+    gold: tuple[GoldSource, ...] = ()
+    drop_reasons: list[str] = field(default_factory=list)
+    error: str | None = None
+
+
+@dataclass(slots=True)
+class TypeResult:
+    """Per-type outcome, including a shortfall the run does not abort on."""
+
+    question_type: QuestionType
+    requested: int
+    accepted: int
+    attempted: int
+
+    @property
+    def shortfall(self) -> int:
+        return max(self.requested - self.accepted, 0)
+
+
+@dataclass(slots=True)
+class GenerationContext:
+    provider: ChatProvider
+    model: str
+    thinking: ThinkingMode | None
+    documents: list[CorpusDocument]
+    index: LexicalIndex
+    recorder: RunRecorder | None = None
+    seen: set[str] = field(default_factory=set)
+
+
+# --------------------------------------------------------------------------- #
+# Sampling
+# --------------------------------------------------------------------------- #
+
+
+def eligible_sections(
+    documents: Sequence[CorpusDocument],
+    *,
+    kinds: set[str] | None = None,
+    post_cutoff_only: bool = False,
+    exclude_post_cutoff: bool = False,
+    min_tokens: int = MIN_SECTION_TOKENS,
+) -> dict[str, list[tuple[CorpusDocument, Section]]]:
+    """Candidate sections grouped by the site area they belong to.
+
+    Grouping is what stops ``/studio``, which is most of the corpus, from
+    supplying most of the questions.
+    """
+    grouped: dict[str, list[tuple[CorpusDocument, Section]]] = defaultdict(list)
+    for document in documents:
+        if kinds is not None and document.page.kind not in kinds:
+            continue
+        if post_cutoff_only and not document.is_post_cutoff:
+            continue
+        if exclude_post_cutoff and document.is_post_cutoff:
+            continue
+        for section in document.sections:
+            if section.level <= 1 or estimate_tokens(section.body) < min_tokens:
+                continue
+            grouped[document.top_level].append((document, section))
+    return dict(grouped)
+
+
+def draw_balanced[T](
+    grouped: dict[str, list[T]],
+    n: int,
+    rng: random.Random,
+) -> list[T]:
+    """Draw up to ``n`` items, round-robin over groups, without replacement.
+
+    Sampling with replacement wastes a generation call and a filter call on a
+    duplicate that the duplicate check then drops.
+    """
+    pools = {name: list(items) for name, items in sorted(grouped.items()) if items}
+    for items in pools.values():
+        rng.shuffle(items)
+    drawn: list[T] = []
+    while len(drawn) < n and pools:
+        for name in sorted(pools):
+            if len(drawn) >= n:
+                break
+            drawn.append(pools[name].pop())
+            if not pools[name]:
+                del pools[name]
+    return drawn
 
 
 def sample_sections(
-    pages: Sequence[CorpusPage],
+    documents: Sequence[CorpusDocument],
     n: int,
     rng: random.Random,
     *,
-    post_cutoff_only: bool = False,
     kinds: set[str] | None = None,
+    post_cutoff_only: bool = False,
     exclude_post_cutoff: bool = False,
-) -> list[CorpusSection]:
-    grouped: dict[str, list[CorpusSection]] = defaultdict(list)
-    for page in pages:
-        path = urlparse(page.url).path
-        if kinds is not None and page.kind not in kinds:
-            continue
-        if post_cutoff_only and not path.startswith(("/studio/search/", "/vibe/")):
-            continue
-        if exclude_post_cutoff and path.startswith(("/studio/search/", "/vibe/")):
-            continue
-        for section in page.sections:
-            if section.level == 1 or section.token_estimate < 80:
-                continue
-            top_level = path.strip("/").split("/", maxsplit=1)[0] or "root"
-            grouped[top_level].append(section)
-    if not grouped:
-        scope = "post-cutoff " if post_cutoff_only else ""
-        raise ValueError(
-            f"corpus has no eligible {scope}sections of at least 80 tokens"
-        )
-    groups = sorted(grouped)
-    return [rng.choice(grouped[rng.choice(groups)]) for _ in range(n)]
+) -> list[tuple[CorpusDocument, Section]]:
+    grouped = eligible_sections(
+        documents,
+        kinds=kinds,
+        post_cutoff_only=post_cutoff_only,
+        exclude_post_cutoff=exclude_post_cutoff,
+    )
+    return draw_balanced(grouped, n, rng)
 
 
-def cross_page_pairs(
-    pages: Sequence[CorpusPage],
-) -> list[tuple[CorpusPage, CorpusPage]]:
-    links = {page.url: _linked_urls(page) for page in pages}
-    pairs: list[tuple[CorpusPage, CorpusPage]] = []
-    for index, left in enumerate(pages):
-        for right in pages[index + 1 :]:
-            shared_parent = bool(
-                left.breadcrumbs
-                and right.breadcrumbs
-                and left.breadcrumbs[-1] == right.breadcrumbs[-1]
+def cross_page_groups(
+    documents: Sequence[CorpusDocument],
+) -> dict[str, list[tuple[CorpusDocument, CorpusDocument]]]:
+    """Pairs of related pages, grouped by the breadcrumb parent they share.
+
+    Pairing inside a breadcrumb group is quadratic in the size of the group, so
+    without grouping the largest category on the real corpus would supply nearly
+    every pair. Pages that link to each other are paired too, under the group of
+    the linking page.
+    """
+    groups: dict[str, list[tuple[CorpusDocument, CorpusDocument]]] = defaultdict(list)
+    links = {
+        document.url: set(extract_links(document.page.body, base_url=document.url))
+        for document in documents
+    }
+    for index, left in enumerate(documents):
+        for right in documents[index + 1 :]:
+            shared = (
+                left.page.breadcrumbs
+                and right.page.breadcrumbs
+                and left.page.breadcrumbs[-1] == right.page.breadcrumbs[-1]
             )
             linked = right.url in links[left.url] or left.url in links[right.url]
-            if shared_parent or linked:
-                pairs.append((left, right))
-    return pairs
+            if shared:
+                groups[left.page.breadcrumbs[-1]].append((left, right))
+            elif linked:
+                groups[f"links:{left.top_level}"].append((left, right))
+    return dict(groups)
 
 
-async def single_section(
-    provider: ChatProvider,
-    section: CorpusSection,
-    *,
-    page: CorpusPage,
-    model: str,
-    thinking: ThinkingMode | None = "disabled",
-    variation: int = 0,
-) -> CandidateOutput:
-    prompt = f"""{SINGLE_SECTION_INSTRUCTIONS}
+def capability_pairs(
+    documents: Sequence[CorpusDocument],
+    rng: random.Random,
+) -> dict[str, list[tuple[CorpusDocument, Section, CorpusDocument | None]]]:
+    """Feature sections of the capability matrix, each with a model card.
 
-Page title: {page.title}
-Heading path: {" > ".join(section.heading_path)}
-Variation: {variation}
-
-Section body:
-{section.body}
-"""
-    return await _candidate_call(provider, prompt, model=model, thinking=thinking)
-
-
-async def cross_page(
-    provider: ChatProvider,
-    left: CorpusPage,
-    right: CorpusPage,
-    *,
-    model: str,
-    thinking: ThinkingMode | None = "disabled",
-    variation: int = 0,
-) -> CandidateOutput:
-    prompt = f"""{CROSS_PAGE_INSTRUCTIONS}
-
-Start line one of the reference answer with "{left.title}:" and line two with "{right.title}:".
-
-Variation: {variation}
-
-Page A title: {left.title}
-Page A breadcrumbs: {" > ".join(left.breadcrumbs)}
-Page A content:
-{left.markdown[:8000]}
-
-Page B title: {right.title}
-Page B breadcrumbs: {" > ".join(right.breadcrumbs)}
-Page B content:
-{right.markdown[:8000]}
-"""
-    return await _candidate_call(provider, prompt, model=model, thinking=thinking)
-
-
-async def unanswerable(
-    provider: ChatProvider,
-    section: CorpusSection,
-    *,
-    page: CorpusPage,
-    model: str,
-    thinking: ThinkingMode | None = "disabled",
-    variation: int = 0,
-) -> CandidateOutput:
-    prompt = f"""{UNANSWERABLE_INSTRUCTIONS}
-
-Page title: {page.title}
-Heading path: {" > ".join(section.heading_path)}
-Variation: {variation}
-
-Section body:
-{section.body}
-"""
-    return await _candidate_call(provider, prompt, model=model, thinking=thinking)
-
-
-async def post_cutoff(
-    provider: ChatProvider,
-    section: CorpusSection,
-    *,
-    page: CorpusPage,
-    model: str,
-    thinking: ThinkingMode | None = "disabled",
-    variation: int = 0,
-) -> CandidateOutput:
-    return await single_section(
-        provider,
-        section,
-        page=page,
-        model=model,
-        thinking=thinking,
-        variation=variation,
+    D-006: "which models support function calling" is answerable from the matrix
+    page; a question about one model also needs that model's card. The card is
+    drawn from the models the feature section links to, so the pair is coherent.
+    """
+    matrix = next(
+        (
+            document
+            for document in documents
+            if document.page.kind == "model" and document.path == "/models"
+        ),
+        None,
     )
+    cards = {
+        document.url: document
+        for document in documents
+        if document.page.kind == "model" and document.path.startswith("/models/")
+    }
+    grouped: dict[str, list[tuple[CorpusDocument, Section, CorpusDocument | None]]] = defaultdict(
+        list
+    )
+    if matrix is not None:
+        for section in matrix.sections:
+            if section.level <= 1 or estimate_tokens(section.body) < MIN_SECTION_TOKENS:
+                continue
+            linked = [
+                cards[url]
+                for url in extract_links(section.body, base_url=matrix.url)
+                if url in cards
+            ]
+            card = rng.choice(linked) if linked else None
+            grouped["matrix"].append((matrix, section, card))
+    for card in cards.values():
+        for section in card.sections:
+            if section.level <= 1 or estimate_tokens(section.body) < MIN_SECTION_TOKENS:
+                continue
+            grouped["cards"].append((card, section, matrix))
+    return dict(grouped)
+
+
+def api_operations(
+    documents: Sequence[CorpusDocument],
+) -> dict[str, list[tuple[CorpusDocument, Section]]]:
+    """Operation sections of the API pages, grouped by API area.
+
+    On API pages the anchors are operation ids (D-003a), so a section with an
+    anchor is one operation, and its subsections carry the request body and the
+    response codes.
+    """
+    grouped: dict[str, list[tuple[CorpusDocument, Section]]] = defaultdict(list)
+    for document in documents:
+        if document.page.kind != "api":
+            continue
+        group = "/".join(document.path.strip("/").split("/")[:3]) or "api"
+        for section in document.sections:
+            if section.anchor is None or section.level <= 1:
+                continue
+            grouped[group].append((document, section))
+    return dict(grouped)
+
+
+# --------------------------------------------------------------------------- #
+# Planning
+# --------------------------------------------------------------------------- #
+
+
+def _section_source(document: CorpusDocument, section: Section, text: str) -> SampledSource:
+    return SampledSource(
+        url=document.url,
+        title=document.title,
+        anchor=section.anchor,
+        heading_path=list(section.heading_path),
+        content=text[:MAX_SOURCE_CHARS],
+    )
+
+
+def _page_source(document: CorpusDocument) -> SampledSource:
+    return SampledSource(
+        url=document.url,
+        title=document.title,
+        anchor=None,
+        heading_path=[document.title],
+        content=document.page.body[:MAX_SOURCE_CHARS],
+    )
+
+
+def plan_attempts(
+    documents: Sequence[CorpusDocument],
+    question_type: QuestionType,
+    count: int,
+    rng: random.Random,
+) -> list[AttemptPlan]:
+    """The ``count`` attempts of one question type, sampled before any call.
+
+    Planning up front is what lets ``--dry-run`` show exactly what a real run
+    would ask about.
+    """
+    plans: list[AttemptPlan] = []
+    if question_type == QuestionType.CROSS_PAGE:
+        for nonce, (left, right) in enumerate(
+            draw_balanced(cross_page_groups(documents), count, rng)
+        ):
+            plans.append(
+                AttemptPlan(
+                    question_type=question_type,
+                    documents=(left, right),
+                    sources=(_page_source(left), _page_source(right)),
+                    gold=(GoldSource(url=left.url), GoldSource(url=right.url)),
+                    language=_language(left.page.locale),
+                    nonce=nonce,
+                )
+            )
+        return plans
+
+    if question_type == QuestionType.CAPABILITY:
+        for nonce, (document, section, other) in enumerate(
+            draw_balanced(capability_pairs(documents, rng), count, rng)
+        ):
+            sources = [_section_source(document, section, block_text(document, section))]
+            documents_used = [document]
+            if other is not None:
+                sources.append(_page_source(other))
+                documents_used.append(other)
+            plans.append(
+                AttemptPlan(
+                    question_type=question_type,
+                    documents=tuple(documents_used),
+                    sources=tuple(sources),
+                    # The model page joins the gold only when the question names
+                    # that model; decided after generation.
+                    gold=(GoldSource(url=document.url, anchor=section.anchor),),
+                    language=_language(document.page.locale),
+                    nonce=nonce,
+                )
+            )
+        return plans
+
+    if question_type == QuestionType.API_REFERENCE:
+        for nonce, (document, section) in enumerate(
+            draw_balanced(api_operations(documents), count, rng)
+        ):
+            plans.append(
+                AttemptPlan(
+                    question_type=question_type,
+                    documents=(document,),
+                    sources=(_section_source(document, section, block_text(document, section)),),
+                    gold=(GoldSource(url=document.url, anchor=section.anchor),),
+                    language=_language(document.page.locale),
+                    nonce=nonce,
+                )
+            )
+        return plans
+
+    sampled = sample_sections(
+        documents,
+        count,
+        rng,
+        kinds={"doc"} if question_type == QuestionType.SINGLE_PAGE else None,
+        exclude_post_cutoff=question_type == QuestionType.SINGLE_PAGE,
+        post_cutoff_only=question_type == QuestionType.POST_CUTOFF,
+    )
+    for nonce, (document, section) in enumerate(sampled):
+        gold: tuple[GoldSource, ...] = ()
+        if question_type != QuestionType.UNANSWERABLE:
+            gold = (GoldSource(url=document.url, anchor=section.anchor),)
+        plans.append(
+            AttemptPlan(
+                question_type=question_type,
+                documents=(document,),
+                sources=(_section_source(document, section, section.body),),
+                gold=gold,
+                language=_language(document.page.locale),
+                nonce=nonce,
+            )
+        )
+    return plans
+
+
+# --------------------------------------------------------------------------- #
+# Generation and checking
+# --------------------------------------------------------------------------- #
+
+
+def _render_source(source: SampledSource, label: str) -> str:
+    return (
+        f"{label}: {source.title}\n"
+        f"Heading path: {' > '.join(source.heading_path)}\n"
+        f"{source.content}"
+    )
+
+
+async def _ask(
+    context: GenerationContext,
+    prompt: str,
+    *,
+    kind: str,
+    schema: type[BaseModel] | None,
+    temperature: float,
+    max_tokens: int,
+    cache_nonce: str | None = None,
+) -> Completion:
+    with call_scope(kind):
+        return await context.provider.complete(
+            [{"role": "user", "content": prompt}],
+            model=context.model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            response_schema=schema,
+            thinking=context.thinking,
+            cache_nonce=cache_nonce,
+        )
+
+
+async def generate_candidate(context: GenerationContext, plan: AttemptPlan) -> CandidateOutput:
+    """The candidate question for one plan, from the generator its type names."""
+    question_type = plan.question_type
+    if question_type == QuestionType.CROSS_PAGE:
+        prompt = (
+            f"{CROSS_PAGE_INSTRUCTIONS}\n\n"
+            f"{_render_source(plan.sources[0], 'Page A')}\n\n"
+            f"{_render_source(plan.sources[1], 'Page B')}\n"
+        )
+        schema: type[CandidateOutput] = CrossPageOutput
+    elif question_type == QuestionType.CAPABILITY:
+        rendered = "\n\n".join(
+            _render_source(source, f"Source {index + 1}")
+            for index, source in enumerate(plan.sources)
+        )
+        prompt = f"{CAPABILITY_INSTRUCTIONS}\n\n{rendered}\n"
+        schema = CapabilityOutput
+    else:
+        instructions = {
+            QuestionType.SINGLE_PAGE: SINGLE_SECTION_INSTRUCTIONS,
+            QuestionType.API_REFERENCE: API_REFERENCE_INSTRUCTIONS,
+            QuestionType.POST_CUTOFF: POST_CUTOFF_INSTRUCTIONS,
+            QuestionType.UNANSWERABLE: UNANSWERABLE_INSTRUCTIONS,
+        }[question_type]
+        prompt = f"{instructions}\n\n{_render_source(plan.sources[0], 'Source')}\n"
+        schema = CandidateOutput
+    completion = await _ask(
+        context,
+        prompt,
+        kind="generation",
+        schema=schema,
+        temperature=GENERATION_TEMPERATURE,
+        max_tokens=GENERATION_MAX_TOKENS,
+        cache_nonce=plan.candidate_id,
+    )
+    return cast(CandidateOutput, completion.parsed)
 
 
 async def filter_candidate(
-    provider: ChatProvider,
-    candidate: CandidateOutput,
-    *,
-    sources: Sequence[tuple[str, str]],
-    question_type: QuestionType,
-    model: str,
-    thinking: ThinkingMode | None = "disabled",
+    context: GenerationContext, plan: AttemptPlan, candidate: CandidateOutput
 ) -> FilterOutput:
-    rendered_sources = "\n\n".join(
-        f"SOURCE {index + 1}: {title}\n{content[:6000]}"
-        for index, (title, content) in enumerate(sources)
-    )
     expected = (
         "The sources must not answer the question. gold_condition_met is true only if the "
         "claimed missing information is absent."
-        if question_type == QuestionType.UNANSWERABLE
-        else "The sources must fully answer the question. gold_condition_met is true only if they do."
+        if plan.question_type == QuestionType.UNANSWERABLE
+        else "The sources must fully answer the question. gold_condition_met is true only if "
+        "they do."
     )
-    all_sources = (
+    every_source = (
         "uses_every_gold_source is true only if the answer uses one fact exclusive to Source 1 "
         "and another fact exclusive to Source 2. Set it to false when one source states both "
-        "facts, even if the reference answer assigns them to separate sources."
-        if question_type == QuestionType.CROSS_PAGE
+        "facts, even if the two facts are described separately."
+        if plan.question_type == QuestionType.CROSS_PAGE
         else "uses_every_gold_source is true when the assigned source is the right evidence."
     )
-    prompt = f"""{FILTER_INSTRUCTIONS}
-
-Question: {candidate.question}
-Reference answer: {candidate.reference_answer}
-Question type: {question_type.value}
-
-Gold condition: {expected}
-Every-source condition: {all_sources}
-
-{rendered_sources}
-"""
-    completion = await provider.complete(
-        [{"role": "user", "content": prompt}],
-        model=model,
-        temperature=0.0,
-        max_tokens=500,
-        response_schema=FilterOutput,
-        thinking=thinking,
+    rendered = "\n\n".join(
+        _render_source(source, f"SOURCE {index + 1}") for index, source in enumerate(plan.sources)
+    )
+    prompt = (
+        f"{FILTER_INSTRUCTIONS}\n\n"
+        f"Question: {candidate.question}\n"
+        f"Reference answer: {candidate.reference_answer}\n"
+        f"Question type: {plan.question_type.value}\n\n"
+        f"Gold condition: {expected}\n"
+        f"Every-source condition: {every_source}\n\n"
+        f"{rendered}\n"
+    )
+    completion = await _ask(
+        context,
+        prompt,
+        kind="filter",
+        schema=FilterOutput,
+        temperature=CHECK_TEMPERATURE,
+        max_tokens=CHECK_MAX_TOKENS,
     )
     return cast(FilterOutput, completion.parsed)
 
 
 async def check_page_alone(
-    provider: ChatProvider,
+    context: GenerationContext,
     candidate: CandidateOutput,
-    *,
-    page: CorpusPage,
+    document: CorpusDocument,
     label: str,
-    model: str,
-    thinking: ThinkingMode | None = "disabled",
-) -> PageAloneOutput:
-    prompt = f"""{PAGE_ALONE_INSTRUCTIONS}
-
-Question: {candidate.question}
-Reference answer: {candidate.reference_answer}
-
-{label}: {page.title}
-{page.markdown[:8000]}
-"""
-    completion = await provider.complete(
-        [{"role": "user", "content": prompt}],
-        model=model,
-        temperature=0.0,
-        max_tokens=400,
-        response_schema=PageAloneOutput,
-        thinking=thinking,
+) -> PageAloneVerdict:
+    prompt = (
+        f"{PAGE_ALONE_INSTRUCTIONS}\n\n"
+        f"Question: {candidate.question}\n"
+        f"Reference answer: {candidate.reference_answer}\n\n"
+        f"{label}: {document.title}\n"
+        f"{document.page.body[:MAX_SOURCE_CHARS]}\n"
     )
-    return cast(PageAloneOutput, completion.parsed)
+    completion = await _ask(
+        context,
+        prompt,
+        kind="page_alone",
+        schema=PageAloneOutput,
+        temperature=CHECK_TEMPERATURE,
+        max_tokens=CHECK_MAX_TOKENS,
+    )
+    verdict = cast(PageAloneOutput, completion.parsed)
+    return PageAloneVerdict(
+        url=document.url,
+        title=document.title,
+        fully_answerable=verdict.fully_answerable,
+        reason=verdict.reason,
+    )
+
+
+async def check_corpus_answers(
+    context: GenerationContext, candidate: CandidateOutput
+) -> tuple[CorpusCheckOutput, list[str]]:
+    """Whether anything in the corpus answers a supposedly unanswerable question.
+
+    One section cannot establish that the documentation is silent (review M1), so
+    the top lexical hits over every section are shown to the model. The sections
+    consulted are returned for the record.
+    """
+    hits = context.index.search(candidate.question, top_k=UNANSWERABLE_CHECK_TOP_K)
+    consulted = [hit.label for hit in hits]
+    if not hits:
+        return CorpusCheckOutput(
+            answered_by_corpus=False,
+            reason="No section of the documentation shares a term with the question.",
+        ), consulted
+    rendered = "\n\n".join(
+        f"SECTION {index + 1}: {hit.label}\n{hit.section.body[:MAX_SOURCE_CHARS]}"
+        for index, hit in enumerate(hits)
+    )
+    prompt = (
+        f"{CORPUS_CHECK_INSTRUCTIONS}\n\n"
+        f"Question: {candidate.question}\n"
+        f"Claimed gap: {candidate.reference_answer}\n\n"
+        f"{rendered}\n"
+    )
+    completion = await _ask(
+        context,
+        prompt,
+        kind="corpus_check",
+        schema=CorpusCheckOutput,
+        temperature=CHECK_TEMPERATURE,
+        max_tokens=CHECK_MAX_TOKENS,
+    )
+    return cast(CorpusCheckOutput, completion.parsed), consulted
+
+
+async def closed_book_probe(context: GenerationContext, candidate: CandidateOutput) -> str:
+    """What the model answers with no documentation in front of it.
+
+    Recorded on post-cutoff records, not used to filter: it becomes the signal
+    that separates a question the model already knew from one it could not.
+    """
+    completion = await _ask(
+        context,
+        f"{CLOSED_BOOK_INSTRUCTIONS}\n\nQuestion: {candidate.question}\n",
+        kind="closed_book",
+        schema=None,
+        temperature=CHECK_TEMPERATURE,
+        max_tokens=PROBE_MAX_TOKENS,
+    )
+    return completion.text.strip()
+
+
+def foreign_vendors_named(question: str) -> list[str]:
+    """Competitor product names the question mentions, in the order they appear."""
+    found: list[str] = []
+    for match in _FOREIGN_VENDOR_RE.finditer(question):
+        name = match.group(1)
+        if name not in found:
+            found.append(name)
+    return found
+
+
+def _capability_gold(plan: AttemptPlan, candidate: CandidateOutput) -> tuple[GoldSource, ...]:
+    """Gold for a capability question: the matrix, plus the model card it names.
+
+    The generator's ``names_single_model`` flag alone is not enough -- the card
+    joins the gold only when the question actually writes that model's name.
+    """
+    gold = list(plan.gold)
+    if not isinstance(candidate, CapabilityOutput) or not candidate.names_single_model:
+        return tuple(gold)
+    question = candidate.question.casefold()
+    for source in plan.sources[1:]:
+        names = [source.title, *_api_names(source.content)]
+        if any(name.casefold() in question for name in names if name):
+            gold.append(GoldSource(url=source.url))
+    return tuple(gold)
+
+
+_API_NAME_RE = re.compile(r"`([a-z0-9][a-z0-9.\-]{4,})`")
+
+
+def _api_names(text: str) -> list[str]:
+    return _API_NAME_RE.findall(text)
+
+
+async def run_attempt(context: GenerationContext, plan: AttemptPlan) -> AttemptOutcome:
+    """One candidate, generated and checked. Never raises on a provider failure."""
+    outcome = AttemptOutcome(plan=plan, gold=plan.gold)
+    with candidate_scope(plan.candidate_id):
+        try:
+            candidate = await generate_candidate(context, plan)
+            outcome.candidate = candidate
+            if isinstance(candidate, CrossPageOutput):
+                outcome.contributions = [
+                    SourceContribution(
+                        url=plan.sources[0].url, contribution=candidate.page_a_contribution
+                    ),
+                    SourceContribution(
+                        url=plan.sources[1].url, contribution=candidate.page_b_contribution
+                    ),
+                ]
+            outcome.gold = (
+                _capability_gold(plan, candidate)
+                if plan.question_type == QuestionType.CAPABILITY
+                else plan.gold
+            )
+            outcome.filter = await filter_candidate(context, plan, candidate)
+            if plan.question_type == QuestionType.CROSS_PAGE:
+                outcome.page_alone = list(
+                    await asyncio.gather(
+                        check_page_alone(context, candidate, plan.documents[0], "Page A alone"),
+                        check_page_alone(context, candidate, plan.documents[1], "Page B alone"),
+                    )
+                )
+            if plan.question_type == QuestionType.UNANSWERABLE:
+                outcome.corpus_check, outcome.consulted_sections = await check_corpus_answers(
+                    context, candidate
+                )
+            if plan.question_type == QuestionType.POST_CUTOFF:
+                outcome.closed_book_answer = await closed_book_probe(context, candidate)
+        except ProviderCallError as error:
+            # One unrecoverable call must cost one candidate, not the run.
+            outcome.error = str(error)
+            outcome.drop_reasons = [DROP_PROVIDER_ERROR]
+            logger.info(
+                "candidate_dropped_on_provider_error",
+                question_type=plan.question_type.value,
+                candidate_id=plan.candidate_id,
+                error=str(error),
+            )
+            return outcome
+    outcome.foreign_vendors = foreign_vendors_named(outcome.candidate.question)
+    outcome.drop_reasons = _check_reasons(plan, outcome, outcome.candidate)
+    return outcome
+
+
+def _check_reasons(
+    plan: AttemptPlan, outcome: AttemptOutcome, candidate: CandidateOutput
+) -> list[str]:
+    """Every reason this candidate fails, from the checks that were run."""
+    reasons: list[str] = []
+    verdict = outcome.filter
+    if verdict is not None:
+        if not verdict.standalone:
+            reasons.append("not standalone")
+        if not verdict.gold_condition_met:
+            reasons.append("gold condition failed")
+        if not verdict.not_answerable_from_title_alone:
+            reasons.append("answerable from title alone")
+        if not verdict.uses_every_gold_source:
+            reasons.append("does not require every gold source")
+        if not verdict.about_the_documented_product:
+            reasons.append("not about the documented product")
+    if outcome.foreign_vendors:
+        reasons.append("names another vendor's product")
+    expected_fully_answered = plan.question_type != QuestionType.UNANSWERABLE
+    if candidate.fully_answered != expected_fully_answered:
+        reasons.append("fully_answered conflicts with question type")
+    for page in outcome.page_alone:
+        if page.fully_answerable:
+            reasons.append(f"answerable from {page.title} alone")
+    if outcome.corpus_check is not None and outcome.corpus_check.answered_by_corpus:
+        reasons.append("the corpus answers it after all")
+    return reasons
+
+
+def finalize_attempt(context: GenerationContext, outcome: AttemptOutcome) -> GenerationAttempt:
+    """Turn an outcome into a record row, applying duplicate detection.
+
+    Runs after the concurrent attempts of a wave have finished, so that two
+    identical questions produced at the same time cannot both be accepted.
+    """
+    plan = outcome.plan
+    drop_reasons = list(outcome.drop_reasons)
+    duplicate = False
+    if outcome.candidate is not None:
+        normalized = normalize_question(outcome.candidate.question)
+        duplicate = normalized in context.seen
+        if duplicate:
+            drop_reasons.append("duplicate question")
+    kept = outcome.candidate is not None and not drop_reasons
+
+    question: EvalQuestion | None = None
+    if kept and outcome.candidate is not None:
+        context.seen.add(normalize_question(outcome.candidate.question))
+        question = EvalQuestion(
+            id=_question_id(plan.question_type, outcome.candidate.question, outcome.gold),
+            question=outcome.candidate.question.strip(),
+            type=plan.question_type,
+            gold=list(outcome.gold),
+            reference_answer=outcome.candidate.reference_answer.strip(),
+            language=plan.language,
+            source=QuestionSource.GENERATED,
+            generator=_generator_metadata(context, plan, outcome),
+        )
+    attempt = GenerationAttempt(
+        candidate_id=plan.candidate_id,
+        generator_type=plan.question_type.value,
+        seed=[source.url for source in plan.sources],
+        candidate=outcome.candidate,
+        filter=outcome.filter,
+        page_alone=outcome.page_alone,
+        corpus_check=outcome.corpus_check,
+        consulted_sections=outcome.consulted_sections,
+        closed_book_answer=outcome.closed_book_answer,
+        contributions=outcome.contributions,
+        foreign_vendors=outcome.foreign_vendors,
+        duplicate=duplicate,
+        kept=kept,
+        drop_reasons=drop_reasons,
+        sampled_sources=list(plan.sources),
+        question=question,
+        error=outcome.error,
+    )
+    if context.recorder is not None:
+        context.recorder.record_candidate(attempt)
+    if not kept:
+        logger.info(
+            "generated_question_dropped",
+            question_type=plan.question_type.value,
+            reasons=drop_reasons,
+        )
+    return attempt
+
+
+def _generator_metadata(
+    context: GenerationContext, plan: AttemptPlan, outcome: AttemptOutcome
+) -> dict[str, object]:
+    metadata: dict[str, object] = {
+        "model": context.model,
+        "prompt_version": PROMPT_VERSION,
+        "prompt_hashes": PROMPT_HASHES,
+        "candidate_id": plan.candidate_id,
+        "seed_section": [source.url for source in plan.sources],
+    }
+    if context.recorder is not None:
+        metadata["run_dir"] = str(context.recorder.run_dir)
+    if outcome.consulted_sections:
+        metadata["sections_consulted"] = outcome.consulted_sections
+    if outcome.closed_book_answer is not None:
+        metadata["closed_book_answer"] = outcome.closed_book_answer
+    if outcome.contributions:
+        metadata["contributions"] = [item.model_dump(mode="json") for item in outcome.contributions]
+    return metadata
+
+
+# --------------------------------------------------------------------------- #
+# Orchestration
+# --------------------------------------------------------------------------- #
 
 
 async def generate_questions(
     provider: ChatProvider,
-    pages: Sequence[CorpusPage],
+    documents: Sequence[CorpusDocument],
     *,
     n: int,
     model: str,
     seed: int,
     thinking: ThinkingMode | None = "disabled",
-    cross_page_review_count: int = 0,
+    attempts_per_question: int = 4,
     recorder: RunRecorder | None = None,
-    run_dir: str | None = None,
-) -> tuple[list[EvalQuestion], list[GenerationAttempt]]:
-    if n < 6:
-        raise ValueError("n must be at least 6 so every question type is represented")
+) -> tuple[list[EvalQuestion], list[GenerationAttempt], list[TypeResult]]:
+    """Generate up to ``n`` questions, evenly across the six types.
+
+    A type that cannot be filled does not fail the run: the dataset is written
+    with what was accepted and the shortfall is reported.
+    """
+    if n < len(QuestionType):
+        raise ValueError(f"n must be at least {len(QuestionType)} so every type is represented")
+    context = GenerationContext(
+        provider=provider,
+        model=model,
+        thinking=thinking,
+        documents=list(documents),
+        index=LexicalIndex(documents),
+        recorder=recorder,
+    )
     rng = random.Random(seed)
-    page_by_url = {page.url: page for page in pages}
     allocations = _allocations(n)
     accepted: list[EvalQuestion] = []
-    seen: set[str] = set()
     attempts: list[GenerationAttempt] = []
+    results: list[TypeResult] = []
 
-    ordinary = sample_sections(
-        pages,
-        max(allocations[QuestionType.SINGLE_PAGE] * 6, 1),
-        rng,
-        kinds={"doc"},
-        exclude_post_cutoff=True,
-    )
-    await _fill_section_questions(
-        provider,
-        ordinary,
-        page_by_url,
-        accepted,
-        attempts,
-        seen,
-        target=allocations[QuestionType.SINGLE_PAGE],
-        question_type=QuestionType.SINGLE_PAGE,
-        model=model,
-        thinking=thinking,
-        recorder=recorder,
-        run_dir=run_dir,
-    )
-
-    pairs = cross_page_pairs(pages)
-    if not pairs:
-        raise ValueError("corpus has no pages that share a breadcrumb parent or link")
-    cross_target = max(allocations[QuestionType.CROSS_PAGE], cross_page_review_count)
-    cross_accepted: list[EvalQuestion] = []
-    cross_attempts: list[GenerationAttempt] = []
-    for variation in range(max(cross_target * 6, 1)):
-        left, right = rng.choice(pairs)
-        candidate = await cross_page(
-            provider,
-            left,
-            right,
-            model=model,
-            thinking=thinking,
-            variation=variation,
-        )
-        question, attempt = await _assess(
-            provider,
-            candidate,
-            sources=[(left.title, left.markdown), (right.title, right.markdown)],
-            gold=[GoldSource(url=left.url), GoldSource(url=right.url)],
-            question_type=QuestionType.CROSS_PAGE,
-            model=model,
-            thinking=thinking,
-            seen=seen,
-            seed_values=[left.url, right.url],
-            sampled_sources=[
-                SampledSource(
-                    url=left.url,
-                    title=left.title,
-                    anchor=None,
-                    heading_path=[],
-                    content=left.markdown,
-                ),
-                SampledSource(
-                    url=right.url,
-                    title=right.title,
-                    anchor=None,
-                    heading_path=[],
-                    content=right.markdown,
-                ),
-            ],
-            page_pair=(left, right),
-            recorder=recorder,
-            run_dir=run_dir,
-        )
-        cross_attempts.append(attempt)
-        if question is not None:
-            cross_accepted.append(question)
-        if len(cross_accepted) >= cross_target:
-            break
-    attempts.extend(cross_attempts)
-    accepted.extend(cross_accepted[: allocations[QuestionType.CROSS_PAGE]])
-    if len(cross_accepted) < cross_target:
-        raise RuntimeError(
-            f"accepted {len(cross_accepted)} of {cross_target} required cross-page "
-            f"candidates after {len(cross_attempts)} attempts"
-        )
-
-    api_sections = sample_sections(
-        pages,
-        max(allocations[QuestionType.API_REFERENCE] * 6, 1),
-        rng,
-        kinds={"api"},
-    )
-    await _fill_section_questions(
-        provider,
-        api_sections,
-        page_by_url,
-        accepted,
-        attempts,
-        seen,
-        target=allocations[QuestionType.API_REFERENCE],
-        question_type=QuestionType.API_REFERENCE,
-        model=model,
-        thinking=thinking,
-        recorder=recorder,
-        run_dir=run_dir,
-    )
-
-    capability_sections = sample_sections(
-        pages,
-        max(allocations[QuestionType.CAPABILITY] * 6, 1),
-        rng,
-        kinds={"model"},
-    )
-    await _fill_section_questions(
-        provider,
-        capability_sections,
-        page_by_url,
-        accepted,
-        attempts,
-        seen,
-        target=allocations[QuestionType.CAPABILITY],
-        question_type=QuestionType.CAPABILITY,
-        model=model,
-        thinking=thinking,
-        recorder=recorder,
-        run_dir=run_dir,
-    )
-
-    unanswerable_sections = sample_sections(
-        pages, max(allocations[QuestionType.UNANSWERABLE] * 6, 1), rng
-    )
-    await _fill_section_questions(
-        provider,
-        unanswerable_sections,
-        page_by_url,
-        accepted,
-        attempts,
-        seen,
-        target=allocations[QuestionType.UNANSWERABLE],
-        question_type=QuestionType.UNANSWERABLE,
-        model=model,
-        thinking=thinking,
-        recorder=recorder,
-        run_dir=run_dir,
-    )
-
-    cutoff_sections = sample_sections(
-        pages,
-        max(allocations[QuestionType.POST_CUTOFF] * 6, 1),
-        rng,
-        post_cutoff_only=True,
-    )
-    await _fill_section_questions(
-        provider,
-        cutoff_sections,
-        page_by_url,
-        accepted,
-        attempts,
-        seen,
-        target=allocations[QuestionType.POST_CUTOFF],
-        question_type=QuestionType.POST_CUTOFF,
-        model=model,
-        thinking=thinking,
-        recorder=recorder,
-        run_dir=run_dir,
-    )
-    return accepted, attempts
-
-
-async def _fill_section_questions(
-    provider: ChatProvider,
-    sections: Sequence[CorpusSection],
-    page_by_url: dict[str, CorpusPage],
-    accepted: list[EvalQuestion],
-    attempts: list[GenerationAttempt],
-    seen: set[str],
-    *,
-    target: int,
-    question_type: QuestionType,
-    model: str,
-    thinking: ThinkingMode | None,
-    recorder: RunRecorder | None,
-    run_dir: str | None,
-) -> None:
-    start_count = sum(question.type == question_type for question in accepted)
-    for variation, section in enumerate(sections):
-        page = page_by_url[section.url]
-        if question_type == QuestionType.UNANSWERABLE:
-            candidate = await unanswerable(
-                provider,
-                section,
-                page=page,
-                model=model,
-                thinking=thinking,
-                variation=variation,
+    for question_type in QuestionType:
+        target = allocations[question_type]
+        budget = target * attempts_per_question
+        plans = plan_attempts(documents, question_type, budget, rng)
+        kept_here = 0
+        used = 0
+        while kept_here < target and used < len(plans):
+            # Waves are sized to the remaining shortfall, doubled: at a high
+            # acceptance rate the run pays for barely more than it needs, at a
+            # low one it still finishes in a handful of round trips.
+            wave = plans[used : used + min(len(plans) - used, max(1, (target - kept_here) * 2))]
+            used += len(wave)
+            outcomes = await asyncio.gather(*(run_attempt(context, plan) for plan in wave))
+            for outcome in outcomes:
+                attempt = finalize_attempt(context, outcome)
+                attempts.append(attempt)
+                if attempt.question is not None and kept_here < target:
+                    accepted.append(attempt.question)
+                    kept_here += 1
+        results.append(
+            TypeResult(
+                question_type=question_type,
+                requested=target,
+                accepted=kept_here,
+                attempted=used,
             )
-            gold: list[GoldSource] = []
-        elif question_type == QuestionType.POST_CUTOFF:
-            candidate = await post_cutoff(
-                provider,
-                section,
-                page=page,
-                model=model,
-                thinking=thinking,
-                variation=variation,
-            )
-            gold = [GoldSource(url=section.url, anchor=section.anchor)]
-        else:
-            candidate = await single_section(
-                provider,
-                section,
-                page=page,
-                model=model,
-                thinking=thinking,
-                variation=variation,
-            )
-            gold = [GoldSource(url=section.url, anchor=section.anchor)]
-        question, attempt = await _assess(
-            provider,
-            candidate,
-            sources=[(page.title, section.body)],
-            gold=gold,
-            question_type=question_type,
-            model=model,
-            thinking=thinking,
-            seen=seen,
-            seed_values=[section.url, section.anchor],
-            sampled_sources=[
-                SampledSource(
-                    url=section.url,
-                    title=page.title,
-                    anchor=section.anchor,
-                    heading_path=section.heading_path,
-                    content=section.body,
-                )
-            ],
-            page_pair=None,
-            recorder=recorder,
-            run_dir=run_dir,
         )
-        attempts.append(attempt)
-        if question is not None:
-            accepted.append(question)
-        current_count = sum(question.type == question_type for question in accepted)
-        if current_count - start_count >= target:
-            return
-    current_count = sum(question.type == question_type for question in accepted)
-    raise RuntimeError(
-        f"accepted {current_count - start_count} of {target} required {question_type.value} candidates"
-    )
-
-
-async def _assess(
-    provider: ChatProvider,
-    candidate: CandidateOutput,
-    *,
-    sources: Sequence[tuple[str, str]],
-    gold: list[GoldSource],
-    question_type: QuestionType,
-    model: str,
-    thinking: ThinkingMode | None,
-    seen: set[str],
-    seed_values: list[str],
-    sampled_sources: list[SampledSource],
-    page_pair: tuple[CorpusPage, CorpusPage] | None,
-    recorder: RunRecorder | None,
-    run_dir: str | None,
-) -> tuple[EvalQuestion | None, GenerationAttempt]:
-    page_a_alone: PageAloneOutput | None = None
-    page_b_alone: PageAloneOutput | None = None
-    try:
-        result = await filter_candidate(
-            provider,
-            candidate,
-            sources=sources,
-            question_type=question_type,
-            model=model,
-            thinking=thinking,
-        )
-        if page_pair is not None:
-            page_a_alone, page_b_alone = await asyncio.gather(
-                check_page_alone(
-                    provider,
-                    candidate,
-                    page=page_pair[0],
-                    label="Page A alone",
-                    model=model,
-                    thinking=thinking,
-                ),
-                check_page_alone(
-                    provider,
-                    candidate,
-                    page=page_pair[1],
-                    label="Page B alone",
-                    model=model,
-                    thinking=thinking,
-                ),
+        if kept_here < target:
+            logger.warning(
+                "question_type_short",
+                question_type=question_type.value,
+                accepted=kept_here,
+                requested=target,
+                attempted=used,
             )
-    except Exception as error:
-        if recorder is not None:
-            recorder.record_candidate(
-                {
-                    "generator_type": question_type.value,
-                    "seed": seed_values,
-                    "candidate": candidate.model_dump(mode="json"),
-                    "filter": None,
-                    "page_a_alone": None,
-                    "page_b_alone": None,
-                    "duplicate": False,
-                    "kept": False,
-                    "drop_reasons": ["filter error"],
-                    "sampled_sources": [
-                        source.model_dump(mode="json") for source in sampled_sources
-                    ],
-                    "question": None,
-                    "error": str(error),
-                }
-            )
-        raise
-    normalized = normalize_question(candidate.question)
-    duplicate = normalized in seen
-    expected_fully_answered = question_type != QuestionType.UNANSWERABLE
-    page_a_passes = page_a_alone is None or not page_a_alone.fully_answerable
-    page_b_passes = page_b_alone is None or not page_b_alone.fully_answerable
-    kept = (
-        result.accepted
-        and not duplicate
-        and candidate.fully_answered == expected_fully_answered
-        and page_a_passes
-        and page_b_passes
-    )
-    drop_reasons: list[str] = []
-    if not result.standalone:
-        drop_reasons.append("not standalone")
-    if not result.gold_condition_met:
-        drop_reasons.append("gold condition failed")
-    if not result.not_answerable_from_title_alone:
-        drop_reasons.append("answerable from title alone")
-    if not result.uses_every_gold_source:
-        drop_reasons.append("does not require every gold source")
-    if duplicate:
-        drop_reasons.append("duplicate question")
-    if candidate.fully_answered != expected_fully_answered:
-        drop_reasons.append("fully_answered conflicts with question type")
-    if not page_a_passes:
-        drop_reasons.append("answerable from page A alone")
-    if not page_b_passes:
-        drop_reasons.append("answerable from page B alone")
-
-    question: EvalQuestion | None = None
-    if kept:
-        seen.add(normalized)
-        metadata: dict[str, object] = {
-            "model": model,
-            "prompt_version": PROMPT_VERSION,
-            "prompt_hashes": PROMPT_HASHES,
-            "seed_section": seed_values,
-            "filter": {
-                "accepted": True,
-                "reasons": result.reasons,
-                "page_a_alone": (
-                    page_a_alone.model_dump(mode="json") if page_a_alone else None
-                ),
-                "page_b_alone": (
-                    page_b_alone.model_dump(mode="json") if page_b_alone else None
-                ),
-            },
-        }
-        if run_dir is not None:
-            metadata["run_dir"] = run_dir
-        question = EvalQuestion(
-            id=_question_id(question_type, candidate.question, gold),
-            question=candidate.question.strip(),
-            type=question_type,
-            gold=gold,
-            reference_answer=candidate.reference_answer.strip(),
-            language="en",
-            source=QuestionSource.GENERATED,
-            generator=metadata,
-        )
-    attempt = GenerationAttempt(
-        generator_type=question_type.value,
-        seed=seed_values,
-        candidate=candidate,
-        filter=result,
-        page_a_alone=page_a_alone,
-        page_b_alone=page_b_alone,
-        duplicate=duplicate,
-        kept=kept,
-        drop_reasons=drop_reasons,
-        sampled_sources=sampled_sources,
-        question=question,
-    )
-    if recorder is not None:
-        recorder.record_candidate(attempt)
-    if not kept:
-        logger.info(
-            "generated_question_dropped",
-            question_type=question_type.value,
-            reasons=drop_reasons,
-        )
-        return None, attempt
-    return question, attempt
-
-
-async def _candidate_call(
-    provider: ChatProvider,
-    prompt: str,
-    *,
-    model: str,
-    thinking: ThinkingMode | None,
-) -> CandidateOutput:
-    completion = await provider.complete(
-        [{"role": "user", "content": prompt}],
-        model=model,
-        temperature=0.7,
-        max_tokens=700,
-        response_schema=CandidateOutput,
-        thinking=thinking,
-    )
-    return cast(CandidateOutput, completion.parsed)
+    return accepted, attempts, results
 
 
 def normalize_question(question: str) -> str:
     return " ".join(re.findall(r"[a-z0-9]+", question.casefold()))
 
 
-def _linked_urls(page: CorpusPage) -> set[str]:
-    return {
-        urljoin(page.url, match.group("href"))
-        for match in LINK_RE.finditer(page.markdown)
-    }
-
-
-def _question_id(
-    question_type: QuestionType, question: str, gold: Sequence[GoldSource]
-) -> str:
+def _question_id(question_type: QuestionType, question: str, gold: Sequence[GoldSource]) -> str:
     material = {
         "type": question_type.value,
         "question": normalize_question(question),
         "gold": [source.model_dump() for source in gold],
     }
-    digest = hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()[
-        :16
-    ]
+    digest = hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()[:16]
     return f"gen-{digest}"
 
 
 def _allocations(n: int) -> dict[QuestionType, int]:
-    order = [
-        QuestionType.SINGLE_PAGE,
-        QuestionType.CROSS_PAGE,
-        QuestionType.API_REFERENCE,
-        QuestionType.CAPABILITY,
-        QuestionType.UNANSWERABLE,
-        QuestionType.POST_CUTOFF,
-    ]
+    order = list(QuestionType)
     allocations = {question_type: 1 for question_type in order}
     for index in range(n - len(order)):
         allocations[order[index % len(order)]] += 1
     return allocations
 
 
+# --------------------------------------------------------------------------- #
+# CLI
+# --------------------------------------------------------------------------- #
+
+
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Generate a documentation evaluation set"
-    )
+    parser = argparse.ArgumentParser(description="Generate a documentation evaluation set")
     parser.add_argument("--corpus", type=Path, required=True)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--name")
@@ -854,96 +1095,111 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--provider", choices=("zai", "mistral"), default="zai")
     parser.add_argument("--model", default="glm-5.3-flash")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--concurrency", type=int, default=4)
+    parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument(
-        "--thinking", choices=("enabled", "disabled"), default="disabled"
+        "--attempts-per-question",
+        type=int,
+        default=4,
+        help="candidates generated per requested question before a type is left short",
     )
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--cross-page-review-count", type=int, default=0)
+    parser.add_argument("--thinking", choices=("enabled", "disabled"), default="disabled")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print what the run would sample, call nothing and write nothing",
+    )
     return parser.parse_args()
 
 
+def _dry_run(documents: Sequence[CorpusDocument], args: argparse.Namespace) -> None:
+    """Show the sources a real run with these arguments would ask about."""
+    rng = random.Random(args.seed)
+    allocations = _allocations(args.n)
+    for question_type in QuestionType:
+        budget = allocations[question_type] * args.attempts_per_question
+        for plan in plan_attempts(documents, question_type, budget, rng):
+            print(
+                json.dumps(
+                    {
+                        "type": question_type.value,
+                        "candidate_id": plan.candidate_id,
+                        "sources": [
+                            {
+                                "url": source.url,
+                                "anchor": source.anchor,
+                                "heading_path": source.heading_path,
+                            }
+                            for source in plan.sources
+                        ],
+                    }
+                )
+            )
+
+
 async def _run(args: argparse.Namespace) -> None:
-    pages = read_corpus(args.corpus)
+    documents = load_documents(args.corpus)
+    if args.dry_run:
+        _dry_run(documents, args)
+        return
+
     run_name = args.name or (args.out.stem if args.out else "generate")
     run_dir = create_run_directory(run_name)
     dataset_path = args.out or run_dir / "questions.jsonl"
-    corpus_commits = sorted({page.source_commit for page in pages})
-    corpus_commit: str | list[str] = (
-        corpus_commits[0] if len(corpus_commits) == 1 else corpus_commits
-    )
+    corpus_commits = sorted({document.page.source_commit for document in documents})
+    # z.ai is the only provider that takes a thinking setting; sending it to
+    # Mistral is an error, and D-020 and D-021 both rest on this being swappable.
+    thinking = cast(ThinkingMode, args.thinking) if args.provider == "zai" else None
     config = {
         "name": run_name,
         "run_dir": str(run_dir),
         "corpus": str(args.corpus),
-        "corpus_commit": corpus_commit,
+        "corpus_commit": corpus_commits[0] if len(corpus_commits) == 1 else corpus_commits,
         "out": str(dataset_path),
         "n": args.n,
         "provider": args.provider,
         "model": args.model,
-        "thinking": args.thinking,
+        "thinking": thinking,
         "seed": args.seed,
         "concurrency": args.concurrency,
-        "dry_run": args.dry_run,
-        "cross_page_review_count": args.cross_page_review_count,
+        "attempts_per_question": args.attempts_per_question,
         "prompt_version": PROMPT_VERSION,
         "prompt_hashes": PROMPT_HASHES,
         "cache_dir": ".cache/llm",
-        "minimum_section_tokens": 80,
-        "generation_temperature": 0.7,
-        "generation_max_tokens": 700,
-        "filter_temperature": 0.0,
-        "filter_max_tokens": 500,
-        "page_alone_max_tokens": 400,
+        "minimum_section_tokens": MIN_SECTION_TOKENS,
+        "max_source_chars": MAX_SOURCE_CHARS,
+        "generation_temperature": GENERATION_TEMPERATURE,
+        "generation_max_tokens": GENERATION_MAX_TOKENS,
+        "check_temperature": CHECK_TEMPERATURE,
+        "check_max_tokens": CHECK_MAX_TOKENS,
+        "unanswerable_check_top_k": UNANSWERABLE_CHECK_TOP_K,
         "http_attempts": 3,
-        "structured_output_attempts": 2,
+        "structured_output_repairs": 1,
     }
-    recorder = RunRecorder(run_dir, config)
-    if args.dry_run:
-        try:
-            rng = random.Random(args.seed)
-            for section in sample_sections(pages, args.n, rng):
-                print(
-                    json.dumps(
-                        {
-                            "url": section.url,
-                            "anchor": section.anchor,
-                            "heading_path": section.heading_path,
-                            "token_estimate": section.token_estimate,
-                        }
-                    )
-                )
-        except Exception as error:
-            recorder.finalize(dataset_path=None, error=str(error))
-            raise
-        recorder.finalize(dataset_path=None, error=None)
-        print(json.dumps({"run_dir": str(run_dir), "dry_run": True}))
-        return
-
-    provider_name = cast(ProviderName, args.provider)
-    thinking = cast(ThinkingMode, args.thinking)
+    recorder = RunRecorder.start(run_dir, config)
     try:
         async with OpenAICompatibleProvider(
-            provider_name,
+            cast(ProviderName, args.provider),
             asyncio.Semaphore(args.concurrency),
             caller_tag="eval.generate",
             recorder=recorder,
+            seed=args.seed,
         ) as provider:
-            questions, _ = await generate_questions(
+            questions, _attempts, results = await generate_questions(
                 provider,
-                pages,
+                documents,
                 n=args.n,
                 model=args.model,
                 seed=args.seed,
                 thinking=thinking,
-                cross_page_review_count=args.cross_page_review_count,
+                attempts_per_question=args.attempts_per_question,
                 recorder=recorder,
-                run_dir=str(run_dir),
             )
         manifest_path = args.corpus / "manifest.json"
         if manifest_path.exists():
             issues = validate_against_corpus(
-                questions, read_manifest(manifest_path), pages
+                questions,
+                read_manifest(args.corpus),
+                [document.page for document in documents],
             )
             if issues:
                 raise RuntimeError(
@@ -954,24 +1210,37 @@ async def _run(args: argparse.Namespace) -> None:
     except Exception as error:
         recorder.finalize(dataset_path=None, error=str(error))
         raise
-    recorder.finalize(dataset_path=dataset_path, error=None)
-    counts = {question_type.value: 0 for question_type in _allocations(args.n)}
-    for question in questions:
-        counts[question.type.value] += 1
+    recorder.finalize(
+        dataset_path=dataset_path,
+        error=None,
+        shortfalls={
+            result.question_type.value: result.shortfall for result in results if result.shortfall
+        },
+        requested_by_type={result.question_type.value: result.requested for result in results},
+    )
     print(
         json.dumps(
             {
                 "written": len(questions),
                 "out": str(dataset_path),
                 "run_dir": str(run_dir),
-                "counts": counts,
+                "requested": {result.question_type.value: result.requested for result in results},
+                "accepted": {result.question_type.value: result.accepted for result in results},
+                "shortfall": {
+                    result.question_type.value: result.shortfall
+                    for result in results
+                    if result.shortfall
+                },
+                "usage": recorder.usage_line(),
             }
         )
     )
 
 
 def main() -> None:
-    load_dotenv(override=True)
+    # Not override=True: an operator who exports a key for one run should not
+    # have it replaced by whatever .env holds.
+    load_dotenv()
     asyncio.run(_run(_parse_args()))
 
 

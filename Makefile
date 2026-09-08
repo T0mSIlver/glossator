@@ -74,6 +74,11 @@ test:
 dev-set:
 	uv run python -m glossator.eval.generate --corpus corpus/mistral-docs --out eval/dev.jsonl --n 300 --provider zai --model glm-5.3-flash --seed 0
 
+## Regenerate a run's README and figures from its records
+## Usage: make eval-report run=eval/runs/2026-09-08-2312-dev-smoke
+eval-report:
+	uv run python -m glossator.eval.report $(run)
+
 ## Generate Bruno API files under vespa/bruno/vespa/ (requires WORKSPACE_ROOT in .env)
 bruno:
 	uv run mistral-vespa bruno \
