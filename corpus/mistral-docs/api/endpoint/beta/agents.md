@@ -55,16 +55,17 @@ Create a new agent giving it instructions, tools, description. The agent is then
 
 - `instructions` (string or null, optional) — Instruction prompt the model will follow during the conversation.
 - `tools` (array of object, optional) — List of tools which are available to the model during the conversation.
-  - one of (oneOf):
+  - one of 7 (oneOf):
     - FunctionTool
     - WebSearchTool
     - WebSearchPremiumTool
     - CodeInterpreterTool
     - ImageGenerationTool
     - DocumentLibraryTool
+    - CustomConnector
 - `completion_args` (CompletionArgs, optional) — Completion arguments that will be used to generate assistant responses. Can be overridden at each message request.
   - `stop` (CompletionArgsStop, optional)
-    - one of (anyOf):
+    - one of 3 (anyOf):
       - string
       - array of string
       - null
@@ -177,16 +178,17 @@ Update an agent attributes and create a new version.
 
 - `instructions` (string or null, optional) — Instruction prompt the model will follow during the conversation.
 - `tools` (array of object, optional) — List of tools which are available to the model during the conversation.
-  - one of (oneOf):
+  - one of 7 (oneOf):
     - FunctionTool
     - WebSearchTool
     - WebSearchPremiumTool
     - CodeInterpreterTool
     - ImageGenerationTool
     - DocumentLibraryTool
+    - CustomConnector
 - `completion_args` (CompletionArgs, optional) — Completion arguments that will be used to generate assistant responses. Can be overridden at each message request.
   - `stop` (CompletionArgsStop, optional)
-    - one of (anyOf):
+    - one of 3 (anyOf):
       - string
       - array of string
       - null

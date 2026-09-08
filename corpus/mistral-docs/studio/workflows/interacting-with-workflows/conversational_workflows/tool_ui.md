@@ -70,6 +70,8 @@ class ReportWorkflow:
         )
 ```
 
+![A rich UI component rendered in Vibe Work, showing a card with a score and a success badge.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_rich-ui-component_report.png)
+
 Rich UI component in Vibe Work.
 
 ### Available components {#available-components}
@@ -141,6 +143,8 @@ layout = Row(
 )
 ```
 
+![Nested rich UI components rendered in Vibe Work, showing two cards each containing a chart.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_rich-ui-component_nesting-with-charts.png)
+
 Nested components with charts in Vibe Work.
 
 ## Tool UI states {#tool-ui-states}
@@ -197,6 +201,8 @@ delete_state = FileToolUIState(
 )
 ```
 
+![A file tool UI state rendered in Vibe Work, showing file operation feedback.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_file-tool-ui-state.png)
+
 File tool UI state in Vibe Work.
 
 ### Generic tool UI state {#generic-tool-ui-state}
@@ -238,6 +244,8 @@ failed_state = GenericToolUIState(
 )
 ```
 
+![A generic tool UI state rendered in Vibe Work, showing tool execution status.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_generic-tool-ui-state.png)
+
 Generic tool UI state in Vibe Work.
 
 ### Command tool UI state {#command-tool-ui-state}
@@ -275,6 +283,8 @@ failed_state = CommandToolUIState(
     result=CommandResultFailed(error="Command not found"),
 )
 ```
+
+![A command tool UI state rendered in Vibe Work, showing command execution status.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_command-tool-ui-state.png)
 
 Command tool UI state in Vibe Work.
 

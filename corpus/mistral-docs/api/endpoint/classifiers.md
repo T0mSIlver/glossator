@@ -28,7 +28,7 @@ Reference for the Classifiers endpoints of the Mistral API, generated from the O
 - `model` (string, required) — ID of the model to use.
 - `metadata` (object or null, optional)
 - `input` (object, required) — Text to classify.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - string
     - array of string
 
@@ -49,7 +49,7 @@ Reference for the Classifiers endpoints of the Mistral API, generated from the O
 `application/json` (required), schema `ChatModerationRequest`
 
 - `input` (object, required) — Chat to classify
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - array of object
     - array of array of object
 - `model` (string, required)
@@ -73,7 +73,7 @@ Reference for the Classifiers endpoints of the Mistral API, generated from the O
 - `model` (string, required) — ID of the model to use.
 - `metadata` (object or null, optional)
 - `input` (object, required) — Text to classify.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - string
     - array of string
 
@@ -95,7 +95,7 @@ Reference for the Classifiers endpoints of the Mistral API, generated from the O
 
 - `model` (string, required)
 - `input` (ChatClassificationRequestInputs, required) — Chat to classify
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - InstructRequest
       - `messages` (array of object, required)
     - array of InstructRequest

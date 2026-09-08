@@ -31,7 +31,7 @@ Reference for the Audio Speech endpoints of the Mistral API, generated from the 
 - `prompt_cache_key` (string or null, optional)
 - `voice_id` (string or null, optional) — The preset or custom voice to use for generating the speech.
 - `ref_audio` (object, optional) — The audio reference for generating the speech.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - string
     - string
     - null

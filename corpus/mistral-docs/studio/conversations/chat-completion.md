@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 Large language models (LLMs) are AI systems that generate text and engage in conversational interactions. They follow instructions and respond naturally to prompts: inputs like questions, instructions, or task examples. The model processes the prompt and produces a relevant text output as its response.
 
+![chat_completions_graph](https://docs.mistral.ai/img/chat_completions.png)
+
 The use cases around text generation such as chat completions are endless and can be applied to a wide range of applications.
 From:
 - Chatbots
@@ -807,7 +809,7 @@ curl --location "https://api.mistral.ai/v1/chat/completions" \
 
 **Safe Prompt**
 
-The `safe_prompt` flag is simple boolean that introduces a simple first level of moderation- to **make replies safer and more respectful**. We recommend taking a look at our [moderation](./guardrailing) docs for better moderation.
+The `safe_prompt` flag is simple boolean that introduces a simple first level of moderation- to **make replies safer and more respectful**. We recommend taking a look at our [moderation](https://docs.mistral.ai/studio/conversations/guardrailing) docs for better moderation.
 
 **Python**
 

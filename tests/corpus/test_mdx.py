@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
-from glossator.corpus.mistral_docs.mdx import MdxNormalizer
+from glossator.corpus.mistral_docs.mdx import Dropped, MdxNormalizer
 
 PAGE_URL = "https://docs.mistral.ai/studio/example"
 
@@ -26,13 +27,18 @@ def test_section_tab_becomes_a_heading_with_its_anchor(tmp_path: Path) -> None:
     assert "SectionTab" not in output
 
 
-def test_section_tab_without_section_id_falls_back_to_the_slug(tmp_path: Path) -> None:
-    output = render(
-        tmp_path,
+def test_section_tab_without_section_id_gets_no_anchor(tmp_path: Path) -> None:
+    # The component sets its DOM id from `sectionId` only, so there is nothing to link to.
+    page = tmp_path / "page.mdx"
+    page.write_text(
         '# Example\n\n<SectionTab as="h2">Set Up</SectionTab>\n\n<SectionTab as="h2">Set Up</SectionTab>\n',
+        encoding="utf-8",
     )
-    assert "## Set Up {#set-up}" in output
-    assert "## Set Up {#set-up-1}" in output
+    result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
+    assert "## Set Up" in result.markdown
+    assert "{#" not in result.markdown
+    assert result.anchors == []
+    assert result.suppressed_anchors == 2
 
 
 def test_secondary_section_tab_renders_one_level_deeper(tmp_path: Path) -> None:
@@ -203,7 +209,7 @@ def test_unknown_components_are_stripped_but_counted(tmp_path: Path) -> None:
     render_result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
     assert "Kept text." in render_result.markdown
     assert "MysteryWidget" not in render_result.markdown
-    assert render_result.stripped["MysteryWidget"] == 1
+    assert render_result.dropped[Dropped("MysteryWidget", "unsupported component, text kept")] == 1
 
 
 def test_frontmatter_title_becomes_the_h1_when_the_body_has_none(tmp_path: Path) -> None:
@@ -226,3 +232,127 @@ def test_images_become_absolute_markdown_images(tmp_path: Path) -> None:
     )
     assert "![steps](https://docs.mistral.ai/img/fc_steps.png)" in output
     assert "<img" not in output
+
+
+@pytest.mark.parametrize(
+    ("target", "expected"),
+    [
+        ("/studio/agents", "https://docs.mistral.ai/studio/agents"),
+        ("#step-1", f"{PAGE_URL}#step-1"),
+        ("./sibling", "https://docs.mistral.ai/studio/sibling"),
+        ("../inference/sampling", "https://docs.mistral.ai/inference/sampling"),
+        ("sibling", "https://docs.mistral.ai/studio/sibling"),
+        ("../models?tab=all#pricing", "https://docs.mistral.ai/models?tab=all#pricing"),
+        ("https://mistral.ai/news", "https://mistral.ai/news"),
+        ("mailto:support@mistral.ai", "mailto:support@mistral.ai"),
+    ],
+)
+def test_every_relative_link_target_is_resolved(tmp_path: Path, target: str, expected: str) -> None:
+    output = render(tmp_path, f"# Example\n\nSee [here]({target}).\n")
+    assert f"[here]({expected})" in output
+
+
+def test_relative_image_targets_are_resolved_too(tmp_path: Path) -> None:
+    output = render(tmp_path, "# Example\n\n![diagram](../img/flow.png)\n")
+    assert "![diagram](https://docs.mistral.ai/img/flow.png)" in output
+
+
+def test_embeds_survive_as_titled_links(tmp_path: Path) -> None:
+    page = tmp_path / "page.mdx"
+    page.write_text(
+        "# Example\n\n"
+        '<iframe src="https://www.youtube.com/embed/abc" title="Fine-tuning walkthrough" />\n\n'
+        '<video src="/media/demo.mp4" title="Demo" />\n',
+        encoding="utf-8",
+    )
+    result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
+    assert "[Fine-tuning walkthrough](https://www.youtube.com/embed/abc)" in result.markdown
+    assert "[Demo](https://docs.mistral.ai/media/demo.mp4)" in result.markdown
+    assert result.dropped == Counter()
+
+
+def test_a_media_element_with_no_source_is_recorded(tmp_path: Path) -> None:
+    page = tmp_path / "page.mdx"
+    page.write_text('# Example\n\n<iframe title="Nothing" />\n', encoding="utf-8")
+    result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
+    assert result.dropped[Dropped("iframe", "no resolvable source")] == 1
+
+
+def test_an_image_with_an_expression_source_is_recorded(tmp_path: Path) -> None:
+    page = tmp_path / "page.mdx"
+    page.write_text('# Example\n\n<img src={diagram} alt="x" />\n', encoding="utf-8")
+    result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
+    assert result.dropped[Dropped("img", "image source is an expression")] == 1
+
+
+def test_a_missing_partial_is_recorded(tmp_path: Path) -> None:
+    page = tmp_path / "page.mdx"
+    page.write_text(
+        "# Example\n\nimport Gone from './gone/_page.mdx';\n\n<Gone />\n", encoding="utf-8"
+    )
+    result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
+    assert result.dropped[Dropped("Gone", "partial file not found")] == 1
+
+
+def test_a_partial_cycle_stops_at_the_depth_limit(tmp_path: Path) -> None:
+    # Two partials importing each other would otherwise recurse forever.
+    first = tmp_path / "one"
+    second = tmp_path / "two"
+    first.mkdir()
+    second.mkdir()
+    (first / "_page.mdx").write_text(
+        "import Two from '../two/_page.mdx';\n\nOne.\n\n<Two />\n", encoding="utf-8"
+    )
+    (second / "_page.mdx").write_text(
+        "import One from '../one/_page.mdx';\n\nTwo.\n\n<One />\n", encoding="utf-8"
+    )
+    page = tmp_path / "page.mdx"
+    page.write_text("# Example\n\nimport One from './one/_page.mdx';\n\n<One />\n", "utf-8")
+    result = MdxNormalizer(PAGE_URL).render_page(page, "Example")
+    assert "One." in result.markdown
+    assert any(
+        dropped.reason == "partial nesting deeper than the limit" for dropped in result.dropped
+    )
+
+
+def test_a_concatenated_href_expression_is_resolved(tmp_path: Path) -> None:
+    output = render(
+        tmp_path,
+        "# Example\n\n"
+        '<AppLink href={"https://" + "admin.mistral.ai/plateforme/privacy"} '
+        'path={["Admin Panel", "Privacy"]} />\n',
+    )
+    assert "[Admin Panel > Privacy](https://admin.mistral.ai/plateforme/privacy)" in output
+
+
+def test_a_dual_theme_image_uses_the_light_variant(tmp_path: Path) -> None:
+    output = render(
+        tmp_path,
+        "# Example\n\n<Image url={['/img/chat.png', '/img/chat_dark.png']} alt=\"Chat\" />\n",
+    )
+    assert "![Chat](https://docs.mistral.ai/img/chat.png)" in output
+
+
+def test_a_raw_html_table_keeps_its_fenced_cells(tmp_path: Path) -> None:
+    output = render(
+        tmp_path,
+        "# Example\n\n"
+        '<table class="prompt-example">\n'
+        "    <tr>\n        <td>Assistant</td>\n        <td>\n\n"
+        '```\n{"Summary": "text"}\n```\n\n'
+        "        </td>\n    </tr>\n</table>\n",
+    )
+    assert "**Assistant**" in output
+    assert '```\n{"Summary": "text"}\n```' in output
+
+
+def test_an_audio_element_becomes_a_link_to_its_source(tmp_path: Path) -> None:
+    output = render(
+        tmp_path,
+        "# Example\n\n<audio controls>\n"
+        '    <source src="/audio/obama.mp3" type="audio/mp3"/>\n'
+        "    Your browser does not support the audio element.\n"
+        "</audio>\n",
+    )
+    assert "[Audio sample](https://docs.mistral.ai/audio/obama.mp3)" in output
+    assert "does not support" not in output

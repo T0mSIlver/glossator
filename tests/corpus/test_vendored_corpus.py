@@ -30,7 +30,9 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def manifest() -> list[dict[str, str]]:
-    return json.loads((CORPUS_DIR / "manifest.json").read_text(encoding="utf-8"))
+    entries = json.loads((CORPUS_DIR / "manifest.json").read_text(encoding="utf-8"))
+    assert isinstance(entries, list)
+    return [dict(entry) for entry in entries]
 
 
 def test_manifest_matches_the_files_on_disk(manifest: list[dict[str, str]]) -> None:
@@ -71,14 +73,22 @@ def test_no_jsx_residue_outside_fences(manifest: list[dict[str, str]]) -> None:
     assert offenders == []
 
 
-def test_no_relative_links_remain(manifest: list[dict[str, str]]) -> None:
-    relative = re.compile(r"\]\((?:/|#)")
+LINK_TARGET = re.compile(r"\]\((?P<target>[^)\s]*)")
+ABSOLUTE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+
+
+def test_every_link_target_is_absolute(manifest: list[dict[str, str]]) -> None:
+    # A corpus file is not a URL, so a relative target resolves against the wrong base.
     offenders = []
     for entry in manifest:
         _, body = split_frontmatter((CORPUS_DIR / entry["path"]).read_text(encoding="utf-8"))
         for line, in_fence in iter_lines(body):
-            if not in_fence and relative.search(line):
-                offenders.append((entry["path"], line.strip()[:80]))
+            if in_fence:
+                continue
+            for match in LINK_TARGET.finditer(line):
+                target = match.group("target")
+                if target and not ABSOLUTE.match(target):
+                    offenders.append((entry["path"], target))
     assert offenders == []
 
 

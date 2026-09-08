@@ -564,7 +564,7 @@ Below you can find a few of the multiple use cases possible, by leveraging the a
 
 **User**
 
-Your browser does not support the audio element.
+[Audio sample](https://docs.mistral.ai/audio/chat.wav)
 
 **Assistant**
 
@@ -599,7 +599,7 @@ This code defines a function `fibonacci` that takes an integer `n` and returns a
 
 **User**
 
-Your browser does not support the audio element.
+[Audio sample](https://docs.mistral.ai/audio/music.mp3)
 
 What's in this file?
 
@@ -611,9 +611,9 @@ The audio file contains music.
 
 **User**
 
-Your browser does not support the audio element.
+[Audio sample](https://docs.mistral.ai/audio/obama.mp3)
 
-Your browser does not support the audio element.
+[Audio sample](https://docs.mistral.ai/audio/bcn_weather.mp3)
 
 Which speaker do you prefer between the two? Why? How are they different from each other?
 
@@ -1481,7 +1481,7 @@ Below you can find a few examples using the audio transcription endpoint.
 
 **Audio**
 
-Your browser does not support the audio element.
+[Audio sample](https://docs.mistral.ai/audio/obama.mp3)
 
 **Transcription**
 

@@ -113,7 +113,7 @@ The body request will follow the same format as the endpoint you want to run you
 }
 ```
 
-For more information regarding completions, visit the [Chat Completions](https://docs.mistral.ai/studio/conversations/chat-completion) docs and the corresponding [API Spec](../api/endpoint/chat#operation-chat_completion_v1_chat_completions_post).
+For more information regarding completions, visit the [Chat Completions](https://docs.mistral.ai/studio/conversations/chat-completion) docs and the corresponding [API Spec](https://docs.mistral.ai/api/endpoint/chat#operation-chat_completion_v1_chat_completions_post).
 
 **Structured Outputs**
 
@@ -227,7 +227,7 @@ The body request will follow the same format as the endpoint you want to run you
 }
 ```
 
-For more information regarding sructured outputs, visit the [Structured Outputs](https://docs.mistral.ai/studio/conversations/structured-output) docs and the corresponding chat completions [API Spec](../api/endpoint/chat#operation-chat_completion_v1_chat_completions_post).
+For more information regarding sructured outputs, visit the [Structured Outputs](https://docs.mistral.ai/studio/conversations/structured-output) docs and the corresponding chat completions [API Spec](https://docs.mistral.ai/api/endpoint/chat#operation-chat_completion_v1_chat_completions_post).
 
 **Embeddings**
 
@@ -344,7 +344,7 @@ The body request will follow the same format as the endpoint you want to run you
 }
 ```
 
-For more information regarding embeddings, visit the [Embeddings](embeddings) docs and the corresponding [API Spec](../api/endpoint/embeddings#operation-embeddings_v1_embeddings_post).
+For more information regarding embeddings, visit the [Embeddings](https://docs.mistral.ai/studio/embeddings) docs and the corresponding [API Spec](https://docs.mistral.ai/api/endpoint/embeddings#operation-embeddings_v1_embeddings_post).
 
 **OCR**
 
@@ -418,7 +418,7 @@ The body request will follow the same format as the endpoint you want to run you
 }
 ```
 
-For more information regarding OCR, visit the [Document AI - OCR](https://docs.mistral.ai/studio/document-processing/basic_ocr) docs and the corresponding [API Spec](../api/endpoint/ocr#operation-ocr_v1_ocr_post).
+For more information regarding OCR, visit the [Document AI - OCR](https://docs.mistral.ai/studio/document-processing/basic_ocr) docs and the corresponding [API Spec](https://docs.mistral.ai/api/endpoint/ocr#operation-ocr_v1_ocr_post).
 
 **Annotations**
 
@@ -522,7 +522,7 @@ The body request will follow the same format as the endpoint you want to run you
 }
 ```
 
-For more information regarding OCR, visit the [Document AI - Annotations](https://docs.mistral.ai/studio/document-processing/annotations) docs and the corresponding [API Spec](../api/endpoint/ocr#operation-ocr_v1_ocr_post).
+For more information regarding OCR, visit the [Document AI - Annotations](https://docs.mistral.ai/studio/document-processing/annotations) docs and the corresponding [API Spec](https://docs.mistral.ai/api/endpoint/ocr#operation-ocr_v1_ocr_post).
 
 **Transcriptions**
 
@@ -587,7 +587,7 @@ The body request will follow the same format as the endpoint you want to run you
 }
 ```
 
-For more information regarding transcriptions, visit the [Transcriptions](https://docs.mistral.ai/studio/audio/speech_to_text) docs and the corresponding [API Spec](../api/endpoint/audio/transcriptions#operation-audio_api_v1_transcriptions_post).
+For more information regarding transcriptions, visit the [Transcriptions](https://docs.mistral.ai/studio/audio/speech_to_text) docs and the corresponding [API Spec](https://docs.mistral.ai/api/endpoint/audio/transcriptions#operation-audio_api_v1_transcriptions_post).
 
 For large batches of up to 1M requests, you would create a .jsonl file with the above data. Once saved, you can upload your batch input file to ensure it is correctly referenced when initiating batch processes.
 

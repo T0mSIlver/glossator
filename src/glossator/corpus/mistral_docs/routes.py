@@ -108,9 +108,15 @@ class DocRoute:
     hidden: bool
     redirected_from: str | None = None
 
-    @property
-    def url_path(self) -> str:
-        return self.route
+
+@dataclass(frozen=True)
+class DroppedDuplicate:
+    """A source page whose canonical URL another page already owns."""
+
+    source_path: str
+    original_route: str
+    target_route: str
+    retained_source_path: str
 
 
 @dataclass
@@ -126,6 +132,8 @@ class RouteEnumeration:
     breadcrumb_mismatches: list[BreadcrumbMismatch] = field(default_factory=list)
     unchecked_breadcrumbs: list[str] = field(default_factory=list)
     unreachable: list[DocRoute] = field(default_factory=list)
+    dropped_duplicates: list[DroppedDuplicate] = field(default_factory=list)
+    raw_route_count: int = 0
 
 
 def title_case(segment: str) -> str:
@@ -279,6 +287,7 @@ def enumerate_routes(
         )
 
     result.routes.sort(key=lambda route: route.route)
+    result.raw_route_count = len(result.routes)
     _drop_unreachable(result)
     _dedupe_routes(result)
     if expected_breadcrumbs is not None:
@@ -324,6 +333,14 @@ def _dedupe_routes(result: RouteEnumeration) -> None:
             url=keep.route,
             kept=keep.source_path,
             dropped=drop.source_path,
+        )
+        result.dropped_duplicates.append(
+            DroppedDuplicate(
+                source_path=drop.source_path,
+                original_route=drop.redirected_from or drop.route,
+                target_route=drop.route,
+                retained_source_path=keep.source_path,
+            )
         )
         by_route[route.route] = keep
     result.routes = sorted(by_route.values(), key=lambda route: route.route)

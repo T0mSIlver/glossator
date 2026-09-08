@@ -71,7 +71,7 @@ Provision all users from a user group to a workspace with a specific role.
 - `user_group_uuid` (string (uuid), required) — User group ID to provision.
 - `workspace_uuid` (string (uuid), required) — Workspace ID where the group is provisioned.
 - `workspace_role` (object, optional) — Workspace role value to assign to the group. Mutually exclusive with 'workspace_role_name'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - WorkspaceRole
     - StaticWorkspaceRoles
     - null
@@ -244,11 +244,11 @@ Assign a user group to a workspace.
 
 - `role_names` (array of enum: 'billing', 'user', 'contributor', 'dev', 'dev_contributor', 'mistral_code_user', 'cloud_user', 'workspace_contributor', 'workspace_admin', 'observability_viewer', 'workflow_executor' or null, optional) — Simplified role names to assign. Mutually exclusive with 'roles'.
 - `roles` (array of object or null, optional) — Role values to assign. Mutually exclusive with 'role_names'.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - WorkspaceRole
     - StaticWorkspaceRoles
 - `role` (object, optional) — Deprecated single role value. Use 'role_names' instead.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - WorkspaceRole
     - StaticWorkspaceRoles
     - null
@@ -296,11 +296,11 @@ Update the workspace role assignment for a user group.
 
 - `role_names` (array of enum: 'billing', 'user', 'contributor', 'dev', 'dev_contributor', 'mistral_code_user', 'cloud_user', 'workspace_contributor', 'workspace_admin', 'observability_viewer', 'workflow_executor' or null, optional) — Simplified role names to assign. Mutually exclusive with 'roles'.
 - `roles` (array of object or null, optional) — Role values to assign. Mutually exclusive with 'role_names'.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - WorkspaceRole
     - StaticWorkspaceRoles
 - `role` (object, optional) — Deprecated single role value. Use 'role_names' instead.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - WorkspaceRole
     - StaticWorkspaceRoles
     - null
@@ -327,7 +327,7 @@ Update the organization role for a user group.
 `application/json` (required), schema `UpdateUserGroupOrganizationRoleIn`
 
 - `organization_role` (object, required) — Organization role to assign to the group.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - UserRole
     - StaticOrganizationRoles
 

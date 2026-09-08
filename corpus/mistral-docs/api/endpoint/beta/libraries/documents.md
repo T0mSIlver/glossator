@@ -55,7 +55,15 @@ Given a library, upload a new document to that library. It is queued for process
 
 `multipart/form-data` (required)
 
-- `file` (File, required) — The File object (not file name) to be uploaded. To upload a file and specify a custom file name you should format your request as such: ```bash file=@path/to/your/file.jsonl;filename=custom_name.jsonl ``` Otherwise, you can just keep the original file name: ```bash file=@path/to/your/file.jsonl ```
+- `file` (File, required) — The File object (not file name) to be uploaded. To upload a file and specify a custom file name you should format your request as such:
+
+  ```bash
+  file=@path/to/your/file.jsonl;filename=custom_name.jsonl
+  ```
+  Otherwise, you can just keep the original file name:
+  ```bash
+  file=@path/to/your/file.jsonl
+  ```
 
 ### Responses
 

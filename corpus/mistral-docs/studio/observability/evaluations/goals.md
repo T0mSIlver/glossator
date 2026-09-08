@@ -64,7 +64,7 @@ When you call `run.show()`:
 
 ## Goals on run evaluators {#goals-on-run-evaluators}
 
-[Run evaluators](../evaluations/run-evaluators) also support goals:
+[Run evaluators](https://docs.mistral.ai/studio/observability/evaluations/run-evaluators) also support goals:
 
 ```python
 from mistralai.observability import RunEvaluator, Goal

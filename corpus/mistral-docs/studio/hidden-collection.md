@@ -24,6 +24,6 @@ Use this collection to confirm these behaviors:
 
 ## Pages in this collection
 
-- [Setup](./setup)
-- [Usage](./usage)
-- [Troubleshooting](./troubleshooting)
+- [Setup](https://docs.mistral.ai/studio/setup)
+- [Usage](https://docs.mistral.ai/studio/usage)
+- [Troubleshooting](https://docs.mistral.ai/studio/troubleshooting)

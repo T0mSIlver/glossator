@@ -105,6 +105,8 @@ When a workflow execution starts, the worker's auth interceptor runs a preflight
 
 If credentials don't exist, which is typical on first OAuth2 use, the worker pauses and gets an auth URL from the Mistral API. It forwards the URL to the client as an `auth_url` event and waits while the user completes authorization in their browser. After the credentials are stored, the workflow resumes.
 
+![Sequence diagram of the Connector OAuth flow between the client, the worker, and the Mistral API](https://docs.mistral.ai/img/workflows_connector_oauth_flow.svg)
+
 The polling activity heartbeats while it waits, so a slow user doesn't cause the worker to time out. The auth URL has a **10-minute** window before `ConnectorAuthTimeout` fires.
 
 ## Build a workflow with Connectors {#build}

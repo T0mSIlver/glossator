@@ -28,7 +28,7 @@ Sending traces requires only a valid Mistral API key: no feature flag or special
 
 > **Note**
 >
-> Every source above redacts spans client-side before export by default. See [Data redaction](./data-redaction) to review the policy or change what is masked.
+> Every source above redacts spans client-side before export by default. See [Data redaction](https://docs.mistral.ai/studio/observability/traces/data-redaction) to review the policy or change what is masked.
 
 Studio Playground doesn't send traces.
 
@@ -116,7 +116,7 @@ enable_otel = true
 
 > **Caution**
 >
-> Traces include tool call arguments and results, which can contain sensitive data. These are redacted client-side by default; see [Data redaction](./data-redaction) to review or adjust the policy.
+> Traces include tool call arguments and results, which can contain sensitive data. These are redacted client-side by default; see [Data redaction](https://docs.mistral.ai/studio/observability/traces/data-redaction) to review or adjust the policy.
 
 **Vibe Work and Vibe Code Web**
 
@@ -124,7 +124,7 @@ A Workspace Admin or Org Admin enables conversation tracing for Vibe Work and Vi
 
 > **Caution**
 >
-> Traces include tool call arguments and results, which can contain sensitive data. These are redacted client-side by default; see [Data redaction](./data-redaction) to review or adjust the policy.
+> Traces include tool call arguments and results, which can contain sensitive data. These are redacted client-side by default; see [Data redaction](https://docs.mistral.ai/studio/observability/traces/data-redaction) to review or adjust the policy.
 
 **Custom (OTEL)**
 

@@ -10,7 +10,7 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 # Manage schema
 
-Manage your Vespa application schemas through Python migrations. For the concepts behind schemas, fields, and ranking, see [Anatomy of a Vespa application](anatomy).
+Manage your Vespa application schemas through Python migrations. For the concepts behind schemas, fields, and ranking, see [Anatomy of a Vespa application](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy).
 
 ## Create and evolve schemas {#creating-and-evolving-schemas}
 
@@ -106,11 +106,11 @@ Call `create_schema()` multiple times to register multiple document types under 
 | `set_content_id(id)` | Override the content cluster id (avoids destructive cluster renames) |
 | `allow_schema_removal(until)` | Permit schema removal until a given date |
 
-For full signatures and parameters, see the [Migration helpers reference](migration-helpers).
+For full signatures and parameters, see the [Migration helpers reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migration-helpers).
 
 ## Deploying {#deploying}
 
-`mistral-vespa migrate` discovers migrations, runs them in order, builds the app package, and uploads it. See the [Local Development](local-development) and [Deploy and Operate](operations) guides for details.
+`mistral-vespa migrate` discovers migrations, runs them in order, builds the app package, and uploads it. See the [Local Development](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development) and [Deploy and Operate](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/operations) guides for details.
 
 ## Optional snapshot {#optional-snapshot}
 
@@ -124,6 +124,6 @@ Writes the app package to disk for inspection or CI validation. It is not used f
 
 ## See also {#see-also}
 
-- **[Anatomy of a Vespa application](anatomy)**: concepts: schemas, fields, ranking profiles, migrations
-- **[Local development](local-development)**: full local development loop
-- **[CLI reference](cli)**: full set of CLI flags
+- **[Anatomy of a Vespa application](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy)**: concepts: schemas, fields, ranking profiles, migrations
+- **[Local development](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development)**: full local development loop
+- **[CLI reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli)**: full set of CLI flags

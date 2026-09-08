@@ -13,7 +13,7 @@ hidden: true
 
 The Trace Explorer is where you search, filter, and inspect every trace flowing through your AI applications. It's available in Studio at [Observability → Traces](https://console.mistral.ai/observability/traces).
 
-Before you can explore traces, your application needs to be instrumented. See [Send traces](./send-traces) for setup instructions.
+Before you can explore traces, your application needs to be instrumented. See [Send traces](https://docs.mistral.ai/studio/observability/traces/send-traces) for setup instructions.
 
 ## What traces contain {#what-traces-contain}
 

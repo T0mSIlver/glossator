@@ -20,12 +20,12 @@ Follow these guides to build and deploy a Vespa application:
 
 | Guide | Purpose |
 |---|---|
-| **[Anatomy of an Application](vespa/anatomy)** | Understand application packages, schemas, fields, ranking profiles, query profiles, and migrations |
-| **[Manage Schema](vespa/migrations)** | Create and evolve schemas using Python migrations |
-| **[Manage Ranking](vespa/query-profiles)** | Configure ranking at query time without schema changes |
-| **[Local Development](vespa/local-development)** | Full local development loop: create, deploy, feed, query, iterate |
-| **[Deploy and Operate](vespa/operations)** | Production configuration, health checks, monitoring |
-| **[CLI Reference](vespa/cli)** | mistral-vespa command reference |
+| **[Anatomy of an Application](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy)** | Understand application packages, schemas, fields, ranking profiles, query profiles, and migrations |
+| **[Manage Schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations)** | Create and evolve schemas using Python migrations |
+| **[Manage Ranking](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles)** | Configure ranking at query time without schema changes |
+| **[Local Development](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development)** | Full local development loop: create, deploy, feed, query, iterate |
+| **[Deploy and Operate](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/operations)** | Production configuration, health checks, monitoring |
+| **[CLI Reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli)** | mistral-vespa command reference |
 
 ## Use Vespa as a search backend {#using-vespa-as-a-search-backend}
 

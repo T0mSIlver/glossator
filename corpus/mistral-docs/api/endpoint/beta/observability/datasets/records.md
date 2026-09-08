@@ -96,7 +96,7 @@ Reference for the Beta Observability Datasets Records endpoints of the Mistral A
   - `description` (string, required)
   - `model_name` (string, required)
   - `output` (object, required)
-    - one of (oneOf):
+    - one of 2 (oneOf):
       - JudgeClassificationOutput
       - JudgeRegressionOutput
   - `instructions` (string, required)

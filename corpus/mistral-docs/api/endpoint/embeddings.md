@@ -28,7 +28,7 @@ Reference for the Embeddings endpoints of the Mistral API, generated from the Op
 - `model` (string, required) — ID of the model to use.
 - `metadata` (object or null, optional)
 - `input` (object, required) — Text to embed.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - string
     - array of string
 - `output_dimension` (integer or null, optional) — The dimension of the output embeddings when feature available. If not provided, a default output dimension will be used.

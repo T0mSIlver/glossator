@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 Agents can use tools to interact with the external world, these can be APIs, databases, or other services, increasing the capabilities of your agent and extending its functionality beyond its own knowledge base and fixed environment.
 
+![tools_graph](https://docs.mistral.ai/img/tools_graph.png)
+
 ## Tool types {#tool-types}
 
 We provide a variety of different **types** of tools agents can use.
@@ -26,6 +28,8 @@ We provide a variety of different **types** of tools agents can use.
 |[Connectors](https://docs.mistral.ai/studio/connectors)| Register MCP servers as managed Connectors. Tools are discovered automatically and executed server-side.|
 
 ## Built-in tools {#built-in-tools}
+
+![built_in_graph](https://docs.mistral.ai/img/built_in_graph.png)
 
 Built-in tools are ready out of the box. They can be called at any point, and all execution happens in our internal environment. They're also available for users to use directly via Conversations without creating an Agent first.
 

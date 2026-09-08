@@ -47,6 +47,8 @@ Convert speech to text with high accuracy and low latency. Two models cover batc
 
 Combine the models into a real-time voice-to-voice loop: **Voxtral Realtime** transcribes incoming speech, **an LLM** reasons over the transcript and decides a response, and **Voxtral TTS** speaks the reply.
 
+![Speech-to-speech pipeline: speech in flows to Voxtral Realtime (transcribe speech), then an LLM (reason over transcript), then Voxtral TTS (speak the reply), producing speech out.](https://docs.mistral.ai/img/audio_speech_to_speech_pipeline.svg)
+
 Each component is independently customizable and deployable. Cross-lingual voice adaptation lets the same pipeline handle live translation while preserving the speaker's accent and identity.
 
 ## Models {#models}

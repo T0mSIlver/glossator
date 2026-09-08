@@ -39,6 +39,8 @@ At its core, the Admin model is built around three concepts:
 
 Members belong to an Organization and gain access to one or more Workspaces through roles, groups, and provisioning rules.
 
+![Admin controls an Organization, its members, and Workspaces. Members access Workspaces through roles, groups, and SCIM provisioning. Workspaces organize access to Vibe and Studio. The Admin API provides programmatic control over the Organization, members, Workspaces, and access workflows.](https://docs.mistral.ai/img/admin_overview.svg)
+
 > **Info**
 >
 > The **Admin API** controls the same model programmatically. If you're on an Enterprise or Team plan, you can use it to [automate administration](https://docs.mistral.ai/admin/admin-api/overview), including Organization management, member lifecycle operations, Workspace administration, and access workflows.

@@ -47,7 +47,57 @@ Create a new conversation, using a base model or an agent and append entries. Co
 
 `application/json` (required), schema `ConversationRequest`
 
-- Not documented.
+- `inputs` (ConversationInputs, required)
+  - one of 2 (anyOf):
+    - string
+    - InputEntries
+- `stream` (enum: False, optional)
+- `store` (boolean or null, optional)
+- `handoff_execution` (enum: 'client', 'server', optional)
+- `instructions` (string or null, optional)
+- `tools` (array of object or null, optional)
+  - one of 7 (oneOf):
+    - FunctionTool
+    - WebSearchTool
+    - WebSearchPremiumTool
+    - CodeInterpreterTool
+    - ImageGenerationTool
+    - DocumentLibraryTool
+    - CustomConnector
+- `completion_args` (object or null, optional) — White-listed arguments from the completion API
+  - `stop` (CompletionArgsStop, optional)
+    - one of 3 (anyOf):
+      - string
+      - array of string
+      - null
+  - `presence_penalty` (number or null, optional)
+  - `frequency_penalty` (number or null, optional)
+  - `temperature` (number or null, optional)
+  - `top_p` (number or null, optional)
+  - `max_tokens` (integer or null, optional)
+  - `random_seed` (integer or null, optional)
+  - `prediction` (object or null, optional) — Enable users to specify an expected completion, optimizing response times by leveraging known or predictable content.
+    - `type` (string, optional)
+    - `content` (string, optional)
+  - `response_format` (object or null, optional) — Specify the format that the model must output. By default it will use `{ "type": "text" }`. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is in JSON. When using JSON mode you MUST also instruct the model to produce JSON yourself with a system or a user message. Setting to `{ "type": "json_schema" }` enables JSON schema mode, which guarantees the message the model generates is in JSON and follows the schema you provide.
+    - `type` (enum: 'text', 'json_object', 'json_schema', optional)
+    - `json_schema` (object or null, optional)
+  - `tool_choice` (enum: 'auto', 'none', 'any', 'required', optional)
+  - `reasoning_effort` (enum: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', optional)
+- `guardrails` (array of GuardrailConfig or null, optional)
+  - `block_on_error` (boolean, optional) — If true, return HTTP 403 and block request in the event of a server-side error
+  - `moderation_llm_v1` (object or null, optional)
+  - `moderation_llm_v2` (object or null, optional)
+- `name` (string or null, optional)
+- `description` (string or null, optional)
+- `metadata` (object or null, optional) — Custom type for metadata with embedded validation.
+- `agent_id` (string or null, optional)
+- `agent_version` (object, optional)
+  - one of 3 (anyOf):
+    - string
+    - integer
+    - null
+- `model` (string or null, optional)
 
 ### Responses
 
@@ -89,7 +139,36 @@ Run completion on the history of the conversation and the user entries. Return t
 
 `application/json` (required), schema `ConversationAppendRequest`
 
-- Not documented.
+- `inputs` (ConversationInputs, optional)
+  - one of 2 (anyOf):
+    - string
+    - InputEntries
+- `stream` (enum: False, optional)
+- `store` (boolean, optional) — Whether to store the results into our servers or not.
+- `handoff_execution` (enum: 'client', 'server', optional)
+- `completion_args` (CompletionArgs, optional) — Completion arguments that will be used to generate assistant responses. Can be overridden at each message request.
+  - `stop` (CompletionArgsStop, optional)
+    - one of 3 (anyOf):
+      - string
+      - array of string
+      - null
+  - `presence_penalty` (number or null, optional)
+  - `frequency_penalty` (number or null, optional)
+  - `temperature` (number or null, optional)
+  - `top_p` (number or null, optional)
+  - `max_tokens` (integer or null, optional)
+  - `random_seed` (integer or null, optional)
+  - `prediction` (object or null, optional) — Enable users to specify an expected completion, optimizing response times by leveraging known or predictable content.
+    - `type` (string, optional)
+    - `content` (string, optional)
+  - `response_format` (object or null, optional) — Specify the format that the model must output. By default it will use `{ "type": "text" }`. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is in JSON. When using JSON mode you MUST also instruct the model to produce JSON yourself with a system or a user message. Setting to `{ "type": "json_schema" }` enables JSON schema mode, which guarantees the message the model generates is in JSON and follows the schema you provide.
+    - `type` (enum: 'text', 'json_object', 'json_schema', optional)
+    - `json_schema` (object or null, optional)
+  - `tool_choice` (enum: 'auto', 'none', 'any', 'required', optional)
+  - `reasoning_effort` (enum: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', optional)
+- `tool_confirmations` (array of ToolCallConfirmation or null, optional)
+  - `tool_call_id` (string, required)
+  - `confirmation` (enum: 'allow', 'deny', required)
 
 ### Responses
 
@@ -167,7 +246,44 @@ Given a conversation_id and an id, recreate a conversation from this point and r
 
 `application/json` (required), schema `ConversationRestartRequest`
 
-- Not documented.
+- `inputs` (ConversationInputs, optional)
+  - one of 2 (anyOf):
+    - string
+    - InputEntries
+- `stream` (enum: False, optional)
+- `store` (boolean, optional) — Whether to store the results into our servers or not.
+- `handoff_execution` (enum: 'client', 'server', optional)
+- `completion_args` (CompletionArgs, optional) — Completion arguments that will be used to generate assistant responses. Can be overridden at each message request.
+  - `stop` (CompletionArgsStop, optional)
+    - one of 3 (anyOf):
+      - string
+      - array of string
+      - null
+  - `presence_penalty` (number or null, optional)
+  - `frequency_penalty` (number or null, optional)
+  - `temperature` (number or null, optional)
+  - `top_p` (number or null, optional)
+  - `max_tokens` (integer or null, optional)
+  - `random_seed` (integer or null, optional)
+  - `prediction` (object or null, optional) — Enable users to specify an expected completion, optimizing response times by leveraging known or predictable content.
+    - `type` (string, optional)
+    - `content` (string, optional)
+  - `response_format` (object or null, optional) — Specify the format that the model must output. By default it will use `{ "type": "text" }`. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is in JSON. When using JSON mode you MUST also instruct the model to produce JSON yourself with a system or a user message. Setting to `{ "type": "json_schema" }` enables JSON schema mode, which guarantees the message the model generates is in JSON and follows the schema you provide.
+    - `type` (enum: 'text', 'json_object', 'json_schema', optional)
+    - `json_schema` (object or null, optional)
+  - `tool_choice` (enum: 'auto', 'none', 'any', 'required', optional)
+  - `reasoning_effort` (enum: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', optional)
+- `guardrails` (array of GuardrailConfig or null, optional)
+  - `block_on_error` (boolean, optional) — If true, return HTTP 403 and block request in the event of a server-side error
+  - `moderation_llm_v1` (object or null, optional)
+  - `moderation_llm_v2` (object or null, optional)
+- `metadata` (object or null, optional) — Custom metadata for the conversation.
+- `from_entry_id` (string, required)
+- `agent_version` (object, optional) — Specific version of the agent to use when restarting. If not provided, uses the current version.
+  - one of 3 (anyOf):
+    - string
+    - integer
+    - null
 
 ### Responses
 
@@ -176,7 +292,7 @@ Given a conversation_id and an id, recreate a conversation from this point and r
 
 ## Create a conversation and append entries to it. {#operation-agents_api_v1_conversations_start_stream}
 
-`POST /v1/conversations#stream`
+`POST /v1/conversations`
 
 Create a new conversation, using a base model or an agent and append entries. Completion and tool executions are run and the response is appended to the conversation.Use the returned conversation_id to continue the conversation.
 
@@ -187,7 +303,57 @@ Create a new conversation, using a base model or an agent and append entries. Co
 
 `application/json` (required), schema `ConversationStreamRequest`
 
-- Not documented.
+- `inputs` (ConversationInputs, required)
+  - one of 2 (anyOf):
+    - string
+    - InputEntries
+- `stream` (enum: True, optional)
+- `store` (boolean or null, optional)
+- `handoff_execution` (enum: 'client', 'server', optional)
+- `instructions` (string or null, optional)
+- `tools` (array of object or null, optional)
+  - one of 7 (oneOf):
+    - FunctionTool
+    - WebSearchTool
+    - WebSearchPremiumTool
+    - CodeInterpreterTool
+    - ImageGenerationTool
+    - DocumentLibraryTool
+    - CustomConnector
+- `completion_args` (object or null, optional) — White-listed arguments from the completion API
+  - `stop` (CompletionArgsStop, optional)
+    - one of 3 (anyOf):
+      - string
+      - array of string
+      - null
+  - `presence_penalty` (number or null, optional)
+  - `frequency_penalty` (number or null, optional)
+  - `temperature` (number or null, optional)
+  - `top_p` (number or null, optional)
+  - `max_tokens` (integer or null, optional)
+  - `random_seed` (integer or null, optional)
+  - `prediction` (object or null, optional) — Enable users to specify an expected completion, optimizing response times by leveraging known or predictable content.
+    - `type` (string, optional)
+    - `content` (string, optional)
+  - `response_format` (object or null, optional) — Specify the format that the model must output. By default it will use `{ "type": "text" }`. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is in JSON. When using JSON mode you MUST also instruct the model to produce JSON yourself with a system or a user message. Setting to `{ "type": "json_schema" }` enables JSON schema mode, which guarantees the message the model generates is in JSON and follows the schema you provide.
+    - `type` (enum: 'text', 'json_object', 'json_schema', optional)
+    - `json_schema` (object or null, optional)
+  - `tool_choice` (enum: 'auto', 'none', 'any', 'required', optional)
+  - `reasoning_effort` (enum: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', optional)
+- `guardrails` (array of GuardrailConfig or null, optional)
+  - `block_on_error` (boolean, optional) — If true, return HTTP 403 and block request in the event of a server-side error
+  - `moderation_llm_v1` (object or null, optional)
+  - `moderation_llm_v2` (object or null, optional)
+- `name` (string or null, optional)
+- `description` (string or null, optional)
+- `metadata` (object or null, optional) — Custom type for metadata with embedded validation.
+- `agent_id` (string or null, optional)
+- `agent_version` (object, optional)
+  - one of 3 (anyOf):
+    - string
+    - integer
+    - null
+- `model` (string or null, optional)
 
 ### Responses
 
@@ -196,7 +362,7 @@ Create a new conversation, using a base model or an agent and append entries. Co
 
 ## Append new entries to an existing conversation. {#operation-agents_api_v1_conversations_append_stream}
 
-`POST /v1/conversations/{conversation_id}#stream`
+`POST /v1/conversations/{conversation_id}`
 
 Run completion on the history of the conversation and the user entries. Return the new created entries.
 
@@ -211,7 +377,36 @@ Run completion on the history of the conversation and the user entries. Return t
 
 `application/json` (required), schema `ConversationAppendStreamRequest`
 
-- Not documented.
+- `inputs` (ConversationInputs, optional)
+  - one of 2 (anyOf):
+    - string
+    - InputEntries
+- `stream` (enum: True, optional)
+- `store` (boolean, optional) — Whether to store the results into our servers or not.
+- `handoff_execution` (enum: 'client', 'server', optional)
+- `completion_args` (CompletionArgs, optional) — Completion arguments that will be used to generate assistant responses. Can be overridden at each message request.
+  - `stop` (CompletionArgsStop, optional)
+    - one of 3 (anyOf):
+      - string
+      - array of string
+      - null
+  - `presence_penalty` (number or null, optional)
+  - `frequency_penalty` (number or null, optional)
+  - `temperature` (number or null, optional)
+  - `top_p` (number or null, optional)
+  - `max_tokens` (integer or null, optional)
+  - `random_seed` (integer or null, optional)
+  - `prediction` (object or null, optional) — Enable users to specify an expected completion, optimizing response times by leveraging known or predictable content.
+    - `type` (string, optional)
+    - `content` (string, optional)
+  - `response_format` (object or null, optional) — Specify the format that the model must output. By default it will use `{ "type": "text" }`. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is in JSON. When using JSON mode you MUST also instruct the model to produce JSON yourself with a system or a user message. Setting to `{ "type": "json_schema" }` enables JSON schema mode, which guarantees the message the model generates is in JSON and follows the schema you provide.
+    - `type` (enum: 'text', 'json_object', 'json_schema', optional)
+    - `json_schema` (object or null, optional)
+  - `tool_choice` (enum: 'auto', 'none', 'any', 'required', optional)
+  - `reasoning_effort` (enum: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', optional)
+- `tool_confirmations` (array of ToolCallConfirmation or null, optional)
+  - `tool_call_id` (string, required)
+  - `confirmation` (enum: 'allow', 'deny', required)
 
 ### Responses
 
@@ -220,7 +415,7 @@ Run completion on the history of the conversation and the user entries. Return t
 
 ## Restart a conversation starting from a given entry. {#operation-agents_api_v1_conversations_restart_stream}
 
-`POST /v1/conversations/{conversation_id}/restart#stream`
+`POST /v1/conversations/{conversation_id}/restart`
 
 Given a conversation_id and an id, recreate a conversation from this point and run completion. A new conversation is returned with the new entries returned.
 
@@ -235,7 +430,44 @@ Given a conversation_id and an id, recreate a conversation from this point and r
 
 `application/json` (required), schema `ConversationRestartStreamRequest`
 
-- Not documented.
+- `inputs` (ConversationInputs, optional)
+  - one of 2 (anyOf):
+    - string
+    - InputEntries
+- `stream` (enum: True, optional)
+- `store` (boolean, optional) — Whether to store the results into our servers or not.
+- `handoff_execution` (enum: 'client', 'server', optional)
+- `completion_args` (CompletionArgs, optional) — Completion arguments that will be used to generate assistant responses. Can be overridden at each message request.
+  - `stop` (CompletionArgsStop, optional)
+    - one of 3 (anyOf):
+      - string
+      - array of string
+      - null
+  - `presence_penalty` (number or null, optional)
+  - `frequency_penalty` (number or null, optional)
+  - `temperature` (number or null, optional)
+  - `top_p` (number or null, optional)
+  - `max_tokens` (integer or null, optional)
+  - `random_seed` (integer or null, optional)
+  - `prediction` (object or null, optional) — Enable users to specify an expected completion, optimizing response times by leveraging known or predictable content.
+    - `type` (string, optional)
+    - `content` (string, optional)
+  - `response_format` (object or null, optional) — Specify the format that the model must output. By default it will use `{ "type": "text" }`. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is in JSON. When using JSON mode you MUST also instruct the model to produce JSON yourself with a system or a user message. Setting to `{ "type": "json_schema" }` enables JSON schema mode, which guarantees the message the model generates is in JSON and follows the schema you provide.
+    - `type` (enum: 'text', 'json_object', 'json_schema', optional)
+    - `json_schema` (object or null, optional)
+  - `tool_choice` (enum: 'auto', 'none', 'any', 'required', optional)
+  - `reasoning_effort` (enum: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', optional)
+- `guardrails` (array of GuardrailConfig or null, optional)
+  - `block_on_error` (boolean, optional) — If true, return HTTP 403 and block request in the event of a server-side error
+  - `moderation_llm_v1` (object or null, optional)
+  - `moderation_llm_v2` (object or null, optional)
+- `metadata` (object or null, optional) — Custom metadata for the conversation.
+- `from_entry_id` (string, required)
+- `agent_version` (object, optional) — Specific version of the agent to use when restarting. If not provided, uses the current version.
+  - one of 3 (anyOf):
+    - string
+    - integer
+    - null
 
 ### Responses
 

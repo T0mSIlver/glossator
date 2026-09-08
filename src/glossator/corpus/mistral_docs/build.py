@@ -11,16 +11,25 @@ import structlog
 
 from . import PINNED_REF, SITE_ORIGIN
 from .fences import strip_fenced_lines, strip_inline_code
-from .mdx import MdxNormalizer
+from .mdx import Dropped, MdxNormalizer
 from .models import MODELS_URL_PREFIX, load_catalog, render_capability_matrix, render_model_page
 from .openapi import OPENAPI_URL, OpenApiSource, load_openapi, render_api_pages
-from .routes import BreadcrumbMismatch, enumerate_routes, load_expected_breadcrumbs
+from .routes import (
+    BreadcrumbMismatch,
+    DroppedDuplicate,
+    enumerate_routes,
+    load_expected_breadcrumbs,
+)
 from .source import DocsCheckout
 from .writer import KIND_API, KIND_DOC, KIND_MODEL, CorpusPage, write_corpus
 
 log = structlog.get_logger(__name__)
 
 JSX_RESIDUE = re.compile(r"<[A-Z][A-Za-z]*[ >/]")
+
+
+class BuildError(RuntimeError):
+    """The corpus could not be built completely."""
 
 
 @dataclass
@@ -31,11 +40,12 @@ class BuildSummary:
     commit: str = ""
     openapi_md5: str = ""
     openapi_origin: str = ""
+    api_operations: int = 0
     pages_by_kind: Counter[str] = field(default_factory=Counter)
     pages_by_section: Counter[str] = field(default_factory=Counter)
     hidden_pages: int = 0
-    stripped_components: Counter[str] = field(default_factory=Counter)
-    stripped_pages: dict[str, int] = field(default_factory=dict)
+    dropped_elements: Counter[Dropped] = field(default_factory=Counter)
+    dropped_pages: dict[Dropped, list[str]] = field(default_factory=dict)
     breadcrumb_mismatches: list[BreadcrumbMismatch] = field(default_factory=list)
     breadcrumbs_unchecked: int = 0
     anchors_total: int = 0
@@ -45,8 +55,10 @@ class BuildSummary:
     partials_inlined: int = 0
     residue_pages: list[str] = field(default_factory=list)
     missing_operations: list[str] = field(default_factory=list)
+    raw_routes: int = 0
     redirected_routes: list[tuple[str, str]] = field(default_factory=list)
     unreachable_routes: list[tuple[str, str]] = field(default_factory=list)
+    dropped_duplicates: list[DroppedDuplicate] = field(default_factory=list)
     suppressed_anchors: int = 0
     duplicate_anchor_pages: list[str] = field(default_factory=list)
 
@@ -82,11 +94,21 @@ def build_corpus(
         if JSX_RESIDUE.search(body):
             summary.residue_pages.append(page.url_path)
 
+    if summary.missing_operations:
+        # An operation the site lists but the spec omits means the API pages are
+        # incomplete; shipping them with a zero exit status hides that.
+        raise BuildError(
+            f"{len(summary.missing_operations)} operations are on the site but not in the "
+            f"spec: {', '.join(summary.missing_operations[:5])}"
+        )
+
     license_path = checkout.path / "LICENSE"
-    license_text = license_path.read_text(encoding="utf-8") if license_path.is_file() else None
-    if license_text is None:
-        log.warning("upstream LICENSE not found", path=str(license_path))
-    write_corpus(pages, out_dir, checkout.commit, license_text)
+    if not license_path.is_file():
+        # Redistribution needs the upstream licence; without it the corpus must not
+        # be written, or stale cleanup would remove the copy already on disk.
+        raise BuildError(f"upstream LICENSE not found at {license_path}")
+
+    write_corpus(pages, out_dir, checkout.commit, license_path.read_text(encoding="utf-8"))
     log.info("corpus written", pages=len(pages), out_dir=str(out_dir))
     return summary
 
@@ -98,6 +120,8 @@ def _build_doc_pages(
     enumeration = enumerate_routes(checkout.path, expected)
     summary.breadcrumb_mismatches = enumeration.breadcrumb_mismatches
     summary.breadcrumbs_unchecked = len(enumeration.unchecked_breadcrumbs)
+    summary.raw_routes = enumeration.raw_route_count
+    summary.dropped_duplicates = enumeration.dropped_duplicates
     summary.redirected_routes = [
         (route.redirected_from, route.route)
         for route in enumeration.routes
@@ -111,9 +135,9 @@ def _build_doc_pages(
     for route in enumeration.routes:
         normalizer = MdxNormalizer(f"{SITE_ORIGIN}{route.route}")
         render = normalizer.render_page(checkout.path / route.source_path, route.title)
-        summary.stripped_components.update(render.stripped)
-        if render.stripped:
-            summary.stripped_pages[route.route] = sum(render.stripped.values())
+        summary.dropped_elements.update(render.dropped)
+        for dropped in render.dropped:
+            summary.dropped_pages.setdefault(dropped, []).append(route.route)
         summary.partials_inlined += render.partials
         summary.suppressed_anchors += render.suppressed_anchors
         _record_anchors(summary, route.route, len(render.anchors), KIND_DOC)
@@ -144,6 +168,7 @@ def _build_api_pages(
     summary.openapi_origin = openapi.origin
     result = render_api_pages(checkout.path, openapi)
     summary.missing_operations = result.missing_operations
+    summary.api_operations = result.operation_count
     pages: list[CorpusPage] = []
     for page, markdown in result.pages:
         _record_anchors(summary, page.url_path, len(page.operations), KIND_API)
@@ -210,6 +235,7 @@ def format_summary(summary: BuildSummary) -> str:
         f"  ref              {summary.ref}",
         f"  commit           {summary.commit}",
         f"  openapi          md5 {summary.openapi_md5} from {summary.openapi_origin}",
+        f"  api operations   {summary.api_operations}",
         f"  pages            {summary.total_pages}",
     ]
     lines.append("  by kind          " + _counter_line(summary.pages_by_kind))
@@ -223,16 +249,31 @@ def format_summary(summary: BuildSummary) -> str:
     )
     lines.append("  anchors by kind  " + _counter_line(summary.anchors_by_kind))
     lines.append(
-        f"  anchors dropped  {summary.suppressed_anchors} SectionTabs nested in JSX or "
-        "partials, which the site does not deep-link"
+        f"  anchors dropped  {summary.suppressed_anchors} SectionTabs with no sectionId or "
+        "nested in JSX or partials, which the site does not deep-link"
     )
 
     lines.append("")
-    lines.append("stripped components (kept their text children)")
-    if summary.stripped_components:
-        for name, count in summary.stripped_components.most_common():
-            lines.append(f"  {count:5d}  {name}")
-        lines.append(f"  on {len(summary.stripped_pages)} pages")
+    lines.append("route accounting")
+    lines.append(f"  {summary.raw_routes} directories with a page")
+    lines.append(f"  {len(summary.dropped_duplicates)} dropped as duplicates of another route")
+    for duplicate in summary.dropped_duplicates:
+        lines.append(
+            f"    {duplicate.source_path} ({duplicate.original_route} -> "
+            f"{duplicate.target_route}), kept {duplicate.retained_source_path}"
+        )
+    lines.append(f"  {len(summary.unreachable_routes)} dropped as unserved")
+    for source_path, target in summary.unreachable_routes:
+        lines.append(f"    {source_path} -> {target}")
+    lines.append(f"  {summary.pages_by_kind[KIND_DOC]} doc pages written")
+
+    lines.append("")
+    lines.append("dropped elements")
+    if summary.dropped_elements:
+        for dropped, count in summary.dropped_elements.most_common():
+            pages = summary.dropped_pages.get(dropped, [])
+            where = ", ".join(pages[:3]) + (f", +{len(pages) - 3} more" if len(pages) > 3 else "")
+            lines.append(f"  {count:5d}  {dropped.component}: {dropped.reason} ({where})")
     else:
         lines.append("  none")
 
@@ -255,23 +296,10 @@ def format_summary(summary: BuildSummary) -> str:
         lines.append("pages where upstream reuses a sectionId")
         lines += [f"  {url}" for url in summary.duplicate_anchor_pages]
 
-    if summary.unreachable_routes:
-        lines.append("")
-        lines.append("source pages excluded because their canonical url is unserved")
-        for source_path, target in summary.unreachable_routes:
-            lines.append(f"  {source_path} -> {target}")
-
     if summary.residue_pages:
         lines.append("")
         lines.append(f"pages with JSX residue: {len(summary.residue_pages)}")
         lines += [f"  {url}" for url in summary.residue_pages[:20]]
-
-    if summary.missing_operations:
-        lines.append("")
-        lines.append(
-            f"operations on the site but not in the spec: {len(summary.missing_operations)}"
-        )
-        lines += [f"  {name}" for name in summary.missing_operations[:20]]
 
     return "\n".join(lines)
 

@@ -11,7 +11,7 @@ from pathlib import Path
 import structlog
 
 from . import PINNED_REF
-from .build import build_corpus, format_summary
+from .build import BuildError, build_corpus, format_summary
 from .check import format_report, run_live_check
 from .openapi import OPENAPI_URL
 from .routes import fetch_search_docs
@@ -20,12 +20,26 @@ from .source import DEFAULT_CACHE_DIR, fetch_docs_repo, use_existing_checkout
 DEFAULT_OUT_DIR = Path("corpus/mistral-docs")
 
 
+class _Stderr:
+    """Write to whatever `sys.stderr` is at call time.
+
+    Binding the stream object once would keep writing to a stream the host has since
+    replaced or closed, which turns a log line into an unrelated crash.
+    """
+
+    def write(self, text: str) -> int:
+        return sys.stderr.write(text)
+
+    def flush(self) -> None:
+        sys.stderr.flush()
+
+
 def _configure_logging(verbose: bool) -> None:
     structlog.configure(
         wrapper_class=structlog.make_filtering_bound_logger(
             logging.DEBUG if verbose else logging.INFO
         ),
-        logger_factory=structlog.PrintLoggerFactory(sys.stderr),
+        logger_factory=structlog.PrintLoggerFactory(_Stderr()),  # type: ignore[arg-type]
     )
 
 
@@ -78,15 +92,19 @@ def _run_build(args: argparse.Namespace) -> int:
         checkout = use_existing_checkout(args.checkout, args.ref)
     else:
         checkout = fetch_docs_repo(args.ref, cache_dir=args.cache_dir)
-    summary = build_corpus(
-        checkout,
-        out_dir=args.out,
-        cache_dir=args.cache_dir.parent / "openapi",
-        search_docs=_search_docs_path(args),
-        openapi_offline=args.openapi_file,
-        openapi_url=args.openapi_url,
-        refresh_openapi=args.refresh_openapi,
-    )
+    try:
+        summary = build_corpus(
+            checkout,
+            out_dir=args.out,
+            cache_dir=args.cache_dir.parent / "openapi",
+            search_docs=_search_docs_path(args),
+            openapi_offline=args.openapi_file,
+            openapi_url=args.openapi_url,
+            refresh_openapi=args.refresh_openapi,
+        )
+    except BuildError as error:
+        print(f"build failed: {error}")
+        return 1
     print(format_summary(summary))
     return 1 if summary.residue_pages or summary.breadcrumb_mismatches else 0
 

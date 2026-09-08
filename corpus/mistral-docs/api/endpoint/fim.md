@@ -33,7 +33,7 @@ FIM completion.
 - `max_tokens` (integer or null, optional) — The maximum number of tokens to generate in the completion. The token count of your prompt plus `max_tokens` cannot exceed the model's context length.
 - `stream` (boolean, optional) — Whether to stream back partial progress. If set, tokens will be sent as data-only server-side events as they become available, with the stream terminated by a data: [DONE] message. Otherwise, the server will hold the request open until the timeout or until completion, with the response containing the full result as JSON.
 - `stop` (object, optional) — Stop generation if this token is detected. Or if one of these tokens is detected when providing an array
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - string
     - array of string
     - null

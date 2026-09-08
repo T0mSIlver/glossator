@@ -21,6 +21,6 @@ Traces are collected using [OpenTelemetry](https://opentelemetry.io/) and are su
 
 ## In this section
 
-- [Send traces](./traces/send-traces): instrument your application and start collecting trace data.
-- [Explore traces](./traces/explorer): search, filter, and inspect traces in Studio.
-- [Data redaction](./traces/data-redaction): review and configure what is masked before spans are exported.
+- [Send traces](https://docs.mistral.ai/studio/observability/traces/send-traces): instrument your application and start collecting trace data.
+- [Explore traces](https://docs.mistral.ai/studio/observability/traces/explorer): search, filter, and inspect traces in Studio.
+- [Data redaction](https://docs.mistral.ai/studio/observability/traces/data-redaction): review and configure what is masked before spans are exported.

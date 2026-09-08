@@ -56,6 +56,8 @@ Inside the sandbox, the agent runs a loop:
 4. **Report** back to the session view (commands, file changes, intermediate output).
 5. **Ask** if it needs clarification, then **wait** for your reply.
 
+![Flow diagram of the Vibe Code agent loop with five steps (Read, Plan, Act, Report, Ask) and a loop arrow back to Read](https://docs.mistral.ai/img/vibe_code_web_agent_loop.svg)
+
 > **Info**
 >
 > The loop continues until the task reaches a natural stopping point, the agent asks a question, or a limit is reached. See [Limits and lifecycle](https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle) for details.

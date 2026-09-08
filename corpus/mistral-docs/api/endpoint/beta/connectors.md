@@ -505,7 +505,7 @@ Delete credentials at the user level for a given connector.
 
 ## Get a connector. {#operation-connector_get_v1}
 
-`GET /v1/connectors/{connector_id_or_name}#idOrName`
+`GET /v1/connectors/{connector_id_or_name}`
 
 Get a connector by its ID or name.
 
@@ -525,7 +525,7 @@ Get a connector by its ID or name.
 
 ## Delete a connector. {#operation-connector_delete_v1}
 
-`DELETE /v1/connectors/{connector_id}#id`
+`DELETE /v1/connectors/{connector_id}`
 
 Delete a connector by its ID.
 
@@ -543,7 +543,7 @@ Delete a connector by its ID.
 
 ## Update a connector. {#operation-connector_update_v1}
 
-`PATCH /v1/connectors/{connector_id}#id`
+`PATCH /v1/connectors/{connector_id}`
 
 Update a connector by its ID.
 

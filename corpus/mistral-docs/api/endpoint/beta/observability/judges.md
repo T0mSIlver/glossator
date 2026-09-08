@@ -53,7 +53,7 @@ Reference for the Beta Observability Judges endpoints of the Mistral API, genera
 - `description` (string, required)
 - `model_name` (string, required)
 - `output` (object, required)
-  - one of (oneOf):
+  - one of 2 (oneOf):
     - JudgeClassificationOutput
       - `type` (string, optional)
       - `options` (array of JudgeClassificationOutputOption, required)
@@ -114,7 +114,7 @@ Reference for the Beta Observability Judges endpoints of the Mistral API, genera
 - `description` (string, required)
 - `model_name` (string, required)
 - `output` (object, required)
-  - one of (oneOf):
+  - one of 2 (oneOf):
     - JudgeClassificationOutput
       - `type` (string, optional)
       - `options` (array of JudgeClassificationOutputOption, required)

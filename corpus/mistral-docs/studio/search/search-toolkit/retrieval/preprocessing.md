@@ -240,7 +240,7 @@ query_engine = QueryEngine(
 
 ## See also {#see-also}
 
-- [Retrieval overview](../retrieval): retrieval pipeline architecture
-- [Retrievers](retrievers): vector and keyword search
-- [Rerankers](rerankers): refine results after retrieval
-- [Semantic cache](semantic-cache): cache preprocessed queries
+- [Retrieval overview](https://docs.mistral.ai/studio/search/search-toolkit/retrieval): retrieval pipeline architecture
+- [Retrievers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers): vector and keyword search
+- [Rerankers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers): refine results after retrieval
+- [Semantic cache](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/semantic-cache): cache preprocessed queries

@@ -29,5 +29,5 @@ Our system includes a built-in mode for JSON output, along with the capability t
 
 ## Structured Outputs Available {#structured-outputs}
 
-- [Custom](structured-output/custom): Use your own schema to enforce a specific format.
-- [JSON](structured-output/json_mode): To enforce a JSON output.
+- [Custom](https://docs.mistral.ai/studio/conversations/structured-output/custom): Use your own schema to enforce a specific format.
+- [JSON](https://docs.mistral.ai/studio/conversations/structured-output/json_mode): To enforce a JSON output.

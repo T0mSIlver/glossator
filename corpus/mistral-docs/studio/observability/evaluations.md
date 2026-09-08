@@ -306,16 +306,16 @@ Cell values render automatically based on type: plain text, JSON objects, and LL
 
 ## Guides {#guides}
 
-- [Judges](./evaluations/judges): use LLM-based scorers for criteria that rule-based functions can't capture.
-- [Datasets](./evaluations/datasets): structure your test cases as typed Python records.
-- [Use context objects](./evaluations/context-objects): `TaskContext`, `ScorerContext`, and `RunEvaluatorContext` reference.
-- [Set goals](./evaluations/goals): define pass/fail thresholds and direction hints on evaluator scores.
-- [Configure system params](./evaluations/system-params): externalize task configuration for side-by-side comparison in Studio.
-- [Combine evaluators](./evaluations/multiple-evaluators): combine rule-based and LLM-based scorers in a single run.
-- [Use run-level evaluators](./evaluations/run-evaluators): aggregate metrics (F1, custom gates) computed after all records are scored.
-- [Iterate locally](./evaluations/local-mode): iterate without uploading results to Studio.
-- [Reduce variance with multiple generations](./evaluations/num-generations): reduce variance by running each record N times.
-- [Retry failed records](./evaluations/retry-failed-records): rerun only the records that errored, patch results in place.
+- [Judges](https://docs.mistral.ai/studio/observability/evaluations/judges): use LLM-based scorers for criteria that rule-based functions can't capture.
+- [Datasets](https://docs.mistral.ai/studio/observability/evaluations/datasets): structure your test cases as typed Python records.
+- [Use context objects](https://docs.mistral.ai/studio/observability/evaluations/context-objects): `TaskContext`, `ScorerContext`, and `RunEvaluatorContext` reference.
+- [Set goals](https://docs.mistral.ai/studio/observability/evaluations/goals): define pass/fail thresholds and direction hints on evaluator scores.
+- [Configure system params](https://docs.mistral.ai/studio/observability/evaluations/system-params): externalize task configuration for side-by-side comparison in Studio.
+- [Combine evaluators](https://docs.mistral.ai/studio/observability/evaluations/multiple-evaluators): combine rule-based and LLM-based scorers in a single run.
+- [Use run-level evaluators](https://docs.mistral.ai/studio/observability/evaluations/run-evaluators): aggregate metrics (F1, custom gates) computed after all records are scored.
+- [Iterate locally](https://docs.mistral.ai/studio/observability/evaluations/local-mode): iterate without uploading results to Studio.
+- [Reduce variance with multiple generations](https://docs.mistral.ai/studio/observability/evaluations/num-generations): reduce variance by running each record N times.
+- [Retry failed records](https://docs.mistral.ai/studio/observability/evaluations/retry-failed-records): rerun only the records that errored, patch results in place.
 
 ## FAQ {#faq}
 
@@ -329,12 +329,12 @@ Yes. Both async and sync functions work for tasks and scorers. The SDK detects w
 
 ### How do I use an LLM as a judge? {#how-do-i-use-an-llm-as-a-judge}
 
-An evaluator is a function: call the Mistral API inside your scorer and return a numeric score. See [Judges](./evaluations/judges) for detailed examples including structured output and variance reduction.
+An evaluator is a function: call the Mistral API inside your scorer and return a numeric score. See [Judges](https://docs.mistral.ai/studio/observability/evaluations/judges) for detailed examples including structured output and variance reduction.
 
 ### Can I run multiple evaluators in a single run? {#can-i-run-multiple-evaluators-in-a-single-run}
 
-Yes. Pass a list to `evaluators`. The SDK runs all of them and computes statistics independently per evaluator. See [Combine evaluators](./evaluations/multiple-evaluators) for details.
+Yes. Pass a list to `evaluators`. The SDK runs all of them and computes statistics independently per evaluator. See [Combine evaluators](https://docs.mistral.ai/studio/observability/evaluations/multiple-evaluators) for details.
 
 ### How do I compare two model versions? {#how-do-i-compare-two-model-versions}
 
-Run the same evaluation twice, each time with a different `System` object. Studio displays the runs side by side with their system configs. See [Configure system params](./evaluations/system-params) for details.
+Run the same evaluation twice, each time with a different `System` object. Studio displays the runs side by side with their system configs. See [Configure system params](https://docs.mistral.ai/studio/observability/evaluations/system-params) for details.

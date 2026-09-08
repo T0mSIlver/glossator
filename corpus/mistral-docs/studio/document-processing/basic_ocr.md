@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 Use the Document AI OCR processor to extract text and structured content from PDF documents and images. The `mistral-ocr-latest` alias points to our latest OCR model.
 
+![Basic OCR Graph](https://docs.mistral.ai/img/basic_ocr_graph.png)
+
 ## Before you start {#before-you-start}
 
 ### Key features
@@ -844,8 +846,8 @@ The output is a JSON object that contains the extracted text, image bounding box
 > **Note**
 >
 > When OCR extracts images and tables, the Markdown output uses placeholders such as:
-> - `![img-0.jpeg](img-0.jpeg)`
-> - `[tbl-3.html](tbl-3.html)`
+> - `![img-0.jpeg](https://docs.mistral.ai/studio/document-processing/img-0.jpeg)`
+> - `[tbl-3.html](https://docs.mistral.ai/studio/document-processing/tbl-3.html)`
 >
 > Use the `images` and `tables` fields to map each placeholder to the extracted image or table.
 
@@ -1124,8 +1126,8 @@ The output is a JSON object that contains the extracted text, image bounding box
 > **Note**
 >
 > When OCR extracts images and tables, the Markdown output uses placeholders such as:
-> - `![img-0.jpeg](img-0.jpeg)`
-> - `[tbl-3.html](tbl-3.html)`
+> - `![img-0.jpeg](https://docs.mistral.ai/studio/document-processing/img-0.jpeg)`
+> - `[tbl-3.html](https://docs.mistral.ai/studio/document-processing/tbl-3.html)`
 >
 > Use the `images` and `tables` fields to map each placeholder to the extracted image or table.
 
@@ -1458,7 +1460,7 @@ curl https://api.mistral.ai/v1/ocr \
 
 ## OCR at scale {#ocr-at-scale}
 
-For high-volume OCR workloads, use the [Batch Inference service](https://docs.mistral.ai/studio/batch-processing) to process documents in parallel. For structured outputs, use [Annotations](annotations).
+For high-volume OCR workloads, use the [Batch Inference service](https://docs.mistral.ai/studio/batch-processing) to process documents in parallel. For structured outputs, use [Annotations](https://docs.mistral.ai/studio/document-processing/annotations).
 
 ## Cookbooks {#cookbooks}
 

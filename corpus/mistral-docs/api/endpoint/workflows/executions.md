@@ -64,7 +64,7 @@ Reference for the Workflows Executions endpoints of the Mistral API, generated f
 
 - `name` (string, required) — The name of the signal to send
 - `input` (object, optional) — Input data for the signal, matching its schema
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - NetworkEncodedInput
       - `b64payload` (string, required) — The encoded payload
       - `encoding_options` (array of EncodedPayloadOptions, optional) — The encoding of the payload
@@ -94,7 +94,7 @@ Reference for the Workflows Executions endpoints of the Mistral API, generated f
 
 - `name` (string, required) — The name of the query to request
 - `input` (object, optional) — Input data for the query, matching its schema
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - NetworkEncodedInput
       - `b64payload` (string, required) — The encoded payload
       - `encoding_options` (array of EncodedPayloadOptions, optional) — The encoding of the payload
@@ -217,7 +217,7 @@ Reference for the Workflows Executions endpoints of the Mistral API, generated f
 
 - `name` (string, required) — The name of the update to request
 - `input` (object, optional) — Input data for the update, matching its schema
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - NetworkEncodedInput
       - `b64payload` (string, required) — The encoded payload
       - `encoding_options` (array of EncodedPayloadOptions, optional) — The encoding of the payload

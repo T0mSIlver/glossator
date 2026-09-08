@@ -72,7 +72,11 @@ Reference for the Workflows Schedules endpoints of the Mistral API, generated fr
     - `comment` (string or null, optional)
   - `start_at` (string (date-time) or null, optional) — Time after which the first action may be run.
   - `end_at` (string (date-time) or null, optional) — Time after which no more actions will be run.
-  - `jitter` (string (duration) or null, optional) — Jitter to apply each action. An action's scheduled time will be incremented by a random value between 0 and this value if present (but not past the next schedule).
+  - `jitter` (string (duration) or null, optional) — Jitter to apply each action.
+
+    An action's scheduled time will be incremented by a random value between 0
+    and this value if present (but not past the next schedule).
+
   - `time_zone_name` (string or null, optional) — IANA time zone name, for example ``US/Central``.
   - `policy` (SchedulePolicy, optional) — Policy for the schedule.
     - `catchup_window_seconds` (integer, optional) — After a Temporal server is unavailable, amount of time in seconds in the past to execute missed actions.
@@ -165,7 +169,11 @@ Reference for the Workflows Schedules endpoints of the Mistral API, generated fr
     - `comment` (string or null, optional)
   - `start_at` (string (date-time) or null, optional) — Time after which the first action may be run.
   - `end_at` (string (date-time) or null, optional) — Time after which no more actions will be run.
-  - `jitter` (string (duration) or null, optional) — Jitter to apply each action. An action's scheduled time will be incremented by a random value between 0 and this value if present (but not past the next schedule).
+  - `jitter` (string (duration) or null, optional) — Jitter to apply each action.
+
+    An action's scheduled time will be incremented by a random value between 0
+    and this value if present (but not past the next schedule).
+
   - `time_zone_name` (string or null, optional) — IANA time zone name, for example ``US/Central``.
   - `policy` (SchedulePolicy, optional) — Policy for the schedule.
     - `catchup_window_seconds` (integer, optional) — After a Temporal server is unavailable, amount of time in seconds in the past to execute missed actions.

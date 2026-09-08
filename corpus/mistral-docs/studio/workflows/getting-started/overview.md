@@ -58,6 +58,8 @@ You can call a workflow you build from:
 
 Workflows runs in **hybrid mode**: we host the orchestrator, and your workflow and activity code runs in your environment.
 
+![Hybrid mode architecture diagram](https://docs.mistral.ai/img/workflows_hybrid_mode.svg)
+
 **Your environment** holds the code you write (typically in your repository) and the workers that execute it. Workers run on your laptop for local development, or in your own infrastructure such as Kubernetes or virtual machines for production.
 
 **The Studio environment** holds the orchestrator (state, history, task dispatch) behind a public REST API and the Studio UI. Workers connect outbound; the orchestrator does not initiate connections into your network.

@@ -64,9 +64,13 @@ class GreetingWorkflow(workflows.InteractiveWorkflow):
         )
 ```
 
+![The greeting workflow running in Vibe Work, showing an assistant message asking for the user's name.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_getting-started_greeting-workflow.png)
+
 The greeting workflow in Vibe Work.
 
 `send_assistant_message()` displays a message to the user in the Vibe Work chat interface. It also accepts an optional `canvas` keyword argument to include a `CanvasResource` alongside the text (see [Canvas](https://docs.mistral.ai/studio/workflows/interacting-with-workflows/conversational_workflows/canvas#canvas-editing-human-in-the-loop)). `ChatInput()` pauses the workflow and waits for the user to respond. You can optionally pass a `prompt` to `ChatInput()` to provide additional context (in placeholder) and `suggestions` to offer pre-filled options that users can select directly.
+
+![The chat input UI state in Vibe Work, showing the message input field waiting for a user response.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_chat-input.png)
 
 Chat input waiting for user response in Vibe Work.
 

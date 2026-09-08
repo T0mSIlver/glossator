@@ -617,6 +617,8 @@ For full API details, see the [Libraries API reference](https://docs.mistral.ai/
 
 Document Library is a built-in [agent tool](https://docs.mistral.ai/studio/agents/agent-tools#built-in-tools) that lets agents search through your Libraries. To use it, create an agent with the `document_library` tool and pass the `library_ids` you want it to access.
 
+![document_library_graph](https://docs.mistral.ai/img/document_library_connector.png)
+
 **Python**
 
 ```py

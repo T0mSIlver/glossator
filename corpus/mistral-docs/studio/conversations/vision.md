@@ -418,6 +418,10 @@ The chart is a bar chart titled 'France's Social Divide,' comparing socio-econom
 
 **Compare images**
 
+![chat_completions_graph](https://docs.mistral.ai/img/eiffel-tower-paris.jpg)
+
+![chat_completions_graph](https://docs.mistral.ai/img/stadium-paris.jpeg)
+
 **cURL**
 
 ```bash
@@ -492,6 +496,8 @@ The two images you provided both feature the Eiffel Tower, but they depict diffe
 In summary, the first image focuses on the architectural details of the Eiffel Tower, while the second image situates the Eiffel Tower within a lively, crowded sports event setting.
 
 **Transcribe**
+
+![chat_completions_graph](https://docs.mistral.ai/img/food-receipt.jpg)
 
 **cURL**
 
@@ -578,6 +584,8 @@ https://clover.com/privacy
 
 **OCR Old Documents**
 
+![chat_completions_graph](https://docs.mistral.ai/img/old-page.jpg)
+
 **cURL**
 
 ```bash
@@ -642,6 +650,8 @@ Jam & Co.
 J.F.
 
 **OCR with Structured output**
+
+![chat_completions_graph](https://docs.mistral.ai/img/food-receipt.jpg)
 
 **cURL**
 

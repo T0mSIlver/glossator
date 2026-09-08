@@ -58,7 +58,15 @@ Please contact us if you need to increase these storage limits.
 - `expiry` (integer or null, optional)
 - `visibility` (object, optional)
 - `purpose` (enum: 'fine-tune', 'batch', 'ocr', optional)
-- `file` (File, required) — The File object (not file name) to be uploaded. To upload a file and specify a custom file name you should format your request as such: ```bash file=@path/to/your/file.jsonl;filename=custom_name.jsonl ``` Otherwise, you can just keep the original file name: ```bash file=@path/to/your/file.jsonl ```
+- `file` (File, required) — The File object (not file name) to be uploaded. To upload a file and specify a custom file name you should format your request as such:
+
+  ```bash
+  file=@path/to/your/file.jsonl;filename=custom_name.jsonl
+  ```
+  Otherwise, you can just keep the original file name:
+  ```bash
+  file=@path/to/your/file.jsonl
+  ```
 
 ### Responses
 

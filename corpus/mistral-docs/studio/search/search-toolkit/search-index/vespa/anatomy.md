@@ -10,7 +10,7 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 # Anatomy of a Vespa application
 
-This page explains the concepts that make up a Vespa application: the application package, schemas, fields, ranking profiles, and query profiles. To learn how to create and configure these, see [Manage schema](migrations).
+This page explains the concepts that make up a Vespa application: the application package, schemas, fields, ranking profiles, and query profiles. To learn how to create and configure these, see [Manage schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations).
 
 ## Application package {#application-package}
 
@@ -26,7 +26,7 @@ A Vespa application package is a set of configuration files that tell the cluste
         └── types/root.xml        # Query profile types
 ```
 
-You never write these files by hand. They are built in memory from your [migrations](migrations) and uploaded to the Vespa cluster. You can inspect them with `mistral-vespa generate` (see [CLI reference](cli)).
+You never write these files by hand. They are built in memory from your [migrations](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations) and uploaded to the Vespa cluster. You can inspect them with `mistral-vespa generate` (see [CLI reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli)).
 
 ## Migrations: Build the application package {#migrations-building-the-application-package}
 
@@ -72,7 +72,7 @@ Each schema also declares an **indexing mode** that controls how documents are l
 | `IndexingMode.DOCUMENT_PER_CHUNK` | **Recommended.** One Vespa document per chunk, each individually addressable by its deterministic id. |
 | `IndexingMode.SINGLE_DOCUMENT` | Legacy: one Vespa document per source, with chunks packed as arrays. **Deprecated**. Removed before 1.0.0. |
 
-With `DOCUMENT_PER_CHUNK`, `create_schema()` injects the standard chunk fields (content, embedding, identity, metadata) automatically. See the [Document model](https://docs.mistral.ai/studio/search/search-toolkit/concepts/document-model) for how chunks are identified, [Manage Schema](migrations) for how to set the mode, and the [Migration helpers reference](migration-helpers#creating-schemas) for the full `create_schema()` signature.
+With `DOCUMENT_PER_CHUNK`, `create_schema()` injects the standard chunk fields (content, embedding, identity, metadata) automatically. See the [Document model](https://docs.mistral.ai/studio/search/search-toolkit/concepts/document-model) for how chunks are identified, [Manage Schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations) for how to set the mode, and the [Migration helpers reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migration-helpers#creating-schemas) for the full `create_schema()` signature.
 
 ## Fields {#fields}
 
@@ -89,7 +89,7 @@ Fields define what data a document holds and how that data is used for indexing 
 | `BoolField` | Stored boolean, not ranked | attribute + summary | None |
 | `LanguageField` | Per-document language tag (RFC 3066) | index | None |
 
-Fields can be single-valued or multi-dimensional (arrays). Set `multi_dimensional=True` for an array field, for example a list of tags or section embeddings. See the [Migration helpers reference](migration-helpers#field-types) for every field type's constructor signature.
+Fields can be single-valued or multi-dimensional (arrays). Set `multi_dimensional=True` for an array field, for example a list of tags or section embeddings. See the [Migration helpers reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migration-helpers#field-types) for every field type's constructor signature.
 
 ### Default fieldset
 
@@ -140,9 +140,9 @@ The plugin generates one query profile per schema (named via `default_query_prof
 - The `weighted-rank2` ranking profile as default
 - Query type fields for function weights
 
-For more, see [Manage ranking](query-profiles) and the [Vespa documentation on query profiles](https://docs.vespa.ai/en/querying/query-profiles.html).
+For more, see [Manage ranking](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles) and the [Vespa documentation on query profiles](https://docs.vespa.ai/en/querying/query-profiles.html).
 
 ## See also {#see-also}
 
-- **[Manage schema](migrations)**: how to create schemas, fields, and ranking via migrations
-- **[Manage ranking](query-profiles)**: configure ranking at query time
+- **[Manage schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations)**: how to create schemas, fields, and ranking via migrations
+- **[Manage ranking](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles)**: configure ranking at query time

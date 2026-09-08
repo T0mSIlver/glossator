@@ -55,17 +55,10 @@ packages = ["src/entrypoints", "src/glossator", "src/search_app", "src/examples"
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
-# Only Python: ruff also formats code blocks in markdown, and the vendored corpus
-# and the skill notes are not ours to rewrite.
-include = ["*.py", "*.pyi", "pyproject.toml"]
-# Starter-template code, owned elsewhere; formatting it here would churn their diffs.
-extend-exclude = [
-    "src/entrypoints",
-    "src/examples",
-    "src/search_app",
-    "tests/test_mcp_tools.py",
-    "tests/test_search_roundtrip.py",
-]
+# This configuration defines the lint and format rules for the corpus adapter. Ruff
+# also formats Python code blocks embedded in Markdown, which would rewrite prose
+# files, so the scope is stated as explicit Python paths.
+include = ["src/glossator/**/*.py", "tests/corpus/**/*.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
@@ -81,11 +74,11 @@ strict = true
 mypy_path = "src"
 explicit_package_bases = true
 namespace_packages = true
-
-[[tool.mypy.overrides]]
-# The starter template's modules predate this configuration and are owned elsewhere.
-module = ["entrypoints.*", "search_app.*", "examples.*"]
-ignore_errors = true
+# Same scope as Ruff above: the strict profile is defined for the corpus adapter.
+# The other packages under `src/` are generated and carry no annotations, so strict
+# mode reports only missing-annotation noise there.
+files = ["src/glossator", "tests/corpus"]
+exclude = "^src/(entrypoints|examples|search_app)/"
 
 [[tool.mypy.overrides]]
 module = ["mistralai_search_toolkit.*", "fastmcp.*"]

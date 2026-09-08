@@ -84,6 +84,8 @@ class ExpenseSubmissionWorkflow(workflows.InteractiveWorkflow):
         )
 ```
 
+![A structured form input rendered in Vibe Work.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_structured-form-input_expense-form.png)
+
 A structured form input rendered in Vibe Work.
 
 ### Field types {#field-types}
@@ -112,6 +114,8 @@ email: str = TextField(
 )
 ```
 
+![A text field rendered in Vibe Work.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_text-field.png)
+
 Text field in Vibe Work.
 
 ### NumberField {#numberfield}
@@ -132,6 +136,8 @@ price: float = NumberField(
 )
 ```
 
+![A number field rendered in Vibe Work.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_number-field.png)
+
 Number field in Vibe Work.
 
 ### DateTimeField {#datetimefield}
@@ -147,6 +153,8 @@ scheduled_at: datetime = DateTimeField(
 )
 ```
 
+![A date-time picker field rendered in Vibe Work.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_datetime-field.png)
+
 Date-time field in Vibe Work.
 
 ### DateField {#datefield}
@@ -161,6 +169,8 @@ scheduled_at: date = DateField(
     prefilled_value="2025-01-15",  # ISO 8601 date string
 )
 ```
+
+![A date picker field rendered in Vibe Work.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_date-field.png)
 
 Date field in Vibe Work.
 
@@ -187,6 +197,10 @@ status: str = SingleChoice(
 )
 ```
 
+![A single-choice dropdown rendered in Vibe Work, showing priority options.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_single-choice-field_priority.png)
+
+![A single-choice dropdown rendered in Vibe Work, showing status options.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_single-choice-field_status.png)
+
 Single-choice field in Vibe Work.
 
 ### MultiChoice {#multichoice}
@@ -212,6 +226,10 @@ colors: list[str] = MultiChoice(
 )
 ```
 
+![A multi-choice field rendered in Vibe Work, showing tag options.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_multi-choice-field_tags.png)
+
+![A multi-choice field rendered in Vibe Work, showing color options.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_multi-choice-field_colors.png)
+
 Multi-choice field in Vibe Work.
 
 ### FileField {#filefield}
@@ -235,6 +253,10 @@ attachments: list[FileWithMetadataValue] = FileField(
     description="Upload files", multiple=True, include_metadata=True
 )
 ```
+
+![A single file upload field rendered in Vibe Work.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_file-field_document.png)
+
+![A multiple file upload field rendered in Vibe Work, showing attached files.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_file-field_attachements.png)
 
 File upload field in Vibe Work.
 
@@ -291,6 +313,8 @@ class TypeSelectionWorkflow(workflows.InteractiveWorkflow):
         )
 ```
 
+![A confirmation input rendered in Vibe Work, showing buttons for each option.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_confirmation.png)
+
 Confirmation input in Vibe Work.
 
 | Property      | Type                                   | Description                                                  |
@@ -336,6 +360,8 @@ class ApprovalWorkflow(workflows.InteractiveWorkflow):
                 content=[workflows_mistralai.TextOutput(text="Action cancelled.")]
             )
 ```
+
+![An accept/decline confirmation rendered in Vibe Work, showing two buttons for accept and decline.](https://docs.mistral.ai/img/conversational_workflows/conversational-workflow_accept-decline-confirmation.png)
 
 Accept/decline confirmation in Vibe Work.
 

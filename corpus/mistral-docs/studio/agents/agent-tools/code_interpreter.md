@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 Code Interpreter adds the capability to safely execute code in an isolated container, this built-in [tool](https://docs.mistral.ai/studio/agents/agent-tools#built-in-tools) allows Agents to run code at any point on demand, practical to draw graphs, data analysis, mathematical operations, code validation, and much more.
 
+![code_interpreter_graph](https://docs.mistral.ai/img/code_interpreter_connector.png)
+
 > **Warning**
 >
 > `code_interpreter` works with the [Conversations API](https://docs.mistral.ai/studio/connectors/conversations) (`/v1/conversations`) and the Agents API. It isn't **supported** in the Chat Completions API (`/v1/chat/completions`). To use it with an Agent, create the Agent with `code_interpreter`, then start the conversation with `/v1/conversations`.

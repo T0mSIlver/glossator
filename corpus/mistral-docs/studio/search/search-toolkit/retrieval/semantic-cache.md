@@ -322,7 +322,7 @@ similarity_threshold=0.90
 
 ## See also {#see-also}
 
-- [Retrieval overview](../retrieval): retrieval pipeline architecture
-- [Retrievers](retrievers): vector search
-- [Rerankers](rerankers): refine results after retrieval
-- [Query preprocessing](preprocessing): improve queries before retrieval
+- [Retrieval overview](https://docs.mistral.ai/studio/search/search-toolkit/retrieval): retrieval pipeline architecture
+- [Retrievers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers): vector search
+- [Rerankers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers): refine results after retrieval
+- [Query preprocessing](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/preprocessing): improve queries before retrieval

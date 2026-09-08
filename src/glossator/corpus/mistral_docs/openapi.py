@@ -20,6 +20,7 @@ import structlog
 import yaml
 
 from . import SITE_ORIGIN
+from .fences import fence_opening
 
 log = structlog.get_logger(__name__)
 
@@ -37,10 +38,16 @@ class OperationRef:
     element_id: str
     method: str
     path: str
+    """The spec key, which may carry a `#stream`-style suffix disambiguating operations."""
     operation_id: str
     summary: str
     description: str
     tag: str
+
+    @property
+    def request_path(self) -> str:
+        """The path a client actually calls: a fragment never reaches the server."""
+        return self.path.split("#", 1)[0]
 
 
 @dataclass(frozen=True)
@@ -151,12 +158,14 @@ class SpecRenderer:
         spec_operation = self._find_operation(ref)
         heading = ref.summary or ref.operation_id
         lines = [f"## {heading} {{#{ref.element_id}}}", ""]
-        lines.append(f"`{ref.method} {ref.path}`")
+        lines.append(f"`{ref.method} {ref.request_path}`")
         if spec_operation is None:
             self.missing_operations.append(ref.operation_id)
             lines += ["", "This operation is listed on the site but absent from the spec."]
             return lines
-        description = str(spec_operation.get("description") or ref.description or "").strip()
+        description = _links_absolute(
+            str(spec_operation.get("description") or ref.description or "").strip()
+        )
         if description and description != heading:
             lines += ["", description]
         lines += ["", f"- Operation id: `{ref.operation_id}`"]
@@ -180,8 +189,6 @@ class SpecRenderer:
             lines += ["", "### Responses", ""]
             lines += responses
         return lines
-
-    # -- spec lookup ---------------------------------------------------------
 
     def _find_operation(self, ref: OperationRef) -> dict[str, Any] | None:
         path_item = self.spec.get("paths", {}).get(ref.path)
@@ -235,8 +242,6 @@ class SpecRenderer:
             node = node[key]
         return node
 
-    # -- pieces --------------------------------------------------------------
-
     def _collect_parameters(self, ref: OperationRef, spec_operation: dict[str, Any]) -> list[str]:
         raw: list[Any] = list(spec_operation.get("parameters") or [])
         path_item = self.spec.get("paths", {}).get(ref.path)
@@ -252,10 +257,11 @@ class SpecRenderer:
             annotations.append("required" if parameter.get("required") else "optional")
             annotations.append(f"in {parameter.get('in', 'query')}")
             line = f"- `{parameter.get('name', '?')}` ({', '.join(a for a in annotations if a)})"
-            description = _one_line(parameter.get("description") or "")
-            if description:
-                line += f" — {description}"
+            summary, continuation = _description_block(parameter.get("description") or "", "")
+            if summary:
+                line += f" — {summary}"
             lines.append(line)
+            lines += continuation
         return lines
 
     def _render_request_body(self, spec_operation: dict[str, Any]) -> list[str]:
@@ -305,7 +311,38 @@ class SpecRenderer:
             lines.append(line)
         return lines
 
-    # -- schema summary ------------------------------------------------------
+    def _flatten_all_of(
+        self, schema: dict[str, Any], seen: frozenset[str]
+    ) -> tuple[dict[str, Any], frozenset[str]]:
+        """Merge an `allOf` into one object.
+
+        The spec composes request bodies out of `allOf` branches; without merging them
+        the properties are simply absent and the page says the body is undocumented.
+        """
+        branches = schema.get("allOf")
+        if not isinstance(branches, list) or not branches:
+            return schema, seen
+        merged: dict[str, Any] = {key: value for key, value in schema.items() if key != "allOf"}
+        properties: dict[str, Any] = dict(merged.get("properties") or {})
+        required: list[str] = list(merged.get("required") or [])
+        for branch in branches:
+            resolved, seen = self.resolve(branch, seen)
+            if not isinstance(resolved, dict):
+                continue
+            resolved, seen = self._flatten_all_of(resolved, seen)
+            properties.update(resolved.get("properties") or {})
+            for name in resolved.get("required") or []:
+                if name not in required:
+                    required.append(name)
+            for key in ("type", "description", "title", "enum", "items", "oneOf", "anyOf"):
+                if key not in merged and key in resolved:
+                    merged[key] = resolved[key]
+        if properties:
+            merged["properties"] = properties
+            merged.setdefault("type", "object")
+        if required:
+            merged["required"] = required
+        return merged, seen
 
     def describe_schema(
         self, schema: Any, depth: int, seen: frozenset[str], indent: str = ""
@@ -314,11 +351,12 @@ class SpecRenderer:
         schema, seen = self.resolve(schema, seen)
         if not isinstance(schema, dict):
             return []
+        schema, seen = self._flatten_all_of(schema, seen)
         combined = _combinator(schema)
         if combined is not None:
             keyword, options = combined
-            combined_lines = [f"{indent}- one of ({keyword}):"]
-            for option in options[:6]:
+            combined_lines = [f"{indent}- one of {len(options)} ({keyword}):"]
+            for option in options:
                 option_schema, option_seen = self.resolve(option, seen)
                 name = _ref_name(option) or _type_name(option_schema, self)
                 combined_lines.append(f"{indent}  - {name}")
@@ -347,14 +385,16 @@ class SpecRenderer:
             annotations.append("required" if name in required else "optional")
             line = f"{indent}- `{name}` ({', '.join(a for a in annotations if a)})"
             raw = raw_property if isinstance(raw_property, dict) else {}
-            description = _one_line(
+            summary, continuation = _description_block(
                 raw.get("description")
                 or (child.get("description") if isinstance(child, dict) else "")
-                or ""
+                or "",
+                indent,
             )
-            if description:
-                line += f" — {description}"
+            if summary:
+                line += f" — {summary}"
             lines.append(line)
+            lines += continuation
             if depth + 1 < MAX_SCHEMA_DEPTH:
                 lines += self.describe_schema(child, depth + 1, child_seen, indent + "  ")
         return lines
@@ -440,6 +480,51 @@ def _type_name(schema: Any, renderer: SpecRenderer) -> str:
     return (str(title) if isinstance(title, str) else "object") + suffix
 
 
+def _links_absolute(text: str) -> str:
+    """Make site-relative markdown links absolute."""
+    return _RELATIVE_LINK.sub(rf"\1{SITE_ORIGIN}/", text)
+
+
 def _one_line(text: str) -> str:
     """Flatten to one line and make site-relative markdown links absolute."""
-    return _RELATIVE_LINK.sub(rf"\1{SITE_ORIGIN}/", " ".join(str(text).split()))
+    return _links_absolute(" ".join(str(text).split()))
+
+
+def _description_block(text: str, indent: str) -> tuple[str, list[str]]:
+    """Split a description into a bullet summary and an indented continuation block.
+
+    Several descriptions in the spec carry fenced examples. Flattening those onto the
+    bullet produces an unreadable line and a fence that no longer opens at a line
+    start, so anything past the first paragraph is kept as list-item continuation.
+    """
+    normalized = str(text).replace("\r\n", "\n").replace("\r", "\n")
+    lines = _trim_blank_edges(normalized.split("\n"))
+    if not lines:
+        return "", []
+    head: list[str] = []
+    cursor = 0
+    while cursor < len(lines) and lines[cursor].strip() and fence_opening(lines[cursor]) is None:
+        head.append(lines[cursor])
+        cursor += 1
+    summary = _one_line(" ".join(head))
+    rest = _trim_blank_edges(lines[cursor:])
+    if not rest:
+        return summary, []
+    body_indent = indent + "  "
+    continuation = [f"{body_indent}{line}".rstrip() for line in _dedent(rest)]
+    return summary, ["", *continuation, ""]
+
+
+def _trim_blank_edges(lines: list[str]) -> list[str]:
+    start, end = 0, len(lines)
+    while start < end and not lines[start].strip():
+        start += 1
+    while end > start and not lines[end - 1].strip():
+        end -= 1
+    return lines[start:end]
+
+
+def _dedent(lines: list[str]) -> list[str]:
+    indents = [len(line) - len(line.lstrip(" ")) for line in lines if line.strip()]
+    common = min(indents) if indents else 0
+    return [line[common:] if line.strip() else line for line in lines]

@@ -18,6 +18,8 @@ Browser clients cannot store long-lived API keys safely and cannot set `Authoriz
 2. Your backend passes the token to the browser, for example in a REST response.
 3. The browser opens the WebSocket connection using the token in the `Sec-WebSocket-Protocol` header.
 
+![Client authentication flow: the browser asks your server for a token, your server mints an rt_* token with the Mistral API, returns it to the browser, and the browser opens the realtime transcription WebSocket using Sec-WebSocket-Protocol.](https://docs.mistral.ai/img/audio_realtime_client_auth_flow.svg)
+
 ## Step 1: Mint a token (server-side) {#mint-token}
 
 Call `POST /v1/client/sessions` from your backend with your API key. Pass the model the client will use.

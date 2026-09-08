@@ -213,7 +213,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/admin/monitor-comply/zero-data-retention/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0d4619fa307c265b823d0c676a3210613be9e2820092e44d4544b9c408dba3e4"
+    "sha256": "19fd095c81b2ddaa0fcd8b7e0e834fa22756daf92c90ae1d85dae764e1ba70fd"
   },
   {
     "url": "https://docs.mistral.ai/admin/overview",
@@ -222,7 +222,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/admin/overview/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0127fae020445f3086832c6f694cea43ae649de0e3e68bd3a2a9fd10b53798b7"
+    "sha256": "e785baf7558be79c86093738c51c5d51ad84927be470cff18fe67eac0faf343e"
   },
   {
     "url": "https://docs.mistral.ai/admin/set-up-organization/create-organization",
@@ -240,7 +240,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/admin/set-up-organization/enterprise-accounts/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "cf1037d6d3661d6e0c4cb515f5a5f3ec438da112f31ff2a07b44d72e38bf0826"
+    "sha256": "cd8ed293c7ddffc2c0617003c2518f1a0cc79e862a822096d4dd7f746c1e27cf"
   },
   {
     "url": "https://docs.mistral.ai/admin/set-up-organization/sign-in-method/email-domain-authentication",
@@ -312,7 +312,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "d052d77cebe77f509e86f19d13167633e277e95d3d62edd5de15ae84b9ecb0c6"
+    "sha256": "1873b27a117f3661a4b4cdf4a9ab83fe599404e3d0b1bae2905a69621690a45e"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/audio/transcriptions",
@@ -321,7 +321,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3a3661fb52b9c9b9ebbdcc3e2ff25bf49de5236de52ba8c9b065ebc7089bc4d1"
+    "sha256": "96fb44940ae17a09b1bf9973f7a197b9383d6bdac801fd1d3b62a6c8f4280ee3"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/audio/voices",
@@ -339,7 +339,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0614c7e3e2b947fda1f3e22093ea4a6dc661a5ac7cbf4fdffe04405212f52ef9"
+    "sha256": "69f9a6677153d5ded11d246dd78bbc1170dd82825ba0ecb79642de890234cfa9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys",
@@ -384,7 +384,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "09bc6e35ecb49d99e2e2362ddbf08e5e07d4e4a9cef11d0804930ab15b5ba5a9"
+    "sha256": "08b14581c1e03a040a09f221421a00416f21adedfcf1ad8c13c56b76248840dc"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
@@ -393,7 +393,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e41977f3ea78799e3f9683e2f6d7752401a710115179baf14073220b742496ce"
+    "sha256": "5bca795dab12ff35949fac3c7e68aeae625aa9edad47c64bf3972dc35d2a948b"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
@@ -429,7 +429,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e74e015d7239884444a5596e6c3fe5cf6226ccc3acf5ab123333becb71de54ef"
+    "sha256": "e907c585dc6a3edb28f12aacc997c4699de52d0ae4f1c0e8f83aef959ef20d6c"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/connectors",
@@ -438,7 +438,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "973d63490aaa493b61ef83bd7edf5e2cdb8c1f25078bf2c27b99d924d4a9ca07"
+    "sha256": "8e0eecd46a21cf0321ba1b2f5c437c7619aaab4feb134078c94735ad7948fa35"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/conversations",
@@ -447,7 +447,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "dc63ecc5da58167f58a928f5089cb5cbf7a31dd620a301245ebdd5d3c9d588fa"
+    "sha256": "da6971af447d041a6e620de550487c33521c8a6a263ec872d19e08e27f4e23f4"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/libraries",
@@ -474,7 +474,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "c5ee833449823fa980c2053c4f87593ce0bbacc5417ccc7297667345bdf79364"
+    "sha256": "cf027c6de2119864ee8a272b07c1f08b90c66f78bfb2b2e3ecdeb36bb05ad068"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns",
@@ -483,7 +483,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a4d2b8d6c52bb6bc06e4b8a8fc32b1c87d0ddb5619502693d99caed311f05a83"
+    "sha256": "9f9c52b77d454f332d2df41453d7fe08d5b0d19b5982bfd14ef4640c50d764b7"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events",
@@ -492,7 +492,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "6082cb581e1e155fb6026db3c4c0898b4bd8353b72285e49c5a800b99497b8df"
+    "sha256": "c6181746966f825ae8fd78dd3c4158ccc50da0cbac7b10627673a9a99b367877"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events/fields",
@@ -501,7 +501,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "5f4bc844a8974d86bad5c7e3a5abe160a16cee862ff6bab240eb144b8c117e02"
+    "sha256": "204b54c6ad17b988f5ba6ccb9d0d07d6b50f0ab4c8b5c85b0f15c3650dc4805d"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets",
@@ -519,7 +519,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "cebd4df13601429f2fd779a74496de23ae5fcfb4ba07ab54d379f95043083dd3"
+    "sha256": "c2053e80b7732d88c9fbaac63daee19cbb6703591f31f62c79a08f5203400121"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/judges",
@@ -528,7 +528,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "4d940ccab8a48187ad39c4e9eb16f845fd98dfcd05323457a2835227e1ef6663"
+    "sha256": "dc7a90f4660fe7e6dedfc353f1dc3526bd8f0e73394e23abf6ddb73741283c89"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/logs",
@@ -582,7 +582,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "ae6fca884f5698e2a6e17be1c30493951a67cb3512659903c1766f829ac5eb7c"
+    "sha256": "d7ce875e0dd7db39ae203a0162691800b16d9e0e92e9fb32305d53b12daf735b"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/skills",
@@ -609,7 +609,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "f7fa6c21066766bcc26f0e6bd56f6f8d9ef4cf2839673bdb4c941038c0080f45"
+    "sha256": "a7659aa74d40ca2f8c98379f57dc0beb189c5063066485914cd17907616f6c0e"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/classifiers",
@@ -618,7 +618,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a34cd1347356a2e0cdcaa2f828ff2cbbf2c525b3c592afaa7e0841a747b8b528"
+    "sha256": "a7fc8cadb9e9d7750267c0524ed957be9aba68fb48dd99884001b4fe10d77e57"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/deprecated/agents",
@@ -627,7 +627,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "b422459454ae912b2014babfa227a056810406c458d8aaf1f742ce05d0c8ea8e"
+    "sha256": "531a0dc1a891e36b489b4d479265ad6babb507768ab4bddf38ef9e090372320d"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/embeddings",
@@ -636,7 +636,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "740f481af760d8565bbb692851bc646b745a313f15e2e991875509b18bf109b0"
+    "sha256": "cc324d4e0eb3e802ebafc8d6d8cf83e86e9169b8c812ceaa57fc42598560d621"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/events",
@@ -654,7 +654,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "255329894269c4456fd01e8783e2c11ed95c79004c613f1a30f56e17a325e429"
+    "sha256": "06d1304757663484ce668cbc33b18dc2c62f8c683bac55d1b775596709c3219f"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/fim",
@@ -663,7 +663,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "9746a419be9d040b3af398ef3e40fe6aa48ec436f97c73aea82dc33d8b37f57a"
+    "sha256": "572c792a26d6864c83e7b6441ffa6915f4933f17b8bd29505538bc931da682b1"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/models",
@@ -681,7 +681,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "b8ed931827f5ba9d9f575b75fd3c9cdd366b87634ec3b08b87a1116142f2eb39"
+    "sha256": "e4600072863682d5ca220726fe88aa4fdcc91f3916bd647ee40b5fe96f5e41b7"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows",
@@ -690,7 +690,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "56b6a12f4660bad31c70b277379d9b065a3a40d7cefcdfd4acff99225d65b931"
+    "sha256": "dc1de376333347a359e76fc176d786e6b2989b06f8a26011665d8084494f4f61"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
@@ -717,7 +717,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3e161f68f069a0db0dd568dbb6135321df259c09e2b8d7777df012b31cb729cd"
+    "sha256": "32af3cbf6be320307115e014a48981edd351782a8ccdf1df3b1526dedcfc7cf7"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/metrics",
@@ -744,7 +744,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "f3839fc483f3c8ae330a1cc2f820190fdeec5d4a450fa7092ad50820397bb74f"
+    "sha256": "9d7a274bd98507847e5fd24e8c47996ea79afaaedfc40e97e66d69336e2cad01"
   },
   {
     "url": "https://docs.mistral.ai/community",
@@ -1095,7 +1095,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/inference/prompting/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "231a2a417d1b9ff852616d7f84bec61b5eda8249e6dfe4638645d6d7c3606488"
+    "sha256": "e6909257b2980ccc2d53fdde74501ea509b9311abbb852b2c255ad5cb0e0d3ce"
   },
   {
     "url": "https://docs.mistral.ai/inference/regional-inference",
@@ -1725,7 +1725,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/resources/deprecated/customization/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "caddf9f03609093b6384b681062e765943b4f60c9b59194ed5bb12c5eaa0cf52"
+    "sha256": "e2b8d33e65bea5223ef136c0389b29c4cc91530c9c1405ebc39540fa8e53a016"
   },
   {
     "url": "https://docs.mistral.ai/resources/deprecated/finetuning",
@@ -1743,7 +1743,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/resources/deprecated/finetuning/classifier_factory/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0ff9a3aa433ff120c294de30821f046d51dd8d9ad2f1acda2b9a66a1c0f59fd5"
+    "sha256": "bce16a21576b13991752461a776dfd47edda85a5ed820fbd8600e62bec8e7164"
   },
   {
     "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning",
@@ -1914,7 +1914,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/agents/agent-tools/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3dd7764fee9fab6a15a854908001582eced81df4c6f422367271d5fae2c43c75"
+    "sha256": "63fa75d26c389197485588a343cd898609ee1247eedad576dc95e372dbcfebf8"
   },
   {
     "url": "https://docs.mistral.ai/studio/agents/agent-tools/code_interpreter",
@@ -1923,7 +1923,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/agents/agent-tools/code_interpreter/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0fc2d52e55250e61d9f2f0f7ea4595cc3cead39043c0b0bfafaae4518c94c2f0"
+    "sha256": "e00ecde2aa5e4a666f9fe643bb1f6838cda68849b8ab74b8a22af9cf755a1a26"
   },
   {
     "url": "https://docs.mistral.ai/studio/agents/agent-tools/function-calling",
@@ -1941,7 +1941,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/agents/agent-tools/image_generation/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "159c4b52f9922d1bcb623b5a3b28852c9df7792d7539eddd6e0a35691eae2562"
+    "sha256": "cf8b1da1c09b717e42c3f9cf746d588cf0c26c1ffef33aba2b3de96602e3f7de"
   },
   {
     "url": "https://docs.mistral.ai/studio/agents/agent-tools/websearch",
@@ -1950,7 +1950,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/agents/agent-tools/websearch/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "dc152d50e22765473a40c457382be2e56bff62b40b621d26d3c19d9ba7250f99"
+    "sha256": "e5449e1aac18db235693afaa617117108020f5698b81c6aae21cfb1e0f33c51b"
   },
   {
     "url": "https://docs.mistral.ai/studio/agents/agents-api",
@@ -1977,7 +1977,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/agents/introduction/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "bb934587055bf177dc5bbcb2e8e9253f83b68382d7a90ea94f1109c3922f9ccf"
+    "sha256": "336dacdc4e11b8e5c238e45129e36d04a9a441549b991c936ae87505f5fd1db3"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/overview",
@@ -1986,7 +1986,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/audio/overview/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a2066a57d8beb97353fe5cfa5cbf21a0c959557a064d62aeb7a46cf5717d40f1"
+    "sha256": "da96259b7f48365e81507a82c364ccaf7c14b604cde38c6681be83e39324af87"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/speech_to_text",
@@ -2004,7 +2004,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/audio/speech_to_text/offline_transcription/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "aeebe22ac48ee30c50f3eec6290ed942d51be34c35ef0675be471a17a0d31cd4"
+    "sha256": "fd794e9c971a02fc556bbdbcd5734638aef6b846e5a5f6bd08e186b100a84900"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/speech_to_text/realtime_transcription",
@@ -2022,7 +2022,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/audio/speech_to_text/realtime_transcription/client_auth/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0da83ca5540a1717a8b7dc19cfb826418b450d8e53fd17d104c1893c4a163683"
+    "sha256": "0611f01b058649e4af47476a8b99f8d16d1a3c0b7e16fe38b732ef64ef938c8f"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/text_to_speech",
@@ -2031,7 +2031,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/audio/text_to_speech/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "d3473f0013ee088ae03ebd229d6b184fd28cc02f33b27716ae9c5169e3ff0f77"
+    "sha256": "048dc5254acc30d477ab04eae016fd410eebed5dec5a28a04a3580b520a0f47a"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/text_to_speech/speech",
@@ -2040,7 +2040,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/audio/text_to_speech/speech/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "afa2aaa86b0dac7edc264da59a1fbccd1799cf2ee248127ccc20097d4a64d65b"
+    "sha256": "7f1dd868079de83f58b4930e0047941a753cd04ecbcfddaab10235fa2dcbf5f7"
   },
   {
     "url": "https://docs.mistral.ai/studio/audio/text_to_speech/voices",
@@ -2058,7 +2058,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/batch-processing/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "af6000f9ed09b24c3efeb12c342ebaeebf6f17c6f41f307b6228060c1c3d1a72"
+    "sha256": "386fdcb7c7dd2a2f556f62db31568ff00c8b280cafa141a66c56b2537899bf7b"
   },
   {
     "url": "https://docs.mistral.ai/studio/connectors",
@@ -2148,7 +2148,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/chat-completion/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "03e26a6fb77d81189b5afe175114d83d57f2b61c6a70d5b8ab320211596afa8a"
+    "sha256": "7fb925ad4bd3d37073f815e833dedb99ac4bafa0806d656f4d51bb0a3a2067a0"
   },
   {
     "url": "https://docs.mistral.ai/studio/conversations/chat-completion/prompt-registry",
@@ -2166,7 +2166,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/chat-completion/prompting/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e6e79acc6b3d70e6120aa3b15c18069b598f1be9c4b69017d5e051065a18142d"
+    "sha256": "999cb81030abd1be3df8b0aa459ed1bfd980aa4fd85c951ad1ef153353a33e68"
   },
   {
     "url": "https://docs.mistral.ai/studio/conversations/citations",
@@ -2202,7 +2202,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/reasoning/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "f19f792a3e0fee94e8fea5f890dbdfde69aa35636da8a9133133cf47234c5ba6"
+    "sha256": "b2e3b28c7c04005642a65d92b9765fd14d7c8ddfa3339d3d98d8ea888d60f418"
   },
   {
     "url": "https://docs.mistral.ai/studio/conversations/structured-output",
@@ -2211,7 +2211,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/structured-output/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "07590def842df52d239fbbc451812fe258f78481f459ba8f92cac0f0b58b468c"
+    "sha256": "c68c73d6fd7f706746fc488ac2349debdd8217889fd0e3cc1a37f50dc4e4eb83"
   },
   {
     "url": "https://docs.mistral.ai/studio/conversations/structured-output/custom",
@@ -2238,7 +2238,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/conversations/vision/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "2c02eb4d663850a7ee89341ca8f3d38729f5610cdaa018c710f699008244f5c7"
+    "sha256": "99cf37ca1bc2243bafe905fbff78749ba7208598f640c7aeb2b9fe2efbe10630"
   },
   {
     "url": "https://docs.mistral.ai/studio/document-processing/annotations",
@@ -2247,7 +2247,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/document-processing/annotations/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a9d9c4d33fbf079889e8f9d5717f1b9a7f984257e1014991740096afe04bb9ce"
+    "sha256": "fa2ce0b239d25154dd10286b019e42ded586b18c4a11500d8bfa25cd85ba5688"
   },
   {
     "url": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
@@ -2256,7 +2256,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/document-processing/basic_ocr/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "177d3d098a652e973d7bd192119944fbf8124b4d2b431fbf058c63841a372769"
+    "sha256": "986f8e33cbdf6a61548056df8cd571965217f67cff19320f158c82b1b219fa59"
   },
   {
     "url": "https://docs.mistral.ai/studio/document-processing/document_qna",
@@ -2274,7 +2274,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/document-processing/overview/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "8985a550980f8977b4cf446cc4d8317bd529d98a8acb30f2247956f0b39709de"
+    "sha256": "994f496434568fad767d084e0301933ff798fa83ea3ef05bd0820b4cb71826e1"
   },
   {
     "url": "https://docs.mistral.ai/studio/hidden-collection",
@@ -2283,7 +2283,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/hidden-collection/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "ec6ddc42e8e150b597994c332f57f82af4e19b0e438d2340654340efc3d3aaa1"
+    "sha256": "f52005452a58e8495cebb490794b7011d2b7623e77111103b85a050902a48e2f"
   },
   {
     "url": "https://docs.mistral.ai/studio/hidden-collection/setup",
@@ -2319,7 +2319,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/knowledge-rag/embeddings/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0dcdb932a2c9b4277555c1e3e3b8c9cac8a7bc0c983dfab223bc83faddae363f"
+    "sha256": "e78ae0f87f012ea6908956bb913ef1f1533511a08368ac99c869fa0e84adf2c7"
   },
   {
     "url": "https://docs.mistral.ai/studio/knowledge-rag/embeddings/code_embeddings",
@@ -2355,7 +2355,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "48b8fdbbc9609a3e10cd180af0deb3a53c276a9dfaf4773fc321e864aa0a2b20"
+    "sha256": "7f66d65f7f6bbc1ae7a83ad73b03228d4399fc9e738f13e35f0da8755d2f6b39"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations",
@@ -2364,7 +2364,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e9d75da56167792649b695284ae685e5dfa792ce99cbb69d987d88863a3a0fb1"
+    "sha256": "76dd607ff4a8aa6bb6daa5899cf5592cd1664ba8c368770a7c1245e7dfd8b804"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/context-objects",
@@ -2373,7 +2373,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/context-objects/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "5c03da7838dafb10b71292b058a9261a38aedbaf06011a099f0351e545a6091d"
+    "sha256": "2821cf3a3aa4cbf4e2c33355eb9e70ab9d3321692b1da12c1c2d2b3b20e3c5f0"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/datasets",
@@ -2382,7 +2382,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/datasets/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "1973dd5ca0aed62f74ac3de68e10925f68208d08ae1f8a0d44f68221000a0a1d"
+    "sha256": "685b2734a2ad5d92cdc1db67419193d12433d168eaae6d89df3220edac04a5e2"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/goals",
@@ -2391,7 +2391,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/goals/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0ad3295b535e704ed08c53861ced1b1a977813ac31827b7516ceca882f3288dc"
+    "sha256": "dc96ba8d7c281f1722cc1ea5db2e7e06ed98d2cd879f7d0329566d9a6cee6552"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/judges",
@@ -2400,7 +2400,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/judges/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "6cc83984836abb05cf8323710279671403b85956a2a413971b68f500730eccbe"
+    "sha256": "29ee76ce2ba8dc530d8c2bb5f4f07f9020c7ce841e7e3fd56ab3c014b233a286"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/local-mode",
@@ -2418,7 +2418,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/multiple-evaluators/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "fab806c64627aecb8f2c4dbbef958b411001c4bbf388d798378f1a1e94b8be73"
+    "sha256": "824debef09e5fd959d5fc84fbadda8fdc438f785f321304ef94e83d5cff24346"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/num-generations",
@@ -2427,7 +2427,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/num-generations/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "52f3dfcd5c01bf080abe625e92a00d0c0b18a009384866c7c95d948eabea258c"
+    "sha256": "1fe577582a552735cf88cc94adc5c5978d25c5c0a4b7d4607b1f8f59cf972275"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/retry-failed-records",
@@ -2445,7 +2445,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/evaluations/run-evaluators/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3ae12f567dccd59b60444e237b2cbc60d2ef9d15f171be991d4ca9348ea59c0c"
+    "sha256": "c2ea9061a2ada7bbc2ef127ed1db9a832f00418dd6b41facf34ac5c6e6c0d4c5"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/evaluations/system-params",
@@ -2463,7 +2463,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/traces/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "7e955edc771ed898bacf4fa8dbc1b3809b4c437e7bc8c5db6e4d170203d6c7be"
+    "sha256": "b320b6972eceede736e03649324cef6c321e67a4f1d7369499098a1a700da887"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/traces/data-redaction",
@@ -2481,7 +2481,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/traces/explorer/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "6d33ca657b1e0d993533aca3769299dfed88039af85afffbe8ad12e9c5f33446"
+    "sha256": "3198fa0440e3eb7daf2e80f4a8cb2151df2bb65299074aca3e8a924b81f39fd7"
   },
   {
     "url": "https://docs.mistral.ai/studio/observability/traces/send-traces",
@@ -2490,7 +2490,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/observability/traces/send-traces/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "60b3e9083f3a3291a90effd63c97c5987b618592f1268be93d046bb4dd0b85ca"
+    "sha256": "02a8d13e38ef289cbaad56307aa54d28a2c3027379aec5e8b2b429e76b8d2fc9"
   },
   {
     "url": "https://docs.mistral.ai/studio/safety-moderation",
@@ -2517,7 +2517,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/libraries/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "de0f8addd28768c45bb767a4a67bb2a37f86fd9f3a5cc924ce28d2b633e7c3de"
+    "sha256": "39b8b3cb01cdc140666a6f2b949d54f19fae7d261639ba6fabef0a54c31645b2"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit",
@@ -2616,7 +2616,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/quickstart/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "7315f4876e5a26e4acdce1eb47336df7854c3871d133ade13832cb364e37f45b"
+    "sha256": "a97cd0a26490a9369b526fa8d47064d2c9c92834847bcb9365ca7b83cef575fa"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval",
@@ -2634,7 +2634,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/retrieval/preprocessing/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "f556cd58579cf0b9bca2145d26887d5a15c3405dcb048c3019e1faac73c203f6"
+    "sha256": "e8560bbe3264421277d02557e2030407c337779b29eb4a0a755da6981851fc7c"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers",
@@ -2643,7 +2643,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/retrieval/rerankers/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "1d4763d449907692260dcda5bb9807f79b3d4a6103cbffeaefd96fdcae2befcf"
+    "sha256": "c01d8aee4e00f67eb8780b62da134a58b2a06032a39ed62dabea94d8cc203c23"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers",
@@ -2652,7 +2652,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/retrieval/retrievers/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "1a9e0c6c478918f5d6da0cbf071ace310500b51f79bcee7fce5fdaf9c498cb60"
+    "sha256": "262d4662ea0d2c716ebec1c9d288a960249c195ba5ed2e4320f7a96b69863c90"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/semantic-cache",
@@ -2661,7 +2661,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/retrieval/semantic-cache/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "8e8f37d19c2abd765860cf39d918076e017813d5703d9869c38ba87fe77748dc"
+    "sha256": "b0501ca4d150035ceb169f424bb6956ab628e40a28b46987c6ae3382d0fb5d94"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index",
@@ -2670,7 +2670,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "edf4d8f8ba6c94a5371bd8d725f5cde2043d361640aba25ff2a4882eaace5e06"
+    "sha256": "798f4f2f8fcd3a9ec31bd43bb74dc35ed9728d84ab2b5ead35d8d644faba1133"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/custom-vector-stores",
@@ -2697,7 +2697,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "93171d482221915ea0e2dc5dd901e577d73c29638581b993ade28d3ba7c23740"
+    "sha256": "282ed1d045df9202cf17249137917313069ae118d7bf846e1f57606286566c31"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy",
@@ -2706,7 +2706,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/anatomy/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "589f50949112d3b323eae5e5cf12dea418441ead9917c85ae51bb3da711c8702"
+    "sha256": "1942fba48ee97d12d2e97014ba550b51164e2151480d6c1aae90ed5d4a1cde8c"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli",
@@ -2724,7 +2724,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/local-development/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "96e0ad3a12112ff1132fc12bf5075534e49152b63db5abb42c6a209b25d723ce"
+    "sha256": "b67f11b543f53b15330322c1542b982da30dc70a1d3df8243340e3a593758517"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migration-helpers",
@@ -2733,7 +2733,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/migration-helpers/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "8793aa056599d07f44fd428239174d3929302e688dd65bcfe2de302956250a6c"
+    "sha256": "47d320f920e0a31f06945e298b5a5df8a8ac69b85b333f05c9daab8e43731f5a"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations",
@@ -2742,7 +2742,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/migrations/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "36d72d3446b2b00bb335d9f5773612018090e75b5bad90d29fb025ad19c7165d"
+    "sha256": "3f136acc044f80f6e2fc170cdc0c2deec9ee7394a663f9f66752c3762a0f6d85"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/operations",
@@ -2751,7 +2751,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/operations/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "6600c4fea2326f166ac9a040bd6927ce0ce9842d7eeec95d0612aceba8dd42e3"
+    "sha256": "fb300dadc6594585cf71d87e918046b1129188485f18a0dc033d8e26f033f424"
   },
   {
     "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles",
@@ -2760,7 +2760,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/search/search-toolkit/search-index/vespa/query-profiles/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "190408abe980642db89806cb52839d815fa5e10426becaf178207e5d17e0e507"
+    "sha256": "77738fb55661976476a86d032ff88e55bccec29ac8553a106161e36cfd67082c"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/building-workflows/activities",
@@ -2814,7 +2814,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/building-workflows/connectors/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "cd811ef4ccb9db8b3898e9c98851333540bf0b34e5b3abf5d0e3ff2186be7176"
+    "sha256": "ce164ab241ce3535b6a4dec6709812baf0cef35bcff607675ed90cb888865cc3"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/building-workflows/consuming_events",
@@ -2895,7 +2895,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/building-workflows/plugins/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "190af7e77c912daddde859beed8e8344be17550219a5925615cf53776c856a27"
+    "sha256": "0888caee378da850dfdf142145948dabd7809dff5d2ba46f7b9b7e35f0212761"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/building-workflows/scheduling",
@@ -2976,7 +2976,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/getting-started/core_concepts/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "d2775df9c2b1eceab67dc04206984afc017f9d5eaef19af394ca00d19e35a495"
+    "sha256": "57a51c2e7ecb41dab7ea7dde441f3311a23fea9897a16fcabb88e3e23df86053"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/getting-started/core_concepts/activities",
@@ -3048,7 +3048,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/getting-started/overview/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "66b57387594737e1787bf2e7f9d9d8b22e6bda416df145253f532dc9d6a3938e"
+    "sha256": "03edf773db230d015c0bb3ea8064c0057c6c15019acbb723b22b15c078f79cd3"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/getting-started/your_first_workflow",
@@ -3066,7 +3066,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/interacting-with-workflows/conversational_workflows/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "81c2fbe59f736bbb2eb5007091e88d81668014bf8f439ff8203a49203f80b7df"
+    "sha256": "9377fadb6428c1b3dde1baf166f56020a8cce803663b728b360617e643694d2b"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/interacting-with-workflows/conversational_workflows/canvas",
@@ -3084,7 +3084,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/interacting-with-workflows/conversational_workflows/forms_and_confirmations/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a956fb710cc5b4e6b5b82bfb4f1e8019262dd8719989f2309931862f2d3f7e09"
+    "sha256": "c16200e035f86324d1c8510f16b83e7e36576af823620deca3b2b1b782b3c73b"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/interacting-with-workflows/conversational_workflows/progress_tracking",
@@ -3111,7 +3111,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/studio/workflows/interacting-with-workflows/conversational_workflows/tool_ui/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "f83b77249577202e9d81d00cc62c53685dbf90404442156638679961f682e1e6"
+    "sha256": "2bb557c1a4d5fe9e5ca30237389f32cce8e8c82de8eff75b67cc1bbed0b8ae63"
   },
   {
     "url": "https://docs.mistral.ai/studio/workflows/interacting-with-workflows/queries",
@@ -3498,7 +3498,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/vibe/code/vibe-code-web/sessions/page.mdx",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "40df09a36101c507158f080e1eeb5eb51b81c5cda3005e408acd3f42c98c6d26"
+    "sha256": "2f14b9f52c491005f4a77f9928c3bbe842fc95c26ddb850785e29933ae56ff79"
   },
   {
     "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/slack-integration",

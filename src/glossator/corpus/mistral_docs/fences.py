@@ -9,10 +9,49 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 
 # The prefix allows blockquote markers so a fence inside a converted `:::` callout
 # is still recognized as code.
-FENCE_RE = re.compile(r"^(?P<indent>[ \t]*(?:>[ \t]*)*)(?P<delim>`{3,}|~{3,})(?P<info>.*)$")
+_FENCE_RE = re.compile(r"^(?P<indent>[ \t]*(?:>[ \t]*)*)(?P<delim>`{3,}|~{3,})(?P<info>.*)$")
+
+# How much further a closing fence may be indented than its opener before it stops
+# closing it, per the CommonMark fenced-code rules.
+_MAX_CLOSING_INDENT_DRIFT = 3
+
+
+@dataclass(frozen=True)
+class FenceOpening:
+    """The delimiter and indentation a fenced block was opened with."""
+
+    delim: str
+    indent: str
+
+
+def fence_opening(line: str) -> FenceOpening | None:
+    """The opening this line would start, or `None` if it is not a fence line."""
+    match = _FENCE_RE.match(line)
+    if match is None:
+        return None
+    return FenceOpening(delim=match.group("delim"), indent=match.group("indent"))
+
+
+def closes_fence(line: str, opening: FenceOpening) -> bool:
+    """Whether this line closes `opening`.
+
+    A closing fence uses the same character at least as many times, carries no info
+    string, and is not indented far past its opener.
+    """
+    match = _FENCE_RE.match(line)
+    if match is None:
+        return False
+    delim = match.group("delim")
+    return (
+        delim[0] == opening.delim[0]
+        and len(delim) >= len(opening.delim)
+        and not match.group("info").strip()
+        and len(match.group("indent")) <= len(opening.indent) + _MAX_CLOSING_INDENT_DRIFT
+    )
 
 
 def iter_lines(text: str) -> Iterator[tuple[str, bool]]:
@@ -21,28 +60,14 @@ def iter_lines(text: str) -> Iterator[tuple[str, bool]]:
     Both the opening and the closing fence lines count as inside, so a rewrite that
     skips fenced lines never rewrites an info string either.
     """
-    open_delim: str | None = None
-    open_indent = ""
+    opening: FenceOpening | None = None
     for line in text.split("\n"):
-        match = FENCE_RE.match(line)
-        if open_delim is None:
-            if match is not None:
-                open_delim = match.group("delim")
-                open_indent = match.group("indent")
-                yield line, True
-                continue
-            yield line, False
+        if opening is None:
+            opening = fence_opening(line)
+            yield line, opening is not None
             continue
-        # A closing fence is at most as indented as the opener and uses the same
-        # character, at least as many times, with nothing after it.
-        if (
-            match is not None
-            and match.group("delim")[0] == open_delim[0]
-            and len(match.group("delim")) >= len(open_delim)
-            and not match.group("info").strip()
-            and len(match.group("indent")) <= len(open_indent) + 3
-        ):
-            open_delim = None
+        if closes_fence(line, opening):
+            opening = None
         yield line, True
 
 

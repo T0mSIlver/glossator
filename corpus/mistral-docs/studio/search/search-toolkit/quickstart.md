@@ -90,7 +90,7 @@ class InitialSchema(VespaMigration):
 >
 > **Application name restrictions:** The name passed to `set_app_name()` must contain only lowercase letters (`a-z`). Numbers, underscores, hyphens, and other special characters are not allowed.
 
-For more details on Vespa application management and deployment, see [Vespa](search-index/vespa).
+For more details on Vespa application management and deployment, see [Vespa](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa).
 
 ## Deploy from migrations {#deploy-schema}
 

@@ -84,7 +84,7 @@ Reference for the Workflows endpoints of the Mistral API, generated from the Ope
 
 - `execution_id` (string or null, optional) — Allows you to specify a custom execution ID. If not provided, a random ID will be generated.
 - `input` (object, optional) — The input to the workflow. This should be a dictionary or a BaseModel that matches the workflow's input schema.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - object
     - object
     - null
@@ -119,7 +119,7 @@ Reference for the Workflows endpoints of the Mistral API, generated from the Ope
 
 - `execution_id` (string or null, optional) — Allows you to specify a custom execution ID. If not provided, a random ID will be generated.
 - `input` (object, optional) — The input to the workflow. This should be a dictionary or a BaseModel that matches the workflow's input schema.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - object
     - object
     - null

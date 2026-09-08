@@ -50,7 +50,7 @@ def write_corpus(
     pages: list[CorpusPage],
     out_dir: Path,
     source_commit: str,
-    license_text: str | None,
+    license_text: str,
 ) -> list[dict[str, Any]]:
     """Write every page plus the manifest; remove files no longer in the corpus."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -79,10 +79,9 @@ def write_corpus(
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", "utf-8")
     written.add(manifest_path.resolve())
 
-    if license_text is not None:
-        license_path = out_dir / LICENSE_NAME
-        license_path.write_text(license_text, encoding="utf-8")
-        written.add(license_path.resolve())
+    license_path = out_dir / LICENSE_NAME
+    license_path.write_text(license_text, encoding="utf-8")
+    written.add(license_path.resolve())
 
     notice_path = out_dir / NOTICE_NAME
     notice_path.write_text(_notice(source_commit, len(manifest)), encoding="utf-8")

@@ -16,8 +16,8 @@ Storage backends persist processed chunks and enable efficient search across you
 
 | Backend | Purpose |
 |---------|---------|
-| **[Vespa](search-index/vespa)** | Vector database with schema management, ranking, clustering, and replication |
-| **[Postgres](search-index/postgres)** | PostgreSQL with `pgvector` and `pg_textsearch` for dense and hybrid search |
-| **[Custom vector stores](search-index/custom-vector-stores)** | Implement your own storage backend |
+| **[Vespa](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa)** | Vector database with schema management, ranking, clustering, and replication |
+| **[Postgres](https://docs.mistral.ai/studio/search/search-toolkit/search-index/postgres)** | PostgreSQL with `pgvector` and `pg_textsearch` for dense and hybrid search |
+| **[Custom vector stores](https://docs.mistral.ai/studio/search/search-toolkit/search-index/custom-vector-stores)** | Implement your own storage backend |
 
 Both built-in backends implement the `VectorStoreIndex` protocol, so they use the same ingestion and retrieval pipeline interfaces. Their provisioning, schema management, and query-scoping behavior differ. See each backend's page for details.

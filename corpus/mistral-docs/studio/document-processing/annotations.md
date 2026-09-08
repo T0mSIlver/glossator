@@ -20,6 +20,8 @@ Specifically, it offers two types of annotations:
 - `bbox_annotation`: gives you the annotation of the bboxes extracted by the OCR model (charts/ figures etc) based on user requirement and provided bbox/image annotation format. The user may ask to describe/caption the figure for instance.
 - `document_annotation`: returns the annotation of the entire document based on the provided document annotation format.
 
+![annotations_explanation_graph](https://docs.mistral.ai/img/ocr_annotations_explanation.png)
+
 ### Key Capabilities {#key-capabilities}
 
 * Labeling and annotating data
@@ -37,6 +39,8 @@ Specifically, it offers two types of annotations:
 
 ## How it Works {#how-it-works}
 
+![annotations_workflow_graph](https://docs.mistral.ai/img/ocr_annotations_workflow.png)
+
 ### BBOX Annotations {#bbox-annotations-explanation}
 
 - All document types:
@@ -50,8 +54,8 @@ Specifically, it offers two types of annotations:
 ### Accepted Formats {#accepted-formats}
 
 You can use our API with the following document formats:
-- [OCR with pdf](basic_ocr#ocr-with-pdf)
-- [OCR with image](basic_ocr#ocr-with-image): even from low-quality or handwritten sources.
+- [OCR with pdf](https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-with-pdf)
+- [OCR with image](https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-with-image): even from low-quality or handwritten sources.
 - scans, DOCX, PPTX...
 
 In the code snippets below, we will consider the `OCR with pdf` format.

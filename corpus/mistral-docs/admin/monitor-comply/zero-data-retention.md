@@ -82,7 +82,7 @@ Include enough detail about your legitimate reason for requesting ZDR. **We revi
 
 After your request is approved, **ZDR appears in your Admin privacy settings**.
 
-Open [Admin Panel > API > Privacy]("https://" + "admin.mistral.ai/plateforme/privacy").
+Open [Admin Panel > API > Privacy](https://admin.mistral.ai/plateforme/privacy).
 
 If ZDR does not appear in your privacy settings, your request has not been processed yet. If your request is rejected, you receive an email.
 

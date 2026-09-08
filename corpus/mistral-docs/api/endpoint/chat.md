@@ -31,14 +31,14 @@ Reference for the Chat endpoints of the Mistral API, generated from the OpenAPI 
 - `max_tokens` (integer or null, optional) — The maximum number of tokens to generate in the completion. The token count of your prompt plus `max_tokens` cannot exceed the model's context length.
 - `stream` (boolean, optional) — Whether to stream back partial progress. If set, tokens will be sent as data-only server-side events as they become available, with the stream terminated by a data: [DONE] message. Otherwise, the server will hold the request open until the timeout or until completion, with the response containing the full result as JSON.
 - `stop` (object, optional) — Stop generation if this token is detected. Or if one of these tokens is detected when providing an array
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - string
     - array of string
     - null
 - `random_seed` (integer or null, optional) — The seed to use for random sampling. If set, different calls will generate deterministic results.
 - `metadata` (object or null, optional)
 - `messages` (array of object, required) — The prompt(s) to generate completions for, encoded as a list of dict with role and content.
-  - one of (oneOf):
+  - one of 4 (oneOf):
     - SystemMessage
     - UserMessage
     - AssistantMessage
@@ -51,15 +51,16 @@ Reference for the Chat endpoints of the Mistral API, generated from the OpenAPI 
     - `schema` (object, required)
     - `strict` (boolean, optional)
 - `tools` (array of object or null, optional) — A list of tools the model may call. Use this to provide a list of functions the model may generate JSON inputs for.
-  - one of (oneOf):
+  - one of 7 (oneOf):
     - Tool
     - WebSearchTool
     - WebSearchPremiumTool
     - CodeInterpreterTool
     - ImageGenerationTool
     - DocumentLibraryTool
+    - CustomConnector
 - `tool_choice` (object, optional) — Controls which (if any) tool is called by the model. `none` means the model will not call any tool and instead generates a message. `auto` means the model can pick between generating a message or calling one or more tools. `any` or `required` means the model must call one or more tools. Specifying a particular tool via `{"type": "function", "function": {"name": "my_function"}}` forces the model to call that tool.
-  - one of (anyOf):
+  - one of 2 (anyOf):
     - ToolChoice
       - `type` (enum: 'function', optional)
       - `function` (FunctionName, required) — this restriction of `Function` is used to select a specific function to call

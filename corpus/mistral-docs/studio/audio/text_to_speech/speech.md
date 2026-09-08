@@ -10,13 +10,13 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 # Speech Generation
 
-Generate speech from text using a [saved voice](voices) (`voice_id`) or a one-off reference audio clip (`ref_audio`).
+Generate speech from text using a [saved voice](https://docs.mistral.ai/studio/audio/text_to_speech/voices) (`voice_id`) or a one-off reference audio clip (`ref_audio`).
 
 ## Generate {#generate}
 
 **Saved Voice**
 
-Generate speech using a previously [saved voice](voices) (`voice_id`) identifier.
+Generate speech using a previously [saved voice](https://docs.mistral.ai/studio/audio/text_to_speech/voices) (`voice_id`) identifier.
 
 **Basic**
 

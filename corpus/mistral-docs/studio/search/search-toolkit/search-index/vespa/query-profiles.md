@@ -12,7 +12,7 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 Query profiles let you **control ranking at query time** without modifying your schema. Each profile bundles a ranking profile, function weights, and query parameters into a named configuration that you can switch between requests.
 
-For the concepts behind query profiles, see [Anatomy of a Vespa application](anatomy).
+For the concepts behind query profiles, see [Anatomy of a Vespa application](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy).
 
 ## Default query profile {#default-query-profile}
 
@@ -107,7 +107,7 @@ Each `QueryField` has:
 | Field | Description |
 |---|---|
 | `ranking.profile` | Ranking profile to use (`weighted-rank1`, `weighted-rank2`, `match-only`) |
-| `ranking.features.query(<weight_name>)` | Weight for a ranking function (see [Ranking reference](anatomy)) |
+| `ranking.features.query(<weight_name>)` | Weight for a ranking function (see [Ranking reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy)) |
 | `hits` | Number of results to return |
 
 Weight names follow the pattern `<function_name>_weight`. For example, `bm25_title` has weight `bm25_title_weight`.
@@ -177,6 +177,6 @@ When `query_profile` is omitted, the schema's default query profile is used auto
 
 ## See also {#see-also}
 
-- **[Anatomy of a Vespa application](anatomy)**: query profiles concept
-- **[Manage schema](migrations)**: migration system and helpers
+- **[Anatomy of a Vespa application](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy)**: query profiles concept
+- **[Manage schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations)**: migration system and helpers
 - **[Vespa query profiles documentation](https://docs.vespa.ai/en/querying/query-profiles.html)**: official Vespa guide

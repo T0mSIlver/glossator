@@ -22,6 +22,8 @@ The Admin hierarchy has three layers:
 2. **Organization**: the account that contains members, Workspaces, billing, access settings, and policies.
 3. **Workspace**: a shared environment inside an Organization for product usage, resources, access, and limits.
 
+![Admin hierarchy: Enterprise Account links one or more Organizations, and each Organization contains one or more Workspaces.](https://docs.mistral.ai/img/admin_enterprise_hierarchy.svg)
+
 Backoffice manages the Enterprise Account and the Organizations under it. The Admin Panel manages one Organization at a time. Workspaces still organize teams, environments, products, and budgets inside one Organization.
 
 ## When you need an Enterprise Account {#when-you-need-an-enterprise-account}

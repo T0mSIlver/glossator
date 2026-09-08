@@ -121,4 +121,4 @@ async def main():
 asyncio.run(main())
 ```
 
-In Studio, each run has its `System` recorded. You can compare score distributions across temperatures at a glance. See [System params](../evaluations/system-params) for details.
+In Studio, each run has its `System` recorded. You can compare score distributions across temperatures at a glance. See [System params](https://docs.mistral.ai/studio/observability/evaluations/system-params) for details.

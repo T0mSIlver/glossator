@@ -52,7 +52,13 @@ Create a new batch job, it will be queued for processing.
 
 `application/json` (required), schema `CreateBatchJobRequest`
 
-- `input_files` (array of string (uuid) or null, optional) — A list of `.jsonl` files for batch inference. Each line must be a JSON object with a `body` field containing the request payload: ```json {"custom_id": "0", "body": {"max_tokens": 100, "messages": [{"role": "user", "content": "What is the best French cheese?"}]}} {"custom_id": "1", "body": {"max_tokens": 100, "messages": [{"role": "user", "content": "What is the best French wine?"}]}} ```
+- `input_files` (array of string (uuid) or null, optional) — A list of `.jsonl` files for batch inference. Each line must be a JSON object with a `body` field containing the request payload:
+
+  ```json
+  {"custom_id": "0", "body": {"max_tokens": 100, "messages": [{"role": "user", "content": "What is the best French cheese?"}]}}
+  {"custom_id": "1", "body": {"max_tokens": 100, "messages": [{"role": "user", "content": "What is the best French wine?"}]}}
+  ```
+
 - `requests` (array of BatchRequest or null, optional)
   - `custom_id` (string or null, optional)
   - `body` (object, required)

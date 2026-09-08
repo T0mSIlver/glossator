@@ -150,6 +150,8 @@ Check out our [fine-tuning doc](https://docs.mistral.ai/resources/deprecated/fin
 
 **RAG for Internet Retrieval**
 
+[YouTube video player](https://www.youtube.com/embed/kqNtOlSOJIE?si=xQOhIXukTFZhV3xq)
+
 The video showcases the behavior of Tak. When a user inputs a query, Tak will use the LLM knowledge, a tool to search the web and a tool to fetch the news to generate the most relevant answer to the user query. Its behavior depends on the type of query by the user.
 
 ### Description
@@ -190,6 +192,8 @@ In conclusion, by combining phospho data collection and labeling with Mistral's 
 If you also want to improve your RAG agent, we encourage you to try fine tuning with Mistral using the data collected and labeled with phospho. This can lead to significant improvement on your user experience.
 
 **RAG for Medical Domain**
+
+[YouTube video player](https://www.youtube.com/embed/Z6cCDmZmU_U?si=bv_RkuNYxQ2Xo2p9)
 
 ### Company Information
 
@@ -376,6 +380,8 @@ We get a response more characteristic of Cleo’s brand.
 Getting a response that corresponds more to our brand.
 
 **Legal Copilot**
+
+[YouTube video player](https://www.youtube.com/embed/H2jAsddS4LA?si=x_iRPIF5FON_Q-WR)
 
 *Video 1: Integration of the Mistral fine-tuned models into our product [Jimini Analyzer](https://jimini.ai/).*
 

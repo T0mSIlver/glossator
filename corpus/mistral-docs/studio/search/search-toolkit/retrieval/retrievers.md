@@ -111,7 +111,7 @@ query_engine = QueryEngine(
 result = await query_engine.search(query="What is RAG?", top_k=10)
 ```
 
-See [Rerankers](rerankers) for RRF and other fusion strategies.
+See [Rerankers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers) for RRF and other fusion strategies.
 
 ## Custom retrievers {#custom-retrievers}
 
@@ -163,6 +163,6 @@ query_engine = QueryEngine(retriever=CustomRetriever())
 
 ## See also {#see-also}
 
-- [Retrieval overview](../retrieval): retrieval pipeline architecture
-- [Rerankers](rerankers): re-score results for better ranking
-- [Query preprocessing](preprocessing): improve queries before retrieval
+- [Retrieval overview](https://docs.mistral.ai/studio/search/search-toolkit/retrieval): retrieval pipeline architecture
+- [Rerankers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers): re-score results for better ranking
+- [Query preprocessing](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/preprocessing): improve queries before retrieval

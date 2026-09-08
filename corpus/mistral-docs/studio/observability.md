@@ -39,8 +39,8 @@ After traces are flowing, the [Trace Explorer](https://console.mistral.ai/observ
 > **Data retention:** traces are kept for **30 days**.
 
 **Where to go next:**
-- [Send traces](./observability/traces/send-traces) to instrument your application and start collecting data.
-- [Explore traces](./observability/traces/explorer) to search, filter, and inspect your traces in Studio.
+- [Send traces](https://docs.mistral.ai/studio/observability/traces/send-traces) to instrument your application and start collecting data.
+- [Explore traces](https://docs.mistral.ai/studio/observability/traces/explorer) to search, filter, and inspect your traces in Studio.
 
 ### Access
 
@@ -69,4 +69,4 @@ The evaluation workflow has three building blocks:
 - **Datasets**: your test cases as a list of input records, with fields like prompts, expected outputs, and grading guidance.
 
 **Where to go next:**
-- [Offline evaluations](./observability/evaluations) to get started with the Evaluation SDK.
+- [Offline evaluations](https://docs.mistral.ai/studio/observability/evaluations) to get started with the Evaluation SDK.

@@ -54,7 +54,7 @@ def accuracy_scorer(ctx: ScorerContext) -> int:
 
 ## RunEvaluatorContext {#runevaluatorcontext}
 
-[Run evaluators](../evaluations/run-evaluators) receive all records and aggregated statistics after the run completes:
+[Run evaluators](https://docs.mistral.ai/studio/observability/evaluations/run-evaluators) receive all records and aggregated statistics after the run completes:
 
 ```python
 from mistralai.observability import RunEvaluatorContext

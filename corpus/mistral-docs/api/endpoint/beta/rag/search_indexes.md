@@ -94,7 +94,7 @@ Update the metrics for a given index
 
 `application/json` (required)
 
-- one of (anyOf):
+- one of 2 (anyOf):
   - UpdateMetricsRequestDeploymentMetricsOnline
     - `status` (string, required)
     - `document_count` (integer, required)

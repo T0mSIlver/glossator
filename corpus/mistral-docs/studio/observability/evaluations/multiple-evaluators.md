@@ -84,7 +84,7 @@ evaluators=[
 ]
 ```
 
-See [Goals](../evaluations/goals) for the full guide.
+See [Goals](https://docs.mistral.ai/studio/observability/evaluations/goals) for the full guide.
 
 ## Statistics computed per evaluator {#statistics-computed-per-evaluator}
 

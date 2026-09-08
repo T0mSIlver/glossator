@@ -142,6 +142,6 @@ vector_store = app.get_search_index(config, collection_name="my_collection")
 
 ## See also {#see-also}
 
-- **[Local development](local-development)**: local setup guide
-- **[Manage schema](migrations)**: create and evolve schemas
+- **[Local development](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development)**: local setup guide
+- **[Manage schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations)**: create and evolve schemas
 - **[Vespa documentation](https://docs.vespa.ai)**: advanced configuration and operations

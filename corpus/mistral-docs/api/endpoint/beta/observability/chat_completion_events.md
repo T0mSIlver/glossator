@@ -32,7 +32,7 @@ Reference for the Beta Observability Chat Completion Events endpoints of the Mis
 
 - `search_params` (FilterPayload, required)
   - `filters` (object, required)
-    - one of (anyOf):
+    - one of 3 (anyOf):
       - FilterGroup
       - FilterCondition
       - null
@@ -60,7 +60,7 @@ Reference for the Beta Observability Chat Completion Events endpoints of the Mis
 
 - `search_params` (FilterPayload, required)
   - `filters` (object, required)
-    - one of (anyOf):
+    - one of 3 (anyOf):
       - FilterGroup
       - FilterCondition
       - null
@@ -135,7 +135,7 @@ Reference for the Beta Observability Chat Completion Events endpoints of the Mis
   - `description` (string, required)
   - `model_name` (string, required)
   - `output` (object, required)
-    - one of (oneOf):
+    - one of 2 (oneOf):
       - JudgeClassificationOutput
       - JudgeRegressionOutput
   - `instructions` (string, required)

@@ -22,5 +22,5 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 ## Text to Speech Services {#tts-services}
 
 Explore our comprehensive TTS services to bring your applications to life with natural-sounding speech:
-    - [Voices](text_to_speech/voices): Create and manage reusable voice profiles for consistent branding and personalization.
-    - [Speech Generation](text_to_speech/speech): Generate speech using either saved voices or one-off reference audio clips with support for both basic and streaming delivery.
+    - [Voices](https://docs.mistral.ai/studio/audio/text_to_speech/voices): Create and manage reusable voice profiles for consistent branding and personalization.
+    - [Speech Generation](https://docs.mistral.ai/studio/audio/text_to_speech/speech): Generate speech using either saved voices or one-off reference audio clips with support for both basic and streaming delivery.

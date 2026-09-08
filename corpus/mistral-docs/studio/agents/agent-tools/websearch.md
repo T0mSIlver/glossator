@@ -14,6 +14,8 @@ Websearch is the capability to **browse the web in search of information**, this
 
 A handy tool for any agent that needs to be up to date with the world.
 
+![websearch_graph](https://docs.mistral.ai/img/websearch_connector.png)
+
 Our built-in [tool](https://docs.mistral.ai/studio/agents/agent-tools#built-in-tools) for websearch allows any of our models to access the web at any point to search websites and sources for relevant information to answer the given query.
 
 There are two versions:

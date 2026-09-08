@@ -68,7 +68,7 @@ Reference for the Beta Observability Chat Completion Events Fields endpoints of 
 
 - `filter_params` (object or null, optional)
   - `filters` (object, required)
-    - one of (anyOf):
+    - one of 3 (anyOf):
       - FilterGroup
       - FilterCondition
       - null

@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 **Embeddings** are vector representations of text that capture the semantic meaning of paragraphs through their position in a high-dimensional vector space. Mistral's Embeddings API provides embeddings for text and code, which you can use for natural language processing (NLP) tasks.
 
+![embedding_graph](https://docs.mistral.ai/img/embedding_graph.png)
+
 Embeddings can power retrieval systems for retrieval-augmented generation, clustering for unorganized data, document classification, semantic code search, code analytics, duplicate detection, and search across raw text or code sources.
 
 If you want a managed feature that ingests, vectorizes, and searches documents for you, use [Libraries](https://docs.mistral.ai/studio/search/libraries). If you want to search connected sources such as Google Drive or SharePoint, use [Connectors](https://docs.mistral.ai/studio/connectors).

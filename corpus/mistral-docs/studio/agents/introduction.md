@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 AI agents are autonomous systems powered by large language models (LLMs) that, given high-level instructions, can plan, use tools, carry out processing steps, and take actions to achieve specific goals. These agents use advanced natural language processing to understand and execute complex tasks, and can collaborate with each other to achieve more sophisticated outcomes.
 
+![agents_graph](https://docs.mistral.ai/img/agent_overview.png)
+
 Our Agents and Conversations API allows developers to build such agents, leveraging multiple features such as:
 - Multiple mutlimodal models available, **text and vision models**.
 - **Persistent state** across conversations.

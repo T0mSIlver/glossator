@@ -10,11 +10,11 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 # Local development
 
-This guide covers the full local development loop: create a schema, deploy locally, feed and query documents, then iterate with new migrations. See [Manage schema](migrations) to learn how to manage schemas and the [CLI reference](cli) for the full set of flags.
+This guide covers the full local development loop: create a schema, deploy locally, feed and query documents, then iterate with new migrations. See [Manage schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations) to learn how to manage schemas and the [CLI reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli) for the full set of flags.
 
 ## Prerequisites {#prerequisites}
 
-- Search Toolkit Vespa Plugin installed ([Installation](../#installation))
+- Search Toolkit Vespa Plugin installed ([Installation](https://docs.mistral.ai/studio/search/search-toolkit/search-index/#installation))
 - Docker installed and running
 
 ## Step 1: Create your first migration {#step-1-create-your-first-migration}
@@ -200,4 +200,4 @@ Use an IDE with the Vespa plugin for syntax highlighting, code completion, navig
 
 ## See also {#see-also}
 
-- **[Deploy and operate](operations)**: production deployment and health checks
+- **[Deploy and operate](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/operations)**: production deployment and health checks

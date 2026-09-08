@@ -11,11 +11,11 @@ hidden: true
 
 # Judges
 
-Judges are LLM-based scorers you can use within the [Evaluation SDK](../evaluations#installation). Instead of a rule-based function, a Judge calls a model to grade each output. They're useful for criteria that are hard to capture with code, such as helpfulness, factual accuracy, or tone.
+Judges are LLM-based scorers you can use within the [Evaluation SDK](https://docs.mistral.ai/studio/observability/evaluations#installation). Instead of a rule-based function, a Judge calls a model to grade each output. They're useful for criteria that are hard to capture with code, such as helpfulness, factual accuracy, or tone.
 
 > **Note**
 >
-> Make sure you have the `mistralai-observability` package installed before following the examples on this page. See [Offline evaluations → Installation](../evaluations#installation).
+> Make sure you have the `mistralai-observability` package installed before following the examples on this page. See [Offline evaluations → Installation](https://docs.mistral.ai/studio/observability/evaluations#installation).
 
 ## Basic LLM judge {#basic-llm-judge}
 

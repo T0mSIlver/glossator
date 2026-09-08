@@ -10,7 +10,7 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 # Migration helpers reference
 
-Reference for the helpers used inside [migrations](migrations). All helpers are imported from `mistralai.search.toolkit.plugins.vespa.migration` and called from within a migration's `migrate()` method.
+Reference for the helpers used inside [migrations](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations). All helpers are imported from `mistralai.search.toolkit.plugins.vespa.migration` and called from within a migration's `migrate()` method.
 
 ```python
 from mistralai.search.toolkit.plugins.vespa.migration import (
@@ -88,7 +88,7 @@ Create a schema with an explicit indexing mode. This is the recommended way to d
 | `embedding_model` | `EmbeddingModel \| MistralEmbeddingPreset \| None` | `None` | Embedding model (dimensions, data type, distance metric) applied to all embedding fields. Required unless you provide the deprecated `embedding_dimensions` parameter. Pass a preset to use its defaults, or pass a `MistralEmbeddingModel` or `CustomEmbeddingModel`. See [Embedding models](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migration-helpers#embedding-models). |
 | `embedding_dimensions` | `int \| None` | `None` | **Deprecated.** Use `embedding_model` instead. If set, builds a `CustomEmbeddingModel(name="unknown")` with that dimension count. Passing both `embedding_model` and `embedding_dimensions` raises `ValueError` |
 | `fields` | `list[FieldDefinition] \| None` | `None` | Fields added on top of the indexing-mode defaults. With `DOCUMENT_PER_CHUNK` the standard chunk fields are injected automatically; `SINGLE_DOCUMENT` requires at least one field |
-| `custom_functions` | `list[FunctionWithInputs] \| None` | `None` | Custom ranking functions (see [Manage Ranking](query-profiles)) |
+| `custom_functions` | `list[FunctionWithInputs] \| None` | `None` | Custom ranking functions (see [Manage Ranking](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles)) |
 | `default_query_profile_name` | `str \| None` | `None` | Name for the auto-generated query profile. Defaults to the schema name |
 | `top_chunks` | `int \| None` | `None` | `SINGLE_DOCUMENT` only. Number of top chunks to select. Rejected with `DOCUMENT_PER_CHUNK`. |
 | `id_field` | `str \| None` | `None` | `SINGLE_DOCUMENT` only. Deprecated. Rejected with `DOCUMENT_PER_CHUNK` (chunk identity is always `id`). |
@@ -238,7 +238,7 @@ Add custom ranking functions to an existing schema.
 def add_query_profiles(query_profiles: list[QueryProfile]) -> None
 ```
 
-Add or update query profiles on the application. See [Manage Ranking](query-profiles).
+Add or update query profiles on the application. See [Manage Ranking](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles).
 
 ### `add_schema_rank_profiles`
 
@@ -302,6 +302,6 @@ For the `MistralEmbeddingModel` vs `CustomEmbeddingModel` distinction, presets, 
 
 ## See also {#see-also}
 
-- **[Manage schema](migrations)**: how to create and evolve schemas with these helpers
-- **[Anatomy of a Vespa application](anatomy)**: concepts: schemas, fields, ranking, query profiles
-- **[Manage ranking](query-profiles)**: query profiles and ranking configuration
+- **[Manage schema](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations)**: how to create and evolve schemas with these helpers
+- **[Anatomy of a Vespa application](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy)**: concepts: schemas, fields, ranking, query profiles
+- **[Manage ranking](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/query-profiles)**: query profiles and ranking configuration

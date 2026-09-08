@@ -11,7 +11,7 @@ hidden: true
 
 # Datasets
 
-A dataset is the set of test cases that drives an offline evaluation. In the [Evaluation SDK](../evaluations#installation), a dataset is a **list of Python dicts** where each dict is an input record, and you define the keys to match what your task function expects.
+A dataset is the set of test cases that drives an offline evaluation. In the [Evaluation SDK](https://docs.mistral.ai/studio/observability/evaluations#installation), a dataset is a **list of Python dicts** where each dict is an input record, and you define the keys to match what your task function expects.
 
 ## Record structure {#record-structure}
 
@@ -235,7 +235,7 @@ Freeze your dataset between runs if you want to track performance over time. Eve
 
 ### Ground truth quality matters
 
-Inaccurate or ambiguous ground truth produces noisy scores. If you use an LLM judge (see [Judges](../evaluations/judges)), include a `grading_guidance` field to give the judge explicit scoring instructions per record.
+Inaccurate or ambiguous ground truth produces noisy scores. If you use an LLM judge (see [Judges](https://docs.mistral.ai/studio/observability/evaluations/judges)), include a `grading_guidance` field to give the judge explicit scoring instructions per record.
 
 ## Organizing in Studio {#organizing-in-studio}
 

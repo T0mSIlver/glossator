@@ -27,7 +27,7 @@ Reference for the OCR endpoints of the Mistral API, generated from the OpenAPI s
 
 - `model` (string or null, required)
 - `document` (object, required) — Document to run OCR on
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - FileChunk
       - `type` (string, optional)
       - `file_id` (string (uuid), required)
@@ -39,7 +39,7 @@ Reference for the OCR endpoints of the Mistral API, generated from the OpenAPI s
       - `type` (string, optional)
       - `image_url` (object, required)
 - `pages` (object, optional) — Specific pages to process. Accepts a list of integers or a string of comma-separated numbers and ranges (e.g. '0,1,2' or '0-5' or '0,2-4'). Page numbers start from 0.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - string
     - array of integer
     - null

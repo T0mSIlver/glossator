@@ -49,7 +49,7 @@ Reference for the Beta Observability Campaigns endpoints of the Mistral API, gen
 
 - `search_params` (FilterPayload, required)
   - `filters` (object, required)
-    - one of (anyOf):
+    - one of 3 (anyOf):
       - FilterGroup
       - FilterCondition
       - null

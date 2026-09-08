@@ -87,7 +87,7 @@ class SummarizeWorkflow:
         return result.choices[0].message.content
 ```
 
-For full documentation on `Agent`, `Runner`, sessions, MCP, and multi-agent handoffs, see the [Durable Agents guide](durable_agents).
+For full documentation on `Agent`, `Runner`, sessions, MCP, and multi-agent handoffs, see the [Durable Agents guide](https://docs.mistral.ai/studio/workflows/building-workflows/durable_agents).
 
 ### Webhook Plugin {#webhook-plugin}
 

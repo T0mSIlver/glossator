@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from .fences import FENCE_RE
+from .fences import closes_fence, fence_opening
 
 # JSX allows dots and dashes in element names (`Foo.Bar`, `my-element`); underscores
 # are allowed too, which is why `<MISTRAL_API_KEY>` scans as a tag and then fails on
@@ -39,7 +39,11 @@ class Text:
 
 @dataclass(frozen=True)
 class Element:
-    """A JSX element. Attribute value `None` means a valueless (boolean) attribute."""
+    """A JSX element.
+
+    An attribute value of `None` is a valueless (boolean) attribute; a value still
+    wrapped in `{...}` is a JavaScript expression rather than a literal.
+    """
 
     name: str
     attrs: dict[str, str | None] = field(default_factory=dict)
@@ -70,25 +74,19 @@ def _line_end(source: str, index: int) -> int:
 
 
 def _scan_fence(source: str, index: int) -> tuple[Fence, int] | None:
-    """Consume a fenced block starting at `index`, which must be at a line start."""
+    """Consume a fenced block starting at `index`, which must be at a line start.
+
+    Opening and closing are decided by `fences`, so the parser and every line-based
+    rewrite agree on where code begins and ends.
+    """
     end = _line_end(source, index)
-    match = FENCE_RE.match(source[index:end])
-    if match is None:
+    opening = fence_opening(source[index:end])
+    if opening is None:
         return None
-    delim = match.group("delim")
-    indent = match.group("indent")
     cursor = min(end + 1, len(source))
     while cursor < len(source):
         stop = _line_end(source, cursor)
-        line = source[cursor:stop]
-        closing = FENCE_RE.match(line)
-        if (
-            closing is not None
-            and closing.group("delim")[0] == delim[0]
-            and len(closing.group("delim")) >= len(delim)
-            and not closing.group("info").strip()
-            and len(closing.group("indent")) <= len(indent) + 3
-        ):
+        if closes_fence(source[cursor:stop], opening):
             return Fence(source[index:stop]), stop
         cursor = stop + 1
     return Fence(source[index:]), len(source)
@@ -169,7 +167,9 @@ def _parse_attributes(source: str, index: int) -> tuple[dict[str, str | None], b
                 end = _skip_braced(source, index)
                 if end is None:
                     return None
-                attrs[name] = source[index + 1 : end - 1].strip()
+                # Braces are kept so a caller can tell an expression from a string
+                # literal: `src={diagram}` has no value this converter can resolve.
+                attrs[name] = source[index:end]
                 index = end
             else:
                 end = index

@@ -48,13 +48,13 @@ Create Organization members.
 
 - `role_names` (array of enum: 'member', 'billing_manager', 'organization_admin' or null, optional) — Simplified role names to assign. Mutually exclusive with 'roles'.
 - `roles` (object, optional) — Role values to assign. Mutually exclusive with 'role_names'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - array of UserRole
     - array of StaticOrganizationRoles
     - null
 - `role_name` (enum: 'member', 'billing_manager', 'organization_admin', optional) — Deprecated single role name, kept for backward compatibility. Mutually exclusive with 'role'.
 - `role` (object, optional) — Deprecated legacy single role value, kept for backward compatibility. Mutually exclusive with 'role_name'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - UserRole
     - StaticOrganizationRoles
     - null
@@ -95,13 +95,13 @@ Invite users to the Organization.
 
 - `role_names` (array of enum: 'member', 'billing_manager', 'organization_admin' or null, optional) — Simplified role names to assign. Mutually exclusive with 'roles'.
 - `roles` (object, optional) — Role values to assign. Mutually exclusive with 'role_names'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - array of UserRole
     - array of StaticOrganizationRoles
     - null
 - `role_name` (enum: 'member', 'billing_manager', 'organization_admin', optional) — Deprecated single role name, kept for backward compatibility. Mutually exclusive with 'role'.
 - `role` (object, optional) — Deprecated legacy single role value, kept for backward compatibility. Mutually exclusive with 'role_name'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - UserRole
     - StaticOrganizationRoles
     - null
@@ -184,13 +184,13 @@ Update an Organization member's roles and product seats.
 
 - `role_names` (array of enum: 'member', 'billing_manager', 'organization_admin' or null, optional) — Simplified role names to assign. Mutually exclusive with 'roles'.
 - `roles` (object, optional) — Role values to assign. Mutually exclusive with 'role_names'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - array of UserRole
     - array of StaticOrganizationRoles
     - null
 - `role_name` (enum: 'member', 'billing_manager', 'organization_admin', optional) — Deprecated single role name, kept for backward compatibility. Mutually exclusive with 'role'.
 - `role` (object, optional) — Deprecated legacy single role value, kept for backward compatibility. Mutually exclusive with 'role_name'.
-  - one of (anyOf):
+  - one of 3 (anyOf):
     - UserRole
     - StaticOrganizationRoles
     - null

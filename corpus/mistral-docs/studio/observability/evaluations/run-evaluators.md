@@ -118,7 +118,7 @@ RunEvaluator(
 )
 ```
 
-See [Goals](../evaluations/goals) for the full guide.
+See [Goals](https://docs.mistral.ai/studio/observability/evaluations/goals) for the full guide.
 
 ### When does the run evaluator run? {#when-does-the-run-evaluator-run}
 

@@ -184,7 +184,7 @@ Instead, use a decision tree:
       - Update the existing record to include the new data.
   ```
 
-### Do Not Make LLMs Count Words {#do-not-make-llms-count-words}
+### Do Not Make LLMs Count Words
 
 - Avoid: “If the record is too long, split it into multiple records.”
 - Avoid: “If the record is longer than 100 characters, split it into multiple records.”
@@ -198,7 +198,7 @@ Instead, use a decision tree:
     - { data: “User: Charlie, Age: 35”, charCount: 17 }
   ```
 
-### Do Not Generate Too Many Tokens {#do-not-generate-too-many-tokens}
+### Do Not Generate Too Many Tokens
 
 Models are faster at ingesting tokens than generating them. If using structured outputs, only ask the model to generate what is strictly necessary.
 Bad Examples:
@@ -207,7 +207,7 @@ Bad Examples:
 
 Only generate the update or necessary data.
 
-### Prefer Worded Scales {#prefer-worded-scales}
+### Prefer Worded Scales
 
 If you need a model to rate something, use a worded scale for better performance.
 **Avoid:**
@@ -297,7 +297,7 @@ This prompt is designed so the model will answer with a json object that could b
 
 > **Tip**
 >
-> You can use the `response_format` parameter to force the model to answer with a json object, or even enforce a specific json schema. Visit our [Structured Outputs](./structured_output) documentation for further details.
+> You can use the `response_format` parameter to force the model to answer with a json object, or even enforce a specific json schema. Visit our [Structured Outputs](https://docs.mistral.ai/inference/structured_output) documentation for further details.
 
 ```
 You are a bank customer service bot. Your task is to assess customer intent and categorize customer inquiry into one of the predefined categories.
@@ -422,7 +422,7 @@ There are many ways to evaluate LLM outputs. Here are three approaches for your 
 
 We can include a confidence score along with the generated output.
 
-Assistant
+**Assistant**
 
 ```
 {
@@ -463,7 +463,7 @@ You will only respond with a JSON object with the key Summary and Confidence. Do
 
 We can also add a second step in the prompt for evaluation. We ask the LLM to generate three summaries and evaluate these three summaries.
 
-Assistant
+**Assistant**
 
 ```
 Summary 1: The essay discusses the author's experiences with writing and programming before college, his initial struggles with learning Fortran on an IBM 1401, and the shift towards microcomputers that led to his interest in AI. He also touches on his decision to pursue a degree in AI and the disillusionment he felt when he realized that AI as practiced at the time was a hoax.
@@ -493,7 +493,7 @@ In production systems, it is common to employ another LLM for evaluation so that
 
 - **Step 1**: use the first LLM to generate three summaries
 
-Assistant
+**Assistant**
 
 ```
 Summary 1: The author writes about their experiences with programming and writing before college. They started programming using Fortran on an IBM 1401 and wrote short stories. They later got into AI, but became disillusioned with it while in graduate school. The author then turned their focus to Lisp, eventually writing a book about it called "On Lisp". They also tried pursuing art, but found it difficult to make a living from it.
@@ -515,7 +515,7 @@ Aim for around 2-3 sentences for each summary.
 
 - **Step 2**: use another LLM to rate the generated summaries
 
-Assistant
+**Assistant**
 
 ```
 Summary 3 provides the most complete and accurate summary of the essay. It covers the author's experiences with writing and programming before college, their disappointment with AI in college, and their eventual focus on Lisp and work at Interleaf. Summary 1 is missing some key details, such as the author's work at Interleaf and their writing of "On Lisp". Summary 2 focuses too much on the author's time at Interleaf and neglects their early experiences with writing and programming before college. Overall, Summary 3 is the best choice as it is the most complete and accurate summary of the essay.

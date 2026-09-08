@@ -25,6 +25,8 @@ Starting a workflow produces an **Execution**: a single run with its own ID, res
 
 Workers belong to a **Deployment** — a named group that owns a set of workflow definitions and receives executions for those definitions.
 
+![Workflows mental model diagram](https://docs.mistral.ai/img/workflows_mental_model.svg)
+
 | Term | What it is |
 |------|------------|
 | **Workflows API** | The orchestrator. The entry point you call to start, query, and signal runs. |

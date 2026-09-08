@@ -307,6 +307,6 @@ result = await query_engine.search(query="...", top_k=10)
 
 ## See also {#see-also}
 
-- [Retrieval overview](../retrieval): retrieval pipeline architecture
-- [Retrievers](retrievers): vector search and custom retrievers
-- [Query preprocessing](preprocessing): improve queries before retrieval
+- [Retrieval overview](https://docs.mistral.ai/studio/search/search-toolkit/retrieval): retrieval pipeline architecture
+- [Retrievers](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers): vector search and custom retrievers
+- [Query preprocessing](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/preprocessing): improve queries before retrieval

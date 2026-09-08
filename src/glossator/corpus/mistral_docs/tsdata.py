@@ -14,6 +14,7 @@ from typing import Any
 _IDENT = re.compile(r"[A-Za-z_$][A-Za-z0-9_$]*")
 _NUMBER = re.compile(r"-?(?:0[xX][0-9a-fA-F]+|\d[\d_]*(?:\.\d+)?(?:[eE][-+]?\d+)?|\.\d+)")
 _WS = " \t\r\n"
+_MAX_CONST_DEPTH = 8
 
 FUNCTION = object()
 """Marker for a value that is a function; the docs never read one as data."""
@@ -52,11 +53,10 @@ def parse_named_const(source: str, name: str) -> dict[str, Any]:
 
 
 class _Reader:
-    def __init__(self, source: str, index: int) -> None:
+    def __init__(self, source: str, index: int, resolving: frozenset[str] = frozenset()) -> None:
         self.source = source
         self.index = index
-
-    # -- primitives ----------------------------------------------------------
+        self.resolving = resolving
 
     def peek(self) -> str:
         return self.source[self.index] if self.index < len(self.source) else ""
@@ -84,8 +84,6 @@ class _Reader:
         if self.peek() != char:
             raise TsParseError(f"expected {char!r} at offset {self.index}")
         self.index += 1
-
-    # -- values --------------------------------------------------------------
 
     def parse_value(self) -> Any:
         self.skip_trivia()
@@ -124,8 +122,25 @@ class _Reader:
             self.index += 2
             self.skip_arrow_body()
             return FUNCTION
-        # A bare identifier reference (an imported constant); its value is not here.
-        return None
+        return self.resolve_identifier(word)
+
+    def resolve_identifier(self, name: str) -> Any:
+        """A bare identifier is only data if a `const` in this file defines it.
+
+        Anything else — an import, a computed expression — has a value that is not in
+        the text being read, and guessing `None` would erase a real field.
+        """
+        if name in self.resolving:
+            raise TsParseError(f"const {name!r} refers to itself")
+        if len(self.resolving) >= _MAX_CONST_DEPTH:
+            raise TsParseError(f"const {name!r} nests too deeply to resolve")
+        match = re.search(rf"\bconst\s+{re.escape(name)}\b[^=;]*=", self.source)
+        if match is None:
+            raise TsParseError(
+                f"identifier {name!r} at offset {self.index} is not defined in this file"
+            )
+        inner = _Reader(self.source, match.end(), self.resolving | {name})
+        return inner.parse_value()
 
     def parse_object(self) -> dict[str, Any]:
         self.expect("{")
@@ -142,7 +157,10 @@ class _Reader:
             if char == ".":  # spread: `...base`
                 while self.peek() == ".":
                     self.index += 1
-                self.parse_value()
+                spread = self.parse_value()
+                if not isinstance(spread, dict):
+                    raise TsParseError(f"object spread at offset {self.index} is not an object")
+                out.update(spread)
                 continue
             key = self.parse_key()
             self.skip_trivia()
@@ -187,40 +205,49 @@ class _Reader:
                 while self.peek() == ".":
                     self.index += 1
                 spread = self.parse_value()
-                if isinstance(spread, list):
-                    out.extend(spread)
+                if not isinstance(spread, list):
+                    raise TsParseError(f"array spread at offset {self.index} is not an array")
+                out.extend(spread)
                 continue
             out.append(self.parse_value())
 
-    def parse_string(self) -> str:
+    def parse_string(self, strict: bool = True) -> str:
+        """Read a string literal. In `strict` mode the value must be fully known."""
         quote = self.source[self.index]
+        start = self.index
         self.index += 1
         parts: list[str] = []
         while self.index < len(self.source):
             char = self.source[self.index]
             if char == "\\":
-                parts.append(_unescape(self.source[self.index + 1]))
-                self.index += 2
+                text, self.index = _read_escape(self.source, self.index)
+                parts.append(text)
                 continue
             if char == quote:
                 self.index += 1
                 return "".join(parts)
             if quote == "`" and self.source.startswith("${", self.index):
-                # Template substitution: keep the expression text out of the value.
-                depth = 0
-                while self.index < len(self.source):
-                    if self.source[self.index] == "{":
-                        depth += 1
-                    elif self.source[self.index] == "}":
-                        depth -= 1
-                        if depth == 0:
-                            self.index += 1
-                            break
-                    self.index += 1
+                if strict:
+                    raise TsParseError(
+                        f"template substitution at offset {self.index} has no literal value"
+                    )
+                self.skip_substitution()
                 continue
             parts.append(char)
             self.index += 1
-        raise TsParseError("unterminated string")
+        raise TsParseError(f"unterminated string at offset {start}")
+
+    def skip_substitution(self) -> None:
+        depth = 0
+        while self.index < len(self.source):
+            if self.source[self.index] == "{":
+                depth += 1
+            elif self.source[self.index] == "}":
+                depth -= 1
+                if depth == 0:
+                    self.index += 1
+                    return
+            self.index += 1
 
     def parse_function(self) -> Any:
         self.skip_balanced("(", ")")
@@ -240,7 +267,28 @@ class _Reader:
         elif char == "(":
             self.skip_balanced("(", ")")
         else:
-            self.parse_value()
+            self.skip_expression()
+
+    def skip_expression(self) -> None:
+        """Skip past an expression without reading it as data."""
+        depth = 0
+        while self.index < len(self.source):
+            char = self.peek()
+            if char in "\"'`":
+                self.parse_string(strict=False)
+                continue
+            if self.source.startswith("//", self.index) or self.source.startswith("/*", self.index):
+                self.skip_trivia()
+                continue
+            if char in "([{":
+                depth += 1
+            elif char in ")]}":
+                if depth == 0:
+                    return
+                depth -= 1
+            elif char == "," and depth == 0:
+                return
+            self.index += 1
 
     def skip_balanced(self, opener: str, closer: str) -> None:
         self.skip_trivia()
@@ -250,7 +298,7 @@ class _Reader:
         while self.index < len(self.source):
             char = self.source[self.index]
             if char in "\"'`":
-                self.parse_string()
+                self.parse_string(strict=False)
                 continue
             if self.source.startswith("//", self.index) or self.source.startswith("/*", self.index):
                 self.skip_trivia()
@@ -266,8 +314,24 @@ class _Reader:
         raise TsParseError(f"unbalanced {opener!r}")
 
 
-_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "b": "\b", "f": "\f", "0": "\0"}
+_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "b": "\b", "f": "\f", "v": "\v", "0": "\0"}
 
 
-def _unescape(char: str) -> str:
-    return _ESCAPES.get(char, char)
+def _read_escape(source: str, index: int) -> tuple[str, int]:
+    """Decode the escape sequence starting at the backslash at `index`."""
+    if index + 1 >= len(source):
+        raise TsParseError(f"string ends on a backslash at offset {index}")
+    char = source[index + 1]
+    if char == "u":
+        if source.startswith("{", index + 2):
+            end = source.find("}", index + 3)
+            if end < 0:
+                raise TsParseError(f"unterminated unicode escape at offset {index}")
+            return chr(int(source[index + 3 : end], 16)), end + 1
+        return chr(int(source[index + 2 : index + 6], 16)), index + 6
+    if char == "x":
+        return chr(int(source[index + 2 : index + 4], 16)), index + 4
+    if char == "\n":
+        # A line continuation contributes nothing to the value.
+        return "", index + 2
+    return _ESCAPES.get(char, char), index + 2

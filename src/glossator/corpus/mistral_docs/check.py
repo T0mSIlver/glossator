@@ -40,11 +40,13 @@ class UrlResult:
 
     @property
     def ok(self) -> bool:
-        return self.error is None and (self.status == 200 or 300 <= self.status < 400)
+        # Only 200 passes. The manifest URL is what a citation points at, so a redirect
+        # means the corpus is carrying a stale path even though the content still exists.
+        return self.error is None and self.status == 200
 
     @property
     def failed(self) -> bool:
-        return self.error is not None or self.status >= 400
+        return not self.ok
 
 
 @dataclass
@@ -57,7 +59,10 @@ class AnchorResult:
 
     @property
     def ok(self) -> bool:
-        return self.error is None and (self.found_in_html or self.found_in_toc)
+        # The DOM id is what a `#anchor` link scrolls to. The RSC table of contents is
+        # reported alongside it but cannot stand in for it: it lists entries the page
+        # never renders an id for.
+        return self.error is None and self.found_in_html
 
 
 @dataclass
@@ -68,6 +73,10 @@ class CheckReport:
     @property
     def url_failures(self) -> list[UrlResult]:
         return [result for result in self.urls if result.failed]
+
+    @property
+    def not_found(self) -> list[UrlResult]:
+        return [result for result in self.urls if result.status >= 400]
 
     @property
     def redirects(self) -> list[UrlResult]:
@@ -207,7 +216,8 @@ def format_report(report: CheckReport) -> str:
         "live check",
         f"  urls checked     {len(report.urls)}",
         f"  200              {sum(1 for r in report.urls if r.status == 200)}",
-        f"  redirects        {len(report.redirects)}",
+        f"  redirects        {len(report.redirects)} (counted as failures)",
+        f"  4xx or transport {len(report.not_found) + sum(1 for r in report.urls if r.error)}",
         f"  failures         {len(report.url_failures)}",
         f"  anchors checked  {len(report.anchors)}",
         f"  anchors ok       {sum(1 for r in report.anchors if r.ok)}",
@@ -216,11 +226,12 @@ def format_report(report: CheckReport) -> str:
         f"  anchor failures  {len(report.anchor_failures)}",
     ]
     if report.redirects:
-        lines += ["", "redirects"]
+        lines += ["", "redirects (a manifest url must be canonical, so these fail)"]
         lines += [f"  {r.status} {r.url} -> {r.redirect_target}" for r in report.redirects]
-    if report.url_failures:
+    other_failures = [r for r in report.url_failures if r not in report.redirects]
+    if other_failures:
         lines += ["", "url failures"]
-        lines += [f"  {r.status or r.error} {r.url}" for r in report.url_failures]
+        lines += [f"  {r.status or r.error} {r.url}" for r in other_failures]
     if report.anchor_failures:
         lines += ["", "anchor failures"]
         lines += [

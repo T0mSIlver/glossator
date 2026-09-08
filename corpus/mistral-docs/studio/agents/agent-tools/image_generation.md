@@ -12,6 +12,8 @@ source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 
 Image Generation is a built-in [tool](https://docs.mistral.ai/studio/agents/agent-tools#built-in-tools) that enables agents to generate images of all kinds and forms.
 
+![image_generation_graph](https://docs.mistral.ai/img/image_generation_connector.png)
+
 Enabling this tool allows models to create images at any given moment.
 
 To use the image generation tool, you can create an agent with the image generation tool enabled and use the conversations API to generate images, note that you need to download the image from the file ID provided in the response.
