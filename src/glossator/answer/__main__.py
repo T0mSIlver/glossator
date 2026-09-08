@@ -10,7 +10,7 @@ import asyncio
 from dotenv import load_dotenv
 
 from glossator.answer.citations import Answer
-from glossator.answer.config import DEFAULT_VARIANT
+from glossator.answer.config import DEFAULT_VARIANT, AnswerConfig
 from glossator.answer.llm import JsonlCallRecorder
 from glossator.answer.service import STRATEGIES, ask
 from glossator.index.variants import VARIANTS
@@ -30,6 +30,10 @@ def _parse_args() -> argparse.Namespace:
         default=DEFAULT_VARIANT,
         choices=sorted(VARIANTS),
         help="Index variant to search",
+    )
+    parser.add_argument(
+        "--model",
+        help="Generation model id; defaults to the one in AnswerConfig",
     )
     parser.add_argument(
         "--record",
@@ -75,6 +79,7 @@ async def main() -> None:
             strategy=args.strategy,
             variant=args.variant,
             recorder=recorder,
+            config=AnswerConfig(model=args.model) if args.model else None,
         )
     finally:
         if recorder is not None:
