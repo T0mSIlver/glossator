@@ -11,7 +11,7 @@ from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from mistralai.client import Mistral
 from mistralai.search.toolkit.document import compute_id
-from mistralai.search.toolkit.embedders import MistralEmbedder
+from mistralai.search.toolkit.embedding import MistralEmbedder
 from mistralai.search.toolkit.ingestion import File
 from mistralai.search.toolkit.ingestion.extractors import (
     MistralOCRExtractor,
@@ -23,7 +23,7 @@ from mistralai.search.toolkit.ingestion.text_splitters import (
     MarkdownTextSplitter,
     MarkdownTextSplitterConfig,
 )
-from mistralai.search.toolkit.retrieval import QueryEngine, VectorRetriever
+from mistralai.search.toolkit.retrieval import QueryEngine
 from mistralai.search.toolkit.search import (
     GrepMode,
     NavigableIndex,
@@ -32,6 +32,8 @@ from mistralai.search.toolkit.search import (
 from mistralai.search.toolkit.search.errors import DocumentNotFoundError
 
 from glossator.index import get_index, get_variant
+from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.retriever import DocsRetriever
 
 load_dotenv(override=True)
 
@@ -68,8 +70,12 @@ if not isinstance(_vector_store, NavigableIndex):
         "Ensure IndexingMode.DOCUMENT_PER_CHUNK is used in the schema migration."
     )
 _navigable_store: NavigableIndex = _vector_store
+# Our retriever rather than the toolkit's: it names the schema on every request
+# (glossator.retrieval.context) and keeps exclude_ids working (D-014).
 _query_engine = QueryEngine(
-    retriever=[VectorRetriever(client=_vector_store, embedder=_embedder)],
+    retriever=[
+        DocsRetriever(_vector_store, _embedder, RetrievalConfig(variant=_variant.name))
+    ],
 )
 
 _loader = FilesystemFileLoader()

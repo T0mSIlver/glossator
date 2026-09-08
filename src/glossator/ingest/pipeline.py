@@ -12,7 +12,7 @@ from pathlib import Path
 
 import structlog
 from mistralai.client import Mistral
-from mistralai.search.toolkit.embedders import MistralEmbedder
+from mistralai.search.toolkit.embedding import MistralEmbedder
 from mistralai.search.toolkit.ingestion.pipelines import Pipeline
 
 from glossator.index import get_index, get_variant

@@ -12,6 +12,7 @@ from typing import override
 import structlog
 from mistralai.search.toolkit.context import RetrievalContext
 from mistralai.search.toolkit.embedding import Embedder
+from mistralai.search.toolkit.plugins.vespa.context import extract_query_params
 from mistralai.search.toolkit.plugins.vespa.search.index import VespaSearchIndex
 from mistralai.search.toolkit.plugins.vespa.search.query import VespaSearchQuery
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
@@ -19,6 +20,7 @@ from mistralai.search.toolkit.retrieval.retrievers.base import DEFAULT_TOP_K, Re
 from mistralai.search.toolkit.search import SearchResult
 
 from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.context import restrict_to
 
 logger = structlog.get_logger(__name__)
 
@@ -38,6 +40,7 @@ class DocsRetriever(Retriever):
         self.index = index
         self.embedder = embedder
         self.config = config
+        self.context = restrict_to(config.index_variant.schema_name)
 
     @override
     async def retrieve(
@@ -49,8 +52,12 @@ class DocsRetriever(Retriever):
         context: RetrievalContext = RetrievalContext(),
         exclude_ids: set[str] | None = None,
     ) -> list[SearchResult]:
+        # The caller's context is used only when it already carries Vespa query
+        # params; otherwise it is replaced, because a request that does not name
+        # its schema cannot be answered at all (see glossator.retrieval.context).
+        request_context = context if extract_query_params(context) else self.context
         try:
-            embedding = await self.embedder.embed_query(query, context=context)
+            embedding = await self.embedder.embed_query(query, context=request_context)
             search_query = VespaSearchQuery(
                 query=query,
                 embedding=embedding,
@@ -64,7 +71,9 @@ class DocsRetriever(Retriever):
                 ranking_weights=dict(self.config.ranking_weights),
                 extra_yql_filter=self.config.yql_filter(),
             )
-            results = await self.index.search(query=search_query, context=context)
+            results = await self.index.search(
+                query=search_query, context=request_context
+            )
         except Exception as exc:
             raise RetrieverException(
                 f"retrieval failed for variant {self.config.variant!r}"

@@ -40,9 +40,10 @@ dev = [
 exclude = ["^src/examples/"]
 
 [tool.ruff]
-# Vendored skill documentation: ruff reformats the python in its fenced blocks,
-# which rewrites text we do not own.
-extend-exclude = [".agents"]
+# Ruff reformats the python inside markdown code fences. That rewrites vendored
+# skill documentation, and it rewrites corpus fixtures that are supposed to be
+# byte-for-byte what the corpus adapter produces (their hashes are in a manifest).
+extend-exclude = [".agents", "tests/fixtures"]
 
 [tool.ruff.lint]
 ignore = [

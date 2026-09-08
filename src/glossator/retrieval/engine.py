@@ -12,8 +12,8 @@ from typing import Any
 
 import structlog
 from mistralai.client import Mistral
-from mistralai.search.toolkit.embedders import MistralEmbedder
-from mistralai.search.toolkit.embedding import Embedder
+from mistralai.search.toolkit.context import RetrievalContext
+from mistralai.search.toolkit.embedding import Embedder, MistralEmbedder
 from mistralai.search.toolkit.plugins.vespa.search.index import VespaSearchIndex
 from mistralai.search.toolkit.search import (
     GrepMode,
@@ -24,6 +24,7 @@ from mistralai.search.toolkit.search import (
 
 from glossator.index import get_index
 from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.context import restrict_to
 from glossator.retrieval.retriever import DocsRetriever
 
 logger = structlog.get_logger(__name__)
@@ -39,8 +40,10 @@ class Navigation:
     source_id: str
     start_offset: int
     end_offset: int
+    context: RetrievalContext
+    """Carries the schema restriction every request to this application needs."""
 
-    async def context(self, window: int = 2) -> list["Hit"]:
+    async def around(self, window: int = 2) -> list["Hit"]:
         """The hit's neighbours and the hit itself, in reading order.
 
         The hit is re-read from the index rather than passed in, so the window is
@@ -59,8 +62,10 @@ class Navigation:
                 self.end_offset,
                 NavigationDirection.NEXT,
                 top_k=top_k,
+                context=self.context,
             ),
             self.index,
+            self.context,
         )
 
     async def previous(self, top_k: int = 1) -> list["Hit"]:
@@ -71,8 +76,10 @@ class Navigation:
                 self.end_offset,
                 NavigationDirection.PREVIOUS,
                 top_k=top_k,
+                context=self.context,
             ),
             self.index,
+            self.context,
         )
 
     async def read(
@@ -80,7 +87,11 @@ class Navigation:
     ) -> list["Hit"]:
         """Chunks fully inside an offset range of the same page."""
         return _hits(
-            await self.index.read(self.source_id, start, end, top_k=top_k), self.index
+            await self.index.read(
+                self.source_id, start, end, top_k=top_k, context=self.context
+            ),
+            self.index,
+            self.context,
         )
 
     async def grep(
@@ -88,8 +99,11 @@ class Navigation:
     ) -> list["Hit"]:
         """Lexical matches for a phrase within the same page."""
         return _hits(
-            await self.index.grep(self.source_id, pattern, mode=mode, top_k=top_k),
+            await self.index.grep(
+                self.source_id, pattern, mode=mode, top_k=top_k, context=self.context
+            ),
             self.index,
+            self.context,
         )
 
 
@@ -135,6 +149,7 @@ class SearchEngine:
         self.config = config
         self.index: VespaSearchIndex = get_index(config.index_variant)
         self.navigation_index = _as_navigable(self.index)
+        self.context = restrict_to(config.index_variant.schema_name)
         self.embedder = embedder or MistralEmbedder(
             client=Mistral(api_key=_api_key()),
             model_name=config.index_variant.embedding_model_name,
@@ -150,7 +165,7 @@ class SearchEngine:
         logger.info(
             "Search", variant=self.config.variant, query=query, hits=len(results)
         )
-        return _hits(results, self.navigation_index)
+        return _hits(results, self.navigation_index, self.context)
 
 
 async def search(query: str, config: RetrievalConfig | None = None) -> list[Hit]:
@@ -181,17 +196,29 @@ def _as_navigable(index: VespaSearchIndex) -> NavigableIndex:
     return index
 
 
-def _hits(results: list[SearchResult], index: NavigableIndex | None) -> list[Hit]:
-    return [_hit(result, index) for result in results]
+def _hits(
+    results: list[SearchResult],
+    index: NavigableIndex | None,
+    context: RetrievalContext,
+) -> list[Hit]:
+    return [_hit(result, index, context) for result in results]
 
 
-def _hit(result: SearchResult, index: NavigableIndex | None) -> Hit:
+def _hit(
+    result: SearchResult,
+    index: NavigableIndex | None,
+    context: RetrievalContext,
+) -> Hit:
     chunk = result.chunk
     metadata: dict[str, Any] = chunk.metadata or {}
     start, end = chunk.start_offset, chunk.end_offset
     navigation = (
         Navigation(
-            index=index, source_id=chunk.source_id, start_offset=start, end_offset=end
+            index=index,
+            source_id=chunk.source_id,
+            start_offset=start,
+            end_offset=end,
+            context=context,
         )
         if index is not None and start is not None and end is not None
         else None
@@ -218,8 +245,9 @@ def _hit(result: SearchResult, index: NavigableIndex | None) -> Hit:
 async def get_chunk(chunk_id: str, config: RetrievalConfig) -> Hit | None:
     """Resolve an opaque chunk id back to a hit, for an agent that kept only the id."""
     index = _as_navigable(get_index(config.index_variant))
-    result = await index.get_chunk(chunk_id)
-    return _hit(result, index) if result is not None else None
+    context = restrict_to(config.index_variant.schema_name)
+    result = await index.get_chunk(chunk_id, context=context)
+    return _hit(result, index, context) if result is not None else None
 
 
 __all__ = [

@@ -18,7 +18,7 @@ from typing import Any
 
 from mistralai import workflows
 from mistralai.client import Mistral
-from mistralai.search.toolkit.embedders import MistralEmbedder
+from mistralai.search.toolkit.embedding import MistralEmbedder
 from mistralai.search.toolkit.ingestion.extractors import (
     MistralOCRExtractor,
     PlainTextExtractor,
