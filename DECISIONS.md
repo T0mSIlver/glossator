@@ -263,3 +263,38 @@ The listwise reranker (D-015) is part of the serving path, so its shipped config
 Datasets in `eval/` carry the generator run that produced them. Charts are rendered from `metrics.json` by a script so they can be regenerated.
 
 **Facts.** The numbers are the argument in the review and the talk; a number that cannot be traced back to raw model output cannot be defended. Runs cost real credits and GLM calls, and re-running to recover lost detail wastes both. Estimated size: a 600-judgement run is a few MB, acceptable in git.
+
+---
+
+## D-003a · Anchors: markdown headings have none; only SectionTab, FAQ, and API operations deep-link
+
+**Status:** decided · 2026-09-08 · corrects D-003
+
+**Facts** (from building and live-checking the corpus, 411 pages, 2,199 anchors, 0 failures):
+- Markdown headings on docs.mistral.ai carry no `id`, in the HTML or in the table-of-contents payload. The site's heading plugin honours only explicit `{#id}` syntax, which no heading uses, and its TOC builder reads `SectionTab` components only. The slugify port planned in D-003 has no target.
+- Deep-linkable anchors come from three sources: `<SectionTab sectionId>` (1,799 emitted), `<FaqItem>` through the FAQ component's own slugify (110), and the `elementId` values in the API sidebar metadata (290).
+- The site has two slugify implementations: the heading one keeps underscores and collapses hyphens; the FAQ one drops underscores and does not collapse. FAQ anchors must use the second.
+- A `SectionTab` nested inside other JSX, inside a non-active tab panel, or reached through an inlined partial is not rendered with an id and is not in the TOC: 99 such headings keep their text and level but get no anchor.
+- A `SectionTab`'s rendered heading level is not its `as` prop: `variant="secondary"` demotes h1/h2 to h3, and a plain h1 renders as h2.
+
+**Consequence.** Many sections have no anchor. Chunk metadata carries `anchor: None` for them and the citation degrades to the page URL, with `heading_path` still identifying the section in the answer. 83 pages carry no anchor at all (66 model pages, 17 docs pages).
+
+---
+
+## D-002a · Redirects and unreachable routes
+
+**Status:** decided · 2026-09-08 · refines D-002
+
+**Facts.** `redirect.ts` yields 320 parseable rules. A `:path*` wildcard whose destination has no `:path*` is a fixed target (Next.js drops the captured tail). Applying the table collapses 3 legacy routes onto pages already in the set, leaving 296 docs pages. One route (`studio-api/workflows/building-workflows/workflow_tags`) redirects to a page that does not exist on the live site (404); it is excluded from the corpus and reported by the build.
+
+Breadcrumbs reproduce the site's own search index exactly (0 mismatches on the 257 routes it lists) by porting its title precedence: page title, then category label, then title-cased directory name.
+
+---
+
+## D-024 · Seven data-driven pages are near-empty after conversion
+
+**Status:** open · 2026-09-08
+
+**Facts.** `/resources/release-notes`, `/resources/glossary`, `/inference/model-selection-guide`, `/admin`, `/inference`, `/resources`, `/community` render React widgets from data files with no MDX children; after conversion their bodies are 17 to 344 bytes. Release notes come from `src/data/releases/en/*.json` and the glossary from a term list. The model catalog pages are already covered by the 66 generated model pages.
+
+**Revisit criterion.** A dev-set or held-out question that needs release notes or glossary content; then synthesize those two pages from their data files the way model pages are.
