@@ -49,7 +49,10 @@ def _print(answer: Answer) -> None:
         print("insufficient evidence")
     print(f"Citations ({len(answer.citations)} verified):")
     for citation in answer.citations:
-        print(f"  [{citation.n}] verified  {citation.citation_url}")
+        # A citation that only matched after normalization is still verified, but
+        # the eval counts it apart, so the CLI says so too.
+        note = f"  ({citation.reason})" if citation.reason else ""
+        print(f"  [{citation.n}] verified  {citation.citation_url}{note}")
         print(f'      "{citation.quote}"')
     for citation in answer.trace.unverified_citations:
         print(f"  [{citation.n}] REJECTED  {citation.reason}")
