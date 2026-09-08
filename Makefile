@@ -1,6 +1,5 @@
-.PHONY: installdeps install-workflows ingest search mcp test start-examples execute-ingestion
+.PHONY: installdeps install-workflows ingest search ask mcp test start-examples execute-ingestion
 .PHONY: corpus-refresh corpus-check dev-set eval-report
-
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -60,6 +59,11 @@ ingest:
 ## Usage: make search query="how do I stream a response" [variant=sec1024] [top_k=10]
 search:
 	uv run python -m glossator.retrieval "$(query)" $(if $(variant),--variant $(variant),) $(if $(top_k),--top-k $(top_k),)
+
+## Answer a question from the documentation, with verified citations
+## Usage: make ask question="how do I stream a chat completion" [strategy=single_pass] [variant=sec1024] [model=id] [record=path]
+ask:
+	uv run python -m glossator.answer "$(question)" $(if $(strategy),--strategy $(strategy),) $(if $(variant),--variant $(variant),) $(if $(model),--model $(model),) $(if $(record),--record $(record),)
 
 ## Start the MCP server in HTTP mode
 ## Usage: make mcp [host=0.0.0.0] [port=8000]

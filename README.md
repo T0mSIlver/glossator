@@ -77,6 +77,35 @@ make search query="which models support function calling" variant=sec1024 top_k=
 Each hit prints its citation URL (the page, deep-linked to the section when the
 heading has an anchor), the score, the heading path and a preview.
 
+### Ask a question
+
+Retrieval, grounded generation and citation verification in one call. Three
+strategies differ only in how evidence is gathered:
+
+| strategy | how it gathers evidence |
+|---|---|
+| `single_pass` | one hybrid search, one generation |
+| `search_loop` | the model drives `search` / `open` / `grep` / `read` as tools, over a capped number of rounds |
+| `outline` | the model picks pages from the site outline and reads them whole |
+
+Round cap, page cap, `top_k`, the context budget and the model all live in
+`AnswerConfig` (`src/glossator/answer/config.py`).
+
+```bash
+make ask question="how do I create a conversational workflow"
+make ask question="what models support function calling" strategy=search_loop
+make ask question="how do I stream" model=ministral-8b-2512
+uv run python -m glossator.answer "comment marche le mode JSON ?" --strategy outline --record calls.jsonl
+```
+
+Every factual sentence carries an `[n]` marker, and every citation carries a
+verbatim quote that is checked against the chunk it names: a citation whose quote
+is not in its source is dropped and reported in the trace. An answer with no
+verified citation comes back flagged as insufficient evidence. The command prints
+the answer, each citation with its status, the trace, token usage, latency and the
+USD the run cost. `--record` writes every model request and response verbatim as
+JSON lines.
+
 ### Run the tests
 
 ```bash
@@ -147,7 +176,8 @@ make generate-vespa-lock
 src/glossator/
 ├── index/            # Vespa application: variant table + schema migrations
 ├── ingest/           # pages → sections → chunks → embed → index (make ingest)
-└── retrieval/        # config, retriever, engine (make search)
+├── retrieval/        # config, retriever, engine (make search)
+└── answer/           # context assembly, grounded generation, citations (make ask)
 src/entrypoints/
 └── mcp_server.py     # read-only MCP server over glossator.retrieval
 tests/                # make test; tests/fixtures/corpus/ is the sample corpus

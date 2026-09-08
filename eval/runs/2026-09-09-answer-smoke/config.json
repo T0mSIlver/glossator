@@ -1,0 +1,55 @@
+{
+  "variant": "sec1024",
+  "strategies": [
+    "single_pass",
+    "search_loop",
+    "outline"
+  ],
+  "questions": [
+    "How do I create a conversational workflow?",
+    "What models support function calling?",
+    "How do I configure a reranker in the Search Toolkit?",
+    "What is the maximum number of tool calls in one response?",
+    "Comment fonctionne le mode JSON avec l'API chat ?"
+  ],
+  "answer_config": {
+    "model": "ministral-8b-2512",
+    "temperature": 0.2,
+    "max_tokens": 1600,
+    "top_k": 8,
+    "context_token_budget": 6000,
+    "round_cap": 4,
+    "searches_per_round": 4,
+    "tool_top_k": 4,
+    "tool_result_chars": 600,
+    "open_result_chars": 1600,
+    "page_cap": 4,
+    "page_read_top_k": 40,
+    "max_attempts": 4,
+    "retry_base_seconds": 1.0,
+    "request_timeout_ms": 180000,
+    "prices": {
+      "mistral-medium-2604": {
+        "input_usd_per_mtok": 1.5,
+        "output_usd_per_mtok": 7.5
+      },
+      "mistral-small-2603": {
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.6
+      },
+      "ministral-8b-2512": {
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.15
+      },
+      "mistral-embed-2312": {
+        "input_usd_per_mtok": 0.1,
+        "output_usd_per_mtok": 0.0
+      }
+    }
+  },
+  "prompts": {
+    "grounded-answer/v1": "723f8e5fc170",
+    "search-loop/v1": "601069ec27ce",
+    "outline/v1": "e1fdfb0a485a"
+  }
+}

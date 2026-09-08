@@ -1,0 +1,48 @@
+{
+  "model": "ministral-8b-2512",
+  "variant": "sec1024",
+  "questions": 5,
+  "llm_calls": 27,
+  "prompt_tokens": 89582,
+  "completion_tokens": 10679,
+  "cost_usd": 0.015039,
+  "errors": 0,
+  "by_strategy": {
+    "single_pass": {
+      "questions": 5,
+      "prompt_tokens": 10429,
+      "completion_tokens": 3145,
+      "cost_usd": 0.002036,
+      "latency_s": 33.7,
+      "verified_citations": 15,
+      "rejected_citations": 4,
+      "distinct_sources_cited": 11,
+      "insufficient_evidence": 0,
+      "quote_verification_rate": 0.789
+    },
+    "search_loop": {
+      "questions": 5,
+      "prompt_tokens": 30681,
+      "completion_tokens": 4228,
+      "cost_usd": 0.005236,
+      "latency_s": 48.8,
+      "verified_citations": 8,
+      "rejected_citations": 4,
+      "distinct_sources_cited": 7,
+      "insufficient_evidence": 0,
+      "quote_verification_rate": 0.667
+    },
+    "outline": {
+      "questions": 5,
+      "prompt_tokens": 48472,
+      "completion_tokens": 3306,
+      "cost_usd": 0.007767,
+      "latency_s": 33.4,
+      "verified_citations": 13,
+      "rejected_citations": 6,
+      "distinct_sources_cited": 7,
+      "insufficient_evidence": 1,
+      "quote_verification_rate": 0.684
+    }
+  }
+}
