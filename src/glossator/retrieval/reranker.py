@@ -145,13 +145,21 @@ class ListwiseReranker:
         ranking that names a candidate twice or invents one leaves the retrieval
         order in place and says why in the trace. Retrieval order is a usable
         answer; an exception on the serving path is not.
+
+        Never narrows either. Only the first ``rerank_candidates`` hits are read by
+        the model -- that bound is what keeps the prompt affordable -- and anything
+        past it comes back after them in retrieval order rather than being dropped,
+        so a caller that asked for more hits than the reranker reads still gets
+        them.
         """
         candidates = hits[: self.config.rerank_candidates]
+        beyond = hits[self.config.rerank_candidates :]
+        tail = _unranked(beyond)
         trace = RerankTrace(
             model=self.config.rerank_model, candidates=len(candidates), applied=False
         )
         if len(candidates) < 2:
-            return RerankResult(hits=_unranked(candidates), trace=trace)
+            return RerankResult(hits=_unranked(candidates) + tail, trace=trace)
 
         started = time.perf_counter()
         try:
@@ -178,7 +186,7 @@ class ListwiseReranker:
             latency_ms = (time.perf_counter() - started) * 1000
             logger.warning("Rerank call failed; keeping retrieval order", error=str(error))
             return RerankResult(
-                hits=_unranked(candidates),
+                hits=_unranked(candidates) + tail,
                 trace=replace(trace, latency_ms=latency_ms, error=str(error)),
             )
 
@@ -192,11 +200,11 @@ class ListwiseReranker:
         if order is None:
             logger.warning("Malformed rerank response; keeping retrieval order", reason=reason)
             return RerankResult(
-                hits=_unranked(candidates),
+                hits=_unranked(candidates) + tail,
                 trace=replace(trace, error=reason),
             )
 
-        ranked = _scored(candidates, order)
+        ranked = _scored(candidates, order, beyond)
         reasons = _reasons(completion, candidates, order)
         logger.info(
             "Reranked",
@@ -271,17 +279,21 @@ def _unranked(candidates: list[Hit]) -> list[Hit]:
     return [replace(hit, retrieval_score=hit.score) for hit in candidates]
 
 
-def _scored(candidates: list[Hit], order: list[int]) -> list[Hit]:
-    """``candidates`` in ``order``, each carrying both scores.
+def _scored(candidates: list[Hit], order: list[int], beyond: list[Hit]) -> list[Hit]:
+    """``candidates`` in ``order``, then ``beyond`` in retrieval order.
 
     ``rerank_score`` is the rank position read as a score -- first of twenty scores
     1.0, last scores 0.05 -- because that is what the ranking says and no more.
     Reading a model's ordinal as a similarity would invent precision it does not
     have. ``retrieval_score`` keeps the number Vespa produced, so a comparison
     between the two orders is still possible after the fact.
+
+    The hits the model did not read continue the same descending ramp, so ``score``
+    stays one scale over the whole list, but they carry no ``rerank_score``: a
+    reader of the record can tell what was ranked from what merely followed.
     """
-    total = len(order)
-    return [
+    total = len(order) + len(beyond)
+    ranked = [
         replace(
             candidates[index],
             score=(total - position) / total,
@@ -290,6 +302,11 @@ def _scored(candidates: list[Hit], order: list[int]) -> list[Hit]:
         )
         for position, index in enumerate(order)
     ]
+    trailing = [
+        replace(hit, score=(total - position) / total, retrieval_score=hit.score)
+        for position, hit in enumerate(beyond, start=len(order))
+    ]
+    return ranked + trailing
 
 
 def _reasons(

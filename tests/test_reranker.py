@@ -145,13 +145,24 @@ def test_a_single_candidate_costs_no_call() -> None:
 
 def test_only_the_configured_number_of_candidates_reaches_the_model() -> None:
     result = rerank(
-        candidates(6),
-        completion(parsed=ranking(1, 2, 3)),
-        rerank_candidates=3,
-        top_k=3,
+        candidates(6), completion(parsed=ranking(3, 2, 1)), rerank_candidates=3, top_k=3
     )
     assert result.trace.candidates == 3
-    assert len(result.hits) == 3
+    # The three the model read come back reordered, the other three follow in
+    # retrieval order: reranking a prefix must not narrow the result set.
+    assert [hit.chunk_id for hit in result.hits] == [
+        "chunk-2",
+        "chunk-1",
+        "chunk-0",
+        "chunk-3",
+        "chunk-4",
+        "chunk-5",
+    ]
+    assert [hit.rerank_score is None for hit in result.hits] == [False] * 3 + [True] * 3
+    # One descending scale over the whole list, so nothing behind outranks anything
+    # in front of it.
+    scores = [hit.score for hit in result.hits]
+    assert scores == sorted(scores, reverse=True)
 
 
 def test_the_usage_and_cost_of_the_call_are_recorded() -> None:
