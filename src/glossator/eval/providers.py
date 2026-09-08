@@ -4,10 +4,11 @@ import asyncio
 import hashlib
 import json
 import os
+import time
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Any, Literal, Protocol, Self
 
 import httpx
 import structlog
@@ -18,6 +19,23 @@ logger = structlog.get_logger(__name__)
 ProviderName = Literal["zai", "mistral"]
 ThinkingMode = Literal["enabled", "disabled"]
 Message = Mapping[str, str]
+
+
+class CallRecorder(Protocol):
+    def record_call(
+        self,
+        *,
+        provider: ProviderName,
+        model: str,
+        messages: Sequence[Message],
+        response_text: str | None,
+        parsed: BaseModel | None,
+        usage: TokenUsage,
+        cached: bool,
+        latency_ms: float,
+        error: str | None,
+        thinking: ThinkingMode | None,
+    ) -> None: ...
 
 
 class TokenUsage(BaseModel):
@@ -55,11 +73,13 @@ class OpenAICompatibleProvider:
         cache_dir: Path = Path(".cache/llm"),
         caller_tag: str = "unspecified",
         client: httpx.AsyncClient | None = None,
+        recorder: CallRecorder | None = None,
     ) -> None:
         self.name = name
         self.semaphore = semaphore
         self.cache_dir = cache_dir
         self.caller_tag = caller_tag
+        self.recorder = recorder
         self._owns_client = client is None
         self.client = client or self._make_client(name)
 
@@ -101,6 +121,17 @@ class OpenAICompatibleProvider:
         cached = self._read_cache(cache_key, response_schema)
         if cached is not None:
             result = cached.model_copy(update={"cached": True})
+            self._record_call(
+                model=model,
+                messages=request_messages,
+                response_text=result.text,
+                parsed=result.parsed,
+                usage=result.usage,
+                cached=True,
+                latency_ms=0.0,
+                error=None,
+                thinking=thinking,
+            )
             self._write_usage(result)
             return result
 
@@ -129,17 +160,65 @@ class OpenAICompatibleProvider:
                 response_schema=response_schema,
                 thinking=thinking,
             )
-            response_json = await self._post_with_retries(payload)
-            text = self._response_text(response_json)
-            total_usage = total_usage.plus(self._response_usage(response_json))
+            response_json, latency_ms = await self._post_with_retries(payload)
+            usage = self._response_usage(response_json)
+            total_usage = total_usage.plus(usage)
+            try:
+                text = self._response_text(response_json)
+            except (TypeError, ValueError) as error:
+                self._record_call(
+                    model=model,
+                    messages=request_messages,
+                    response_text=json.dumps(response_json, sort_keys=True),
+                    parsed=None,
+                    usage=usage,
+                    cached=False,
+                    latency_ms=latency_ms,
+                    error=str(error),
+                    thinking=thinking,
+                )
+                raise
             if response_schema is None:
+                self._record_call(
+                    model=model,
+                    messages=request_messages,
+                    response_text=text,
+                    parsed=None,
+                    usage=usage,
+                    cached=False,
+                    latency_ms=latency_ms,
+                    error=None,
+                    thinking=thinking,
+                )
                 break
             try:
                 parsed = response_schema.model_validate_json(text)
                 validation_error = None
+                self._record_call(
+                    model=model,
+                    messages=request_messages,
+                    response_text=text,
+                    parsed=parsed,
+                    usage=usage,
+                    cached=False,
+                    latency_ms=latency_ms,
+                    error=None,
+                    thinking=thinking,
+                )
                 break
             except (ValidationError, json.JSONDecodeError) as error:
                 validation_error = error
+                self._record_call(
+                    model=model,
+                    messages=request_messages,
+                    response_text=text,
+                    parsed=None,
+                    usage=usage,
+                    cached=False,
+                    latency_ms=latency_ms,
+                    error=str(error),
+                    thinking=thinking,
+                )
                 logger.info(
                     "structured_output_validation_failed",
                     provider=self.name,
@@ -230,26 +309,105 @@ class OpenAICompatibleProvider:
             payload["thinking"] = {"type": thinking}
         return payload
 
-    async def _post_with_retries(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def _post_with_retries(
+        self, payload: dict[str, Any]
+    ) -> tuple[dict[str, Any], float]:
         for attempt in range(3):
+            started = time.perf_counter()
             try:
                 async with self.semaphore:
                     response = await self.client.post("chat/completions", json=payload)
-                if (
-                    response.status_code == 429 or response.status_code >= 500
-                ) and attempt < 2:
-                    await asyncio.sleep(0.25 * (2**attempt))
-                    continue
+                latency_ms = (time.perf_counter() - started) * 1000
+                retryable = response.status_code == 429 or response.status_code >= 500
+                if response.is_error:
+                    self._record_http_error(payload, response, latency_ms)
+                    if retryable and attempt < 2:
+                        await asyncio.sleep(0.25 * (2**attempt))
+                        continue
                 response.raise_for_status()
                 data = response.json()
                 if not isinstance(data, dict):
                     raise TypeError("chat completion response must be a JSON object")
-                return data
-            except httpx.TransportError:
+                return data, latency_ms
+            except httpx.TransportError as error:
+                self._record_call(
+                    model=str(payload["model"]),
+                    messages=payload["messages"],
+                    response_text=None,
+                    parsed=None,
+                    usage=TokenUsage(),
+                    cached=False,
+                    latency_ms=(time.perf_counter() - started) * 1000,
+                    error=str(error),
+                    thinking=self._payload_thinking(payload),
+                )
                 if attempt == 2:
                     raise
                 await asyncio.sleep(0.25 * (2**attempt))
         raise RuntimeError("request retry loop ended unexpectedly")
+
+    def _record_http_error(
+        self, payload: dict[str, Any], response: httpx.Response, latency_ms: float
+    ) -> None:
+        usage = TokenUsage()
+        response_text = response.text
+        try:
+            data = response.json()
+            if isinstance(data, dict):
+                usage = self._response_usage(data)
+                try:
+                    response_text = self._response_text(data)
+                except (TypeError, ValueError):
+                    pass
+        except json.JSONDecodeError:
+            pass
+        self._record_call(
+            model=str(payload["model"]),
+            messages=payload["messages"],
+            response_text=response_text,
+            parsed=None,
+            usage=usage,
+            cached=False,
+            latency_ms=latency_ms,
+            error=f"HTTP {response.status_code}",
+            thinking=self._payload_thinking(payload),
+        )
+
+    @staticmethod
+    def _payload_thinking(payload: dict[str, Any]) -> ThinkingMode | None:
+        thinking = payload.get("thinking")
+        if not isinstance(thinking, dict):
+            return None
+        value = thinking.get("type")
+        return value if value in ("enabled", "disabled") else None
+
+    def _record_call(
+        self,
+        *,
+        model: str,
+        messages: Sequence[Message],
+        response_text: str | None,
+        parsed: BaseModel | None,
+        usage: TokenUsage,
+        cached: bool,
+        latency_ms: float,
+        error: str | None,
+        thinking: ThinkingMode | None,
+    ) -> None:
+        if self.recorder is None:
+            return
+        self.recorder.record_call(
+            provider=self.name,
+            model=model,
+            messages=messages,
+            response_text=response_text,
+            parsed=parsed,
+            usage=usage,
+            cached=cached,
+            latency_ms=latency_ms,
+            error=error,
+            thinking=thinking,
+        )
 
     @staticmethod
     def _response_text(response: dict[str, Any]) -> str:

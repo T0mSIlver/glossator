@@ -7,6 +7,7 @@ import pytest
 from pydantic import BaseModel
 
 from glossator.eval.providers import OpenAICompatibleProvider
+from glossator.eval.run_records import RunRecorder
 
 
 class Answer(BaseModel):
@@ -30,6 +31,20 @@ def response(content: str, *, prompt: int = 4, completion: int = 2) -> httpx.Res
 @pytest.mark.asyncio
 async def test_cache_miss_then_hit_skips_transport(tmp_path: Path) -> None:
     calls = 0
+    run_dir = tmp_path / "run"
+    recorder = RunRecorder(
+        run_dir,
+        {
+            "model": "glm-test",
+            "corpus": "fixture",
+            "prompt_version": "test",
+            "provider": "zai",
+            "thinking": "disabled",
+            "seed": 0,
+            "corpus_commit": "fixture",
+            "n": 1,
+        },
+    )
 
     def handler(request: httpx.Request) -> httpx.Response:
         nonlocal calls
@@ -46,9 +61,10 @@ async def test_cache_miss_then_hit_skips_transport(tmp_path: Path) -> None:
     provider = OpenAICompatibleProvider(
         "zai",
         asyncio.Semaphore(1),
-        cache_dir=tmp_path,
+        cache_dir=tmp_path / "cache",
         caller_tag="test",
         client=client,
+        recorder=recorder,
     )
     kwargs = {
         "model": "glm-test",
@@ -66,8 +82,17 @@ async def test_cache_miss_then_hit_skips_transport(tmp_path: Path) -> None:
     assert isinstance(second.parsed, Answer)
     assert second.parsed.value == 7
     assert second.usage.reasoning_tokens == 1
-    usage_rows = (tmp_path / "usage.jsonl").read_text().splitlines()
+    usage_rows = (tmp_path / "cache" / "usage.jsonl").read_text().splitlines()
     assert [json.loads(row)["cached"] for row in usage_rows] == [False, True]
+    recorder.finalize(dataset_path=None, error=None)
+    call_rows = [
+        json.loads(row) for row in (run_dir / "calls.jsonl").read_text().splitlines()
+    ]
+    assert [row["cached"] for row in call_rows] == [False, True]
+    assert call_rows[0]["parsed_result"] == {"value": 7}
+    assert call_rows[0]["usage"]["reasoning_tokens"] == 1
+    assert call_rows[0]["latency_ms"] >= 0
+    assert call_rows[0]["error"] is None
     await client.aclose()
 
 

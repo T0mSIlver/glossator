@@ -1,3 +1,4 @@
+import json
 import random
 from collections import Counter
 from pathlib import Path
@@ -10,11 +11,13 @@ from glossator.eval.datasets import QuestionType
 from glossator.eval.generate import (
     CandidateOutput,
     FilterOutput,
+    PageAloneOutput,
     cross_page_pairs,
     generate_questions,
     sample_sections,
 )
 from glossator.eval.providers import Completion, TokenUsage
+from glossator.eval.run_records import RunRecorder
 
 FIXTURE_CORPUS = Path("tests/fixtures/corpus")
 
@@ -22,6 +25,7 @@ FIXTURE_CORPUS = Path("tests/fixtures/corpus")
 class StubProvider:
     def __init__(self) -> None:
         self.candidate_number = 0
+        self.page_a_checks = 0
 
     async def complete(
         self,
@@ -42,6 +46,19 @@ class StubProvider:
                 not_answerable_from_title_alone=True,
                 uses_every_gold_source=True,
                 reasons=[],
+            )
+        elif response_schema is PageAloneOutput:
+            page_a = "Page A alone" in prompt
+            reject = page_a and self.page_a_checks == 0
+            if page_a:
+                self.page_a_checks += 1
+            parsed = PageAloneOutput(
+                fully_answerable=reject,
+                reason=(
+                    "Page A contains every required fact."
+                    if reject
+                    else "The other page supplies a required fact."
+                ),
             )
         else:
             self.candidate_number += 1
@@ -79,11 +96,32 @@ def test_cross_page_pairs_use_breadcrumbs_or_links() -> None:
 
 
 @pytest.mark.asyncio
-async def test_generation_returns_every_type_with_stub_provider() -> None:
+async def test_generation_returns_every_type_with_stub_provider(tmp_path: Path) -> None:
     pages = read_corpus(FIXTURE_CORPUS)
-    questions, attempts = await generate_questions(
-        StubProvider(), pages, n=6, model="stub", seed=0
+    run_dir = tmp_path / "run"
+    recorder = RunRecorder(
+        run_dir,
+        {
+            "model": "stub",
+            "corpus": str(FIXTURE_CORPUS),
+            "prompt_version": "test",
+            "provider": "zai",
+            "thinking": "disabled",
+            "seed": 0,
+            "corpus_commit": "fixture",
+            "n": 6,
+        },
     )
+    questions, attempts = await generate_questions(
+        StubProvider(),
+        pages,
+        n=6,
+        model="stub",
+        seed=0,
+        recorder=recorder,
+        run_dir=str(run_dir),
+    )
+    recorder.finalize(dataset_path=run_dir / "questions.jsonl", error=None)
 
     assert len(questions) == 6
     assert Counter(question.type for question in questions) == {
@@ -96,3 +134,21 @@ async def test_generation_returns_every_type_with_stub_provider() -> None:
     }
     assert all(question.generator is not None for question in questions)
     assert attempts
+    records = [
+        json.loads(line)
+        for line in (run_dir / "records.jsonl").read_text().splitlines()
+    ]
+    assert len(records) == len(attempts)
+    cross_records = [
+        record for record in records if record["generator_type"] == "cross_page"
+    ]
+    rejected_cross, cross_record = cross_records
+    assert rejected_cross["page_a_alone"]["fully_answerable"] is True
+    assert rejected_cross["page_b_alone"]["fully_answerable"] is False
+    assert rejected_cross["kept"] is False
+    assert "answerable from page A alone" in rejected_cross["drop_reasons"]
+    assert cross_record["page_a_alone"]["fully_answerable"] is False
+    assert cross_record["page_b_alone"]["fully_answerable"] is False
+    assert cross_record["kept"] is True
+    assert cross_record["sampled_sources"][0]["content"]
+    assert json.loads((run_dir / "metrics.json").read_text())["kept"] == 6
