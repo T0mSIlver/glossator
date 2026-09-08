@@ -524,3 +524,66 @@ Rules that vidtheque paid for in two consumer evaluations (a tool-design bench w
 2. The default strategy is decided after the retrieval improvements (reranker, floors) are measured, because `single_pass` gains the most from better ranking; `search_loop` is the quality reference and the cost row beside it.
 3. Product changes taken now: a chunk's citation anchor falls back to the nearest anchored ancestor heading, so a deep link lands on the closest linkable section instead of the page top; `[n]` markers that name no citation are stripped from the answer text (D-029); the outline strategy's page list includes API pages when the question mentions an endpoint, method or path.
 4. Capability gold accepts the model card of a model the question names, in addition to the matrix page, at the next dataset regeneration.
+
+---
+
+## D-015a · The listwise reranker, measured
+
+**Status:** decided · 2026-09-09
+
+**Facts.** One call per query, 20 candidates each cut to 300 Mistral tokens; hits past the twentieth come back after the ranked ones rather than being dropped. On `ministral-14b-2512` (fixture run, 24 calls): mean 4,585 prompt and 396 completion tokens, 0.00075 USD per call at Ministral prices and 0.00093 USD at Mistral Small 4 prices; median latency 4.0 s against 7.6 ms without it. 2 of 24 calls (8%; 12.5% on an earlier run) returned an unusable ranking, always by dropping candidates, never by repeating or inventing one; the reranker then falls back to retrieval order and says so in the trace. Billed calls, applied rankings and budget-skipped rows are three separate counts.
+
+**Decision.** Serving default stays Mistral Small 4 (D-017); every evaluation names its reranker model (D-017a). The reranker budget for the dev-set grid is 600 calls so both reranked rows cover every question.
+
+---
+
+## D-016a · What counts as a retrieval hit
+
+**Status:** decided · 2026-09-09
+
+**Decision.** Two matchings, reported separately: page level (hit URL equals a gold URL) and section level (URL and anchor). A question whose gold carries no anchor on any source is scored at page level only, never as a section miss, so the two matchings score different numbers of questions and every table carries its own count. The ranked list is collapsed to distinct pages (or sections) at their best rank before scoring, so recall@k means "the answer was among the first k pages". Unanswerable questions are excluded from recall and reported with the top hit each configuration returned.
+
+**Facts.** The toolkit's nDCG builds its ideal DCG as if each relevant id appears once; under URL proxies several chunks of one page score the same proxy and nDCG@10 came out at 1.220 before the de-duplication. Fork-note candidate (D-018).
+
+---
+
+## D-025a · Two more toolkit facts
+
+**Status:** decided · 2026-09-09
+
+- A hit's cosine similarity cannot be read from a search result: the toolkit drops Vespa's `matchfeatures`. Reading it takes a second query restricted to the hits' ids (`id in (...)`) and ranked with every weight zeroed except the cosine term. The restriction is required because the HNSW index is euclidean (D-025): an unrestricted vector-only query returns a different candidate set whose top cosine can be lower (0.7251 against 0.7884 on the same query).
+- A grid that embeds each question once per configuration loses queries to free-tier 429s (6 of 156 on the first fixture run). The query vector depends on the embedding model, not the weights, so the grid embeds once per (model, question) and throttles every API call at 1.1 s; the engine's embedder retries 8 times instead of the toolkit's 3 (D-011a). Zero errors on the second run.
+
+---
+
+## D-030a · First sighting of the similarity corridor
+
+**Status:** open · 2026-09-09 · refines D-030
+
+**Facts** (fixture calibration, `eval/runs/2026-09-08-2331-fixture-floors`, not to be adopted): real questions' best-hit cosine 0.798 to 0.840 (median), junk questions 0.609 median and 0.675 max, a corridor 0.12 wide; 5 of 15 junk queries had no lexical footing, 0 of 11 real ones. The one unanswerable question's best hit was 0.824, above any floor that keeps the real questions. A floor separates another subject from this documentation; it does not separate answerable from unanswerable, and the footing gate cannot either, because unanswerable questions are made of the corpus's own words.
+
+**Decision.** Floors stay unset until the dev-set calibration is read; the unanswerable case is the generator's and the judge's problem (D-016, D-033), not the retriever's.
+
+---
+
+## D-031a · Embedding probe thresholds, measured
+
+**Status:** decided · 2026-09-09
+
+| constant | value | measured at 1024 dims | measured at 128 dims |
+|---|---|---|---|
+| minimum related similarity | 0.55 | 0.755 | 0.666 |
+| minimum separation from the next-best passage | 0.05 | 0.095 | 0.132 |
+| minimum stored-versus-re-embedded similarity | 0.999 | 0.99997 | 0.99999 |
+
+Separation is the check that catches random weights; raw similarity does not, because untrained embeddings put every text at the same distance from every other. The stored vector is read back through `get_chunk`, which surfaces the tensor. `make ingest` runs the probe before embedding anything; the search CLI runs it once per process.
+
+---
+
+## D-023a · Test runs mutate the serving index
+
+**Status:** open · 2026-09-09
+
+**Facts.** The ingestion integration test writes the fixture corpus into the shared `sec128` schema, and one fixture page shares its URL with a real page, so `make test` replaces that page's chunks and adds eight fixture pages beside the real corpus. The fixture retrieval grid did the same to all three variants; the real `/models` page was re-ingested afterwards and the fixture-only pages deleted from `sec1024` and `page128`.
+
+**Decision.** Fixture pages get a URL prefix that cannot collide with the corpus, and the integration test filters to its own pages (done); a test-only schema is the durable fix if the collision recurs.
