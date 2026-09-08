@@ -1,0 +1,100 @@
+{
+  "cached_calls": 0,
+  "call_ms_total": 1727673.944,
+  "calls": 515,
+  "calls_by_kind": {
+    "closed_book": 32,
+    "corpus_check": 32,
+    "filter": 193,
+    "generation": 192,
+    "page_alone": 66
+  },
+  "candidates": 192,
+  "candidates_by_type": {
+    "api_reference": 32,
+    "capability": 32,
+    "cross_page": 32,
+    "post_cutoff": 32,
+    "single_page": 32,
+    "unanswerable": 32
+  },
+  "dataset": "eval/dev-batch-1.jsonl",
+  "dropped": 96,
+  "dropped_by_reason": {
+    "answerable from one page alone": 2,
+    "answerable from title alone": 2,
+    "does not require every gold source": 10,
+    "duplicate question": 3,
+    "gold condition failed": 4,
+    "names another vendor's product": 1,
+    "not about the documented product": 10,
+    "surplus, the type was already filled": 62,
+    "the corpus answers it after all": 7
+  },
+  "error": null,
+  "estimated_usd": 0.0,
+  "failed_calls": 3,
+  "finish_reasons": {
+    "length": 1,
+    "stop": 514
+  },
+  "kept": 96,
+  "kept_by_type": {
+    "api_reference": 16,
+    "capability": 16,
+    "cross_page": 16,
+    "post_cutoff": 16,
+    "single_page": 16,
+    "unanswerable": 16
+  },
+  "model": "glm-5.3-flash",
+  "requested": 96,
+  "requested_by_type": {
+    "api_reference": 16,
+    "capability": 16,
+    "cross_page": 16,
+    "post_cutoff": 16,
+    "single_page": 16,
+    "unanswerable": 16
+  },
+  "shortfall": 0,
+  "shortfall_by_type": {},
+  "status": "complete",
+  "uncached_usage": {
+    "completion_tokens": 55576,
+    "prompt_tokens": 664975,
+    "reasoning_tokens": 14599
+  },
+  "usage": {
+    "completion_tokens": 55576,
+    "prompt_tokens": 664975,
+    "reasoning_tokens": 14599
+  },
+  "usage_by_kind": {
+    "closed_book": {
+      "completion_tokens": 3398,
+      "prompt_tokens": 2458,
+      "reasoning_tokens": 707
+    },
+    "corpus_check": {
+      "completion_tokens": 2274,
+      "prompt_tokens": 46518,
+      "reasoning_tokens": 281
+    },
+    "filter": {
+      "completion_tokens": 21858,
+      "prompt_tokens": 283721,
+      "reasoning_tokens": 10570
+    },
+    "generation": {
+      "completion_tokens": 22266,
+      "prompt_tokens": 232626,
+      "reasoning_tokens": 1698
+    },
+    "page_alone": {
+      "completion_tokens": 5780,
+      "prompt_tokens": 99652,
+      "reasoning_tokens": 1343
+    }
+  }
+}
