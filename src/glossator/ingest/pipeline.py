@@ -7,6 +7,7 @@ so a second run over an unchanged corpus leaves the index exactly as it was.
 
 import asyncio
 import os
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,7 +24,13 @@ from glossator.ingest.pages import CorpusError, iter_page_paths, load_page
 
 logger = structlog.get_logger(__name__)
 
-DEFAULT_CONCURRENCY = 5
+DEFAULT_CONCURRENCY = 4
+
+# The embedding API rate-limits a full-corpus run. The toolkit's embedder retries a
+# 429 with exponential backoff, but only three times by default, which a handful of
+# concurrent pages exhaust -- and a page that runs out of retries is a page missing
+# from the index. More attempts cost wall-clock time on a run that happens rarely.
+_EMBEDDER_MAX_RETRY = 8
 
 # USD per million input tokens for mistral-embed (pricing page, 2026-09-08). The
 # smaller-dimension variants have no published price; they are billed as embeddings,
@@ -56,6 +63,37 @@ def _mistral_client() -> Mistral:
     )
 
 
+async def _run_batch(
+    paths: list[Path],
+    ingest_one: Callable[[Path], Awaitable[None]],
+    sequential: bool = False,
+) -> list[Path]:
+    """Ingest every path, returning the ones that raised.
+
+    ``sequential`` drops all concurrency, which is what a retry after a rate limit
+    wants: the page's own semaphore slot is not the constraint, the account's
+    request rate is.
+    """
+    failed: list[Path] = []
+    if sequential:
+        for path in paths:
+            try:
+                await ingest_one(path)
+            except Exception as exc:  # noqa: BLE001 - reported per page, never fatal
+                failed.append(path)
+                logger.error("Failed to ingest page", path=str(path), error=str(exc))
+        return failed
+
+    results = await asyncio.gather(
+        *(ingest_one(path) for path in paths), return_exceptions=True
+    )
+    for path, result in zip(paths, results, strict=True):
+        if isinstance(result, BaseException):
+            failed.append(path)
+            logger.error("Failed to ingest page", path=str(path), error=str(result))
+    return failed
+
+
 def build_pipeline(variant: IndexVariant, client: Mistral | None = None) -> Pipeline:
     """The ingestion pipeline for one variant.
 
@@ -68,7 +106,9 @@ def build_pipeline(variant: IndexVariant, client: Mistral | None = None) -> Pipe
         extractor=CorpusPageExtractor(),
         text_splitter=build_chunker(variant.chunking),
         embedder=MistralEmbedder(
-            client=client or _mistral_client(), model_name=variant.embedding_model_name
+            client=client or _mistral_client(),
+            model_name=variant.embedding_model_name,
+            max_retry=_EMBEDDER_MAX_RETRY,
         ),
         stores=get_index(variant),
     )
@@ -95,7 +135,6 @@ async def ingest_corpus(
 
     chunks = 0
     tokens = 0
-    failures: list[str] = []
 
     async def ingest_one(path: Path) -> None:
         nonlocal chunks, tokens
@@ -108,13 +147,14 @@ async def ingest_corpus(
             tokens += int(document.metadata.get("embed_total_tokens") or 0)
             logger.debug("Indexed page", url=page.url, chunks=len(document.chunks))
 
-    results = await asyncio.gather(
-        *(ingest_one(path) for path in paths), return_exceptions=True
-    )
-    for path, result in zip(paths, results, strict=True):
-        if isinstance(result, BaseException):
-            failures.append(str(path))
-            logger.error("Failed to ingest page", path=str(path), error=str(result))
+    failed = await _run_batch(paths, ingest_one)
+    if failed:
+        # One sequential retry pass. What fails here is a rate limit the embedder's
+        # own backoff ran out of attempts on, and a corpus indexed except for the
+        # pages that happened to collide is worse than a slower run.
+        log.info("Retrying pages that failed", count=len(failed))
+        failed = await _run_batch(failed, ingest_one, sequential=True)
+    failures = [str(path) for path in failed]
 
     report = IngestReport(
         variant=resolved.name,

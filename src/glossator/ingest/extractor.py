@@ -9,6 +9,7 @@ and carry the page's provenance onto the document.
 from pathlib import Path
 from typing import override
 
+from mistralai.search.toolkit.common.text import sanitize_text
 from mistralai.search.toolkit.context import IngestContext
 from mistralai.search.toolkit.document import Document
 from mistralai.search.toolkit.ingestion import File
@@ -46,7 +47,11 @@ class CorpusPageExtractor(DocumentExtractor):
         )
         return Document(
             source_id=file.source_id or page.url,
-            content=page.body,
+            # Vespa rejects a string field containing a code point that is illegal
+            # in XML text, and the docs corpus contains a few (a stray 0x08 in one
+            # security advisory). The toolkit's sanitizer substitutes U+FFFD one
+            # code point at a time, so offsets into the body still line up.
+            content=sanitize_text(page.body),
             # No chunks: the chunker builds them from the body, because per-chunk
             # metadata differs within a page and the toolkit's sub-chunk path can
             # only copy one metadata object onto all of them.
