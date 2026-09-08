@@ -7,7 +7,7 @@ locale: en
 source_path: openapi.yaml
 source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
 openapi_md5: 316010c8ca4ddeb962becf11df72be9e
-openapi_url: /tmp/claude-1000/-home-dev-work-glossator--claude-worktrees-valiant-hugging-codd/6d539ee6-ce5b-457d-adc5-7e53a6f3c066/scratchpad/corpus/live-openapi.yaml
+openapi_url: https://docs.mistral.ai/openapi.yaml
 ---
 
 # Audio Voices API

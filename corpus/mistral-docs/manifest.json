@@ -312,7 +312,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e7ecec372c76b15116b6ed2fbbe96dcb7b0267b22cdbd66bb0d98e9423f0c95b"
+    "sha256": "d052d77cebe77f509e86f19d13167633e277e95d3d62edd5de15ae84b9ecb0c6"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/audio/transcriptions",
@@ -321,7 +321,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3719ddca6b546f62392f455dce81304d38a6ea34916f163dedc160bd38be350c"
+    "sha256": "3a3661fb52b9c9b9ebbdcc3e2ff25bf49de5236de52ba8c9b065ebc7089bc4d1"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/audio/voices",
@@ -330,7 +330,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "41a1e9b56e6472c485d92a7c1fd4daed0a216edfb833b086da3c85b3e2b13b78"
+    "sha256": "1894e4668c873f0aea9cccf1dde17953a1a2674b2b7218ce3ed783ba47ffda4c"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/batch",
@@ -339,7 +339,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "afb63151209989fac6b6131b1ea61fc36815d1582422b02668c9e1e3c0a3cb4b"
+    "sha256": "0614c7e3e2b947fda1f3e22093ea4a6dc661a5ac7cbf4fdffe04405212f52ef9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys",
@@ -348,7 +348,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "c1c9301287a77bfd34d7023c807f3934b057ea5b8db559cac204ab8461271f83"
+    "sha256": "5721ecc6abc550c99b900f924281287266775e47ad308b87bd08e5841bda9151"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/audit-logs",
@@ -357,7 +357,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "73c47cf3627cf26eab01eeb29dc02fa1c5c0f87e392b04093c20eca6e0fa4f8c"
+    "sha256": "77fba620da0da31a9e40f70276efe9d4fc154fbb4ac5a0fbcbefed4a2b48cf1f"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/billing",
@@ -366,7 +366,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "ff06d3b8a18e951589e1d95e702bea97c6c08607575d5801a77baeba6af19ff7"
+    "sha256": "b405460f859a4529a022837995a131afbae397cd0f0ac9a9cd45ab253b2ce47d"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/scim",
@@ -375,7 +375,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "4b579471d676d4ffe0cbfba82712c39647c2e88b5c7d762b93bbd436685fe5ca"
+    "sha256": "01b83b33512a410b5d7622b268decf79a7e2c12d95d741fda68b649265915f26"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
@@ -384,7 +384,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3b13e139e0a1fc781a3120eb4c92c3f718b661d6b4e58ae1a9e65c9fe4a2797a"
+    "sha256": "09bc6e35ecb49d99e2e2362ddbf08e5e07d4e4a9cef11d0804930ab15b5ba5a9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
@@ -393,7 +393,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "b2fcfff63c7aee0dcdbd807d1e3c9056f8c3a7ca2edfd75e26621bcf8064917f"
+    "sha256": "e41977f3ea78799e3f9683e2f6d7752401a710115179baf14073220b742496ce"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
@@ -402,7 +402,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "aa3b447193d3c54b1b7400ce2945895ddaae4dbc2a60a8f12b2ce8c9988a3147"
+    "sha256": "bf758d504db017e3972241478d8c57e834c52bf5c473686456a1f8af15dfe4f3"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
@@ -411,7 +411,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "b8bcc30afcac8a617bf2f32487e3f8537c8a70ea380af8852ad878d2d4535536"
+    "sha256": "e1ff84475e31de0b698bb2d75e9f3b019134deba3a7509ebe38cc6d88a74e4fb"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
@@ -420,7 +420,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "7818f5c717cc05ed794c3c10c8ce136b6d43cf27fdcc9bfd6db95f4b7d286465"
+    "sha256": "4bff09fa70fe383b45d0d7d2e95f6ecc7c7b8d4467415831dae1a65b29561542"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/agents",
@@ -429,7 +429,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "32ca75082e7d6167c82b0db1891080cd6dc3a30128ee2a535dc58ed03ebe9cd0"
+    "sha256": "e74e015d7239884444a5596e6c3fe5cf6226ccc3acf5ab123333becb71de54ef"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/connectors",
@@ -438,7 +438,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "3e10e68c2d95e223daebd84658b5d73ffc3c4d3ef7f87d22a01f95e33228b1b7"
+    "sha256": "973d63490aaa493b61ef83bd7edf5e2cdb8c1f25078bf2c27b99d924d4a9ca07"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/conversations",
@@ -447,7 +447,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "217d6c886a3506877331a0e0f4c91af43170f6a4daa68cd1f24dcb79a9bf8108"
+    "sha256": "dc63ecc5da58167f58a928f5089cb5cbf7a31dd620a301245ebdd5d3c9d588fa"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/libraries",
@@ -456,7 +456,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "8c56c034bbf0b40864d00d0a52d71e4436d7c77f88522ac20ef1c601bd9dfbbf"
+    "sha256": "2ce1a868e03377bd0cbf35090a5c1342e12419698f3e9f188cdb3a5ddd1fc0bf"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/libraries/accesses",
@@ -465,7 +465,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e6c36a0bf1f40b8f3445a07d7ef339f1f571da52d7a6c9977f5fe56869ea0413"
+    "sha256": "851c614b81c1e787923b654e2881f4a4c3b6c27eb3193386071427ed9e630594"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/libraries/documents",
@@ -474,7 +474,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "4314144819261ec69888c6494d6a7194b77f1cd89d22fc11a20627e2e9c7eede"
+    "sha256": "c5ee833449823fa980c2053c4f87593ce0bbacc5417ccc7297667345bdf79364"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns",
@@ -483,7 +483,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "9559d4f644cf5f356f2c1e85c66136c65ce64e008029cb97a23b6980430793fb"
+    "sha256": "a4d2b8d6c52bb6bc06e4b8a8fc32b1c87d0ddb5619502693d99caed311f05a83"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events",
@@ -492,7 +492,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "6e73e1f0ae0f6d1e7de9eafb352f756eb38d3c22fbb42972a193ec7e1e31e7ab"
+    "sha256": "6082cb581e1e155fb6026db3c4c0898b4bd8353b72285e49c5a800b99497b8df"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events/fields",
@@ -501,7 +501,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "cfb0d7841c6a82a763bb5c335bf0c773d5ffecf74df67861772ef6a4afa41b95"
+    "sha256": "5f4bc844a8974d86bad5c7e3a5abe160a16cee862ff6bab240eb144b8c117e02"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets",
@@ -510,7 +510,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "82174b7ae101b24f864441953470109384cd854c3d198dc9215a02a710be0563"
+    "sha256": "36b523b15a71c046ff54128d255419e573a663f1482c86641e89a8b94f2ee467"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets/records",
@@ -519,7 +519,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "dbe39a16da9991f3109e1d90fa14a07ae1ab09b826dcc6246b1917539754235e"
+    "sha256": "cebd4df13601429f2fd779a74496de23ae5fcfb4ba07ab54d379f95043083dd3"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/judges",
@@ -528,7 +528,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "9ada4bcfb8c83f14d25b8adcb1a11bbb81771d5195d015c724e007f24e2d6a5b"
+    "sha256": "4d940ccab8a48187ad39c4e9eb16f845fd98dfcd05323457a2835227e1ef6663"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/logs",
@@ -537,7 +537,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "b927fe52c9abba26ef0f813991b959a8d2545141e02073cb2543f923b6328c92"
+    "sha256": "8bb92d3264c465d5501fe3c283cd72fb465a2a0befb4da6ca610c60282bfd2fb"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/spans",
@@ -546,7 +546,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "f15870d3934be0dce63d6ae64dab3c2f7f3bb3ce70194b30783fcf482e8abcbe"
+    "sha256": "c3a913f5642383d574ae1c28ccf35fe7dec6731279cd3dd2246a0fc64ad4fc6e"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/observability/traces",
@@ -555,7 +555,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e1b59972432720a21d144a5b740b5f7dede733d1cafbc9bf6b270f8267eb3585"
+    "sha256": "1f10bf9194438ffd1a3142b1b1deb4dab1dfc47e99a87f582b0204053d489594"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/prompts",
@@ -564,7 +564,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "35cdd855987d57a2114858c935e6e54c5fba7ed93ef8633929bb83a31440bd2d"
+    "sha256": "13fc1317b27a6b060658c17b2f08aafd4e1722f0b129e7d57ed3416c1295b0f9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/rag/ingestion_pipeline_configurations",
@@ -573,7 +573,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0b813f304eac71f4f8f0b329b08cd46a5ee389e65b31ea538268e32b1b789979"
+    "sha256": "7f840cc02595c0b89d97175268eba80cd9385914f99b7440606a80846c1de0f3"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/rag/search_indexes",
@@ -582,7 +582,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "785689e386c69231001a2e36521ef0baeba9f87061ab77b262020b6ba654fac9"
+    "sha256": "ae6fca884f5698e2a6e17be1c30493951a67cb3512659903c1766f829ac5eb7c"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/skills",
@@ -591,7 +591,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "4b115743f63b4ff61b571d1c4ef78c17b71fa56221651c8d19ae814ffb1833ea"
+    "sha256": "71e7e5e92fdaaa62915f48bbc12e5d08d7567a3df6f8937e3805999940d5877d"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/beta/users",
@@ -600,7 +600,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "db657f7742fcd8b349750128f3399a373aaf12bed4d505829b37efdcfd28f367"
+    "sha256": "459dab03a4b45624de6fd1caffa589455c8ce43088e7cd179a502884b4f377b5"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/chat",
@@ -609,7 +609,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "29d5ccc75ccffc72632a8599400f8f81466ff58e8dace88a07ab831f7283ead7"
+    "sha256": "f7fa6c21066766bcc26f0e6bd56f6f8d9ef4cf2839673bdb4c941038c0080f45"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/classifiers",
@@ -618,7 +618,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "de018bcdb1a99cef29f06f3f19a62a718596dc039c227e5845ad7e3545f3dc7b"
+    "sha256": "a34cd1347356a2e0cdcaa2f828ff2cbbf2c525b3c592afaa7e0841a747b8b528"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/deprecated/agents",
@@ -627,7 +627,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "9dc261cd640ef4f89694f85990972f5d9b9d6f71a74419ff865b2bbb62c8d2d2"
+    "sha256": "b422459454ae912b2014babfa227a056810406c458d8aaf1f742ce05d0c8ea8e"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/embeddings",
@@ -636,7 +636,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "4bd0104764c68971137935bbb6517f50bc23b884354778430eb1531bb6f52639"
+    "sha256": "740f481af760d8565bbb692851bc646b745a313f15e2e991875509b18bf109b0"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/events",
@@ -645,7 +645,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0228ede35c09f46ed59ceeb140e670cb42f1dad9199b68c476165d0dbb5383b2"
+    "sha256": "3ea94231f173f074106d7300dbfadec19984dc89cde16dcd2b1493b4fabb860d"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/files",
@@ -654,7 +654,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "df35d361d5995fc52b42f7ef2340ab9ab420c25c07148d42a61b1088c5f3fd36"
+    "sha256": "255329894269c4456fd01e8783e2c11ed95c79004c613f1a30f56e17a325e429"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/fim",
@@ -663,7 +663,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "0fd78b0837bc6a5ca216c33383bb3f43a89e2231670a2f8f0f74469bb4490531"
+    "sha256": "9746a419be9d040b3af398ef3e40fe6aa48ec436f97c73aea82dc33d8b37f57a"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/models",
@@ -672,7 +672,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "974b85a59949161170923b1d92079eb714bd1b1262fa80840a736faaf2e9e9f9"
+    "sha256": "3e0880a9d4d4cc40963903032204b57eae4cd340d96a30339275360fa1167cb9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/ocr",
@@ -681,7 +681,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "fe3e3939b00520162e453476ca64c82e9a76cc6e901ccabc229bb11ce9b8b16c"
+    "sha256": "b8ed931827f5ba9d9f575b75fd3c9cdd366b87634ec3b08b87a1116142f2eb39"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows",
@@ -690,7 +690,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "22052045e5508224aabb97ff56a5c5a987c65ddbe7d1b4a607052ac870c1e30d"
+    "sha256": "56b6a12f4660bad31c70b277379d9b065a3a40d7cefcdfd4acff99225d65b931"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
@@ -699,7 +699,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "621c05077320e7b076dfc7e0c00649d31518b42720503eae5b44d3e7db17459a"
+    "sha256": "3afcfc14ce7429dda36752cd9883b4418e65a0be0d4353b06357109795c24ea9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/events",
@@ -708,7 +708,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "e5ef9131e8845c0dfb0e561ec008eca28214aeed56e7902e206bb7fa08789e51"
+    "sha256": "7b9b27f1909e2bb99e918f1c42a0c43d2a9dde817e0b1d779447052846230ec9"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/executions",
@@ -717,7 +717,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "5736235bd974919f6b79ff0eb653e621e34694c2147d0a2fd878386a74884278"
+    "sha256": "3e161f68f069a0db0dd568dbb6135321df259c09e2b8d7777df012b31cb729cd"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/metrics",
@@ -726,7 +726,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "a4a05b5f6019577b134228beacb4705f2dd2ea9915ced04f899059c679b41c92"
+    "sha256": "d2930e76657cd66edbff883c910bebd6882a73b7acfb0c8b0aa9464c5f57ff96"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/runs",
@@ -735,7 +735,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "15074b088f973b2d4803b306e3a942b50279ba600b184db62ab0e93e7847d647"
+    "sha256": "c262951d9916c738b186aa01a079709a2a5181c37352fbe3d83163dd099b2182"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/workflows/schedules",
@@ -744,7 +744,7 @@
     "kind": "api",
     "source_path": "openapi.yaml",
     "source_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-    "sha256": "dbc9f00a23a9a2c560e398d94cb9c74b4b80061799af5062f9d693fe939aca44"
+    "sha256": "f3839fc483f3c8ae330a1cc2f820190fdeec5d4a450fa7092ad50820397bb74f"
   },
   {
     "url": "https://docs.mistral.ai/community",

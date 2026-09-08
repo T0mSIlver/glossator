@@ -14,6 +14,7 @@ from . import PINNED_REF
 from .build import build_corpus, format_summary
 from .check import format_report, run_live_check
 from .openapi import OPENAPI_URL
+from .routes import fetch_search_docs
 from .source import DEFAULT_CACHE_DIR, fetch_docs_repo, use_existing_checkout
 
 DEFAULT_OUT_DIR = Path("corpus/mistral-docs")
@@ -45,7 +46,12 @@ def _build_parser() -> argparse.ArgumentParser:
     build.add_argument(
         "--search-docs",
         type=Path,
-        help="search-docs-en.json to cross-check breadcrumbs against",
+        help="local search-docs-en.json; fetched from the site when omitted",
+    )
+    build.add_argument(
+        "--no-search-docs",
+        action="store_true",
+        help="skip the breadcrumb cross-check instead of fetching the site's index",
     )
     build.add_argument("--openapi-url", default=OPENAPI_URL)
     build.add_argument("--openapi-file", type=Path, help="use a local spec instead of fetching")
@@ -59,6 +65,14 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _search_docs_path(args: argparse.Namespace) -> Path | None:
+    if args.no_search_docs:
+        return None
+    if args.search_docs is not None:
+        return Path(args.search_docs)
+    return fetch_search_docs(args.cache_dir.parent / "search-docs", refresh=args.refresh_openapi)
+
+
 def _run_build(args: argparse.Namespace) -> int:
     if args.checkout is not None:
         checkout = use_existing_checkout(args.checkout, args.ref)
@@ -68,7 +82,7 @@ def _run_build(args: argparse.Namespace) -> int:
         checkout,
         out_dir=args.out,
         cache_dir=args.cache_dir.parent / "openapi",
-        search_docs=args.search_docs,
+        search_docs=_search_docs_path(args),
         openapi_offline=args.openapi_file,
         openapi_url=args.openapi_url,
         refresh_openapi=args.refresh_openapi,

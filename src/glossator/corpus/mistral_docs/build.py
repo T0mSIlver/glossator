@@ -48,6 +48,7 @@ class BuildSummary:
     redirected_routes: list[tuple[str, str]] = field(default_factory=list)
     unreachable_routes: list[tuple[str, str]] = field(default_factory=list)
     suppressed_anchors: int = 0
+    duplicate_anchor_pages: list[str] = field(default_factory=list)
 
     @property
     def total_pages(self) -> int:
@@ -116,6 +117,10 @@ def _build_doc_pages(
         summary.partials_inlined += render.partials
         summary.suppressed_anchors += render.suppressed_anchors
         _record_anchors(summary, route.route, len(render.anchors), KIND_DOC)
+        anchors = [anchor.anchor for anchor in render.anchors]
+        if len(anchors) != len(set(anchors)):
+            # Upstream reuses a sectionId; the live deep link lands on the first one.
+            summary.duplicate_anchor_pages.append(route.route)
         if route.hidden:
             summary.hidden_pages += 1
         pages.append(
@@ -150,7 +155,7 @@ def _build_api_pages(
                 markdown=markdown,
                 source_path="openapi.yaml",
                 breadcrumbs=["API", page.label],
-                extra={"openapi_md5": openapi.md5, "openapi_url": openapi.origin},
+                extra={"openapi_md5": openapi.md5, "openapi_url": openapi.url},
             )
         )
     return pages
@@ -244,6 +249,11 @@ def format_summary(summary: BuildSummary) -> str:
         lines.append("routes normalized through redirect.ts")
         for source, target in summary.redirected_routes:
             lines.append(f"  {source} -> {target}")
+
+    if summary.duplicate_anchor_pages:
+        lines.append("")
+        lines.append("pages where upstream reuses a sectionId")
+        lines += [f"  {url}" for url in summary.duplicate_anchor_pages]
 
     if summary.unreachable_routes:
         lines.append("")

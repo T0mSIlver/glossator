@@ -61,6 +61,9 @@ class OpenApiSource:
     spec: dict[str, Any]
     md5: str
     origin: str
+    """Where the bytes came from on this run: a URL, the cache, or a local file."""
+    url: str = OPENAPI_URL
+    """The canonical published location, recorded on every page regardless of origin."""
 
 
 def load_openapi(
@@ -90,7 +93,7 @@ def load_openapi(
     if not isinstance(spec, dict) or "paths" not in spec:
         raise ValueError(f"{origin} is not an OpenAPI document")
     log.info("openapi loaded", origin=origin, md5=digest, paths=len(spec["paths"]))
-    return OpenApiSource(spec=spec, md5=digest, origin=origin)
+    return OpenApiSource(spec=spec, md5=digest, origin=origin, url=url)
 
 
 def load_endpoint_pages(repo_root: Path) -> list[EndpointPage]:

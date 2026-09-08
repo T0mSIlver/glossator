@@ -14,9 +14,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import httpx
 import structlog
 
-from . import LOCALE
+from . import LOCALE, SITE_ORIGIN
 from .frontmatter import split as split_frontmatter
 
 log = structlog.get_logger(__name__)
@@ -24,6 +25,8 @@ log = structlog.get_logger(__name__)
 PAGE_BASENAMES = ("page.mdx", "page.md")
 META_BASENAMES = ("_meta.mdx", "_meta.md")
 CATEGORY_JSON = "_category_.json"
+
+SEARCH_DOCS_URL = f"{SITE_ORIGIN}/search-docs-en.json"
 
 _REDIRECT_RULE = re.compile(
     r"source:\s*(['\"])(?P<source>.*?)\1\s*,\s*destination:\s*(['\"])(?P<destination>.*?)\3",
@@ -203,6 +206,19 @@ def _walk_route_dirs(root: Path, parts: list[str]) -> list[list[str]]:
             continue
         found.extend(_walk_route_dirs(child, [*parts, child.name]))
     return found
+
+
+def fetch_search_docs(cache_dir: Path, url: str = SEARCH_DOCS_URL, refresh: bool = False) -> Path:
+    """Download the site's own search index, which is the breadcrumb reference."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cached = cache_dir / "search-docs-en.json"
+    if cached.is_file() and not refresh:
+        return cached
+    log.info("fetching search index", url=url)
+    response = httpx.get(url, timeout=60.0, follow_redirects=True)
+    response.raise_for_status()
+    cached.write_bytes(response.content)
+    return cached
 
 
 def load_expected_breadcrumbs(search_docs: Path) -> dict[str, list[str]]:

@@ -98,7 +98,10 @@ def fetch_docs_repo(
             break
         if depth == 0:
             log.info("deepening docs repo to full history", ref=ref)
-            _git(["fetch", "--unshallow", "--tags", "origin"], cwd=cache_dir)
+            # Best effort: `--unshallow` errors on a clone that is already complete,
+            # which is exactly the case where there is nothing left to deepen.
+            if not _try_git(["fetch", "--unshallow", "--tags", "origin"], cwd=cache_dir):
+                _try_git(["fetch", "--tags", "origin"], cwd=cache_dir)
         else:
             log.info("deepening docs repo", ref=ref, depth=depth)
             _try_git(["fetch", f"--depth={depth}", "origin"], cwd=cache_dir)
