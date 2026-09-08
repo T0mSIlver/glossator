@@ -1,0 +1,40 @@
+{
+  "cached_calls": 6,
+  "calls": 20,
+  "candidates": 9,
+  "candidates_by_type": {
+    "api_reference": 2,
+    "capability": 3,
+    "cross_page": 1,
+    "post_cutoff": 1,
+    "single_page": 1,
+    "unanswerable": 1
+  },
+  "dataset": "eval/runs/2026-09-08-2312-fixture-cross-page-v3-complete/questions.jsonl",
+  "dropped": 3,
+  "dropped_by_reason": {
+    "answerable from title alone": 3
+  },
+  "error": null,
+  "kept": 6,
+  "kept_by_type": {
+    "api_reference": 1,
+    "capability": 1,
+    "cross_page": 1,
+    "post_cutoff": 1,
+    "single_page": 1,
+    "unanswerable": 1
+  },
+  "latency_ms": 39022.42,
+  "status": "complete",
+  "uncached_usage": {
+    "completion_tokens": 974,
+    "prompt_tokens": 6855,
+    "reasoning_tokens": 83
+  },
+  "usage": {
+    "completion_tokens": 1678,
+    "prompt_tokens": 11157,
+    "reasoning_tokens": 288
+  }
+}
