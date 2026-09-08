@@ -9,7 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from glossator.index.variants import VARIANTS
-from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.config import RetrievalConfig, query_weights
 
 
 def test_defaults_name_a_real_variant() -> None:
@@ -72,3 +72,9 @@ def test_the_config_is_frozen() -> None:
     config = RetrievalConfig()
     with pytest.raises(ValidationError):
         config.top_k = 3
+
+
+def test_weights_are_translated_to_vespa_query_inputs() -> None:
+    """A feature name sent as a query input names nothing and is silently ignored."""
+    assert query_weights({"bm25_content": 1.0}) == {"bm25_content_weight": 1.0}
+    assert query_weights({}) == {}

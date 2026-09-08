@@ -55,7 +55,7 @@ The three `mistral` format flags matter. Without them vLLM applies a HuggingFace
 chat template that does not match the model's own tokenizer, and the model answers
 noticeably worse for reasons that are hard to see from the output.
 
-### Function calling {#function-calling}
+### Function calling
 
 Tool calls need a parser so that vLLM can turn the model's raw output into the
 structured `tool_calls` field a client expects:
@@ -72,7 +72,7 @@ vllm serve mistralai/Ministral-3-8B-Instruct \
 Without `--enable-auto-tool-choice`, tool calls come back as text in the content
 field and every client that reads `tool_calls` sees an empty list.
 
-### Context length and the KV cache {#context-length-and-the-kv-cache}
+### Context length and the KV cache
 
 `--max-model-len` sets the context window the server advertises. Set it to what
 you actually need: the KV cache is preallocated from what is left after the

@@ -19,7 +19,7 @@ from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.retrieval.retrievers.base import DEFAULT_TOP_K, Retriever
 from mistralai.search.toolkit.search import SearchResult
 
-from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.config import RetrievalConfig, query_weights
 from glossator.retrieval.context import restrict_to
 
 logger = structlog.get_logger(__name__)
@@ -68,7 +68,7 @@ class DocsRetriever(Retriever):
                 # No query_profile: that is what keeps the two fields below usable.
                 # The builder still attaches the schema's generated default profile,
                 # so the migration's baked-in weights apply and these override them.
-                ranking_weights=dict(self.config.ranking_weights),
+                ranking_weights=query_weights(self.config.ranking_weights),
                 extra_yql_filter=self.config.yql_filter(),
             )
             results = await self.index.search(

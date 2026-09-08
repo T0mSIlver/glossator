@@ -221,3 +221,21 @@ def test_chunking_is_deterministic(
     assert [(spec.start, spec.end, spec.content) for spec in first] == [
         (spec.start, spec.end, spec.content) for spec in second
     ]
+
+
+def test_a_chunk_without_an_anchor_still_carries_its_heading_path(
+    chunker: SectionChunker, corpus_pages: list[CorpusPage]
+) -> None:
+    """Most headings on the live site have no anchor; the citation degrades to page level."""
+    anchorless = [
+        spec
+        for page in corpus_pages
+        for spec in chunker.plan(page.body, _facts(page))
+        if spec.metadata.anchor is None
+    ]
+    assert anchorless, (
+        "the fixture corpus should include sections whose headings carry no anchor"
+    )
+    for spec in anchorless:
+        assert spec.metadata.heading_path
+        assert spec.metadata.url

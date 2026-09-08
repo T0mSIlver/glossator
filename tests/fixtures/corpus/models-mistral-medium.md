@@ -16,7 +16,7 @@ Mistral Medium 3.5 is the frontier model for general use: the best quality per
 euro in the catalogue for reasoning, instruction following and long-context work.
 Released 2026-04-28.
 
-## At a glance {#at-a-glance}
+## At a glance
 
 | Property | Value |
 | --- | --- |
@@ -29,7 +29,7 @@ Released 2026-04-28.
 | Knowledge cutoff | 2026-02 |
 | Licence | Proprietary, API only |
 
-## Capabilities {#capabilities}
+## Capabilities
 
 Function calling, structured outputs, document Q&A, vision, reasoning, and
 prompt caching are all supported. The model accepts image parts in user messages
@@ -38,7 +38,7 @@ and PDF document parts through the document Q&A path.
 Reasoning is emitted as a separate segment before the answer, so a client that
 renders the raw content stream must skip it or show it as a distinct block.
 
-## When to choose it {#when-to-choose-it}
+## When to choose it
 
 Choose Mistral Medium 3.5 when answer quality is the constraint: multi-step
 reasoning, careful instruction following, grounded answers over retrieved
@@ -50,7 +50,7 @@ on those tasks is usually not measurable.
 
 Choose Ministral 3 8B when latency dominates and the task is narrow.
 
-## Limits {#limits}
+## Limits
 
 The 128k context window is shared between prompt and completion. A request whose
 prompt fills the window returns `finish_reason: "model_length"` without producing

@@ -61,8 +61,10 @@ class Indexed:
 
 async def _skip_unless_vespa_ready() -> None:
     index = get_index(VARIANT)
+    # A non-zero vector: cosine similarity against an all-zero query is NaN, which
+    # Vespa serializes as a null relevance and the toolkit then fails to parse.
     probe = VectorSearchQuery(
-        query="probe", embedding=[0.0] * VARIANT.embedding_dimensions, top_k=1
+        query="probe", embedding=[0.1] * VARIANT.embedding_dimensions, top_k=1
     )
     try:
         await index.search(probe, context=restrict_to(VARIANT.schema_name))

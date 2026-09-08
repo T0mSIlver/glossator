@@ -6,7 +6,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/agents/conversations/page.mdx",
     "source_commit": "2e094f7",
-    "sha256": "77330cc6882a898d0f70580d633e08f1f02df21e1a531a26914af0768c50081b"
+    "sha256": "25aea3938fc6311d79ae56db47b407566ff402046ec09fef9f873d32d9a3c0a1"
   },
   {
     "url": "https://docs.mistral.ai/api/endpoint/chat-completions",
@@ -42,7 +42,7 @@
     "kind": "doc",
     "source_path": "src/content/en/docs/deployment/self-deployment/page.mdx",
     "source_commit": "2e094f7",
-    "sha256": "90a3780683303dbcfed25b6e8d2915de7d1c563e3938b47e040c5dafd00e5dfb"
+    "sha256": "ec18d925d49361a8a701289b95285e390378b38f3122e45437bbb113c58fccd2"
   },
   {
     "url": "https://docs.mistral.ai/getting-started/quickstart",
@@ -69,6 +69,6 @@
     "kind": "model",
     "source_path": "src/schema/models/models/mistral-medium.ts",
     "source_commit": "2e094f7",
-    "sha256": "6e8a81b22a19161f520bd402270d02c1c19cd51ed98197b3338cdced69152e40"
+    "sha256": "7b2b1cd38d2f0507c816a75935099d5eb7306568db2f04cd0d91652f07c25b4d"
   }
 ]

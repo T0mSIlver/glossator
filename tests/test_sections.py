@@ -93,11 +93,34 @@ def test_a_hash_inside_a_fenced_block_is_not_a_heading() -> None:
     assert "value = 1" in second.body
 
 
-def test_the_fixture_corpus_parses_into_anchored_sections(
+def test_the_fixture_corpus_parses_into_sections(
     corpus_pages: list[CorpusPage],
 ) -> None:
     for page in corpus_pages:
         sections = parse_sections(page.body, page_title=page.title)
         assert sections, page.url
         assert sections[0].heading_path[0] == page.title
-        assert any(section.anchor for section in sections), page.url
+
+
+def test_pages_without_anchors_still_parse(corpus_pages: list[CorpusPage]) -> None:
+    """Most headings on the live site have no anchor at all (D-003 correction).
+
+    Only headings converted from SectionTab, FAQ items and API operations carry
+    one, so a section without an anchor is the common case, not an error: the
+    citation degrades to page level and the heading path still names the section.
+    """
+    anchorless = [
+        page
+        for page in corpus_pages
+        if not any(
+            section.anchor
+            for section in parse_sections(page.body, page_title=page.title)
+        )
+    ]
+    assert anchorless, (
+        "the fixture corpus should include pages whose headings carry no anchor"
+    )
+    for page in anchorless:
+        for section in parse_sections(page.body, page_title=page.title):
+            assert section.anchor is None
+            assert section.heading_path

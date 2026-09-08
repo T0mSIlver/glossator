@@ -101,6 +101,21 @@ class RetrievalConfig(BaseModel):
         return " and ".join(present)
 
 
+def query_weights(weights: dict[str, float]) -> dict[str, float]:
+    """Translate ranking feature names into the query inputs Vespa expects.
+
+    The two toolkit APIs that set the same weights disagree about the name.
+    ``set_default_ranking_weights`` in a migration takes the *feature* name
+    (``bm25_content``) and appends the suffix itself; ``VespaSearchQuery.ranking_weights``
+    is serialized verbatim into ``ranking.features.query(<key>)``, so it needs the
+    *input* name (``bm25_content_weight``). A feature name passed there names an
+    input that no rank expression reads: the override is accepted and silently
+    ignored. One vocabulary is used everywhere in this package -- the feature name --
+    and translated here.
+    """
+    return {f"{feature}_weight": weight for feature, weight in weights.items()}
+
+
 def _in_clause(field: str, values: list[str]) -> str | None:
     if not values:
         return None
@@ -115,4 +130,5 @@ __all__ = [
     "RANKING_FEATURES",
     "VARIANTS",
     "RetrievalConfig",
+    "query_weights",
 ]
