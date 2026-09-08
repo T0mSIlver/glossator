@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from mistralai.client import Mistral
-from mistralai.search.toolkit.embedders import MistralEmbedder
 from mistralai.search.toolkit.document import compute_id
+from mistralai.search.toolkit.embedders import MistralEmbedder
 from mistralai.search.toolkit.ingestion import File
 from mistralai.search.toolkit.ingestion.extractors import (
     MistralOCRExtractor,
@@ -24,9 +24,14 @@ from mistralai.search.toolkit.ingestion.text_splitters import (
     MarkdownTextSplitterConfig,
 )
 from mistralai.search.toolkit.retrieval import QueryEngine, VectorRetriever
-from mistralai.search.toolkit.search import GrepMode, NavigableIndex, NavigationDirection
+from mistralai.search.toolkit.search import (
+    GrepMode,
+    NavigableIndex,
+    NavigationDirection,
+)
 from mistralai.search.toolkit.search.errors import DocumentNotFoundError
-from search_app import get_index
+
+from glossator.index import get_index, get_variant
 
 load_dotenv(override=True)
 
@@ -40,16 +45,25 @@ _api_key = os.environ.get("MISTRAL_API_KEY", "")
 if not _api_key:
     raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
 
-_collection_name = os.environ.get("COLLECTION_NAME", "exampledocs")
+# Which index variant this server serves. Schema names are owned by the index
+# package, so the environment names a variant rather than a Vespa collection.
+_collection_name = os.environ.get("GLOSSATOR_VARIANT", "sec1024")
 
 _mistral_client = Mistral(
     api_key=_api_key,
     server_url=os.getenv("MISTRAL_API_URL", "https://api.mistral.ai"),
 )
-_embedder = MistralEmbedder(client=_mistral_client)
-_vector_store = get_index(_collection_name)
+_variant = get_variant(_collection_name)
+# The embedder must match the variant: MistralEmbedder defaults to the 128-dim
+# model, which a 1024-dim schema rejects only at feed time.
+_embedder = MistralEmbedder(
+    client=_mistral_client, model_name=_variant.embedding_model_name
+)
+_vector_store = get_index(_variant)
 if not isinstance(_vector_store, NavigableIndex):
-    raise RuntimeError(
+    # A misconfigured schema, not a caller passing the wrong type, so this stays a
+    # RuntimeError rather than the TypeError the isinstance check suggests.
+    raise RuntimeError(  # noqa: TRY004
         "The search index does not support agentic navigation. "
         "Ensure IndexingMode.DOCUMENT_PER_CHUNK is used in the schema migration."
     )
@@ -253,6 +267,7 @@ async def delete(source_id: str) -> str:
 # Agentic navigation tools  (RFC: Agentic Search Loop)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 async def open(chunk_id: str, window: int = 2) -> list[dict]:
     """Expand context around a chunk from search: return it plus adjacent chunks in reading order.
@@ -325,7 +340,9 @@ async def read(
         end_offset:   Inclusive upper bound (None = end of document).
         top_k:        Maximum number of chunks to return (default 20).
     """
-    results = await _navigable_store.read(source_id, start_offset, end_offset, top_k=top_k)
+    results = await _navigable_store.read(
+        source_id, start_offset, end_offset, top_k=top_k
+    )
     return _format_chunks(results)
 
 
@@ -346,7 +363,9 @@ async def grep(
         top_k:     Maximum number of matching chunks to return (default 5).
     """
     grep_mode = GrepMode(mode)
-    results = await _navigable_store.grep(source_id, pattern, mode=grep_mode, top_k=top_k)
+    results = await _navigable_store.grep(
+        source_id, pattern, mode=grep_mode, top_k=top_k
+    )
     return _format_chunks(results)
 
 
@@ -360,10 +379,15 @@ if __name__ == "__main__":
         help="Start in HTTP (streamable-HTTP) mode instead of the default stdio mode.",
     )
     parser.add_argument(
-        "--host", default="127.0.0.1", help="Bind host (HTTP mode only, default: 127.0.0.1)."
+        "--host",
+        default="127.0.0.1",
+        help="Bind host (HTTP mode only, default: 127.0.0.1).",
     )
     parser.add_argument(
-        "--port", type=int, default=8000, help="Bind port (HTTP mode only, default: 8000)."
+        "--port",
+        type=int,
+        default=8000,
+        help="Bind port (HTTP mode only, default: 8000).",
     )
     args = parser.parse_args()
 

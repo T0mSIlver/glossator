@@ -24,7 +24,6 @@ import os
 import uuid
 
 import pytest
-
 from mistralai.search.toolkit.document import Document, DocumentChunk
 from mistralai.search.toolkit.search import VectorSearchQuery, VectorStoreIndex
 from search_app import get_index
@@ -61,7 +60,9 @@ async def _open_ready_index() -> VectorStoreIndex:
     try:
         await index.search(_query(top_k=1))
     except Exception as exc:  # noqa: BLE001 - any failure here means the backend is not ready
-        pytest.skip(f"backend not ready for collection {COLLECTION_NAME!r} ({exc}); run `make setup-*` first")
+        pytest.skip(
+            f"backend not ready for collection {COLLECTION_NAME!r} ({exc}); run `make setup-*` first"
+        )
     return index
 
 

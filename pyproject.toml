@@ -14,6 +14,9 @@ dependencies = [
     # the older core does not have. Bump both by bumping this.
     "mistralai-search-toolkit[text-splitter-langchain,vespa]==0.0.13",
     "python-dotenv>=0.9.9",
+    # Logging in library code (AGENTS.md). Also a toolkit dependency, but we call
+    # it directly, so it is declared rather than inherited.
+    "structlog>=25.1",
 ]
 
 [project.optional-dependencies]
@@ -26,8 +29,30 @@ workflows = [
 dev = [
     "ruff>=0.11",
     "mypy>=1.15",
+    "types-PyYAML>=6.0",
     # `make test` round-trips a document through the backend; see tests/.
     "pytest>=8.0",
+]
+
+[tool.mypy]
+# The workflow samples only type-check with the optional `workflows` extra installed,
+# and they are template scaffolding rather than part of the engine.
+exclude = ["^src/examples/"]
+
+[tool.ruff]
+# Vendored skill documentation: ruff reformats the python in its fenced blocks,
+# which rewrites text we do not own.
+extend-exclude = [".agents"]
+
+[tool.ruff.lint]
+ignore = [
+    # The toolkit's base classes declare their context parameter as
+    # `context: IngestContext = IngestContext()`; an override that does not match
+    # that signature is a different method. The contexts are frozen models, so the
+    # shared-mutable-default hazard the rule guards against does not apply.
+    # The same shape is how the workflows SDK declares an injected dependency
+    # (`embedder: MistralEmbedder = Depends(get_embedder)`).
+    "B008",
 ]
 
 [tool.uv]
@@ -47,4 +72,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/entrypoints", "src/search_app", "src/examples"]
+packages = ["src/entrypoints", "src/glossator", "src/examples"]

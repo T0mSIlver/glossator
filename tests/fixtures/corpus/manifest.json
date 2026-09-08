@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://docs.mistral.ai/agents/conversations",
+    "path": "agents-conversations.md",
+    "title": "Conversations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/agents/conversations/page.mdx",
+    "source_commit": "2e094f7",
+    "sha256": "77330cc6882a898d0f70580d633e08f1f02df21e1a531a26914af0768c50081b"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/chat-completions",
+    "path": "api-endpoint-chat-completions.md",
+    "title": "Create chat completion",
+    "kind": "api",
+    "source_path": "openapi-public-doc.yaml#/paths/~1v1~1chat~1completions/post",
+    "source_commit": "2e094f7",
+    "sha256": "bfc6c562e97f6c6e3ec3ea756ef8d26a0049a0d82e0f964e27cb47158cd90f7c"
+  },
+  {
+    "url": "https://docs.mistral.ai/capabilities/embeddings",
+    "path": "capabilities-embeddings.md",
+    "title": "Embeddings",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/capabilities/embeddings/page.mdx",
+    "source_commit": "2e094f7",
+    "sha256": "cede39da64b1d2a3c3a1784e217620aeb4f51416850a649ed76fbbc34df7eb83"
+  },
+  {
+    "url": "https://docs.mistral.ai/capabilities/function-calling",
+    "path": "capabilities-function-calling.md",
+    "title": "Function calling",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/capabilities/function-calling/page.mdx",
+    "source_commit": "2e094f7",
+    "sha256": "db3ad991c11ca427fbdd152de95871fccd01849834b1cd0bd29ee521d2fae5d8"
+  },
+  {
+    "url": "https://docs.mistral.ai/deployment/self-deployment",
+    "path": "deployment-self-deployment.md",
+    "title": "Self-deployment",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/deployment/self-deployment/page.mdx",
+    "source_commit": "2e094f7",
+    "sha256": "90a3780683303dbcfed25b6e8d2915de7d1c563e3938b47e040c5dafd00e5dfb"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstart",
+    "path": "getting-started-quickstart.md",
+    "title": "Quickstart",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstart/page.mdx",
+    "source_commit": "2e094f7",
+    "sha256": "d51261a6b86c48923bde61241fbdb55f6576ce387d6c1e99d5d85a00e145620b"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/capability-matrix",
+    "path": "models-capability-matrix.md",
+    "title": "Model capability matrix",
+    "kind": "doc",
+    "source_path": "src/schema/models/models/*.ts",
+    "source_commit": "2e094f7",
+    "sha256": "54c159b5e45e21538c0f9b517ce1cd11606e1abe654e1deb53202558b3834700"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-medium",
+    "path": "models-mistral-medium.md",
+    "title": "Mistral Medium 3.5",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-medium.ts",
+    "source_commit": "2e094f7",
+    "sha256": "6e8a81b22a19161f520bd402270d02c1c19cd51ed98197b3338cdced69152e40"
+  }
+]

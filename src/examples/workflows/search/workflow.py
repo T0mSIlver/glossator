@@ -1,6 +1,6 @@
 """Document ingestion workflow -- orchestration only, no I/O here."""
 
-import mistralai.workflows as workflows
+from mistralai import workflows
 from mistralai.workflows import workflow
 
 # Activities import the search toolkit and mistralai.client (→ httpx), which
@@ -9,7 +9,7 @@ from mistralai.workflows import workflow
 with workflow.unsafe.imports_passed_through():
     from .activities import collect_document_paths, ingest_documents
 
-from .models import IngestionInput, IngestionResult  # noqa: E402
+from .models import IngestionInput, IngestionResult
 
 
 @workflows.workflow.define(

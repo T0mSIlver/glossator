@@ -41,20 +41,19 @@ reset-vespa:
 	@echo "Vespa stopped and project volume removed. Run: make setup-vespa"
 
 migrate-vespa: verify-vespa
-	uv run mistral-vespa migrate --app-dir src/search_app \
+	uv run mistral-vespa migrate --app-dir src/glossator/index \
 		--config-server $(VESPA_CONFIG_URL) \
 		--query-port $(VESPA_QUERY_PORT)
 
-## Ingest a file or directory (Search Toolkit Pipeline)
-## Usage: make ingest path=sample_data/hello.txt
-##        make ingest path=sample_data
+## Ingest a corpus directory into one index variant
+## Usage: make ingest corpus=corpus/mistral-docs variant=sec1024
 ingest:
-	uv run python -m entrypoints.ingest $(path)
+	uv run python -m glossator.ingest --corpus $(corpus) --variant $(variant)
 
-## Search the indexed collection (Search Toolkit QueryEngine)
-## Usage: make search query="hello world" [top_k=5] [query_profile=hybrid-search]
+## Search one index variant
+## Usage: make search query="how do I stream a response" [variant=sec1024] [top_k=10]
 search:
-	uv run python -m entrypoints.search "$(query)" $(if $(top_k),--top-k $(top_k),) $(if $(query_profile),--query-profile $(query_profile),)
+	uv run python -m glossator.retrieval "$(query)" $(if $(variant),--variant $(variant),) $(if $(top_k),--top-k $(top_k),)
 
 ## Start the MCP server in HTTP mode
 ## Usage: make mcp [host=0.0.0.0] [port=8000]
@@ -68,14 +67,14 @@ test:
 ## Generate Bruno API files under vespa/bruno/vespa/ (requires WORKSPACE_ROOT in .env)
 bruno:
 	uv run mistral-vespa bruno \
-		--app-dir src/search_app \
+		--app-dir src/glossator/index \
 		--query-url $(VESPA_ENDPOINT) \
 		--document-url $(VESPA_ENDPOINT)
 
 ## Optional: write a vespa.lock snapshot for inspection or CI
 generate-vespa-lock:
 	uv run mistral-vespa generate \
-		--app-dir src/search_app \
+		--app-dir src/glossator/index \
 		--path ./vespa.lock
 
 ## Install optional workflows dependency (required for examples/workflows/)

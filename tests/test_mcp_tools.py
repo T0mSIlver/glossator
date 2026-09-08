@@ -23,7 +23,6 @@ import asyncio
 import importlib
 
 import pytest
-
 from mistralai.search.toolkit.document import ChunkType
 from mistralai.search.toolkit.search import NavigationDirection
 from mistralai.search.toolkit.search.models import SearchResult, SearchResultChunk
@@ -67,7 +66,14 @@ class _FakeStore:
         return _result("c2", 10, 20, "anchor") if chunk_id == "c2" else None
 
     async def navigate(
-        self, source_id: str, start: int, end: int, direction: NavigationDirection, *, top_k: int = 1, **_: object
+        self,
+        source_id: str,
+        start: int,
+        end: int,
+        direction: NavigationDirection,
+        *,
+        top_k: int = 1,
+        **_: object,
     ) -> list[SearchResult]:
         if direction == NavigationDirection.PREVIOUS:
             return [_result("c1", 0, 10, "before")]
@@ -108,7 +114,9 @@ def test_search_exposes_exclude_ids(mcp_server) -> None:
     assert search_tool.parameters.get("required") == ["query"]
 
 
-def test_search_forwards_exclude_ids_as_a_set(mcp_server, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_search_forwards_exclude_ids_as_a_set(
+    mcp_server, monkeypatch: pytest.MonkeyPatch
+) -> None:
     engine = _RecordingEngine()
     monkeypatch.setattr(mcp_server, "_query_engine", engine)
 
@@ -117,7 +125,9 @@ def test_search_forwards_exclude_ids_as_a_set(mcp_server, monkeypatch: pytest.Mo
     assert engine.calls[0]["exclude_ids"] == {"a", "b"}
 
 
-def test_search_defaults_exclude_ids_to_none(mcp_server, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_search_defaults_exclude_ids_to_none(
+    mcp_server, monkeypatch: pytest.MonkeyPatch
+) -> None:
     engine = _RecordingEngine()
     monkeypatch.setattr(mcp_server, "_query_engine", engine)
 
@@ -139,7 +149,9 @@ def test_open_takes_a_chunk_id_and_read_stays_offset_addressed(mcp_server) -> No
     assert "chunk_id" not in read_props
 
 
-def test_open_resolves_the_chunk_and_windows_around_it(mcp_server, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_open_resolves_the_chunk_and_windows_around_it(
+    mcp_server, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(mcp_server, "_navigable_store", _FakeStore())
 
     out = asyncio.run(_open_fn(mcp_server)("c2", window=1))
@@ -149,7 +161,9 @@ def test_open_resolves_the_chunk_and_windows_around_it(mcp_server, monkeypatch: 
     assert [r["content"] for r in out] == ["before", "anchor", "after"]
 
 
-def test_open_raises_when_the_chunk_id_is_unknown(mcp_server, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_open_raises_when_the_chunk_id_is_unknown(
+    mcp_server, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from fastmcp.exceptions import ToolError
 
     monkeypatch.setattr(mcp_server, "_navigable_store", _FakeStore())
