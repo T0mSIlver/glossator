@@ -386,3 +386,16 @@ Observed on the real corpus: phase-1 BM25 is overweighted for paraphrased questi
 **Facts.** A citation that only names a source cannot be checked without a judge; a quote can be checked in code for free and is the primary "citation correctness" number (D-016). Streaming a JSON object token by token would make the quote check possible only after the stream ends, which removes the point of streaming; the API can add a streamed text-first mode later if latency numbers justify it. Mistral Medium 3.5 supports structured outputs and function calling (model card, 2026-09-08).
 
 **Strategies compared** (named by what differs, D-016): `single_pass` (one retrieval, one generation), `search_loop` (tool-use loop over search, open, grep, read with a round cap and seen-chunk deduplication), `outline` (the model picks pages from the site outline, reads their sections, then answers).
+
+---
+
+## D-028 · Provider quotas that shape the evaluation schedule
+
+**Status:** decided · 2026-09-09
+
+**Facts.**
+- The Mistral account is on the free tier (not yet provisioned for paid use as of 2026-09-08 night). Every Mistral call is free but rate-limited; the 429s seen while embedding the full corpus (D-011a) were free-tier limits. Evaluation runs against Mistral models are governed to about one request per second with retries instead of concurrency.
+- The z.ai coding plan (level "lite") exposes its quota at `GET https://api.z.ai/api/monitor/usage/quota/limit`: a 5-hour token window reported as a percentage (33% used at 00:04 on 2026-09-09, reset 03:00), plus a separate limit for its search tools. The absolute token budget is not published.
+- Codex on the ChatGPT plan hit its 5-hour usage limit at 23:1x on 2026-09-08 (reset 02:09), which cut one worker mid-turn and one review before it reported.
+
+**Decision.** Every tool that calls GLM polls the quota endpoint before a batch and pauses when the window is above 80%; runs checkpoint per candidate so a pause resumes without loss (D-023 records are append-only). Long generations are split into batches spread over the quota windows. Reviews and workers move between codex, opencode (GLM, muse) and opus subagents according to which provider has headroom, and the ledger records which one did what.
