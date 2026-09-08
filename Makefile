@@ -27,7 +27,18 @@ installdeps:
 setup-vespa: start-vespa migrate-vespa
 
 start-vespa:
-	docker compose up -d --wait vespa
+	# One Vespa per machine (fixed name and ports), shared across worktrees:
+	# reuse the running container instead of colliding on the name.
+	@if docker inspect $(VESPA_CONTAINER) >/dev/null 2>&1; then \
+		echo "$(VESPA_CONTAINER) exists — starting it"; \
+		docker start $(VESPA_CONTAINER) >/dev/null; \
+	else \
+		docker compose up -d --wait vespa; \
+	fi
+	@for i in $$(seq 1 60); do \
+		curl -sf $(VESPA_CONFIG_URL)/state/v1/health >/dev/null && break; \
+		sleep 2; \
+	done
 	@$(MAKE) verify-vespa
 
 verify-vespa:
@@ -61,9 +72,9 @@ search:
 	uv run python -m glossator.retrieval "$(query)" $(if $(variant),--variant $(variant),) $(if $(top_k),--top-k $(top_k),)
 
 ## Answer a question from the documentation, with verified citations
-## Usage: make ask question="how do I stream a chat completion" [strategy=single_pass] [variant=sec1024] [record=path]
+## Usage: make ask question="how do I stream a chat completion" [strategy=single_pass] [variant=sec1024] [model=ministral-14b-2512] [record=path]
 ask:
-	uv run python -m glossator.answer "$(question)" $(if $(strategy),--strategy $(strategy),) $(if $(variant),--variant $(variant),) $(if $(record),--record $(record),)
+	uv run python -m glossator.answer "$(question)" $(if $(strategy),--strategy $(strategy),) $(if $(variant),--variant $(variant),) $(if $(model),--model $(model),) $(if $(record),--record $(record),)
 
 ## Start the MCP server in HTTP mode
 ## Usage: make mcp [host=0.0.0.0] [port=8000]

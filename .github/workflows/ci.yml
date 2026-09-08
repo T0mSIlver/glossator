@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly, Tuesday 03:17 UTC — the corpus link check rides this schedule.
+    - cron: "17 3 * * 2"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run mypy src
+      # Backend tests that need Vespa or an API key skip themselves.
+      - run: uv run pytest -q
+      # The offline corpus tests, called out so a failure names the corpus.
+      - run: uv run pytest tests/corpus -q
+
+  corpus-check:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync
+      # Every vendored URL and anchor, checked against the live docs site.
+      - run: uv run python -m glossator.corpus.mistral_docs check --live --corpus corpus/mistral-docs

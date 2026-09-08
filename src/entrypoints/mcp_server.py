@@ -33,7 +33,13 @@ from mistralai.search.toolkit.search import GrepMode
 
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer
-from glossator.answer.config import DEFAULT_VARIANT, MISTRAL_MEDIUM_3_5
+from glossator.answer.config import (
+    DEFAULT_VARIANT,
+    MISTRAL_MEDIUM_3_5,
+    PRICES,
+    AnswerConfig,
+    ModelPrice,
+)
 from glossator.index.variants import VARIANTS
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import Hit, SearchEngine
@@ -58,6 +64,26 @@ if _variant_name not in VARIANTS:
     )
 
 CORPUS_DIR = Path(os.environ.get("GLOSSATOR_CORPUS_DIR", "corpus/mistral-docs"))
+
+# Generation model for the ask tool. The default is the shipped configuration
+# (D-017); a deployment on the free tier points this at a reachable model
+# (D-017a) without widening the tool's parameter surface.
+_model_env = os.environ.get("GLOSSATOR_MODEL", "")
+
+
+def _answer_config() -> AnswerConfig:
+    if not _model_env:
+        return AnswerConfig()
+    if _model_env in PRICES:
+        return AnswerConfig(model=_model_env)
+    # An unpriced id is priced at 0 with a log line rather than rejected: on the
+    # free tier every call is free, and usage is recorded either way.
+    logger.warning("No price for model, cost recorded as zero", model=_model_env)
+    return AnswerConfig(
+        model=_model_env,
+        prices={**PRICES, _model_env: ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0)},
+    )
+
 
 # Building the engine resolves the variant, matches the embedder to its model,
 # and checks that the schema supports navigation — all before the first request.
@@ -683,7 +709,11 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
     async with _admission_or_busy():
         try:
             answer = await answer_service.ask(
-                question, strategy=strategy, variant=_variant_name, engine=_engine
+                question,
+                strategy=strategy,
+                variant=_variant_name,
+                engine=_engine,
+                config=_answer_config(),
             )
         except Exception as exc:  # the service already retries its own transient errors
             raise _upstream(f"ask({question!r})", exc) from exc
