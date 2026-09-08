@@ -860,6 +860,8 @@ dependencies = [
     { name = "httpx" },
     { name = "mistralai-search-toolkit", extra = ["text-splitter-langchain", "vespa"] },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "structlog" },
 ]
 
 [package.optional-dependencies]
@@ -883,6 +885,8 @@ requires-dist = [
     { name = "mistralai-workflows", extras = ["mistralai"], marker = "extra == 'workflows'", specifier = ">=3.0.0,<4" },
     { name = "pydantic", marker = "extra == 'workflows'" },
     { name = "python-dotenv", specifier = ">=0.9.9" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "structlog", specifier = ">=25.5.0" },
 ]
 provides-extras = ["workflows"]
 
