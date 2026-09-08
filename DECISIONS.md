@@ -490,3 +490,37 @@ Rules that vidtheque paid for in two consumer evaluations (a tool-design bench w
 `eval/dev-fr.jsonl`: 36 stratified questions from the dev set translated into French by `glm-5.3` with identifiers, model names and code kept verbatim (`glossator.eval.translate`, run `eval/runs/2026-09-08-2253-dev-fr`), so D-008 can be measured as French questions over English pages without a French corpus.
 
 **Decision.** The dev set is frozen at this hash for tuning; the held-out set (Tom's, hand-written) is the reporting set. Questions the answer eval flags as broken are fixed by regenerating with a new seed, never by hand-editing a generated question, so provenance holds.
+
+---
+
+## D-033 · Baseline answer evaluation: what the three strategies do on sixty development questions
+
+**Status:** decided · 2026-09-09 · run `eval/runs/2026-09-08-2305-dev60-baseline`
+
+**Facts** (60 stratified dev questions, `sec1024`, shipped retrieval defaults, no reranker, Ministral 3 14B as the generator because Medium 3.5 is rate-limited to zero on this key, GLM 5.3 as the blinded judge; 180 answers, 0 errors):
+
+| metric (all types) | single_pass | search_loop | outline |
+|---|---|---|---|
+| correctness (judge, 1 / 0.5 / 0) | 0.81 | **0.93** | 0.65 |
+| groundedness (judge) | 0.75 | **0.81** | 0.65 |
+| refusal correct (both directions) | 0.82 | **0.88** | 0.72 |
+| cited URL matches gold | 0.70 | **0.78** | 0.42 |
+| cited anchor matches gold | **0.50** | 0.40 | 0.18 |
+| quote verification rate | 0.86 | 0.82 | **0.89** |
+| fabricated quotes per answer | 0.40 | 0.55 | **0.23** |
+| latency p50 | **3.0 s** | 7.4 s | 3.7 s |
+| prompt tokens per answer | **1.9k** | 16.0k | 8.9k |
+| USD per question at Medium 3.5 prices | **0.005** | 0.028 | 0.016 |
+
+- `search_loop` wins every quality metric except anchor precision and quote verification, at 8 times the tokens and 2.5 times the latency of `single_pass`; it averages 4.7 tool calls and 3.1 rounds, and 8.7 calls on unanswerable questions, where it keeps searching.
+- `outline` is the weakest on eight of eleven metrics. Its API-reference correctness is 0.15 because the outline offered to the model excludes API pages by design (their titles carry no signal), and cross-page questions overflow its page budget.
+- Anchor precision is low for a structural reason: of 42 verified citations on the right page, 22 carry no anchor at all and 12 a different one. The generator's gold anchor is the section heading's, while the cited chunk sits in a nested subsection whose heading is not deep-linkable (D-003a), so the chunk has `anchor: None`.
+- Capability questions: retrieval ranks the `/models` matrix first (checked on "which models support FIM"), yet `single_pass` cites model cards and feature pages instead (URL match 0.10, correctness 0.80): the gold is stricter than the content, since a model card is also a correct source.
+- Fabricated quotes (a sentence not in the cited source) run 0.2 to 0.55 per answer on Ministral 14B; cosmetic rejections are zero after the emphasis-normalization fallback.
+- Refusals still write `[n]` markers that name nothing (0.8 to 1.0 per unanswerable answer).
+
+**Decisions.**
+1. `outline` leaves the candidate list for the shipped default; it stays in the grid as a documented experiment.
+2. The default strategy is decided after the retrieval improvements (reranker, floors) are measured, because `single_pass` gains the most from better ranking; `search_loop` is the quality reference and the cost row beside it.
+3. Product changes taken now: a chunk's citation anchor falls back to the nearest anchored ancestor heading, so a deep link lands on the closest linkable section instead of the page top; `[n]` markers that name no citation are stripped from the answer text (D-029); the outline strategy's page list includes API pages when the question mentions an endpoint, method or path.
+4. Capability gold accepts the model card of a model the question names, in addition to the matrix page, at the next dataset regeneration.
