@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "glossator": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "entrypoints.mcp_server"]
+    }
+  }
+}
