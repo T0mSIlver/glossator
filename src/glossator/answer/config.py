@@ -19,6 +19,7 @@ logger = structlog.get_logger(__name__)
 MISTRAL_MEDIUM_3_5 = "mistral-medium-2604"
 MISTRAL_SMALL_4 = "mistral-small-2603"
 MINISTRAL_3_8B = "ministral-8b-2512"
+MINISTRAL_3_14B = "ministral-14b-2512"
 MISTRAL_EMBED = "mistral-embed-2312"
 
 
@@ -35,6 +36,11 @@ PRICES: dict[str, ModelPrice] = {
     MISTRAL_MEDIUM_3_5: ModelPrice(input_usd_per_mtok=1.50, output_usd_per_mtok=7.50),
     MISTRAL_SMALL_4: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.60),
     MINISTRAL_3_8B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
+    # The pricing page publishes one Ministral 3 line and does not break the 14B
+    # out separately (checked 2026-09-09), so it is recorded at the same rate. The
+    # token counts are recorded whatever the price, so a published number can be
+    # applied to a run that already happened.
+    MINISTRAL_3_14B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
     # Embeddings are billed on input only; the output price is zero rather than
     # absent so one arithmetic path covers every model.
     MISTRAL_EMBED: ModelPrice(input_usd_per_mtok=0.10, output_usd_per_mtok=0.0),
@@ -104,6 +110,7 @@ class AnswerConfig(BaseModel):
 
 __all__ = [
     "DEFAULT_VARIANT",
+    "MINISTRAL_3_14B",
     "MINISTRAL_3_8B",
     "MISTRAL_EMBED",
     "MISTRAL_MEDIUM_3_5",

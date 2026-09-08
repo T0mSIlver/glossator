@@ -17,6 +17,7 @@ from glossator.ingest.pipeline import (
     PartialIngestError,
     ingest_corpus,
 )
+from glossator.retrieval.probe import EmbeddingProbeError, probe_embedding
 
 
 def _parse_args() -> argparse.Namespace:
@@ -38,6 +39,11 @@ def _parse_args() -> argparse.Namespace:
         default=DEFAULT_CONCURRENCY,
         help=f"Pages processed at once (default: {DEFAULT_CONCURRENCY})",
     )
+    parser.add_argument(
+        "--skip-probe",
+        action="store_true",
+        help="Index without checking the embedding model first (D-031)",
+    )
     return parser.parse_args()
 
 
@@ -51,6 +57,14 @@ def _summary(report: IngestReport) -> str:
 async def main() -> None:
     load_dotenv(override=True)
     args = _parse_args()
+    if not args.skip_probe:
+        # Before anything is embedded, not after: a corpus indexed with a broken
+        # embedding model looks exactly like a corpus indexed correctly, and the
+        # only cheap moment to find out is before the spend (D-031).
+        try:
+            print(f"embedding probe: {(await probe_embedding(args.variant)).summary()}")
+        except EmbeddingProbeError as exc:
+            raise SystemExit(str(exc)) from None
     try:
         report = await ingest_corpus(args.corpus, args.variant, concurrency=args.concurrency)
     except PartialIngestError as exc:

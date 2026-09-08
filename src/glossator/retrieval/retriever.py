@@ -7,6 +7,7 @@ profile, the other way to set weights, makes ``exclude_ids`` and
 path with a ``VespaSearchQuery`` of our own.
 """
 
+import re
 from typing import override
 
 import structlog
@@ -18,10 +19,15 @@ from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.retrieval.retrievers.base import DEFAULT_TOP_K, Retriever
 from mistralai.search.toolkit.search import SearchResult
 
-from glossator.retrieval.config import RetrievalConfig, query_weights
+from glossator.retrieval.config import RetrievalConfig, cosine_only_weights, query_weights
 from glossator.retrieval.context import with_restrict
 
 logger = structlog.get_logger(__name__)
+
+# Chunk ids are hex digits and dashes (the toolkit derives them with uuid5). The
+# cosine read-out interpolates them into YQL, so the shape is checked rather than
+# assumed, the same way the config's closed vocabularies are.
+_CHUNK_ID = re.compile(r"[A-Za-z0-9_.:-]{1,128}")
 
 
 class DocsRetriever(Retriever):
@@ -50,13 +56,18 @@ class DocsRetriever(Retriever):
         include_content: bool = True,
         context: RetrievalContext = RetrievalContext(),
         exclude_ids: set[str] | None = None,
+        *,
+        embedding: list[float] | None = None,
     ) -> list[SearchResult]:
+        """Hits for one query. ``embedding`` skips the embedding call when the
+        caller already has the query's vector and needs it for something else."""
         # Every request has to name its schema or Vespa cannot resolve the query
         # embedding's type (see glossator.retrieval.context); the caller's own
         # context is kept and the restriction merged into it.
         request_context = with_restrict(context, self.schema_name)
         try:
-            embedding = await self.embedder.embed_query(query, context=request_context)
+            if embedding is None:
+                embedding = await self.embedder.embed_query(query, context=request_context)
             search_query = VespaSearchQuery(
                 query=query,
                 embedding=embedding,
@@ -82,3 +93,47 @@ class DocsRetriever(Retriever):
         stamped.sort(key=lambda result: result.score, reverse=True)
         logger.debug("Retrieved", variant=self.config.variant, query=query, hits=len(stamped))
         return stamped
+
+    async def embed_query(
+        self, query: str, context: RetrievalContext = RetrievalContext()
+    ) -> list[float]:
+        return await self.embedder.embed_query(
+            query, context=with_restrict(context, self.schema_name)
+        )
+
+    async def cosine_similarities(
+        self,
+        embedding: list[float],
+        chunk_ids: list[str],
+        context: RetrievalContext = RetrievalContext(),
+    ) -> dict[str, float]:
+        """Each named chunk's cosine similarity to the query vector.
+
+        A second Vespa round trip rather than a second embedding call: the ids are
+        already known, so the query restricts itself to them and ranks them on the
+        exact cosine term alone (see ``cosine_only_weights``). Restricting to the
+        ids matters -- an unrestricted vector-only query is ordered by the HNSW
+        index's euclidean distance and need not contain the hits being scored.
+        """
+        if not chunk_ids:
+            return {}
+        malformed = sorted(id_ for id_ in chunk_ids if not _CHUNK_ID.fullmatch(id_))
+        if malformed:
+            raise RetrieverException(f"chunk id(s) not of the expected shape: {malformed}")
+        request_context = with_restrict(context, self.schema_name)
+        quoted = ", ".join(f'"{chunk_id}"' for chunk_id in sorted(set(chunk_ids)))
+        # No query text: the select is then vector-only, which is all this measures.
+        search_query = VespaSearchQuery(
+            query="",
+            embedding=embedding,
+            top_k=len(set(chunk_ids)),
+            ranking_weights=query_weights(cosine_only_weights()),
+            extra_yql_filter=f"id in ({quoted})",
+        )
+        try:
+            results = await self.index.search(query=search_query, context=request_context)
+        except Exception as exc:
+            raise RetrieverException(
+                f"cosine read-out failed for variant {self.config.variant!r}"
+            ) from exc
+        return {result.chunk.id: result.score for result in results}
