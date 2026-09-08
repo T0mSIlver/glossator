@@ -656,12 +656,21 @@ class RunDirectory:
 
     @classmethod
     def open(cls, path: Path, config: dict[str, Any]) -> RunDirectory:
-        """Create the directory, or reopen one and read its records back."""
+        """Create the directory, or reopen one and read its records back.
+
+        Resuming rewrites `config.json` from the command that resumed, except for
+        the notes: those describe the run, and a resume typed without `--note`
+        would otherwise silently delete the caveats the run was published with.
+        """
         resumed = path.exists()
         (path / "figures").mkdir(parents=True, exist_ok=True)
         run = cls(path, config)
         if resumed and run.records_path.exists():
             run.records = read_records(run.records_path)
+        if resumed and not run.config.get("notes"):
+            with contextlib.suppress(FileNotFoundError, ValueError):
+                stored = json.loads((path / "config.json").read_text())
+                run.config["notes"] = stored.get("notes") or []
         run.calls_path.touch()
         run.records_path.touch()
         run.config["resumed_records"] = len(run.records)

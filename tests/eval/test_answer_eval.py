@@ -581,6 +581,26 @@ def test_reopening_a_run_keeps_the_rows_it_already_paid_for(tmp_path: Path) -> N
     assert [json.loads(line)["question_id"] for line in lines] == ["q1", "q2"]
 
 
+def test_resuming_without_notes_keeps_the_notes_the_run_was_published_with(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "run"
+    RunDirectory.open(path, {**config_for(path), "notes": ["the index is not isolated"]})
+    resumed = RunDirectory.open(path, {**config_for(path), "notes": []})
+    assert resumed.config["notes"] == ["the index is not isolated"]
+    readme = render_readme(
+        resumed.config, {**aggregate([], resumed.config), "status": "complete", "error": None}
+    )
+    assert "the index is not isolated" in readme
+
+
+def test_resuming_with_new_notes_replaces_the_old_ones(tmp_path: Path) -> None:
+    path = tmp_path / "run"
+    RunDirectory.open(path, {**config_for(path), "notes": ["first"]})
+    resumed = RunDirectory.open(path, {**config_for(path), "notes": ["second"]})
+    assert resumed.config["notes"] == ["second"]
+
+
 def test_a_run_name_resolves_to_the_newest_directory_that_carries_it(tmp_path: Path) -> None:
     (tmp_path / "2026-09-01-0900-answers").mkdir()
     (tmp_path / "2026-09-02-0900-answers").mkdir()
