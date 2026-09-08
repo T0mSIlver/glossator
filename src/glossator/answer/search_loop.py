@@ -26,6 +26,9 @@ logger = structlog.get_logger(__name__)
 
 NAME = "search_loop"
 
+MAX_TOOL_TOP_K = 10
+"""Ceiling on what one tool call may return, whatever the model asks for."""
+
 TOOLS: list[ToolSpec] = [
     {
         "type": "function",
@@ -39,7 +42,10 @@ TOOLS: list[ToolSpec] = [
                 "type": "object",
                 "properties": {
                     "query": {"type": "string"},
-                    "top_k": {"type": "integer", "description": "Results to return."},
+                    "top_k": {
+                        "type": "integer",
+                        "description": "Results to return; 4 by default, 10 at most.",
+                    },
                 },
                 "required": ["query"],
             },
@@ -185,7 +191,12 @@ async def _invoke(
     try:
         if invocation.name == "search":
             query = _string(arguments, "query")
-            top_k = _integer(arguments, "top_k", config.tool_top_k)
+            # A round trip costs the same whether it returns one chunk or eight, so
+            # the model's own top_k only ever widens the result, never narrows it.
+            top_k = min(
+                max(_integer(arguments, "top_k", config.tool_top_k), config.tool_top_k),
+                MAX_TOOL_TOP_K,
+            )
             return await engine.search(query, exclude_ids=set(seen), top_k=top_k), None
         if invocation.name == "open":
             chunk_id = _string(arguments, "chunk_id")
@@ -285,4 +296,4 @@ def _optional_integer(arguments: dict[str, Any], key: str) -> int | None:
     return None
 
 
-__all__ = ["NAME", "TOOLS", "answer"]
+__all__ = ["MAX_TOOL_TOP_K", "NAME", "TOOLS", "answer"]

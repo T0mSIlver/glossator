@@ -358,3 +358,35 @@ def test_ask_dispatches_to_the_named_strategy(config: AnswerConfig) -> None:
 def test_ask_refuses_an_unknown_strategy() -> None:
     with pytest.raises(ValueError, match="unknown strategy"):
         asyncio.run(ask("How?", strategy="telepathy"))
+
+
+def test_a_frugal_top_k_from_the_model_is_widened_to_the_configured_depth(
+    config: AnswerConfig,
+) -> None:
+    engine = FakeIndex([[make_hit("a", TOOLS_TEXT)], []])
+    llm = FakeLLM(
+        [
+            completion(tool_calls=[invocation("search", query="one", top_k=1)]),
+            completion(text="done"),
+            completion(parsed=grounded("declared as JSON objects")),
+        ]
+    )
+
+    asyncio.run(search_loop.answer("How?", engine=engine, llm=llm, config=config))
+
+    assert engine.queries[1][1] == config.tool_top_k
+
+
+def test_an_extravagant_top_k_from_the_model_is_capped(config: AnswerConfig) -> None:
+    engine = FakeIndex([[make_hit("a", TOOLS_TEXT)], []])
+    llm = FakeLLM(
+        [
+            completion(tool_calls=[invocation("search", query="one", top_k=500)]),
+            completion(text="done"),
+            completion(parsed=grounded("declared as JSON objects")),
+        ]
+    )
+
+    asyncio.run(search_loop.answer("How?", engine=engine, llm=llm, config=config))
+
+    assert engine.queries[1][1] == search_loop.MAX_TOOL_TOP_K
