@@ -45,6 +45,15 @@
     "sha256": "ec18d925d49361a8a701289b95285e390378b38f3122e45437bbb113c58fccd2"
   },
   {
+    "url": "https://docs.mistral.ai/fr/capabilities/embeddings",
+    "path": "fr-capabilities-embeddings.md",
+    "title": "Embeddings",
+    "kind": "doc",
+    "source_path": "src/content/fr/docs/capabilities/embeddings/page.mdx",
+    "source_commit": "2e094f7",
+    "sha256": "5a5145b9e9f3c55a42d4791a3253adc29c0bc870a00308755ec870e7eb34ea0b"
+  },
+  {
     "url": "https://docs.mistral.ai/getting-started/quickstart",
     "path": "getting-started-quickstart.md",
     "title": "Quickstart",
@@ -54,13 +63,13 @@
     "sha256": "d51261a6b86c48923bde61241fbdb55f6576ce387d6c1e99d5d85a00e145620b"
   },
   {
-    "url": "https://docs.mistral.ai/models/capability-matrix",
+    "url": "https://docs.mistral.ai/models",
     "path": "models-capability-matrix.md",
     "title": "Model capability matrix",
-    "kind": "doc",
+    "kind": "model",
     "source_path": "src/schema/models/models/*.ts",
     "source_commit": "2e094f7",
-    "sha256": "54c159b5e45e21538c0f9b517ce1cd11606e1abe654e1deb53202558b3834700"
+    "sha256": "e65669ec44a1d5fd381aa971d90ba6c46757d4aa5eae1e9795e15c87670b736f"
   },
   {
     "url": "https://docs.mistral.ai/models/mistral-medium",

@@ -12,7 +12,7 @@ htmlcov/
 .tox/
 .coverage
 .coverage.*
-.cache
+.cache/
 .pytest_cache/
 cover/
 

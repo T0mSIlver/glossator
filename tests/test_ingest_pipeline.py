@@ -24,7 +24,7 @@ def corpus_copy(corpus_dir: Path, tmp_path: Path) -> Path:
 
 
 def test_the_fixture_corpus_matches_its_manifest(corpus_dir: Path) -> None:
-    assert verify_manifest(corpus_dir) == 8
+    assert verify_manifest(corpus_dir) == 9
 
 
 def test_an_edited_page_is_refused(corpus_copy: Path) -> None:
@@ -82,7 +82,7 @@ def test_a_partial_run_raises_rather_than_returning(
 
     report = raised.value.report
     assert isinstance(report, IngestReport)
-    assert len(report.failures) == 8
+    assert len(report.failures) == 9
     assert report.pages == 0
 
 
@@ -101,4 +101,4 @@ def test_allow_partial_returns_the_report_instead(
 
     report = asyncio.run(ingest_corpus(corpus_dir, "sec128", allow_partial=True))
 
-    assert len(report.failures) == 8
+    assert len(report.failures) == 9

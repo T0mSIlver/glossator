@@ -11,6 +11,8 @@ dependencies = [
     # bound -- so a core pin left behind a plugin release resolves to a pair that imports names
     # the older core does not have. Bump both by bumping this.
     "mistralai-search-toolkit[text-splitter-langchain,vespa]==0.0.13",
+    # Also a toolkit dependency, but the eval schemas and records are declared with it directly.
+    "pydantic>=2.9",
     "python-dotenv>=0.9.9",
     "pyyaml>=6.0.3",
     # Also a toolkit dependency, but called directly, so declared rather than inherited.
@@ -28,6 +30,7 @@ dev = [
     "ruff>=0.11",
     "mypy>=1.15",
     "pytest>=8.0",
+    "pytest-asyncio>=0.24",
     "types-pyyaml>=6.0.12",
 ]
 
@@ -72,6 +75,9 @@ ignore = [
 # Corpus fixtures reproduce upstream MDX and TypeScript lines verbatim; wrapping
 # them would stop them from being the thing under test.
 "tests/corpus/*" = ["E501"]
+# One paragraph per line: these are prompts sent to a model, and their text is
+# hashed into every question generated from them, so rewrapping rewrites data.
+"src/glossator/eval/prompts.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
