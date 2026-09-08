@@ -10,7 +10,7 @@ import asyncio
 from dotenv import load_dotenv
 
 from glossator.answer.citations import Answer
-from glossator.answer.config import DEFAULT_VARIANT, AnswerConfig
+from glossator.answer.config import DEFAULT_VARIANT
 from glossator.answer.llm import JsonlCallRecorder
 from glossator.answer.service import STRATEGIES, ask
 from glossator.index.variants import VARIANTS
@@ -81,8 +81,8 @@ async def main() -> None:
             args.question,
             strategy=args.strategy,
             variant=args.variant,
+            model=args.model,
             recorder=recorder,
-            config=AnswerConfig(model=args.model) if args.model else None,
         )
     finally:
         if recorder is not None:

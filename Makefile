@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check dev-set eval-report
+.PHONY: corpus-refresh corpus-check dev-set eval-report eval-answers
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -77,6 +77,18 @@ test:
 ## Generate the 300-question development set
 dev-set:
 	uv run python -m glossator.eval.generate --corpus corpus/mistral-docs --out eval/dev.jsonl --n 300 --provider zai --model glm-5.3-flash --seed 0
+
+## Score a question dataset through the answer strategies
+## Usage: make eval-answers dataset=eval/dev.jsonl name=answers-dev [strategies=single_pass,search_loop,outline] [variant=sec1024] [limit=N] [model=id] [judge_model=glm-5.3] [skip_judge=1]
+eval-answers:
+	uv run python -m glossator.eval.answer_eval --dataset $(dataset) --name $(name) \
+		$(if $(strategies),--strategies $(strategies),) \
+		$(if $(variant),--variant $(variant),) \
+		$(if $(limit),--limit $(limit),) \
+		$(if $(model),--model $(model),) \
+		$(if $(judge_model),--judge-model $(judge_model),) \
+		$(if $(note),--note "$(note)",) \
+		$(if $(skip_judge),--skip-judge,)
 
 ## Regenerate a run's README and figures from its records
 ## Usage: make eval-report run=eval/runs/2026-09-08-2312-dev-smoke
