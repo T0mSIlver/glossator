@@ -1,6 +1,6 @@
 # Working in this repository
 
-glossator answers technical questions over Mistral's documentation with cited sources. Read `DECISIONS.md` before changing behaviour: every choice is recorded there with the facts behind it, and a change that reverses one gets a new entry.
+glossator answers technical questions over Mistral's documentation with cited sources. Read `DECISIONS.md` before changing behaviour: every choice is recorded there with the facts behind it, and a change that reverses one gets a new entry. If `.local/AGENTS.md` exists, read it first: it holds machine-local context and is never committed.
 
 ## Layout
 

@@ -246,3 +246,20 @@ The listwise reranker (D-015) is part of the serving path, so its shipped config
 **Facts.** The generated `.env` sets only `MISTRAL_API_KEY`. `src/entrypoints/*.py` default `COLLECTION_NAME` to `exampledocs`; `src/search_app/migrations/001_*.py` defaults it to `mistral_docs` (the copier answer). Without `COLLECTION_NAME` in `.env`, the starter as generated indexes and searches a schema that the migration never created.
 
 **Decision.** Schema names are owned by the index package (D-010, S3), not by an environment variable; `.env` carries only secrets and ports. Candidate for the fork notes (D-018).
+
+---
+
+## D-023 · Evaluation records: nothing is discarded, every run is self-describing
+
+**Status:** decided by Tom · 2026-09-08
+
+**Decision.** Every evaluation or dataset-generation run writes a directory `eval/runs/<date>-<name>/` that is committed:
+- `README.md`: what is being measured, in plain words; the question it answers; the configurations compared; the datasets used (with their commit hash); the result tables; charts under `figures/`; the conclusion and the decision it feeds (linked D-number).
+- `config.json`: every parameter (models, prompts by hash, weights, chunking, top-k, seeds).
+- `records.jsonl`: one line per question with the retrieval hits (ids, scores, url, anchor), the assembled context, every prompt and raw model response (generation, rerank, judge), verified citations, token usage, latency, and errors.
+- `calls.jsonl`: every LLM request and response in the run, verbatim, with provider, model, thinking setting, and usage. The disk cache under `.cache/` is for deduplication only and is not the durable record.
+- `metrics.json`: aggregate numbers used in the tables.
+
+Datasets in `eval/` carry the generator run that produced them. Charts are rendered from `metrics.json` by a script so they can be regenerated.
+
+**Facts.** The numbers are the argument in the review and the talk; a number that cannot be traced back to raw model output cannot be defended. Runs cost real credits and GLM calls, and re-running to recover lost detail wastes both. Estimated size: a 600-judgement run is a few MB, acceptable in git.
