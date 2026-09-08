@@ -1,4 +1,5 @@
 .PHONY: installdeps install-workflows ingest search mcp test start-examples execute-ingestion
+.PHONY: corpus-refresh corpus-check
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -13,6 +14,10 @@ VESPA_QUERY_PORT := $(or $(VESPA_QUERY_PORT),18080)
 VESPA_CONFIG_PORT := $(or $(VESPA_CONFIG_PORT),19072)
 VESPA_ENDPOINT := $(or $(VESPA_ENDPOINT),http://localhost:$(VESPA_QUERY_PORT))
 VESPA_CONFIG_URL := $(or $(VESPA_CONFIG_URL),http://localhost:$(VESPA_CONFIG_PORT))
+
+# Docs repo commit the vendored corpus is built from (DECISIONS.md D-001, D-009).
+CORPUS_REF := $(or $(REF),2e094f7bbe1395de4a738a3483def3573143d973)
+CORPUS_DIR := $(or $(CORPUS_DIR),corpus/mistral-docs)
 
 ## Install dependencies
 installdeps:
@@ -90,3 +95,16 @@ start-examples: install-workflows
 ## Usage: make execute-ingestion input='{"file_path": "sample_data/hello.txt", "collection_name": "mydocs"}'
 execute-ingestion: install-workflows
 	uv run python -m examples.workflows.start --workflow document-ingestion $(if $(input),--input '$(input)',--input '{"file_path":"sample_data/hello.txt"}')
+
+## Rebuild the vendored documentation corpus from the docs repo
+## Usage: make corpus-refresh [REF=<commit|tag|branch>]
+corpus-refresh:
+	uv run python -m glossator.corpus.mistral_docs build \
+		--ref $(CORPUS_REF) \
+		--out $(CORPUS_DIR) \
+		--refresh-openapi
+
+## Check every corpus URL and anchor against docs.mistral.ai
+corpus-check:
+	uv run pytest tests/corpus -q
+	uv run python -m glossator.corpus.mistral_docs check --live --corpus $(CORPUS_DIR)

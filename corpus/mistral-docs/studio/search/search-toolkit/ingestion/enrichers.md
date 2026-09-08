@@ -1,0 +1,176 @@
+---
+url: https://docs.mistral.ai/studio/search/search-toolkit/ingestion/enrichers
+title: Chunk enrichers
+breadcrumbs: [Studio, Search, Search Toolkit, Ingestion]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/search/search-toolkit/ingestion/enrichers/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Chunk enrichers
+
+Chunk enrichers add custom metadata to chunks during ingestion. Use them to attach information from external sources, classifications, tags, or any computed metadata.
+
+## Available chunk enrichers {#available-chunk-enrichers}
+
+| Enricher | Purpose |
+|----------|---------|
+| **[Summary Enricher](https://docs.mistral.ai/studio/search/search-toolkit/ingestion/enrichers#summary-enricher)** | Generate document summaries using an LLM |
+| **[Custom Enrichers](https://docs.mistral.ai/studio/search/search-toolkit/ingestion/enrichers#creating-custom-enrichers)** | Add custom metadata from any source |
+
+## Summary Enricher {#summary-enricher}
+
+`SummaryEnricher` generates a document summary using an LLM and optionally injects it into chunks and/or document metadata. This can improve retrieval by giving each chunk context about the full document.
+
+By default, `SummaryEnricher` is non-breaking: if summary generation fails, it logs the failure and returns the original chunks unchanged.
+
+**Requirements**:
+
+- A Mistral API key
+
+**Usage**:
+
+```python
+import os
+
+from mistralai.client import Mistral
+from mistralai.search.toolkit.ingestion.enrichment import SummaryEnricher, SummaryConfig, SummarizeRequestConfig
+from mistralai.search.toolkit.llm import MistralChat, LLMConfig
+
+# Create LLM provider
+mistral_client = Mistral(api_key=os.environ.get("MISTRAL_API_KEY", "your-api-key"))
+llm = MistralChat(client=mistral_client, config=LLMConfig(model="mistral-small-latest"))
+
+# Create enricher with default settings
+enricher = SummaryEnricher(llm_provider=llm)
+
+# Or customize the summary behavior
+enricher = SummaryEnricher(
+    llm_provider=llm,
+    summary_config=SummaryConfig(
+        request_config=SummarizeRequestConfig(
+            prompt="Summarize this document in 3 sentences.",
+            max_tokens=256,
+        ),
+    ),
+)
+```
+
+**Parameters**:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `llm_provider` | `ChatLLMProvider` | *(required)* | LLM provider for summarization |
+| `summary_config` | `SummaryConfig \| None` | `None` | Configuration object (see below) |
+
+**SummarizeRequestConfig**:
+
+Controls the LLM request for summary generation.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `model` | `str` | `"mistral-small-latest"` | Model to use for summarization |
+| `prompt` | `str` | `"Summarize the document in less than 5 lines."` | Summarization prompt |
+| `max_tokens` | `int` | `256` | Maximum tokens in the summary |
+| `max_chars_per_call` | `int \| None` | `32768` | Char budget per LLM call; content above this is truncated or map-reduced (see `overflow_strategy`) |
+| `overflow_strategy` | `OverflowStrategy` | `OverflowStrategy.TRUNCATE` | `TRUNCATE` cuts to `max_chars_per_call`; `MAP_REDUCE` splits into parts, summarizes each, then merges |
+| `map_concurrency` | `int` | `10` | Max concurrent map-phase LLM calls (map-reduce only) |
+| `temperature` | `float \| None` | `0.6` | LLM temperature |
+
+**SummaryRequestOptions**:
+
+Controls how the summary is injected into the pipeline output.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `include_summary_chunk` | `bool` | `True` | Add a dedicated summary chunk to the chunk list |
+| `propagate_summary_to_chunks` | `bool` | `False` | Prepend the summary to every chunk's content |
+| `populate_document_metadata` | `bool` | `True` | Store the summary in the document's metadata |
+| `fail_on_generation_error` | `bool` | `False` | Raise on summary generation failure instead of logging and continuing |
+
+## Creating custom enrichers {#creating-custom-enrichers}
+
+Implement the `ChunkEnricher` interface to add custom metadata. `ChunkEnricher` is a `DocumentProcessor`: implement `enrich_chunk` to transform a single chunk, and `process` fans it out over the document's chunks:
+
+```python
+from mistralai.search.toolkit.context import IngestContext
+from mistralai.search.toolkit.ingestion.enrichment import ChunkEnricher
+from mistralai.search.toolkit.document import DocumentChunk, Document
+
+class EntityTagger(ChunkEnricher):
+    """Add entity tags to chunks."""
+
+    async def enrich_chunk(
+        self,
+        document: Document,
+        chunk: DocumentChunk,
+        context: IngestContext = IngestContext(),
+    ) -> DocumentChunk:
+        entities = await self._extract_entities(chunk.content)
+        updated_metadata = chunk.metadata.model_copy(update={"entities": entities})
+        return chunk.model_copy(update={"metadata": updated_metadata})
+
+    async def _extract_entities(self, text: str) -> list[str]:
+        entities = []
+        # ... entity extraction logic ...
+        return entities
+
+enricher = EntityTagger()
+enriched_document = await enricher.process(document)
+
+for chunk in enriched_document.chunks:
+    print(f"Entities: {chunk.metadata.get('entities', [])}")
+```
+
+### Batch enrichment patterns
+
+`ChunkEnricher.process` already fans `enrich_chunk` out over the document's chunks with a bounded worker pool (`concurrency`, default 10). For external API calls, keep that work inside `enrich_chunk`:
+
+```python
+from mistralai.search.toolkit.context import IngestContext
+from mistralai.search.toolkit.ingestion.enrichment import ChunkEnricher
+from mistralai.search.toolkit.document import DocumentChunk, Document
+
+class BatchEnricher(ChunkEnricher):
+    """Batch API calls for efficiency."""
+
+    def __init__(self) -> None:
+        super().__init__(concurrency=20)  # raise the worker-pool size for external calls
+
+    async def enrich_chunk(
+        self,
+        document: Document,
+        chunk: DocumentChunk,
+        context: IngestContext = IngestContext(),
+    ) -> DocumentChunk:
+        metadata = await self._fetch_metadata(chunk.content)
+        return chunk.model_copy(
+            update={"metadata": chunk.metadata.model_copy(update=metadata)}
+        )
+
+    async def _fetch_metadata(self, text: str) -> dict:
+        # Call external API with batching/retries
+        ...
+```
+
+### Combining multiple enrichers
+
+```python
+from mistralai.search.toolkit.ingestion.pipelines import Pipeline
+
+pipeline = Pipeline(
+    loader=loader,
+    extractor=extractor,
+    text_splitter=splitter,
+    embedder=embedder,
+    stores=vector_store,
+    processors=[
+        SummaryEnricher(llm_provider=llm),
+        EntityTagger(),
+        CustomMetadataEnricher(),
+    ],
+)
+```
+
+Enrichers are applied sequentially in the order listed. Each enricher receives the output of the previous one.

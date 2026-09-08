@@ -1,0 +1,106 @@
+---
+url: https://docs.mistral.ai/studio/search/search-toolkit/concepts/document-model
+title: Document model
+breadcrumbs: [Studio, Search, Search Toolkit, Concepts]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/search/search-toolkit/concepts/document-model/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Document model
+
+Search Toolkit represents every ingested source with a single, unified document model. Two classes carry the data through the whole pipeline:
+
+- **`Document`**: the full output of an extractor for one source.
+- **`DocumentChunk`**: a retrievable slice of that document, optionally carrying an embedding.
+
+Both are tied together by a **deterministic identity** derived from a `source_id` and a `locator`. The same identity is mirrored on the retrieval side by `SearchResultChunk`, so a chunk keeps the same id from ingestion all the way through search.
+
+> **Info**
+>
+> Earlier preview releases exposed a separate *page* representation between documents and chunks. This has been removed. Extractors now produce `DocumentChunk` objects directly.
+
+## Document {#document}
+
+A `Document` is what an extractor produces for a single source. Its `id` is computed automatically from `source_id`, so you rarely set it by hand.
+
+```python
+class Document:
+    id: str                       # deterministic, computed from source_id
+    source_id: str                # stable identifier of the source
+    content: str                  # full extracted text
+    chunks: list[DocumentChunk]   # the document's chunks
+    metadata: DocumentMetadata    # extensible, immutable metadata
+```
+
+## DocumentChunk {#documentchunk}
+
+A `DocumentChunk` is the unit that gets indexed and retrieved. Its `id` is computed from `source_id` + `locator`, and `parent_ref` points back to the `id` of the `Document` it belongs to.
+
+```python
+class DocumentChunk:
+    id: str                          # deterministic, computed from source_id + locator
+    source_id: str                   # same source_id as the parent document
+    locator: str                     # semantic position within the source
+    start_offset: int                # inclusive character offset
+    end_offset: int                  # exclusive character offset
+    parent_ref: str | None           # id of the parent Document
+    chunk_type: ChunkType            # content, image_annotation, or summary
+    content: str                     # the chunk text
+    metadata: DocumentChunkMetadata  # extensible, immutable metadata
+    embedding: list[float] | None    # populated once embedded
+```
+
+## Identity: source_id, locator, and deterministic ids {#identity}
+
+## source_id {#source-id}
+
+`source_id` is the stable identifier of the source document, such as a file path, a URL, or a custom scheme like `arxiv:1706.03762`. It is set on `File.source_id` and stamped by extractors onto the resulting document and every chunk. By default, `source_id` is the file path or name.
+
+Set `source_id` explicitly to decouple a document's identity from its storage location. Moving a file preserves its IDs only when its `source_id` stays unchanged.
+
+## locator {#locator}
+
+`locator` describes the semantic position of a chunk within its source. The built-in formats are:
+
+- `char:{start}-{end}`: a character range.
+- `page:{n}:char:{start}-{end}`: a character range on a known page, for paginated sources.
+
+When a chunk is not plain content, its type prefixes the locator, for example `summary:char:0-512` or `image_annotation:page:2:char:0-128`.
+
+## Deterministic ids {#deterministic-ids}
+
+Ids are UUID5 hashes derived from the identity fields, not random values:
+
+- `Document.id` = hash of `source_id`
+- `DocumentChunk.id` = hash of `source_id` + `locator`
+- `parent_ref` = hash of `source_id` (so a chunk always resolves back to its document)
+
+Because IDs are derived, re-ingesting the same `source_id` and locators overwrites the same records instead of creating duplicates. This behavior makes indexing **idempotent**.
+
+## Chunk types {#chunk-types}
+
+`chunk_type` distinguishes the kinds of chunks a document can contain:
+
+| Type | Description |
+|------|-------------|
+| `content` | A slice of the document's main text. |
+| `image_annotation` | Text describing an image (for example an OCR caption). |
+| `summary` | A generated summary of the document or a section. |
+
+## Metadata {#metadata}
+
+`DocumentMetadata` and `DocumentChunkMetadata` are immutable once created, and you can add your own keys. The toolkit ships typed subtypes for common cases, such as `DocumentFileMetadata` (`filename`, `filepath`) and `PagedDocumentChunkMetadata` (`page_number`).
+
+A metadata key must not collide with a model field name (for example, you cannot put `source_id` in metadata), since that would be ambiguous when the chunk is persisted.
+
+## Search results {#search-results}
+
+On the retrieval side, `SearchResultChunk` carries the same identity contract: `id`, `source_id`, `locator`, `parent_ref`, and `chunk_type`. Every result maps straight back to the chunk that was ingested.
+
+## See also {#see-also}
+
+- **[Ingestion](https://docs.mistral.ai/studio/search/search-toolkit/ingestion)**: how documents and chunks are produced.
+- **[Retrieval](https://docs.mistral.ai/studio/search/search-toolkit/retrieval)**: how chunks are searched and returned.
+- **[Search index](https://docs.mistral.ai/studio/search/search-toolkit/search-index)**: how chunks are persisted.
