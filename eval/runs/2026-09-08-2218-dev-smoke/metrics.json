@@ -1,0 +1,94 @@
+{
+  "cached_calls": 0,
+  "call_ms_total": 214030.712,
+  "calls": 66,
+  "calls_by_kind": {
+    "closed_book": 4,
+    "corpus_check": 4,
+    "filter": 24,
+    "generation": 24,
+    "page_alone": 10
+  },
+  "candidates": 24,
+  "candidates_by_type": {
+    "api_reference": 4,
+    "capability": 4,
+    "cross_page": 4,
+    "post_cutoff": 4,
+    "single_page": 4,
+    "unanswerable": 4
+  },
+  "dataset": "eval/dev-smoke.jsonl",
+  "dropped": 12,
+  "dropped_by_reason": {
+    "gold condition failed": 1,
+    "not about the documented product": 2,
+    "provider_error": 1,
+    "surplus, the type was already filled": 9
+  },
+  "error": null,
+  "estimated_usd": 0.0,
+  "failed_calls": 3,
+  "finish_reasons": {
+    "stop": 63
+  },
+  "kept": 12,
+  "kept_by_type": {
+    "api_reference": 2,
+    "capability": 2,
+    "cross_page": 2,
+    "post_cutoff": 2,
+    "single_page": 2,
+    "unanswerable": 2
+  },
+  "model": "glm-5.3-flash",
+  "requested": 12,
+  "requested_by_type": {
+    "api_reference": 2,
+    "capability": 2,
+    "cross_page": 2,
+    "post_cutoff": 2,
+    "single_page": 2,
+    "unanswerable": 2
+  },
+  "shortfall": 0,
+  "shortfall_by_type": {},
+  "status": "complete",
+  "uncached_usage": {
+    "completion_tokens": 6456,
+    "prompt_tokens": 78684,
+    "reasoning_tokens": 1563
+  },
+  "usage": {
+    "completion_tokens": 6456,
+    "prompt_tokens": 78684,
+    "reasoning_tokens": 1563
+  },
+  "usage_by_kind": {
+    "closed_book": {
+      "completion_tokens": 351,
+      "prompt_tokens": 294,
+      "reasoning_tokens": 62
+    },
+    "corpus_check": {
+      "completion_tokens": 309,
+      "prompt_tokens": 6689,
+      "reasoning_tokens": 14
+    },
+    "filter": {
+      "completion_tokens": 2519,
+      "prompt_tokens": 34765,
+      "reasoning_tokens": 1140
+    },
+    "generation": {
+      "completion_tokens": 2660,
+      "prompt_tokens": 28803,
+      "reasoning_tokens": 189
+    },
+    "page_alone": {
+      "completion_tokens": 617,
+      "prompt_tokens": 8133,
+      "reasoning_tokens": 158
+    }
+  }
+}

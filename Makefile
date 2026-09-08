@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check
+.PHONY: corpus-refresh corpus-check dev-set eval-report
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -73,6 +73,15 @@ mcp:
 ## Round-trip a document through the configured backend (skips unless it is set up)
 test:
 	uv run pytest tests/ -q
+
+## Generate the 300-question development set
+dev-set:
+	uv run python -m glossator.eval.generate --corpus corpus/mistral-docs --out eval/dev.jsonl --n 300 --provider zai --model glm-5.3-flash --seed 0
+
+## Regenerate a run's README and figures from its records
+## Usage: make eval-report run=eval/runs/2026-09-08-2312-dev-smoke
+eval-report:
+	uv run python -m glossator.eval.report $(run)
 
 ## Generate Bruno API files under vespa/bruno/vespa/ (requires WORKSPACE_ROOT in .env)
 bruno:
