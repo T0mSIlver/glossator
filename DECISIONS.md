@@ -364,3 +364,13 @@ Observed on the real corpus: phase-1 BM25 is overweighted for paraphrased questi
 - An all-zero query embedding yields NaN relevance and a "Malformed search hit" error from the response parser.
 - Retrieval uses the query-builder path with no named profile; the schema's generated default profile still carries the baked-in weights, so `exclude_ids` and filters work alongside tuned ranking (resolves D-014).
 - The host disk sat at 90% during the build, above Vespa's 80% feed-block limit; the local deployment was patched with a higher resource limit outside the repository. A reviewer's machine below 80% is unaffected; the README should mention the limit.
+
+---
+
+## D-026 · The MCP server does not ingest
+
+**Status:** decided · 2026-09-08
+
+**Decision.** The starter's `ingest(uri)` and `delete(source_id)` MCP tools are removed. The index is built from the vendored corpus by `make ingest`; the MCP surface exposes search, navigation, and (later) `ask`.
+
+**Facts.** The starter's ingest tool routes any URL or file through OCR or plain-text extraction with page-level chunks and no `url`, `anchor`, or `kind` metadata. Chunks written that way land in the serving variant and can never be cited or filtered (review finding on the S3 changes, 2026-09-08). A client-facing documentation engine should not let an agent push arbitrary content into the index it answers from; corpus changes go through the adapter, the manifest, and the link check.
