@@ -20,7 +20,12 @@ from glossator.index import get_index, get_variant
 from glossator.index.variants import IndexVariant
 from glossator.ingest.chunker import build_chunker
 from glossator.ingest.extractor import CorpusPageExtractor, page_file
-from glossator.ingest.pages import CorpusError, iter_page_paths, load_page
+from glossator.ingest.pages import (
+    CorpusError,
+    iter_page_paths,
+    load_page,
+    verify_manifest,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -36,6 +41,23 @@ _EMBEDDER_MAX_RETRY = 8
 # smaller-dimension variants have no published price; they are billed as embeddings,
 # so the same rate is the honest estimate to report rather than a silent zero.
 _EMBEDDING_USD_PER_MTOK = 0.10
+
+
+class PartialIngestError(RuntimeError):
+    """Some pages did not reach the index.
+
+    Raised rather than returned because a caller that does not look at
+    ``IngestReport.failures`` -- the eval grid, a script -- would otherwise measure
+    a corpus with holes in it and never know. Pass ``allow_partial=True`` to get the
+    report back instead.
+    """
+
+    def __init__(self, report: "IngestReport") -> None:
+        super().__init__(
+            f"{len(report.failures)} of {len(report.failures) + report.pages} page(s) "
+            f"failed to index into {report.variant!r}: {', '.join(report.failures)}"
+        )
+        self.report = report
 
 
 @dataclass(frozen=True, slots=True)
@@ -119,19 +141,24 @@ async def ingest_corpus(
     variant: IndexVariant | str,
     concurrency: int = DEFAULT_CONCURRENCY,
     client: Mistral | None = None,
+    allow_partial: bool = False,
 ) -> IngestReport:
-    """Index every page of ``corpus_dir`` into ``variant``'s schema."""
+    """Index every page of ``corpus_dir`` into ``variant``'s schema.
+
+    Raises ``PartialIngestError`` if any page fails, unless ``allow_partial`` is set.
+    """
     resolved = get_variant(variant) if isinstance(variant, str) else variant
     paths = list(iter_page_paths(corpus_dir))
     if not paths:
         raise CorpusError(f"{corpus_dir}: no markdown pages found")
+    verified = verify_manifest(corpus_dir)
 
     pipeline = build_pipeline(resolved, client=client)
     semaphore = asyncio.Semaphore(concurrency)
     log = logger.bind(
         variant=resolved.name, schema=resolved.schema_name, pages=len(paths)
     )
-    log.info("Ingesting corpus", corpus_dir=str(corpus_dir))
+    log.info("Ingesting corpus", corpus_dir=str(corpus_dir), manifest_pages=verified)
 
     chunks = 0
     tokens = 0
@@ -170,4 +197,6 @@ async def ingest_corpus(
         estimated_usd=round(report.estimated_usd, 6),
         failures=len(report.failures),
     )
+    if report.failures and not allow_partial:
+        raise PartialIngestError(report)
     return report

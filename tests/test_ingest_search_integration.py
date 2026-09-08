@@ -77,8 +77,9 @@ async def _skip_unless_vespa_ready() -> None:
 async def _ingest_and_search(corpus_dir: Path) -> Indexed:
     await _skip_unless_vespa_ready()
 
+    # ingest_corpus raises PartialIngestError if any page fails, so reaching the
+    # next line already means the whole fixture corpus is indexed.
     report = await ingest_corpus(corpus_dir, VARIANT, concurrency=4)
-    assert not report.failures, report.failures
 
     engine = SearchEngine(RetrievalConfig(variant=VARIANT.name, top_k=5))
     hits = {query: await engine.search(query) for query in QUERIES}

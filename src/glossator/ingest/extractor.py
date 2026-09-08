@@ -63,5 +63,6 @@ class CorpusPageExtractor(DocumentExtractor):
                 locale=page.locale,
                 source_path=page.source_path,
                 source_commit=page.source_commit,
+                breadcrumbs=list(page.breadcrumbs),
             ),
         )

@@ -6,10 +6,17 @@ rather than discovered as a query that quietly returns the wrong thing.
 """
 
 import pytest
+from mistralai.search.toolkit.context import RetrievalContext
+from mistralai.search.toolkit.plugins.vespa.context import extract_query_params
 from pydantic import ValidationError
 
 from glossator.index.variants import VARIANTS
 from glossator.retrieval.config import RetrievalConfig, query_weights
+from glossator.retrieval.context import (
+    RESTRICT_PARAM,
+    DocsRetrievalContext,
+    with_restrict,
+)
 
 
 def test_defaults_name_a_real_variant() -> None:
@@ -78,3 +85,29 @@ def test_weights_are_translated_to_vespa_query_inputs() -> None:
     """A feature name sent as a query input names nothing and is silently ignored."""
     assert query_weights({"bm25_content": 1.0}) == {"bm25_content_weight": 1.0}
     assert query_weights({}) == {}
+
+
+def test_the_schema_restriction_is_added_to_a_bare_context() -> None:
+    """Every query has to name its schema or Vespa cannot type the query embedding."""
+    restricted = with_restrict(RetrievalContext(), "docs_section_lowdim")
+
+    assert extract_query_params(restricted) == {RESTRICT_PARAM: "docs_section_lowdim"}
+
+
+def test_the_callers_own_query_params_survive() -> None:
+    """Replacing the context would silently drop bound filter params and client options."""
+    caller = DocsRetrievalContext(query_params={"user_permissions": "acme"})
+
+    restricted = with_restrict(caller, "docs_section_lowdim")
+
+    assert extract_query_params(restricted) == {
+        "user_permissions": "acme",
+        RESTRICT_PARAM: "docs_section_lowdim",
+    }
+    assert isinstance(restricted, DocsRetrievalContext)
+
+
+def test_a_caller_that_pinned_the_restriction_keeps_it() -> None:
+    caller = DocsRetrievalContext(query_params={RESTRICT_PARAM: "docs_page_lowdim"})
+
+    assert with_restrict(caller, "docs_section_lowdim") is caller

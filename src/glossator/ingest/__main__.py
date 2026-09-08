@@ -11,7 +11,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from glossator.index.variants import VARIANTS
-from glossator.ingest.pipeline import DEFAULT_CONCURRENCY, ingest_corpus
+from glossator.ingest.pipeline import (
+    DEFAULT_CONCURRENCY,
+    IngestReport,
+    PartialIngestError,
+    ingest_corpus,
+)
 
 
 def _parse_args() -> argparse.Namespace:
@@ -36,20 +41,26 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-async def main() -> None:
-    load_dotenv(override=True)
-    args = _parse_args()
-    report = await ingest_corpus(
-        args.corpus, args.variant, concurrency=args.concurrency
-    )
-    print(
+def _summary(report: IngestReport) -> str:
+    return (
         f"{report.variant}: indexed {report.chunks} chunks from {report.pages} page(s); "
         f"{report.embedding_tokens} embedding tokens (~${report.estimated_usd:.4f})"
     )
-    if report.failures:
-        raise SystemExit(
-            f"{len(report.failures)} page(s) failed: {', '.join(report.failures)}"
+
+
+async def main() -> None:
+    load_dotenv(override=True)
+    args = _parse_args()
+    try:
+        report = await ingest_corpus(
+            args.corpus, args.variant, concurrency=args.concurrency
         )
+    except PartialIngestError as exc:
+        # Report what did land before failing: a partial index is still worth
+        # knowing the size of, and the exit code is what a script reads.
+        print(_summary(exc.report))
+        raise SystemExit(str(exc)) from None
+    print(_summary(report))
 
 
 if __name__ == "__main__":

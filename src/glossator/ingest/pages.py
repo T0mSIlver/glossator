@@ -4,13 +4,17 @@ The corpus adapter (``glossator.corpus``) writes these files; ingestion only
 reads them, so the format is validated here rather than trusted.
 """
 
+import hashlib
 import json
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import structlog
 import yaml
+
+logger = structlog.get_logger(__name__)
 
 _FRONTMATTER_FENCE = "---"
 
@@ -121,10 +125,52 @@ def read_manifest(corpus_dir: Path) -> list[dict[str, Any]]:
     if not manifest.is_file():
         return []
     loaded = json.loads(manifest.read_text(encoding="utf-8"))
-    if isinstance(loaded, dict):
-        pages = loaded.get("pages", [])
-    else:
-        pages = loaded
+    pages = loaded.get("pages", []) if isinstance(loaded, dict) else loaded
     if not isinstance(pages, list):
         raise CorpusError(f"{manifest}: expected a list of page entries")
     return [entry for entry in pages if isinstance(entry, dict)]
+
+
+def verify_manifest(corpus_dir: Path) -> int:
+    """Check every manifest entry against the file on disk. Returns pages checked.
+
+    The corpus is vendored (D-009), so the manifest is how a reader knows which
+    upstream commit the committed markdown came from. A page edited after the
+    manifest was written breaks that link silently: the index would hold text no
+    recorded commit produced, and a citation would point at a page that never said
+    it. Ingestion refuses rather than indexing content it cannot account for.
+
+    A corpus that ships no manifest is checked as far as it can be -- not at all --
+    and ingested; the fixture corpora used in tests are the reason that is allowed.
+    """
+    entries = read_manifest(corpus_dir)
+    if not entries:
+        logger.warning(
+            "Corpus has no manifest; skipping the content check",
+            corpus_dir=str(corpus_dir),
+        )
+        return 0
+
+    missing: list[str] = []
+    changed: list[str] = []
+    for entry in entries:
+        relative = str(entry.get("path", ""))
+        expected = str(entry.get("sha256", ""))
+        if not relative or not expected:
+            raise CorpusError(
+                f"{corpus_dir / MANIFEST_NAME}: an entry has no path or sha256"
+            )
+        path = corpus_dir / relative
+        if not path.is_file():
+            missing.append(relative)
+            continue
+        if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            changed.append(relative)
+
+    if missing or changed:
+        raise CorpusError(
+            f"{corpus_dir}: corpus does not match its manifest "
+            f"(missing: {sorted(missing)}; content changed: {sorted(changed)}). "
+            "Regenerate the manifest if the change is intended."
+        )
+    return len(entries)

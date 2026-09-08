@@ -41,7 +41,7 @@ from mistralai.search.toolkit.ingestion.text_splitters.models import TextFragmen
 from glossator.index.variants import ChunkStrategy
 from glossator.ingest.markdown import Line, is_table_row, parse_heading, scan_lines
 from glossator.ingest.models import ChunkMetadata, CorpusPageMetadata
-from glossator.ingest.sections import Section, parse_sections
+from glossator.ingest.sections import Section, parse_sections, title_from_body
 
 logger = structlog.get_logger(__name__)
 
@@ -138,9 +138,12 @@ class CorpusChunker(TextSplitter, ABC):
         """The planned spans as bare fragments, without context prefixes.
 
         Present because ``TextSplitter`` requires it, and useful for inspecting a
-        strategy's boundaries; ingestion goes through ``process``.
+        strategy's boundaries; ingestion goes through ``process``, which has the
+        page's frontmatter. Here there is only markdown, so the title is taken from
+        the body's own first heading -- otherwise every heading path would start
+        with an empty segment.
         """
-        page = PageFacts(url="", title="", kind="doc", locale="en")
+        page = PageFacts(url="", title=title_from_body(text), kind="doc", locale="en")
         return [
             TextFragment(
                 content=text[spec.start : spec.end],

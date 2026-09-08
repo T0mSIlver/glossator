@@ -97,10 +97,5 @@ def parse_heading(line: Line) -> Heading | None:
     return Heading(level=len(match.group(1)), text=body.strip(), anchor=anchor)
 
 
-def opens_fence(line: Line, previous_in_fence: bool) -> bool:
-    """True when this line opens (rather than closes or continues) a fenced block."""
-    return line.in_fence and not previous_in_fence
-
-
 def is_table_row(line: Line) -> bool:
     return not line.in_fence and bool(_TABLE_ROW.match(line.text))

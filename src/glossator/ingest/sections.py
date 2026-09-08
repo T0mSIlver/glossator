@@ -51,6 +51,20 @@ class Section:
         return not self.text.strip()
 
 
+def title_from_body(body: str) -> str:
+    """The title the body declares for itself: its first heading, or "".
+
+    Corpus pages carry their title in the frontmatter, which is authoritative.
+    This is for callers that only have the markdown -- notably the ``TextSplitter``
+    fragment interface, which is handed bare text.
+    """
+    for line in scan_lines(body):
+        heading = parse_heading(line)
+        if heading is not None:
+            return heading.text
+    return ""
+
+
 def parse_sections(body: str, *, page_title: str) -> list[Section]:
     """Split a page body into sections.
 

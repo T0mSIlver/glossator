@@ -157,15 +157,40 @@ class SearchEngine:
         self.retriever = DocsRetriever(self.index, self.embedder, config)
 
     async def search(
-        self, query: str, exclude_ids: set[str] | None = None
+        self,
+        query: str,
+        exclude_ids: set[str] | None = None,
+        top_k: int | None = None,
     ) -> list[Hit]:
+        """Hits for a query. ``top_k`` overrides the configured depth for one call."""
         results = await self.retriever.retrieve(
-            query, top_k=self.config.top_k, exclude_ids=exclude_ids
+            query, top_k=top_k or self.config.top_k, exclude_ids=exclude_ids
         )
         logger.info(
             "Search", variant=self.config.variant, query=query, hits=len(results)
         )
         return _hits(results, self.navigation_index, self.context)
+
+    def navigation_at(
+        self, source_id: str, start_offset: int = 0, end_offset: int = 0
+    ) -> Navigation:
+        """Navigation bound to a position in a page.
+
+        The offsets are the anchor ``next``/``previous`` step from; ``read`` and
+        ``grep`` address the page directly and ignore them.
+        """
+        return Navigation(
+            index=self.navigation_index,
+            source_id=source_id,
+            start_offset=start_offset,
+            end_offset=end_offset,
+            context=self.context,
+        )
+
+    async def get_chunk(self, chunk_id: str) -> Hit | None:
+        """Resolve an opaque chunk id back to a hit, for a caller that kept only the id."""
+        result = await self.navigation_index.get_chunk(chunk_id, context=self.context)
+        return _hit(result, self.navigation_index, self.context) if result else None
 
 
 async def search(query: str, config: RetrievalConfig | None = None) -> list[Hit]:
@@ -227,7 +252,9 @@ def _hit(
     return Hit(
         chunk_id=chunk.id,
         score=result.score,
-        url=str(metadata.get("url", "")),
+        # source_id is the page URL for every chunk this project writes, so a hit
+        # always has somewhere to point even if the url metadata went missing.
+        url=str(metadata.get("url") or chunk.source_id),
         anchor=metadata.get("anchor"),
         heading_path=tuple(str(part) for part in heading_path),
         page_title=str(metadata.get("page_title", "")),

@@ -29,6 +29,12 @@ class CorpusPageMetadata(DocumentMetadata):
     locale: str
     source_path: str
     source_commit: str
+    breadcrumbs: list[str]
+    """The page's place in the documentation navigation, outermost first.
+
+    Not a root field and not matched: it duplicates what the heading path already
+    says about a chunk. It is carried so an answer can name where a page sits
+    ("Studio > Agents > Conversations") without a second lookup."""
 
 
 class ChunkMetadata(DocumentChunkMetadata):
