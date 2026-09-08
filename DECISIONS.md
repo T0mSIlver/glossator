@@ -399,3 +399,53 @@ Observed on the real corpus: phase-1 BM25 is overweighted for paraphrased questi
 - Codex on the ChatGPT plan hit its 5-hour usage limit at 23:1x on 2026-09-08 (reset 02:09), which cut one worker mid-turn and one review before it reported.
 
 **Decision.** Every tool that calls GLM polls the quota endpoint before a batch and pauses when the window is above 80%; runs checkpoint per candidate so a pause resumes without loss (D-023 records are append-only). Long generations are split into batches spread over the quota windows. Reviews and workers move between codex, opencode (GLM, muse) and opus subagents according to which provider has headroom, and the ledger records which one did what.
+
+---
+
+## D-029 · MCP surface rules carried over from vidtheque
+
+**Status:** decided · 2026-09-09
+
+Rules that vidtheque paid for in two consumer evaluations (a tool-design bench with weaker models, and a blind evaluation with six agents of another vendor) and that apply unchanged to a documentation engine. Sources: vidtheque `docs/design/DECISIONS.md`, `research/mcp-design-bench-2026-08-09.md`, `research/mcp-eval-terra-2026-08-10.md`, `mcp/src/vidtheque_mcp/tools/{descriptions,resources,params}.py`, `errors.py`, `text.py`.
+
+- **Server instructions name the happy-path order, the guide resource, and the one unforgivable sin in one breath.** glossator: "Start with search, open and read the section before answering; prefer `ask` for questions and the navigation tools for exploration. Read `glossator://guide` for the shared rules; never fabricate documentation URLs or anchors: cite only a URL and anchor exactly as a tool printed them."
+- **Tool descriptions stay under about 120 words; shared rules live once in a guide resource.** Nine copies of shared rules cost about 4k tokens of permanent context per session. Each description keeps purpose, USE WHEN, DO NOT USE (naming the tool to use instead), and START WITH parameters. Line one is a complete clause under 80 characters, because some clients show only that.
+- **Three resources, and the guide says there are no others**, so a cold-start model does not invent `glossator://help`: `glossator://guide` (rules and flow), `glossator://index` (page list), `glossator://context` (limits, id formats, corpus commit and freshness).
+- **Every response ends with a `next:` hint tuned to that result, and it must agree with the guide.** Pagination lines are copy-pasteable ("Results: 5/12, use offset=5 for more").
+- **Clamp server-side, never silently.** A clamp prints "note: clamped server-side: limit=500 → 50". Expensive paths (candidate pool, reranker candidates, loop rounds) are bounded independently of `limit`, so `limit` never changes ranking.
+- **Truncation markers name only parameters the calling tool accepts.** A marker that names a parameter the tool lacks is a trap that reports no failure.
+- **Unknown parameter names are rejected with `E_BAD_PARAM` naming the right one**, never dropped; a call that returned results applied every argument sent.
+- **Errors are typed, carry an HTTP-shaped status, and name the next call.** `E_UNKNOWN_PAGE` tells the model to use a URL exactly as a result printed it, never one recalled from memory. `E_BUSY` says retry the identical call, because "narrow the query" taught a model to abandon search.
+- **Empty results are never bare.** Say which kind of empty (no page matched the filter, legs ran with no lexical footing, corpus lacks the topic), echo the query, and give a `next:`.
+- **Per-unit citations.** Every retrieved section carries its canonical `url#anchor` built by one constructor; long payloads print the anchor on each unit so the model never reuses the page-top link for a section further down. Citations in `ask` answers are drawn only from recorded evidence; an `[n]` naming nothing is stripped rather than rendered.
+- **"all means all":** a search leg or filter that cannot apply prints a `note:` and never narrows silently; counts print kept over considered (`vec 11/800`), never a bare number.
+
+---
+
+## D-030 · Score floors and a lexical-footing gate make refusal possible
+
+**Status:** decided, to calibrate · 2026-09-09
+
+**Facts** (vidtheque `research/vec-floor-calibration-2026-08-10.md`, `research/mcp-eval-terra-2026-08-10.md` §4.1). With k-nearest-neighbour search and no ceiling, every query matches something: a junk query ("feline hyperthyroidism") returned 401 rows over 120 videos, and an unanswerable question got a confident wrong top hit at three identical RRF tie scores. Calibrating on 12 real and 10 junk queries showed a 0.12-wide empty corridor between the worst real best-hit distance and the best junk one; an absolute distance ceiling plus a relative margin over the query's own best hit cut junk to 0 rows and left rank-1 unchanged, at a quarter of the latency. A lexical-footing gate (skip vector legs when no query word occurs anywhere in the corpus) is what makes "0 results" reachable and lets the model say the corpus does not cover the topic; four of four unanswerable tasks were refused correctly in the blind evaluation after it shipped.
+
+**Decision.** glossator's retriever gets (a) an absolute cosine-similarity floor and (b) a relative margin below the query's best hit, both calibrated on the live Vespa index with real questions from the dev set and junk questions, with the measured distributions recorded beside the constants; (c) a lexical-footing check that reports "no lexical footing" in the trace; (d) hit counts reported as kept over considered. The `unanswerable` question type in the eval measures the effect (D-016). Calibration is part of the retrieval grid work.
+
+---
+
+## D-031 · Embedding sanity probe at index time
+
+**Status:** decided · 2026-09-09
+
+**Facts** (vidtheque `research/embedding-random-init-2026-08-10.md`). A checkpoint-loading mismatch left an embedding model with random weights for 36 hours; every stored vector was noise, search still returned plausible results, and every shape check (model name, dimensions, unit norm) passed, because none of them describes whether the weights are real. The fix that caught it: embed fixed probe documents and queries, assert the known top-1 matches and a score separation between related and unrelated pairs, and refuse to serve on failure; plus a stored-versus-re-embedded round trip.
+
+**Decision.** `make ingest` and the retrieval engine's startup run a semantic probe against the configured embedding model and variant: five fixed probe pairs with known nearest neighbours and a minimum separation; a stored chunk re-embedded must match its stored vector. Failure aborts ingestion or marks the engine unhealthy. The probe results and thresholds are recorded with the run.
+
+---
+
+## D-032 · Evaluate the MCP surface with blind consumers on a weaker model
+
+**Status:** decided · 2026-09-09
+
+**Facts.** vidtheque's two evaluations found their defects by giving real tasks to agents that were not told they were evaluating anything, on a weaker model than the author's, with every wrong turn treated as a surface defect until proven otherwise, every server-side claim reproduced by hand with the command printed, a severity scale (wrong or unreachable answer; extra calls; friction), and a byte-identical re-run after fixes to show regressions honestly.
+
+**Decision.** Before the tag, run the same protocol on glossator's MCP server: several personas (first contact, exhaustive reader, unanswerable questions, stress tester, a coding agent integrating the SDK), on codex or GLM clients connected as ordinary consumers, transcripts kept, findings classified and fixed in prose or code, then re-run. Tom's own hand test on his private questions is the final pass.
