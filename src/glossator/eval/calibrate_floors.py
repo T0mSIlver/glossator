@@ -31,8 +31,8 @@ import structlog
 from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, Field
 
-from glossator.eval.datasets import QuestionType, read_jsonl
 from glossator.eval.charts import line_chart
+from glossator.eval.datasets import QuestionType, read_jsonl
 from glossator.eval.run_records import create_run_directory
 from glossator.retrieval.config import DEFAULT_CORPUS_DIR, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
