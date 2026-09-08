@@ -158,9 +158,10 @@ def test_search_loop_runs_a_tool_round_and_then_answers(config: AnswerConfig) ->
 
 def test_the_loop_replies_to_every_tool_call_it_was_given(config: AnswerConfig) -> None:
     engine = FakeIndex([[make_hit("a", TOOLS_TEXT)], [make_hit("b", STREAM_TEXT)]])
+    search = invocation("search", query="streaming")
     llm = FakeLLM(
         [
-            completion(tool_calls=[invocation("search", query="streaming")]),
+            completion(tool_calls=[search]),
             completion(text="done"),
             completion(parsed=grounded("declared as JSON objects")),
         ]
@@ -172,9 +173,9 @@ def test_the_loop_replies_to_every_tool_call_it_was_given(config: AnswerConfig) 
     assistant = second_round[-2]
     tool_reply = second_round[-1]
     assert assistant["role"] == "assistant"
-    assert [call["id"] for call in assistant["tool_calls"]] == ["call_search"]
+    assert [call["id"] for call in assistant["tool_calls"]] == [search.id]
     assert tool_reply["role"] == "tool"
-    assert tool_reply["tool_call_id"] == "call_search"
+    assert tool_reply["tool_call_id"] == search.id
 
 
 def test_the_loop_stops_at_the_round_cap(config: AnswerConfig) -> None:
@@ -236,7 +237,9 @@ def test_a_tool_call_with_bad_arguments_is_reported_back_not_raised(
     answer = asyncio.run(search_loop.answer("How?", engine=engine, llm=llm, config=config))
 
     tool_event = next(event for event in answer.trace.events if event.kind == "tool")
-    assert tool_event.note == "no chunk with id 'nope'"
+    assert tool_event.note is not None
+    assert "No chunk with chunk_id='nope'" in tool_event.note
+    assert "exactly as an earlier result printed it" in tool_event.note
     assert answer.citations[0].verified
 
 
@@ -389,4 +392,4 @@ def test_an_extravagant_top_k_from_the_model_is_capped(config: AnswerConfig) -> 
 
     asyncio.run(search_loop.answer("How?", engine=engine, llm=llm, config=config))
 
-    assert engine.queries[1][1] == search_loop.MAX_TOOL_TOP_K
+    assert engine.queries[1][1] == config.max_tool_top_k

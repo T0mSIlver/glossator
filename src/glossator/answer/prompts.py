@@ -8,7 +8,7 @@ each instruction states the observable behaviour rather than a disposition.
 
 import hashlib
 
-GROUNDED_ANSWER_VERSION = "grounded-answer/v1"
+GROUNDED_ANSWER_VERSION = "grounded-answer/v2"
 
 GROUNDED_ANSWER_SYSTEM = """\
 You answer questions about Mistral's documentation from numbered sources only.
@@ -25,8 +25,9 @@ insufficient_evidence to true. Do not guess and do not offer a general answer in
 Return JSON with:
 - answer_markdown: the answer, in markdown, with [n] markers.
 - citations: one entry per marker you used, each with n and quote, where quote is a \
-short span copied character for character from that source's text. Do not paraphrase \
-a quote; it is checked against the source.
+span copied character for character from that source's text, in the source's own \
+language, at least ten characters long. Do not paraphrase a quote and do not translate \
+it; it is checked against the source.
 - insufficient_evidence: true when the sources do not answer the question.
 """
 
@@ -37,7 +38,7 @@ Sources:
 {context}
 """
 
-SEARCH_LOOP_VERSION = "search-loop/v1"
+SEARCH_LOOP_VERSION = "search-loop/v2"
 
 # Mixedbread's search-agent work found that models retrieve better when they
 # describe what they are looking for in a sentence than when they guess keywords,
@@ -56,6 +57,8 @@ message, each looking for a different thing.
 again, so repeating a search wastes a round.
 - Use open, grep and read to pull more of a page you already found something in, \
 rather than searching again for the same thing.
+- Use chunk_id and source_id exactly as a previous result printed them; never write \
+one from memory.
 - Stop as soon as the collected sources answer the question: reply with a one-line \
 summary of what you found and call no more tools.
 
