@@ -16,9 +16,9 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
-import mistralai.workflows as workflows
+from mistralai import workflows
 from mistralai.client import Mistral
-from mistralai.search.toolkit.embedders import MistralEmbedder
+from mistralai.search.toolkit.embedding import MistralEmbedder
 from mistralai.search.toolkit.ingestion.extractors import (
     MistralOCRExtractor,
     PlainTextExtractor,
@@ -30,7 +30,8 @@ from mistralai.search.toolkit.ingestion.text_splitters import (
     MarkdownTextSplitterConfig,
 )
 from mistralai.workflows import Depends
-from search_app import get_index
+
+from glossator.index import get_index
 
 from .models import IngestionResult
 
@@ -86,14 +87,14 @@ def _build_pipelines(
     """Assemble plain-text and OCR pipelines from shared components.
 
     The store index (vector_store) is the only per-call argument because
-    it is keyed to the collection_name supplied at runtime.
+    it is keyed to the index variant supplied at runtime.
     """
-    shared = dict(
-        loader=loader,
-        text_splitter=text_splitter,
-        embedder=embedder,
-        stores=vector_store,
-    )
+    shared = {
+        "loader": loader,
+        "text_splitter": text_splitter,
+        "embedder": embedder,
+        "stores": vector_store,
+    }
     return (
         Pipeline(extractor=PlainTextExtractor(), **shared),
         Pipeline(extractor=ocr_extractor, **shared),
@@ -157,7 +158,9 @@ async def ingest_documents(
 
     total_chunks = 0
     if text_docs:
-        total_chunks += await plain_text_pipeline.run(documents=text_docs, use_checkpoint=False)
+        total_chunks += await plain_text_pipeline.run(
+            documents=text_docs, use_checkpoint=False
+        )
     if ocr_docs:
         total_chunks += await ocr_pipeline.run(documents=ocr_docs, use_checkpoint=False)
 

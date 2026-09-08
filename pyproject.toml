@@ -1,11 +1,9 @@
 [project]
 name = "glossator"
 version = "0.1.0"
-description = "A Mistral Search Toolkit project"
+description = "Grounded question answering over Mistral's documentation"
 requires-python = ">=3.12,<3.15"
 dependencies = [
-    # Shared across backends: the MCP server (entrypoints/mcp_server.py) is
-    # backend-agnostic (routes through search_app.get_index) and ships on both.
     "fastmcp>=3.3.1",
     "httpx>=0.27",
     # Pinned exactly, and core and the vespa plugin are released in lockstep on the same version
@@ -15,7 +13,8 @@ dependencies = [
     "mistralai-search-toolkit[text-splitter-langchain,vespa]==0.0.13",
     "python-dotenv>=0.9.9",
     "pyyaml>=6.0.3",
-    "structlog>=25.5.0",
+    # Also a toolkit dependency, but called directly, so declared rather than inherited.
+    "structlog>=25.1",
 ]
 
 [project.optional-dependencies]
@@ -28,9 +27,8 @@ workflows = [
 dev = [
     "ruff>=0.11",
     "mypy>=1.15",
-    # `make test` round-trips a document through the backend; see tests/.
     "pytest>=8.0",
-    "types-pyyaml>=6.0.12.20260815",
+    "types-pyyaml>=6.0.12",
 ]
 
 [tool.uv]
@@ -50,18 +48,25 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/entrypoints", "src/glossator", "src/search_app", "src/examples"]
+packages = ["src/entrypoints", "src/glossator", "src/examples"]
 
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
-# This configuration defines the lint and format rules for the corpus adapter. Ruff
-# also formats Python code blocks embedded in Markdown, which would rewrite prose
-# files, so the scope is stated as explicit Python paths.
-include = ["src/glossator/**/*.py", "tests/corpus/**/*.py"]
+# Ruff also formats Python inside Markdown code fences, which would rewrite the vendored
+# skill documentation and the corpus fixtures (their hashes are in a manifest), so the
+# scope is stated as explicit Python paths. The workflow samples are template scaffolding.
+include = ["src/glossator/**/*.py", "src/entrypoints/**/*.py", "tests/**/*.py"]
+extend-exclude = ["tests/fixtures"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    # The toolkit's base classes declare `context: IngestContext = IngestContext()`; an
+    # override must match that signature. The contexts are frozen models, so the
+    # shared-mutable-default hazard the rule guards against does not apply.
+    "B008",
+]
 
 [tool.ruff.lint.per-file-ignores]
 # Corpus fixtures reproduce upstream MDX and TypeScript lines verbatim; wrapping
@@ -74,11 +79,10 @@ strict = true
 mypy_path = "src"
 explicit_package_bases = true
 namespace_packages = true
-# Same scope as Ruff above: the strict profile is defined for the corpus adapter.
-# The other packages under `src/` are generated and carry no annotations, so strict
-# mode reports only missing-annotation noise there.
-files = ["src/glossator", "tests/corpus"]
-exclude = "^src/(entrypoints|examples|search_app)/"
+# The workflow samples only type-check with the optional `workflows` extra installed
+# and carry no annotations; everything else is checked strictly.
+files = ["src/glossator", "src/entrypoints", "tests"]
+exclude = "^(src/examples/|tests/fixtures/)"
 
 [[tool.mypy.overrides]]
 module = ["mistralai_search_toolkit.*", "fastmcp.*"]

@@ -887,7 +887,7 @@ requires-dist = [
     { name = "pydantic", marker = "extra == 'workflows'" },
     { name = "python-dotenv", specifier = ">=0.9.9" },
     { name = "pyyaml", specifier = ">=6.0.3" },
-    { name = "structlog", specifier = ">=25.5.0" },
+    { name = "structlog", specifier = ">=25.1" },
 ]
 provides-extras = ["workflows"]
 
@@ -896,7 +896,7 @@ dev = [
     { name = "mypy", specifier = ">=1.15" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "ruff", specifier = ">=0.11" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.20260815" },
+    { name = "types-pyyaml", specifier = ">=6.0.12" },
 ]
 
 [[package]]

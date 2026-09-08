@@ -1,5 +1,4 @@
 """Start a worker that registers all example workflows for search-starter-app."""
-# ruff: noqa: E402
 
 import asyncio
 import os
@@ -9,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-import mistralai.workflows as workflows
+from mistralai import workflows
 
 from examples.workflows.search import IngestionWorkflow
 

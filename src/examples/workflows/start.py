@@ -3,7 +3,6 @@
 Requires the optional workflows extra:
     uv sync --extra workflows
 """
-# ruff: noqa: E402
 
 import argparse
 import asyncio
@@ -14,7 +13,10 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-from mistralai.extra.workflows import WorkflowEncodingConfig, configure_workflow_encoding
+from mistralai.extra.workflows import (
+    WorkflowEncodingConfig,
+    configure_workflow_encoding,
+)
 from mistralai.workflows.client import get_mistral_client
 
 
