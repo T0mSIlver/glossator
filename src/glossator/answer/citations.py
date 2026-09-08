@@ -17,7 +17,11 @@ from glossator.answer.llm import TokenUsage
 
 logger = structlog.get_logger(__name__)
 
-MARKER = re.compile(r"\[(\d{1,3})\]")
+MARKER = re.compile(r"\[([1-9]\d{0,2})\]")
+"""Sources are numbered from 1, so `[0]` is never a marker -- and answers about an
+API are full of `choices[0]`."""
+
+_CODE = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.DOTALL)
 _WHITESPACE = re.compile(r"\s+")
 MIN_QUOTE_CHARS = 8
 """A quote shorter than this verifies against almost any chunk, so it is not
@@ -119,9 +123,12 @@ class Answer(BaseModel):
 
 
 def markers(text: str) -> list[int]:
-    """The `[n]` markers in the answer, in order, without duplicates."""
+    """The `[n]` markers in the prose, in order, without duplicates.
+
+    Code is excluded: an answer that shows `messages[1]` is not citing source 1.
+    """
     seen: list[int] = []
-    for match in MARKER.finditer(text):
+    for match in MARKER.finditer(_CODE.sub(" ", text)):
         n = int(match.group(1))
         if n not in seen:
             seen.append(n)

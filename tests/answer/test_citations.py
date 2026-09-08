@@ -124,3 +124,13 @@ def test_markers_without_a_citation_are_reported() -> None:
     verified, rejected = resolve([(1, "Tools are JSON objects")], context)
 
     assert unmatched("Sentence one [1]. Sentence two [3].", verified + rejected) == [3]
+
+
+def test_array_indexing_in_code_is_not_a_citation_marker() -> None:
+    answer = "Read the first choice [1].\n\n```python\nprint(response.choices[0].message)\n```\n"
+
+    assert markers(answer) == [1]
+
+
+def test_an_inline_code_span_is_not_a_citation_marker() -> None:
+    assert markers("Use `messages[2]` to reach it [1].") == [1]
