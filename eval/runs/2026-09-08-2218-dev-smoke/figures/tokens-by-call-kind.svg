@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200" role="img" aria-label="Tokens by call kind">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Tokens by call kind</text>
+<text x="240" y="51.0" text-anchor="end">closed_book</text>
+<rect x="248" y="39.0" width="3.3" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="3.9" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">294 / 351</text>
+<text x="240" y="77.0" text-anchor="end">corpus_check</text>
+<rect x="248" y="65.0" width="74.7" height="7" fill="#3b6fd4"/>
+<rect x="248" y="73.0" width="3.4" height="7" fill="#c05621"/>
+<text class="v" x="646" y="77.0">6689 / 309</text>
+<text x="240" y="103.0" text-anchor="end">filter</text>
+<rect x="248" y="91.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="99.0" width="28.1" height="7" fill="#c05621"/>
+<text class="v" x="646" y="103.0">34765 / 2519</text>
+<text x="240" y="129.0" text-anchor="end">generation</text>
+<rect x="248" y="117.0" width="321.5" height="7" fill="#3b6fd4"/>
+<rect x="248" y="125.0" width="29.7" height="7" fill="#c05621"/>
+<text class="v" x="646" y="129.0">28803 / 2660</text>
+<text x="240" y="155.0" text-anchor="end">page_alone</text>
+<rect x="248" y="143.0" width="90.8" height="7" fill="#3b6fd4"/>
+<rect x="248" y="151.0" width="6.9" height="7" fill="#c05621"/>
+<text class="v" x="646" y="155.0">8133 / 617</text>
+<rect x="16" y="183" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="192">prompt</text>
+<rect x="84" y="183" width="10" height="10" fill="#c05621"/>
+<text class="v" x="98" y="192">completion</text>
+</svg>

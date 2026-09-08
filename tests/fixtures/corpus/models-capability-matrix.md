@@ -1,10 +1,9 @@
 ---
-url: https://docs.mistral.ai/models/capability-matrix
+url: https://docs.mistral.ai/models
 title: Model capability matrix
 breadcrumbs:
   - Models
-  - Capability matrix
-kind: doc
+kind: model
 locale: en
 source_path: src/schema/models/models/*.ts
 source_commit: 2e094f7
@@ -19,7 +18,7 @@ means the feature is not available on that model, not that it is untested.
 
 | Model | Context | Function calling | Structured outputs | Document Q&A | Vision | Reasoning |
 | --- | --- | --- | --- | --- | --- | --- |
-| `mistral-medium-latest` | 128k | yes | yes | yes | yes | yes |
+| [`mistral-medium-latest`](https://docs.mistral.ai/models/mistral-medium) | 128k | yes | yes | yes | yes | yes |
 | `mistral-large-latest` | 128k | yes | yes | yes | yes | yes |
 | `mistral-small-latest` | 128k | yes | yes | yes | yes | |
 | `ministral-8b-latest` | 128k | yes | yes | yes | | |

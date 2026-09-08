@@ -57,7 +57,7 @@ FILTER_INSTRUCTIONS = f"""Audit this generated evaluation question. Be strict.
 
 {PRODUCT}
 
-Set standalone to false if the question refers to unseen context. Check the required gold condition. Set not_answerable_from_title_alone to false if a source title reveals the answer without reading its body. Check whether every assigned source is necessary. Set about_the_documented_product to false if the question is about another vendor's product, or names one. Reject misspelled, truncated, or invented API fields and model identifiers. List short, concrete failure reasons. Use an empty list only when every check passes."""
+Set standalone to false if the question refers to unseen context. Check the required gold condition. Set not_answerable_from_title_alone to false only if the source's page title, on its own, states the answer: a reader who saw nothing but that title could answer correctly. The heading path and any operation name shown alongside a source are part of the body, not the title, and a question that names an endpoint or a model is not answered by naming it. Check whether every assigned source is necessary. Set about_the_documented_product to false if the question is about another vendor's product, or names one. Reject misspelled, truncated, or invented API fields and model identifiers. Give a short, concrete reason for every check you fail. Use an empty list only when every check passes."""
 
 PAGE_ALONE_INSTRUCTIONS = """Decide whether the single supplied page can fully answer the generated question. Judge the whole question, not one clause. Set fully_answerable to true only when no fact from another source is needed. Give one concrete reason."""
 

@@ -148,7 +148,7 @@ def test_a_streaming_question_finds_the_streaming_section(indexed: Indexed) -> N
 
 def test_a_capability_question_reaches_the_capability_matrix(indexed: Indexed) -> None:
     hits = indexed.hits[CAPABILITY_QUERY]
-    assert any("capability-matrix" in hit.url or "function-calling" in hit.url for hit in hits)
+    assert any(hit.url.endswith("/models") or "function-calling" in hit.url for hit in hits)
 
 
 def test_an_identifier_query_finds_the_page_that_names_it(indexed: Indexed) -> None:

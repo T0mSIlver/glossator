@@ -409,15 +409,21 @@ def cross_page_groups(
     return dict(groups)
 
 
+CapabilitySeed = tuple[CorpusDocument, Section, CorpusDocument | None]
+
+
 def capability_pairs(
     documents: Sequence[CorpusDocument],
     rng: random.Random,
-) -> dict[str, list[tuple[CorpusDocument, Section, CorpusDocument | None]]]:
+) -> dict[str, list[CapabilitySeed]]:
     """Feature sections of the capability matrix, each with a model card.
 
-    D-006: "which models support function calling" is answerable from the matrix
-    page; a question about one model also needs that model's card. The card is
-    drawn from the models the feature section links to, so the pair is coherent.
+    D-006: "which models support function calling" is answerable from a feature
+    section of the matrix; "does model Y support X" also needs Y's card. Every
+    seed leads with the matrix, which is always gold -- it carries the per-feature
+    model lists and the context lengths. The card is drawn from the models that
+    feature section links to, so the pair is about the same feature, and seeds are
+    grouped by feature so that one large feature cannot supply every question.
     """
     matrix = next(
         (
@@ -427,30 +433,24 @@ def capability_pairs(
         ),
         None,
     )
+    if matrix is None:
+        return {}
     cards = {
         document.url: document
         for document in documents
         if document.page.kind == "model" and document.path.startswith("/models/")
     }
-    grouped: dict[str, list[tuple[CorpusDocument, Section, CorpusDocument | None]]] = defaultdict(
-        list
-    )
-    if matrix is not None:
-        for section in matrix.sections:
-            if section.level <= 1 or estimate_tokens(section.body) < MIN_SECTION_TOKENS:
-                continue
-            linked = [
-                cards[url]
-                for url in extract_links(section.body, base_url=matrix.url)
-                if url in cards
-            ]
-            card = rng.choice(linked) if linked else None
-            grouped["matrix"].append((matrix, section, card))
-    for card in cards.values():
-        for section in card.sections:
-            if section.level <= 1 or estimate_tokens(section.body) < MIN_SECTION_TOKENS:
-                continue
-            grouped["cards"].append((card, section, matrix))
+    grouped: dict[str, list[CapabilitySeed]] = defaultdict(list)
+    for section in matrix.sections:
+        if section.level <= 1 or estimate_tokens(section.body) < MIN_SECTION_TOKENS:
+            continue
+        linked = [
+            cards[url] for url in extract_links(section.body, base_url=matrix.url) if url in cards
+        ]
+        rng.shuffle(linked)
+        grouped[section.heading].append((matrix, section, None))
+        for card in linked[:4]:
+            grouped[section.heading].append((matrix, section, card))
     return dict(grouped)
 
 
@@ -529,23 +529,23 @@ def plan_attempts(
         return plans
 
     if question_type == QuestionType.CAPABILITY:
-        for nonce, (document, section, other) in enumerate(
+        for nonce, (matrix, section, card) in enumerate(
             draw_balanced(capability_pairs(documents, rng), count, rng)
         ):
-            sources = [_section_source(document, section, block_text(document, section))]
-            documents_used = [document]
-            if other is not None:
-                sources.append(_page_source(other))
-                documents_used.append(other)
+            sources = [_section_source(matrix, section, block_text(matrix, section))]
+            documents_used = [matrix]
+            if card is not None:
+                sources.append(_page_source(card))
+                documents_used.append(card)
             plans.append(
                 AttemptPlan(
                     question_type=question_type,
                     documents=tuple(documents_used),
                     sources=tuple(sources),
-                    # The model page joins the gold only when the question names
-                    # that model; decided after generation.
-                    gold=(GoldSource(url=document.url, anchor=section.anchor),),
-                    language=_language(document.page.locale),
+                    # The card joins the gold only when the question names that
+                    # model; decided after generation.
+                    gold=(GoldSource(url=matrix.url, anchor=section.anchor),),
+                    language=_language(matrix.page.locale),
                     nonce=nonce,
                 )
             )
@@ -665,8 +665,23 @@ async def generate_candidate(context: GenerationContext, plan: AttemptPlan) -> C
     return cast(CandidateOutput, completion.parsed)
 
 
+def gold_sources(plan: AttemptPlan, gold: Sequence[GoldSource]) -> list[SampledSource]:
+    """The sampled text behind each gold source, in gold order.
+
+    The filter must judge what the dataset row claims as evidence. A generator
+    may show the model more than it makes gold -- a capability question sees a
+    model card it need not cite -- and asking whether every *shown* source was
+    necessary drops good questions for using their context.
+    """
+    by_url = {source.url: source for source in plan.sources}
+    return [by_url[item.url] for item in gold if item.url in by_url]
+
+
 async def filter_candidate(
-    context: GenerationContext, plan: AttemptPlan, candidate: CandidateOutput
+    context: GenerationContext,
+    plan: AttemptPlan,
+    candidate: CandidateOutput,
+    gold: Sequence[GoldSource],
 ) -> FilterOutput:
     expected = (
         "The sources must not answer the question. gold_condition_met is true only if the "
@@ -680,10 +695,12 @@ async def filter_candidate(
         "and another fact exclusive to Source 2. Set it to false when one source states both "
         "facts, even if the two facts are described separately."
         if plan.question_type == QuestionType.CROSS_PAGE
-        else "uses_every_gold_source is true when the assigned source is the right evidence."
+        else "uses_every_gold_source is true when every assigned source is evidence for part "
+        "of the answer."
     )
+    sources = gold_sources(plan, gold) or list(plan.sources)
     rendered = "\n\n".join(
-        _render_source(source, f"SOURCE {index + 1}") for index, source in enumerate(plan.sources)
+        _render_source(source, f"SOURCE {index + 1}") for index, source in enumerate(sources)
     )
     prompt = (
         f"{FILTER_INSTRUCTIONS}\n\n"
@@ -844,7 +861,7 @@ async def run_attempt(context: GenerationContext, plan: AttemptPlan) -> AttemptO
                 if plan.question_type == QuestionType.CAPABILITY
                 else plan.gold
             )
-            outcome.filter = await filter_candidate(context, plan, candidate)
+            outcome.filter = await filter_candidate(context, plan, candidate, outcome.gold)
             if plan.question_type == QuestionType.CROSS_PAGE:
                 outcome.page_alone = list(
                     await asyncio.gather(
@@ -896,19 +913,24 @@ def _check_reasons(
     expected_fully_answered = plan.question_type != QuestionType.UNANSWERABLE
     if candidate.fully_answered != expected_fully_answered:
         reasons.append("fully_answered conflicts with question type")
-    for page in outcome.page_alone:
-        if page.fully_answerable:
-            reasons.append(f"answerable from {page.title} alone")
+    if any(page.fully_answerable for page in outcome.page_alone):
+        # One reason for every page, not one per page title: the title belongs on
+        # the verdict in the record, and a reason that varies cannot be counted.
+        reasons.append("answerable from one page alone")
     if outcome.corpus_check is not None and outcome.corpus_check.answered_by_corpus:
         reasons.append("the corpus answers it after all")
     return reasons
 
 
-def finalize_attempt(context: GenerationContext, outcome: AttemptOutcome) -> GenerationAttempt:
+def finalize_attempt(
+    context: GenerationContext, outcome: AttemptOutcome, *, still_needed: bool = True
+) -> GenerationAttempt:
     """Turn an outcome into a record row, applying duplicate detection.
 
     Runs after the concurrent attempts of a wave have finished, so that two
-    identical questions produced at the same time cannot both be accepted.
+    identical questions produced at the same time cannot both be accepted, and
+    so that ``kept`` means what the dataset holds rather than what passed the
+    checks: a wave overshoots on purpose, and the surplus is recorded as such.
     """
     plan = outcome.plan
     drop_reasons = list(outcome.drop_reasons)
@@ -918,6 +940,8 @@ def finalize_attempt(context: GenerationContext, outcome: AttemptOutcome) -> Gen
         duplicate = normalized in context.seen
         if duplicate:
             drop_reasons.append("duplicate question")
+        if not drop_reasons and not still_needed:
+            drop_reasons.append("surplus, the type was already filled")
     kept = outcome.candidate is not None and not drop_reasons
 
     question: EvalQuestion | None = None
@@ -1035,9 +1059,9 @@ async def generate_questions(
             used += len(wave)
             outcomes = await asyncio.gather(*(run_attempt(context, plan) for plan in wave))
             for outcome in outcomes:
-                attempt = finalize_attempt(context, outcome)
+                attempt = finalize_attempt(context, outcome, still_needed=kept_here < target)
                 attempts.append(attempt)
-                if attempt.question is not None and kept_here < target:
+                if attempt.question is not None:
                     accepted.append(attempt.question)
                     kept_here += 1
         results.append(

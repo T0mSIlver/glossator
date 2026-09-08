@@ -275,6 +275,26 @@ async def test_generation_returns_every_type_it_can_fill(
 
 
 @pytest.mark.asyncio
+async def test_a_candidate_beyond_the_target_is_recorded_as_surplus(
+    documents: list[Any], tmp_path: Path
+) -> None:
+    recorder = recorder_for(tmp_path)
+    questions, attempts, _results = await generate_questions(
+        StubProvider(), documents, n=6, model="stub", seed=0, recorder=recorder
+    )
+    surplus = [
+        attempt
+        for attempt in attempts
+        if "surplus, the type was already filled" in attempt.drop_reasons
+    ]
+
+    # A wave overshoots on purpose; what it produced past the target is recorded
+    # rather than counted as kept, so the record and the dataset agree.
+    assert surplus
+    assert len(questions) == sum(attempt.kept for attempt in attempts)
+
+
+@pytest.mark.asyncio
 async def test_a_type_the_corpus_cannot_fill_is_short_not_fatal(
     documents: list[Any], tmp_path: Path
 ) -> None:
@@ -426,7 +446,7 @@ async def test_a_cross_page_question_one_page_answers_is_dropped(
     cross = [attempt for attempt in attempts if attempt.generator_type == "cross_page"]
 
     assert cross
-    assert all(any("alone" in reason for reason in attempt.drop_reasons) for attempt in cross)
+    assert all("answerable from one page alone" in attempt.drop_reasons for attempt in cross)
     assert all(len(attempt.page_alone) == 2 for attempt in cross)
 
 
