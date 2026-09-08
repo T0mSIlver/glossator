@@ -11,6 +11,8 @@ from itertools import pairwise
 import pytest
 
 from glossator.ingest.chunker import (
+    ATOMIC_TOKEN_CEILING,
+    EMBEDDER_TOKEN_LIMIT,
     SECTION_MAX_TOKENS,
     PageChunker,
     PageFacts,
@@ -239,3 +241,47 @@ def test_a_chunk_without_an_anchor_still_carries_its_heading_path(
     for spec in anchorless:
         assert spec.metadata.heading_path
         assert spec.metadata.url
+
+
+# --- blocks that cannot fit -------------------------------------------------
+
+_PAGE_HEAD = "# Page title\n\n## Big block\n\n"
+
+
+def _fenced(rows: int) -> str:
+    lines = "\n".join(f"value_{index} = {index}" for index in range(rows))
+    return f"{_PAGE_HEAD}```python\n{lines}\n```\n"
+
+
+def test_a_code_block_over_the_cap_but_under_the_ceiling_stays_whole(
+    chunker: SectionChunker,
+) -> None:
+    body = _fenced(600)
+    tokens = chunker.count_tokens(body)
+    assert SECTION_MAX_TOKENS < tokens < ATOMIC_TOKEN_CEILING
+    specs = [spec for spec in chunker.plan(body, FACTS) if "```" in spec.content]
+    assert len(specs) == 1
+
+
+def test_a_code_block_over_the_ceiling_is_split_so_it_can_be_embedded(
+    chunker: SectionChunker,
+) -> None:
+    """An unembeddable chunk never reaches the index, which is worse than a cut one."""
+    body = _fenced(4000)
+    assert chunker.count_tokens(body) > ATOMIC_TOKEN_CEILING
+    specs = chunker.plan(body, FACTS)
+    assert len(specs) > 1
+    for spec in specs:
+        assert chunker.count_tokens(spec.content) <= EMBEDDER_TOKEN_LIMIT
+    # Still a contiguous, verbatim cover of the section.
+    assert specs[0].start == body.index("## Big block")
+    assert specs[-1].end == len(body)
+    for earlier, later in pairwise(specs):
+        assert earlier.end == later.start
+
+
+def test_the_atomic_ceiling_is_validated() -> None:
+    with pytest.raises(ValueError, match="atomic_ceiling"):
+        SectionChunker(atomic_ceiling=EMBEDDER_TOKEN_LIMIT + 1)
+    with pytest.raises(ValueError, match="atomic_ceiling"):
+        SectionChunker(max_tokens=1024, atomic_ceiling=512)

@@ -18,7 +18,7 @@ span is resolved back to the source.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import ClassVar, override
 
 import structlog
@@ -34,6 +34,7 @@ from mistralai.search.toolkit.ingestion.text_splitters import (
     MarkdownTextSplitter,
     MarkdownTextSplitterConfig,
     TextSplitter,
+    TokenTextSplitter,
 )
 from mistralai.search.toolkit.ingestion.text_splitters.models import TextFragment
 
@@ -52,6 +53,18 @@ PAGE_CHUNK_OVERLAP = 50
 SECTION_TARGET_TOKENS = 600
 SECTION_MAX_TOKENS = 1024
 SECTION_OVERLAP_TOKENS = 60
+
+# Hard limit on one embedding input, from the Mistral embedding models.
+EMBEDDER_TOKEN_LIMIT = 8192
+
+# How far a table or a code fence may exceed the chunk cap before it has to be
+# split anyway. Below this it is emitted whole: half a table has no header row and
+# half a code block does not run, and an over-long chunk is a smaller problem than
+# an unquotable one. Above it there is no choice -- the embedder rejects an input
+# over its limit, and a chunk that cannot be embedded cannot be retrieved at all.
+# The margin under the limit covers the heading-path prefix and the model's own
+# special tokens. The real corpus has four such blocks (the largest 39k tokens).
+ATOMIC_TOKEN_CEILING = 7000
 
 _CONTEXT_SEPARATOR = " > "
 
@@ -222,8 +235,10 @@ class SectionChunker(CorpusChunker):
     One chunk per section where the section fits; otherwise the section is packed
     into several chunks at paragraph boundaries with a small overlap. A chunk
     never spans two headings, and never cuts into a table or a fenced code block
-    even when that pushes it past the budget -- half a table is worse than a long
-    chunk, and the embedder's real limit is 8192 tokens, far above the cap here.
+    while that block stays under ``ATOMIC_TOKEN_CEILING`` -- half a table is worse
+    than a long chunk. Past the ceiling the block is cut anyway, because the
+    embedder refuses an input over 8192 tokens and an unembeddable chunk is not in
+    the index at all.
     """
 
     strategy: ClassVar[ChunkStrategy] = ChunkStrategy.SECTION
@@ -233,6 +248,7 @@ class SectionChunker(CorpusChunker):
         target_tokens: int = SECTION_TARGET_TOKENS,
         max_tokens: int = SECTION_MAX_TOKENS,
         overlap_tokens: int = SECTION_OVERLAP_TOKENS,
+        atomic_ceiling: int = ATOMIC_TOKEN_CEILING,
         tokenizer: MistralTokenizer | None = None,
     ) -> None:
         if not 0 < target_tokens <= max_tokens:
@@ -243,9 +259,15 @@ class SectionChunker(CorpusChunker):
             raise ValueError(
                 f"overlap_tokens ({overlap_tokens}) must be under target_tokens ({target_tokens})"
             )
+        if atomic_ceiling < max_tokens or atomic_ceiling > EMBEDDER_TOKEN_LIMIT:
+            raise ValueError(
+                f"atomic_ceiling ({atomic_ceiling}) must sit between max_tokens ({max_tokens}) "
+                f"and the embedder limit ({EMBEDDER_TOKEN_LIMIT})"
+            )
         self.target_tokens = target_tokens
         self.max_tokens = max_tokens
         self.overlap_tokens = overlap_tokens
+        self.atomic_ceiling = atomic_ceiling
         # v1 regardless of model: MistralEmbedder tokenizes every embedding model
         # with it, and "mistral-embed" is not a name MistralTokenizer resolves.
         self._tokenizer = tokenizer or MistralTokenizer.v1()
@@ -295,12 +317,21 @@ class SectionChunker(CorpusChunker):
 
         for block in blocks:
             tokens = self.count_tokens(body[block.start : block.end])
+            heading_only = bool(current) and all(item.is_heading for item in current)
+            if tokens > cap:
+                # Nothing this block is packed with can help it fit, so close the
+                # current chunk first -- unless all it holds is the section's own
+                # heading, which belongs with the block rather than alone.
+                if current and not heading_only:
+                    flush()
+                oversized = replace(
+                    block, start=current[0].start if heading_only else block.start
+                )
+                specs.extend(self._plan_oversized(body, oversized, section, page, cap))
+                current, current_tokens = [], 0
+                continue
             # A heading on its own is not a chunk; keep packing until it has content.
-            if (
-                current
-                and current_tokens + tokens > budget
-                and not all(item.is_heading for item in current)
-            ):
+            if current and current_tokens + tokens > budget and not heading_only:
                 seed = flush()
                 current = seed
                 current_tokens = sum(
@@ -308,9 +339,6 @@ class SectionChunker(CorpusChunker):
                 )
                 if current and current_tokens + tokens > budget:
                     current, current_tokens = [], 0
-            if not current and tokens > cap:
-                specs.extend(self._plan_oversized(body, block, section, page, cap))
-                continue
             current.append(block)
             current_tokens += tokens
 
@@ -322,21 +350,42 @@ class SectionChunker(CorpusChunker):
     ) -> list[ChunkSpec]:
         """One block that does not fit on its own.
 
-        A table or a fenced code block is emitted whole and logged: cutting it
-        would produce a chunk that is not valid markdown and cannot be quoted.
-        Any other block is a single paragraph over the cap, which real
-        documentation does not contain; it is split at line boundaries.
+        A table or a fenced code block is emitted whole while it stays under
+        ``ATOMIC_TOKEN_CEILING``: cutting it would produce a chunk that is not
+        valid markdown and cannot be quoted, and being over the chunk cap is the
+        lesser harm. Past that ceiling it must be cut anyway -- the embedder
+        rejects an input over its own limit, so the alternative is a chunk that
+        never reaches the index.
+
+        Everything else is one paragraph over the cap; it is cut at line
+        boundaries, which is as close to a sentence boundary as this gets.
         """
-        if block.atomic:
+        tokens = self.count_tokens(body[block.start : block.end])
+        if block.atomic and tokens <= self.atomic_ceiling:
             logger.info(
                 "Emitting an oversized atomic block whole",
                 url=page.url,
                 heading=section.heading,
-                tokens=self.count_tokens(body[block.start : block.end]),
+                tokens=tokens,
                 cap=cap,
             )
             return [self._spec(body, block.start, block.end, section, page)]
+        if block.atomic:
+            logger.warning(
+                "Splitting a table or code block above the embedder's input limit",
+                url=page.url,
+                heading=section.heading,
+                tokens=tokens,
+                ceiling=self.atomic_ceiling,
+            )
+        return self._split_at_lines(
+            body, block, section, page, min(cap, self.atomic_ceiling)
+        )
 
+    def _split_at_lines(
+        self, body: str, block: _Block, section: Section, page: PageFacts, cap: int
+    ) -> list[ChunkSpec]:
+        """Cut one block into line-aligned windows of at most ``cap`` tokens."""
         specs: list[ChunkSpec] = []
         start = block.start
         tokens = 0
@@ -347,10 +396,44 @@ class SectionChunker(CorpusChunker):
             if line_start > start and tokens + line_tokens > cap:
                 specs.append(self._spec(body, start, line_start, section, page))
                 start, tokens = line_start, 0
+            if line_tokens > cap:
+                # One line over the cap on its own: a minified payload or a long
+                # generated blob, where there is no textual boundary left to
+                # respect. Windowing on tokens is the last resort that keeps every
+                # chunk embeddable.
+                specs.extend(
+                    self._split_by_tokens(body, start, line_end, section, page, cap)
+                )
+                start, tokens = line_end, 0
+                continue
             tokens += line_tokens
             if line_end == block.end and start < block.end:
                 specs.append(self._spec(body, start, block.end, section, page))
         return specs
+
+    def _split_by_tokens(
+        self,
+        body: str,
+        start: int,
+        end: int,
+        section: Section,
+        page: PageFacts,
+        cap: int,
+    ) -> list[ChunkSpec]:
+        """Cut a span into token windows, ignoring text structure entirely."""
+        splitter = TokenTextSplitter(
+            chunk_size=cap, chunk_overlap=0, tokenizer=self._tokenizer
+        )
+        return [
+            self._spec(
+                body,
+                start + fragment.start_offset,
+                start + fragment.end_offset,
+                section,
+                page,
+            )
+            for fragment in splitter.split_text(body[start:end])
+        ]
 
     def _overlap_seed(self, body: str, packed: list[_Block]) -> list[_Block]:
         """Trailing blocks of a flushed chunk to repeat at the head of the next one.
