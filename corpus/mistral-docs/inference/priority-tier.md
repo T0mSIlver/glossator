@@ -183,15 +183,15 @@ Requests served as Priority Tier traffic are billed according to your Priority T
 
 ## FAQ {#faq}
 
-### What happens if I omit service_tier? {#what-happens-if-i-omit-service_tier}
+### What happens if I omit service_tier? {#what-happens-if-i-omit-servicetier}
 
 The request uses `standard_only`. It is served as Standard Tier traffic and does not consume Priority Tier limits.
 
-### What happens when I set service_tier to auto? {#what-happens-when-i-set-service_tier-to-auto}
+### What happens when I set service_tier to auto? {#what-happens-when-i-set-servicetier-to-auto}
 
 We attempt to serve the request with Priority Tier. If Priority Tier is not available for that request, we serve it as Standard Tier traffic.
 
-### Why did my request return service_tier: standard? {#why-did-my-request-return-service_tier-standard}
+### Why did my request return service_tier: standard? {#why-did-my-request-return-servicetier-standard}
 
 The request was served as Standard Tier traffic. Common causes include exceeded Priority Tier limits, a model that is not eligible for Priority Tier, missing entitlement, expired access, or unavailable Priority Tier capacity.
 

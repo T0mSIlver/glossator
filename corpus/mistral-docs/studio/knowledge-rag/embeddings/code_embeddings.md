@@ -310,7 +310,7 @@ display(df.head())
 
 ![drawing](https://docs.mistral.ai/img/guides/tsne_dataset-codestral-embed.png)
 
-### t-SNE embeddings visualization {#t-sne-embeddings-visualization}
+### t-SNE embeddings visualization
 
 We mentioned previously that our embeddings have 1536 dimensions, which makes them impossible to visualize directly. Thus, in order to visualize our embeddings, we can use a dimensionality reduction technique such as t-SNE to project our embeddings into a lower-dimensional space that is easier to visualize.
 

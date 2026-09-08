@@ -390,7 +390,7 @@ curl https://api.mistral.ai/v1/chat/completions \
 
 You can also upload a PDF file in our Cloud and get the QnA results from the uploaded PDF by retrieving a signed url. Document QnA is under the umbrela OCR, the method for uploading and handling files will hence be the same.
 
-### Upload a File {#upload-a-file}
+### Upload a File
 
 First, you will have to upload your PDF file to our cloud, this file will be stored and only accessible via an API key.
 
@@ -481,7 +481,7 @@ curl https://api.mistral.ai/v1/files \
 }
 ```
 
-### Retrieve File {#retrieve-file}
+### Retrieve File
 
 Once the file uploaded, you can retrieve it at any point.
 
@@ -526,7 +526,7 @@ curl -X GET "https://api.mistral.ai/v1/files/$id" \
 }
 ```
 
-### Get Signed Url {#get-signed-url}
+### Get Signed Url
 
 For QnA with Documents, you can get a signed url to access the file. An optional `expiry` parameter allow you to automatically expire the signed url after n hours.
 
@@ -560,7 +560,7 @@ curl -X GET "https://api.mistral.ai/v1/files/$id/url?expiry=24" \
 }
 ```
 
-### Get Chat Completion Result {#get-chat-completion-results}
+### Get Chat Completion Result
 
 You can now query any LLM with the signed url.
 
@@ -667,7 +667,7 @@ curl https://api.mistral.ai/v1/chat/completions \
 }
 ```
 
-### Delete File {#delete-file}
+### Delete File
 
 Once everything done, you can optionally delete the pdf file from our cloud unless you wish to reuse it later.
 

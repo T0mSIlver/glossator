@@ -16,7 +16,7 @@ from pathlib import Path
 import structlog
 
 from . import SITE_ORIGIN
-from .anchors import AnchorAllocator, section_tab_level, slugify
+from .anchors import AnchorAllocator, faq_slugify, section_tab_level
 from .fences import collapse_blank_lines, iter_lines, map_outside_fences
 from .frontmatter import split as split_frontmatter
 from .jsx import Element, Fence, Node, Text, parse
@@ -111,6 +111,7 @@ class PageRender:
     anchors: list[EmittedAnchor] = field(default_factory=list)
     stripped: Counter[str] = field(default_factory=Counter)
     partials: int = 0
+    suppressed_anchors: int = 0
 
 
 @dataclass
@@ -132,6 +133,8 @@ class MdxNormalizer:
         self.emitted: list[EmittedAnchor] = []
         self.stripped: Counter[str] = Counter()
         self.partials = 0
+        self.suppressed_anchors = 0
+        self._jsx_depth = 0
 
     # -- entry point ---------------------------------------------------------
 
@@ -146,6 +149,7 @@ class MdxNormalizer:
             anchors=list(self.emitted),
             stripped=Counter(self.stripped),
             partials=self.partials,
+            suppressed_anchors=self.suppressed_anchors,
         )
 
     # -- file handling -------------------------------------------------------
@@ -186,7 +190,11 @@ class MdxNormalizer:
         return _block(self._children(element, scope))
 
     def _children(self, element: Element, scope: _FileScope) -> str:
-        return _dedent(self._render_nodes(element.children, scope))
+        self._jsx_depth += 1
+        try:
+            return _dedent(self._render_nodes(element.children, scope))
+        finally:
+            self._jsx_depth -= 1
 
     def _inline_partial(self, element: Element, module: str, scope: _FileScope) -> str:
         if scope.depth >= MAX_PARTIAL_DEPTH:
@@ -208,6 +216,12 @@ class MdxNormalizer:
         if not text:
             return ""
         level = section_tab_level(element.attr("as"), element.attr("variant"))
+        if self._jsx_depth > 0 or scope.depth > 0:
+            # Nested in JSX or pulled in from a partial: the site renders such a
+            # SectionTab only while its tab is open and leaves it out of the table of
+            # contents, so the id is not a link anyone can follow.
+            self.suppressed_anchors += 1
+            return _block(f"{'#' * level} {text}")
         section_id = element.attr("sectionId")
         anchor = self.anchors.reserve(section_id) if section_id else self.anchors.allocate(text)
         self.emitted.append(EmittedAnchor(anchor=anchor, text=text, kind="section-tab"))
@@ -231,7 +245,7 @@ class MdxNormalizer:
             return _block(body)
         # The Faq accordion renders `id = id ?? slugify(question)`, so this anchor is
         # a real deep link even though the question is not a markdown heading.
-        anchor = self.anchors.reserve(element.attr("id") or slugify(question))
+        anchor = self.anchors.reserve(element.attr("id") or faq_slugify(question))
         self.emitted.append(EmittedAnchor(anchor=anchor, text=question, kind="faq"))
         return _block(f"### {question} {{#{anchor}}}") + _block(body)
 

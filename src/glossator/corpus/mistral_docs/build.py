@@ -46,6 +46,8 @@ class BuildSummary:
     residue_pages: list[str] = field(default_factory=list)
     missing_operations: list[str] = field(default_factory=list)
     redirected_routes: list[tuple[str, str]] = field(default_factory=list)
+    unreachable_routes: list[tuple[str, str]] = field(default_factory=list)
+    suppressed_anchors: int = 0
 
     @property
     def total_pages(self) -> int:
@@ -100,6 +102,9 @@ def _build_doc_pages(
         for route in enumeration.routes
         if route.redirected_from is not None
     ]
+    summary.unreachable_routes = [
+        (route.source_path, route.route) for route in enumeration.unreachable
+    ]
 
     pages: list[CorpusPage] = []
     for route in enumeration.routes:
@@ -109,6 +114,7 @@ def _build_doc_pages(
         if render.stripped:
             summary.stripped_pages[route.route] = sum(render.stripped.values())
         summary.partials_inlined += render.partials
+        summary.suppressed_anchors += render.suppressed_anchors
         _record_anchors(summary, route.route, len(render.anchors), KIND_DOC)
         if route.hidden:
             summary.hidden_pages += 1
@@ -211,6 +217,10 @@ def format_summary(summary: BuildSummary) -> str:
         f"max {summary.max_anchors[1]} on {summary.max_anchors[0] or 'n/a'}"
     )
     lines.append("  anchors by kind  " + _counter_line(summary.anchors_by_kind))
+    lines.append(
+        f"  anchors dropped  {summary.suppressed_anchors} SectionTabs nested in JSX or "
+        "partials, which the site does not deep-link"
+    )
 
     lines.append("")
     lines.append("stripped components (kept their text children)")
@@ -234,6 +244,12 @@ def format_summary(summary: BuildSummary) -> str:
         lines.append("routes normalized through redirect.ts")
         for source, target in summary.redirected_routes:
             lines.append(f"  {source} -> {target}")
+
+    if summary.unreachable_routes:
+        lines.append("")
+        lines.append("source pages excluded because their canonical url is unserved")
+        for source_path, target in summary.unreachable_routes:
+            lines.append(f"  {source_path} -> {target}")
 
     if summary.residue_pages:
         lines.append("")

@@ -122,6 +122,7 @@ class RouteEnumeration:
     routes: list[DocRoute] = field(default_factory=list)
     breadcrumb_mismatches: list[BreadcrumbMismatch] = field(default_factory=list)
     unchecked_breadcrumbs: list[str] = field(default_factory=list)
+    unreachable: list[DocRoute] = field(default_factory=list)
 
 
 def title_case(segment: str) -> str:
@@ -262,10 +263,34 @@ def enumerate_routes(
         )
 
     result.routes.sort(key=lambda route: route.route)
+    _drop_unreachable(result)
     _dedupe_routes(result)
     if expected_breadcrumbs is not None:
         _cross_check_breadcrumbs(result, expected_breadcrumbs)
     return result
+
+
+def _drop_unreachable(result: RouteEnumeration) -> None:
+    """Drop pages whose canonical URL nothing serves.
+
+    A redirect rule can point a legacy path at a URL that no page.mdx produces, which
+    leaves the source file on disk but its content unreachable on the site. Such a
+    page cannot be cited, so it is reported and left out.
+    """
+    direct = {route.route for route in result.routes if route.redirected_from is None}
+    kept: list[DocRoute] = []
+    for route in result.routes:
+        if route.redirected_from is not None and route.route not in direct:
+            result.unreachable.append(route)
+            log.warning(
+                "route redirects to a url no page serves",
+                source=route.redirected_from,
+                target=route.route,
+                path=route.source_path,
+            )
+            continue
+        kept.append(route)
+    result.routes = kept
 
 
 def _dedupe_routes(result: RouteEnumeration) -> None:

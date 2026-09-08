@@ -452,7 +452,7 @@ writeFileSync("output_streamed.opus", audioBytes);
 ]
 ```
 
-## `ref_audio` Guidelines {#ref-audio-guidelines}
+## `ref_audio` Guidelines
 
 When using `ref_audio` for zero-shot cloning:
 

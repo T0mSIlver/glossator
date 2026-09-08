@@ -461,7 +461,7 @@ curl https://api.mistral.ai/v1/ocr \
 
 You can also upload a PDF file in our Cloud and get the OCR results from the uploaded PDF by retrieving a signed url.
 
-### Upload a File {#upload-a-file}
+### Upload a File
 
 First, you will have to upload your PDF file to our cloud, this file will be stored and only accessible via an API key.
 
@@ -552,7 +552,7 @@ curl https://api.mistral.ai/v1/files \
 }
 ```
 
-### Retrieve File {#retrieve-file}
+### Retrieve File
 
 Once the file uploaded, you can retrieve it at any point.
 
@@ -597,7 +597,7 @@ curl -X GET "https://api.mistral.ai/v1/files/$id" \
 }
 ```
 
-### Get Signed Url {#get-signed-url}
+### Get Signed Url
 
 For OCR tasks, you can get a signed url to access the file. An optional `expiry` parameter allow you to automatically expire the signed url after n hours.
 
@@ -631,7 +631,7 @@ curl -X GET "https://api.mistral.ai/v1/files/$id/url?expiry=24" \
 }
 ```
 
-### Get OCR Results {#get-ocr-results}
+### Get OCR Results
 
 You can now query the OCR endpoint with the signed url.
 
@@ -784,7 +784,7 @@ curl https://api.mistral.ai/v1/ocr \
 }
 ```
 
-### Delete File {#delete-file}
+### Delete File
 
 Once all OCR done, you can optionally delete the pdf file from our cloud unless you wish to reuse it later.
 

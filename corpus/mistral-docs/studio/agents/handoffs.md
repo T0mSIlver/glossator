@@ -496,7 +496,7 @@ curl --location "https://api.mistral.ai/v1/conversations" \
   }'
 ```
 
-### Output Events {#output-events}
+### Output Events
 
 Below, you can see the output events of the conversation in order of appearance for the example above.
 
@@ -679,7 +679,7 @@ curl --location "https://api.mistral.ai/v1/conversations" \
   }'
 ```
 
-### Output Events {#output-events}
+### Output Events
 
 Below, you can see the output events of the conversation in order of appearance for the example above.
 

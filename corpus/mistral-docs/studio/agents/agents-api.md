@@ -46,7 +46,7 @@ When creating an Agent, there are multiple parameters and values that need to be
   - `document_library`: Our built-in RAG tool for knowledge grounding and search on custom data.
 - `completion_args` *optional*: Standard chat completion sampler arguments. All chat completion arguments are accepted.
 
-### Creating an Agent {#creating-agent}
+### Creating an Agent
 
 **Python**
 
@@ -239,7 +239,7 @@ You can find more information [here](https://docs.mistral.ai/studio/agents/agent
 After creation, you can update the Agent with new settings if needed. The arguments are the same as those used when creating an Agent.
 The result is a new `version` of the Agent with the new settings, you can this way have the previous and new versions available.
 
-### Create a new Version {#create-new-version}
+### Create a new Version
 
 Create a new `version` of the Agent, will be used by default.
 
@@ -317,7 +317,7 @@ curl --location "https://api.mistral.ai/v1/agents/<agent_id>" \
 }
 ```
 
-### Change version {#change-version}
+### Change version
 
 Change manually the version of the Agent.
 
@@ -652,7 +652,7 @@ curl --location "https://api.mistral.ai/v1/conversations/<conv_id>" \
 
 You can retrieve conversations; both all available already created and the details of each.
 
-### Available conversations {#retrieve-available-conversations}
+### Available conversations
 
 You can retrieve a list of all available conversations by calling the `list` method.
 
@@ -809,7 +809,7 @@ curl --location "https://api.mistral.ai/v1/conversations?page=0&page_size=100" \
 ]
 ```
 
-### Details of a Conversation {#retrieve-details-from-specific-conversation}
+### Details of a Conversation
 
 To retrieve the details of a specific conversation, you can use the `get` method.
 
@@ -852,7 +852,7 @@ curl --location "https://api.mistral.ai/v1/conversations/<conv_id>" \
 }
 ```
 
-### Retrieve entries and History {#retrieve-entries-from-specific-conversation}
+### Retrieve entries and History
 
 To retrieve the entries and history of a specific conversation, you can use the `get_history` method.
 
@@ -932,7 +932,7 @@ curl --location "https://api.mistral.ai/v1/conversations/<conv_id>/history" \
 }
 ```
 
-### Retrieve all messages from a specific conversation {#retrieve-all-messages-from-specific-conversation}
+### Retrieve all messages from a specific conversation
 
 Finally, to retrieve all messages from a specific conversation, you can use the `get_messages` method.
 
@@ -1180,7 +1180,7 @@ When streaming, you will have specific indexes for specific content types during
 - `agent.handoff.done`: The handoff was concluded.
 - `function.call.delta`: Chunk of content, usually tokens corresponding to the function tool call.
 
-### Streaming Output Example {#streaming-output}
+### Streaming Output Example
 
 ```
 event: conversation.response.started

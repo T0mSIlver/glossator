@@ -31,6 +31,22 @@ def slugify(text: str) -> str:
     return out
 
 
+_FAQ_NON_WORD = re.compile(r"[^a-z0-9\s-]")
+
+
+def faq_slugify(text: str) -> str:
+    """Port of the private `slugify` in `src/components/common/faq.tsx`.
+
+    The FAQ accordion ships its own slugify, which differs from the heading one: it
+    drops underscores and does not collapse repeated hyphens, so `service_tier`
+    becomes `servicetier`. Using the wrong one produces anchors that do not exist.
+    """
+    out = text.lower()
+    out = _FAQ_NON_WORD.sub("", out)
+    out = out.strip()
+    return _SPACES.sub("-", out)
+
+
 class AnchorAllocator:
     """Port of `uniqueHeadingId`: `-1`, `-2`, ... suffixes for repeated slugs.
 

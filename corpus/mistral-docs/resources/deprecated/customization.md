@@ -152,7 +152,7 @@ Check out our [fine-tuning doc](https://docs.mistral.ai/resources/deprecated/fin
 
 The video showcases the behavior of Tak. When a user inputs a query, Tak will use the LLM knowledge, a tool to search the web and a tool to fetch the news to generate the most relevant answer to the user query. Its behavior depends on the type of query by the user.
 
-### Description {#phospho-description}
+### Description
 
 [Tak is a B2C internet search app](https://tak.phospho.ai/) powered by Mistral Large and other models with RAG and Function Calling.
 
@@ -160,12 +160,12 @@ In order to provide the most relevant answer to the user query, several function
 
 ![Performance Metrics](https://docs.mistral.ai/img/stories/tak_architecture_diagram.png)
 
-### Company Description {#phospho-company-description}
+### Company Description
 
 At phospho, we developed the Tak chatbot as an experimental playground to test new phospho features and showcase the power of phospho analytics. A great thing is that you can use the data logged to phospho to finetune LLM models.
 We are [phospho](https://phospho.ai/), an open-source text analytics platform for LLM apps. Companies of all sizes use phospho to understand what users do with their LLM app and how well the app performs at the product level.
 
-### Data {#phospho-data}
+### Data
 
 We used a dataset of user queries in Tak and the corresponding GPT-4-turbo function calls, collected and filtered through the phospho platform. We then divided the dataset into a _train_ set (70%), an _evaluation_ set (15%) and a test set (15%).
 
@@ -173,7 +173,7 @@ To determine the optimal training duration, we followed the rule of thumb that e
 
 For the learning rate, we used the suggested learning rate of 6e-5.
 
-### Eval {#phospho-eval}
+### Eval
 
 To evaluate our fine-tuned model, we run inference of the test set of our dataset, then use binary classification metrics (Accuracy, Recall, F1 score). We test whether we were able to align the behavior of Mistral 7b to the classification behavior of OpenAI GPT-4-turbo, while maintaining the expected structured output. Indeed, we removed the function calling.
 
@@ -183,7 +183,7 @@ Fine-tuning made Mistral 7B match the reference model, **increasing the F1 score
 
 As we fine-tuned the model to only answer with `news_related` or `not_news_related`, we do not need to use function calling anymore. This led to a **34% decrease in the number of tokens used** excluding the user query, which further decreases costs.
 
-### Conclusion {#phospho-conclusion}
+### Conclusion
 
 In conclusion, by combining phospho data collection and labeling with Mistral's fine-tuning services, we significantly enhanced our ability to deliver precise and relevant answers to user queries while decreasing cost. We have successfully aligned the behavior of Mistral 7B with GPT-4-turbo. This fine-tuning process not only ensures consistent output formatting but also reduces operational costs by minimizing token usage.
 
@@ -191,11 +191,11 @@ If you also want to improve your RAG agent, we encourage you to try fine tuning 
 
 **RAG for Medical Domain**
 
-### Company Information {#myo-company-information}
+### Company Information
 
 [Myo](https://myo.fit) is building multimodal AI for brain health. Right now, we're exploring the relationship between microRNAs and various neurological conditions, including how these biomarkers can be utilized for early detection and monitoring of these diseases. AmiRA is an internal tool powered by Mistral's commercial and open-source models to help understand the functions of certain miRNA in sample results and their accompanying target genes.
 
-### Description {#myo-description}
+### Description
 
 This project demonstrates the fine tuning of mistral models and their use in a RAG system for:
 
@@ -204,7 +204,7 @@ This project demonstrates the fine tuning of mistral models and their use in a R
 
 This project serves mainly as a proof-of-concept, showing that LLMs and agents can help us explore biomarkers and their relationships to health outcomes with proper engineering.
 
-### Data and Training {#myo-data-training}
+### Data and Training
 
 Titles and abstracts from 9839 PubMed were crawled. Three questions for each paper were then generated using the `mistral-large-latest` function calling API and traditional prompting. An example prompt is below:
 
@@ -267,7 +267,7 @@ This leaves us with ~28000 question/answer pairs to feed into the model for tuni
 }
 ```
 
-### "Rag" Pipeline {#myo-rag-pipeline}
+### "Rag" Pipeline
 
 A simple table lookup (Pandas Dataframe) was used to surface relevant information about each miRNA present in query strings, and whole abstracts were fed into the model. N of results was never more than 12, and the context window limit was never reached.
 
@@ -277,7 +277,7 @@ Embeddings for each paper and title abstract were prepopulated and stored in the
 
 The model also has the option to take the raw query and perform lookups in the dataframe to gather more information or context at it's own discretion.
 
-### Benchmarking and Results {#myo-benchmarking-and-results}
+### Benchmarking and Results
 
 For disease association and prediction, 150 random questions from a miRNA disease association [benchmarking paper published in 2019](https://pubmed.ncbi.nlm.nih.gov/31594544/) were sampled. This dataset was completely separate from any training data used or any PubMed papers crawled to create the training data.
 
@@ -289,7 +289,7 @@ One of the benefits of fine-tuning is that you can achieve better performnance w
 
 ![](https://docs.mistral.ai/img/stories/latency.png)
 
-### Example Responses {#myo-example-responses}
+### Example Responses
 
 The purpose of the finetuning model is not to be a test taker, but to provide better context for RAG systems, so it's natural to want to evaluate the actual outputs of the model in use. Below are two examples of the fine-tuned model's output compared to similar outputs `mistral-large-latest` and `mistral-small-latest`. In situations where the model was forced to "guess" the answer to a question, it gave correct context from it's own knowledge, based off of information it gathered from papers included in its training.
 
@@ -303,15 +303,15 @@ The purpose of the finetuning model is not to be a test taker, but to provide be
 
 **Financial Assistant**
 
-### Company Description {#cleo-company-description}
+### Company Description
 
 Cleo is an AI fintech, building a financial assistant that helps its users navigate the complexity of their financial life.
 
-### Data {#cleo-data}
+### Data
 
 Using an internal dataset consisting of user requests and Cleo responses crafted by Cleo's Content Design team.
 
-### Eval {#cleo-eval}
+### Eval
 
 Human evaluation by the Content Design team.
 
@@ -383,7 +383,7 @@ The video begins by showcasing the integration of the fine-tuned model on [BSARD
 
 The remainder of the video highlights the integration of the fine-tuned template on [Multi EURLEX](https://arxiv.org/pdf/2109.00904) into our legal translation tool, resulting in more precise translations of complex legal terminology, such as "_Gerichtsgesetzbuch_'' for "_Code judiciaire_". This enhancement ensures that our translations **accurately reflect the intended legal meaning, ultimately providing greater value to our clients**.
 
-### Description {#description}
+### Description
 
 As we are building a legal copilot, fine-tuning a model presents several interests for us :
 
@@ -397,11 +397,11 @@ For this first use-case, demonstrated on the [_BSARD_](https://arxiv.org/pdf/210
 
 Our **strong European roots** and commitment to our European clients drive us to excel in French-German legal translation. By harnessing the strong multilingual abilities of `mistral-small` and fine-tuning it further specifically for legal terms on the [Multi EURLEX](https://arxiv.org/pdf/2109.00904) dataset, we significantly improved the translation of legal terminology.
 
-### Company Description {#jimini-company-description}
+### Company Description
 
 At [Jimini AI](https://jimini.ai/), we are dedicated to creating a **cutting-edge legal copilot**, designed to assist legal professionals in automating their most tedious and time-consuming tasks, such as the legal research or the translation of legal documents. Gaining access to [Mistral AI](https://mistral.ai/)'s fine-tuning API presented us with an ideal opportunity to focus on two of our key use-cases.
 
-### BSARD - Data {#bsard-data}
+### BSARD - Data
 
 We used the [Belgian Statutory Article Retrieval Dataset (BSARD)](https://aclanthology.org/2022.acl-long.468/), a comprehensive French dataset for examining legal information retrieval, to fine-tune `mistral-small-latest` and improve the legal accuracy and quality of its answers. It encompasses over 22,600 statutory articles derived from Belgian law along with approximately 1,100 legal inquiries.
 
@@ -421,7 +421,7 @@ In addition to this initial sanity check, we used the very useful integration of
 ![BSARD training curves](https://docs.mistral.ai/img/stories/bsard_curves.png)
 *Figure 2: Perplexity and eval loss during the fine-tuning on BSARD monitored in *Weights & Biases*.*
 
-### BSARD - Eval {#bsard-eval}
+### BSARD - Eval
 
 To evaluate the effectiveness of our fine-tuning process, we employed the _LLM-as-a-Judge_ methodology. Specifically, we drew inspiration from the additive scale approach developed by [Yuan et al](https://arxiv.org/abs/2401.10020). and recently utilized for the [FineWeb-Edu dataset constitution](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1). We then adapted the methodology by transforming it into a preference score system, denoted in the following by `legal_quality` :
 
@@ -463,7 +463,7 @@ These criteria were meticulously established and fine-tuned based on the feedbac
 
 We conducted a rigorous evaluation of several candidate `Judge LLMs`, including `gpt-3.5-turbo`, `mixtral`, and `mistral-large`. The results of our analysis revealed that `mistral-large` demonstrated the highest correlation with the experts' preferences, and was therefore selected as the `Judge LLM`.
 
-### BSARD - Results {#bsard-results}
+### BSARD - Results
 
 ![BSARD evaluation on legal quality](https://docs.mistral.ai/img/stories/legal_quality.png)
 _Figure 3: LLM-as-a-judge evaluation of `mistral-small-latest` and `mistral-small-finetuned` based on the legal quality of their answers._
@@ -503,7 +503,7 @@ If you continue to not pay, this may lead to the termination of the contract or 
 
 The answer from `mistral-small-finetuned` is clear and well-structured, supported by precise legal references, whereas the response from `mistral-small-latest` is not.
 
-### Multi EURLEX - Data {#multi-eurlex-data}
+### Multi EURLEX - Data
 
 To enhance our legal translation tool, we have also fine-tuned `mistral-small-latest` on legal documents. For this purpose, we selected a subset of the [Multi EURLEX](https://arxiv.org/pdf/2109.00904) dataset, which consists of 35,000 European legal documents in French translated into German.
 
@@ -511,13 +511,13 @@ To enhance our legal translation tool, we have also fine-tuned `mistral-small-la
 
 *Figure 4: Perplexity and eval loss during the fine-tuning on Multi EURLEX monitored in *Weights & Biases*.*
 
-### Multi EURLEX - Eval {#multi-eurlex-eval}
+### Multi EURLEX - Eval
 
 In order to evaluate the fine-tuned model on relevant examples for our use cases, we selected 50 texts containing complex legal terms to be translated from French to German (such as _"Clause de non-concurrence"_, which is sometimes translated as _"Nicht-Konkurrenz-Klausel"_ instead of _"Wettbewerbsverbotsklausel"_).
 
 We then submitted the triplets (`example`, `mistral_base_translation`, `mistral_finetuned_translation`) blindly to a bilingual legal expert, who selected the most accurate legal translation for each example.
 
-### Multi EURLEX - Results {#multi-eurlex-results}
+### Multi EURLEX - Results
 
 The legal expert preferred the legal translation of the fine-tuned model in 38 / 50 cases, with 9 cases tied. Thus, the fine-tuned model is **better or at least as good as the base model in 94% of cases**.
 
@@ -527,7 +527,7 @@ The legal expert preferred the legal translation of the fine-tuned model in 38 /
 
 _Table 1: Comparison of `mistral-small-latest` and its fine-tuned counterpart on Multi EURLEX. The fine-tuned model uses "Verfahrensmangel" and "Nichtigkeit des Urteils", which are the precise and correct legal terms._
 
-### Conclusion {#jimini-conclusion}
+### Conclusion
 
 Our initial tests fine-tuning the `mistral-small` model using Mistral AI's endpoint have yielded promising results. **The fine-tuned model excels in generating structured, well-sourced responses and accurately translating complex legal terms**, demonstrating its potential for specialized legal applications.
 
@@ -537,7 +537,7 @@ We will further enhance our results by collaborating closely with our lawyer cus
 
 We extend our thanks to Mistral AI for allowing us to test their fine-tuning API during Public Preview. The Mistral AI fine-tuning endpoint has proven to be an invaluable tool for our legal AI development - these experiments were just the beginning!
 
-### References {#jimini-references}
+### References
 
 - BSARD : [paper](https://arxiv.org/abs/2108.11792)
 - FineWeb-Edu : [blogpost](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1)

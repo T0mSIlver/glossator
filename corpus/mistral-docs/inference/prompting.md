@@ -250,7 +250,7 @@ In the following example, when presented with the customer inquiry, Mistral AI m
 User Inquiry: "I am inquiring about the availability of your cards in the EU, as I am a resident of France and am interested in using your cards."
 Assistant Response: "country_support"
 
-### System Prompt {#classification-prompt}
+### System Prompt
 
 The classification prompt needed to be carefully designed to ensure that the model correctly categorizes the customer inquiry.
 For classification purposes, there are 2 main strategies, you could:

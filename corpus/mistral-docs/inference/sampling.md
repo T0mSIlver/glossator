@@ -24,12 +24,12 @@ Explore each parameter and learn how to adjust LLM outputs effectively.
 >
 > Currently `mistral-large-2512` does not support N completions.
 
-### Key Points {#key-points}
+### Key Points
 
 - **Multiple Responses**: By setting `N` to a value greater than 1, you can get multiple responses for the same input.
 - **Cost Efficiency**: Input tokens are only billed once, regardless of the number of completions requested. This makes it cost-effective to explore different possibilities.
 
-### Example {#n-example}
+### Example
 
 Here's an example of how to use the `N` parameter in the API:
 
@@ -114,7 +114,7 @@ In this example, the model generates 10 responses for the same input prompt. Thi
 >
 > While intuitively, setting `temperature` to 0 should make outputs fully deterministic and consistent (same prompt and settings = same completion output), in reality, even with greedy sampling at `temperature=0`, **slight variances** can sometimes occur due to hardware differences and rounding errors. These variances are more noticeable when output probabilities are very close. This effect becomes especially evident during long completions (input and/or output), where a single differing token can create an entirely new sequence, resulting in significantly different outputs for the same prompt-even with greedy sampling.
 
-### Visualization {#visualization}
+### Visualization
 
 To better understand the underlying principle and impact it has on the probability distribution, here is a visualisation of the Temperature with a simple prompt:
 _"What is the best mythical creature? Answer with a single word."_
@@ -125,7 +125,7 @@ Barplot example comparing the distribution with different `Temperature` values a
 
 **Temperature** significantly affects the probability distribution in LLMs. At a Temperature of 0, the model always outputs the most likely token, e.g., "**Dragon**". Increasing the Temperature to 0.2 introduces variability, allowing for tokens like "**Un**" (as in "**Un**icorn"). Further increases reveal more diverse tokens: the third token might still be "**Drag**" (for "**Drag**on"), but the fourth could start "**Peg**asus", and the fifth, "**Phoenix**". Higher Temperatures make less likely tokens more probable, enhancing the diversity of the model's output.
 
-### API {#api}
+### API
 
 You can set a temperature value easily via our clients, let's experiment with our API.
 
@@ -213,18 +213,18 @@ Unicorn.
 
 The outputs ended much more diverse, the model answering with a different creature more frequently, we have "Dragon", "Unicorn" and "Phoenix".
 
-### The Best Temperature {#best-temperature}
+### The Best Temperature
 
 There's no one-size-fits-all Temperature for all use cases, but some guidelines can help you find the best for your applications.
 
-### Determinism {#determinism}
+### Determinism
 
 - **Requirements**: Tasks needing consistent, accurate responses, such as Mathematics, Classification, Healthcare, or Reasoning.
 - **Temperature**: Use very low values, sometimes not null to add slight uniqueness.
 
 For example, a classification agent should use a Temperature of 0 to always pick the best token. A math chat assistant might use very low Temperature values to avoid repetition while maintaining accuracy.
 
-### Creativity {#creativity}
+### Creativity
 
 - **Requirements**: Tasks needing diverse, unique text, like brainstorming, writing novels, creating slogans, or roleplaying.
 - **Temperature**: Use high values, but avoid excessively high Temperatures to prevent randomness and nonsense outputs.
@@ -235,7 +235,7 @@ Consider the trade-off: higher Temperatures increase creativity but may decrease
 
 **Top P** is a setting that limits the tokens considered by a language model based on a probability threshold. It helps focus on the most likely tokens, improving output quality.
 
-### Visualization {#visualization}
+### Visualization
 
 For these examples, we set the Temperature first, then apply a Top P of 50%. Note that a Temperature of 0 is deterministic, making Top P irrelevant in that case.
 
@@ -267,14 +267,14 @@ We will visualize the token probability distribution across different temperatur
 
 Top P ensures that only high-quality tokens are considered, maintaining output quality by excluding unlikely tokens. It's challenging to balance Temperature and Top P, so it's recommended to fix one and adjust the other. However you should experiment to find the best settings for your use case!
 
-### To Summarize {#to-summarize}
+### To Summarize
 
 1. **Role of Top P**: Top P limits the tokens considered based on a probability threshold, focusing on the most likely tokens to improve output quality.
 2. **Interaction with Temperature**: Top P is applied after Temperature.
 3. **Impact on Outputs**: Top P avoids considering very unlikely tokens, maintaining output quality and coherence.
 4. **Balancing Temperature and Top P**: It's challenging to balance both. Start by fixing one parameter and adjust the other, experiment to find optimal settings.
 
-### Example {#example}
+### Example
 
 Here's an example of how to use the `Top P` parameter with our python client:
 
@@ -334,7 +334,7 @@ for i, choice in enumerate(chat_response.choices):
     print(choice.message.content)
 ```
 
-### Output {#output}
+### Output
 
 ```py
 Unicorn
@@ -349,7 +349,7 @@ Dragon
 Dragon
 ```
 
-### Output Table {#output-table}
+### Output Table
 
 | Temperature 0.1 | Temperature 1 | Temperature 1 & Top P 50% |
 | :-------------: | :-----------: | :-----------------------: |
@@ -370,7 +370,7 @@ In this example, the model generates a response considering only the top tokens 
 
 Presence and frequency penalties are parameters that penalize repetition. They let you control the diversity of generated text.
 
-### Presence Penalty {#presence-penalty}
+### Presence Penalty
 
 **Presence Penalty** determines how much the model penalizes the repetition of words or phrases. It encourages the model to use a wider variety of words and phrases, making the output more diverse and creative.
 
@@ -381,7 +381,7 @@ A higher presence penalty encourages the model to avoid repeating words or phras
 
 The presence penalty specifically is a **one-time adjustment** applied to all tokens that have been used at least once. It reduces the likelihood of repeating any token that has already appeared. This encourages the model to use a diverse range of tokens, promoting creativity and variety in the output.
 
-### Frequency Penalty {#frequency-penalty}
+### Frequency Penalty
 
 **Frequency Penalty** is a parameter that penalizes the repetition of words based on their frequency in the generated text. It helps to promote diversity and reduce repetition in the output.
 
@@ -392,7 +392,7 @@ A higher frequency penalty discourages the model from repeating words that have 
 
 The frequency penalty specifically is a value that increases with the frequency of a token's appearance in the generated text, **an accumulative penalty**, the more the token is sampled the higher the penalty. It reduces the likelihood of repeating any token that has already appeared frequently. This ensures that the generated text is more varied and less repetitive.
 
-### Presence and Frequency Penalties Differences {#differences-between-presence-penalty-and-frequency-penalty}
+### Presence and Frequency Penalties Differences
 
 - **Presence Penalty**: This is a one-off additive contribution that applies to all tokens that have been sampled at least once. It encourages the model to include a diverse range of tokens in the generated text.
 - **Frequency Penalty**: This is a contribution that is proportional to how often a particular token has already been sampled. It discourages the model from repeating the same words or phrases too frequently within the generated text.
@@ -608,7 +608,7 @@ print(chat_response.choices[0].message.content)
 
 > The output is already more diverse than previously, however notice that after the 7th value of the list tokens such as `_"` and single quotation marks start to also be heavily affected, this shows how stronger the impact of frequency penalty is in the long term as an accumulative penalty.
 
-### Side by Side Comparison {#side-by-side-comparison}
+### Side by Side Comparison
 
 A table with the 3 different outputs side by side in a table for comparison:
 

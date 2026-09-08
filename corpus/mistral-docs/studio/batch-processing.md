@@ -56,7 +56,7 @@ A batch file for chat completions, with `v1/chat/completions` as the Endpoint an
 
 As a JSONL file, each line represents a request to the API Endpoint and Model.
 
-### Explanation {#chat-completions-explained}
+### Explanation
 
 The body request will follow the same format as the endpoint you want to run your batching, except the model id that will be provided only during the job creation to start the batch run. Below we provide an example of row with chat completions:
 
@@ -137,7 +137,7 @@ A batch file for structured outputs, with `v1/chat/completions` as the Endpoint 
 
 As a JSONL file, each line represents a request to the API Endpoint and Model.
 
-### Explanation {#structured-outputs-explained}
+### Explanation
 
 The body request will follow the same format as the endpoint you want to run your batching, except the model id that will be provided only during the job creation to start the batch run. Below we provide an example of row with structured outputs:
 
@@ -251,7 +251,7 @@ A batch file for embeddings, with `v1/embeddings` as the Endpoint and `mistral-e
 
 As a JSONL file, each line represents a request to the API Endpoint and Model.
 
-### Explanation {#embeddings-explained}
+### Explanation
 
 The body request will follow the same format as the endpoint you want to run your batching, except the model id that will be provided only during the job creation to start the batch run. Below we provide an example of row with embeddings:
 
@@ -368,7 +368,7 @@ A batch file for OCR, with `v1/ocr` as the Endpoint and `mistral-ocr-latest` as 
 
 As a JSONL file, each line represents a request to the API Endpoint and Model.
 
-### Explanation {#ocr-explained}
+### Explanation
 
 The body request will follow the same format as the endpoint you want to run your batching, except the model id that will be provided only during the job creation to start the batch run. Below we provide an example of row with OCR:
 
@@ -448,7 +448,7 @@ A batch file would look like the following:
 
 As a JSONL file, each line represents a request to the API Endpoint and Model.
 
-### Explanation {#ocr-explained}
+### Explanation
 
 The body request will follow the same format as the endpoint you want to run your batching, except the model id that will be provided only during the job creation to start the batch run. Below we provide an example of row with OCR:
 
@@ -546,7 +546,7 @@ A batch file for transcriptions, with `v1/audio/transcriptions` as the Endpoint 
 
 As a JSONL file, each line represents a request to the API Endpoint and Model.
 
-### Explanation {#chat-completions-explained}
+### Explanation
 
 The body request will follow the same format as the endpoint you want to run your batching, except the model id that will be provided only during the job creation to start the batch run. Below we provide an example of row with transcriptions:
 

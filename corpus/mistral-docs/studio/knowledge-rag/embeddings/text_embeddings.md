@@ -279,7 +279,7 @@ df.head()
 
 ![drawing](https://docs.mistral.ai/img/guides/embeddings1.png)
 
-### t-SNE embeddings visualization {#t-sne-embeddings-visualization}
+### t-SNE embeddings visualization
 
 We mentioned previously that our embeddings have 1024 dimensions, which makes them impossible to visualize directly. Thus, in order to visualize our embeddings, we can use a dimensionality reduction technique such as t-SNE to project our embeddings into a lower-dimensional space that is easier to visualize.
 
@@ -299,7 +299,7 @@ sns.move_legend(ax, 'upper left', bbox_to_anchor=(1, 1))
 
 ![drawing](https://docs.mistral.ai/img/guides/embeddings2.png)
 
-### Comparison with fastText {#comparison-with-fasttext}
+### Comparison with fastText
 
 We can compare it with fastText, a popular open-source embeddings model. However, when examining the t-SNE embeddings plot, we notice that fastText embeddings fail to create clear separations between data points with matching labels.
 
@@ -374,7 +374,7 @@ clf.predict([get_text_embedding([text])])
 'Migraine'
 ```
 
-### Comparison with fastText embeddings {#comparison-with-fastText-embeddings}
+### Comparison with fastText embeddings
 
 Additionally, let's take a look at the performance using fastText embeddings in this classification task. It appears that the classification model achieves better performance with Mistral AI Embeddings model as compared to using fastText embeddings.
 

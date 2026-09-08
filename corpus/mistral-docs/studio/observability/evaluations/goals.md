@@ -140,7 +140,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### What happens if I set both goal and aggregate_goal? {#what-happens-if-i-set-both-goal-and-aggregate_goal}
+### What happens if I set both goal and aggregate_goal? {#what-happens-if-i-set-both-goal-and-aggregategoal}
 
 Both are evaluated independently. `goal` checks each generation's score. `aggregate_goal` checks the aggregated statistic (default: average) across all generations and records. Either can fail independently.
 

@@ -70,7 +70,7 @@ As previously mentionned, you can either:
 
 Here is an example of how to use our BBox Annotation functionalities.
 
-### Define the Data Model {#bbox-define-the-data-model}
+### Define the Data Model
 
 First, define the response formats for `BBox Annotation`, using either Pydantic or Zod schemas for our SDKs, or a JSON schema for a curl API call.
 
@@ -203,7 +203,7 @@ const ImageSchema = z.object({
 }
 ```
 
-### Start Request {#bbox-start-request}
+### Start Request
 
 Next, make a request and ensure the response adheres to the defined structures using `bbox_annotation_format` set to the corresponding schemas:
 
@@ -400,7 +400,7 @@ curl --location 'https://api.mistral.ai/v1/ocr' \
 }
 ```
 
-### BBox Annotation Example Output {#bbox-example-output}
+### BBox Annotation Example Output
 
 The BBox Annotation feature allows to extract data and annotate images that were extracted from the original document, below you have one of the images of a document extracted by our OCR Processor.
 
@@ -428,7 +428,7 @@ And you can annotate the image with the model schema you want, below you have an
 
 Here is an example of how to use our Document Annotation functionalities.
 
-### Define the Data Model {#document-define-the-data-model}
+### Define the Data Model
 
 First, define the response formats for `Document Annotation`, using either Pydantic or Zod schemas for our SDKs, or a JSON schema for a curl API call.
 
@@ -561,7 +561,7 @@ const DocumentSchema = z.object({
 }
 ```
 
-### Annotation Prompt (Optional) {#document-annotation-prompt}
+### Annotation Prompt (Optional)
 
 After defining your annotation schema, you may need to provide more context and instructions around the annotation and document at stake. We allow the passing of a `document_annotation_prompt` that will be used as a high level system prompt for the annotation step, providing further context and instructions on how the annotation should be done. An example of prompt would be:
 
@@ -598,7 +598,7 @@ Be precise and include only exact matches.
 
 In production, you may want to provide context about the use case and refine instructions further if the output doesn’t match expectations exactly.
 
-### Start Request {#document-start-request}
+### Start Request
 
 Next, make a request and ensure the response adheres to the defined structures using `document_annotation_format` set to the corresponding schemas:
 
@@ -794,7 +794,7 @@ curl --location 'https://api.mistral.ai/v1/ocr' \
 }
 ```
 
-### Document Annotation Example Output {#document-example-output}
+### Document Annotation Example Output
 
 The Document Annotation feature allows to extract data and annotate documents, below you have an example of the annotation output:
 
@@ -828,7 +828,7 @@ The Document Annotation feature allows to extract data and annotate documents, b
 
 Below you can find an example of how to use the `bbox_annotation_format` and `document_annotation_format` together to extract information from a document.
 
-### Define the Data Model {#bbox-document-define-the-data-model}
+### Define the Data Model
 
 First, define the response formats for `BBox Annotation`, using either Pydantic or Zod schemas for our SDKs, or a JSON schema for a curl API call.
 
@@ -1049,7 +1049,7 @@ const DocumentSchema = z.object({
 }
 ```
 
-### Document Annotation Prompt (Optional) {#bbox-document-annotation-prompt}
+### Document Annotation Prompt (Optional)
 
 After defining your document annotation schema, you may need to provide more context and instructions around the annotation and document at stake. We allow the passing of a `document_annotation_prompt` that will be used as a high level system prompt for the annotation step, providing further context and instructions on how the annotation should be done. An example of prompt would be:
 
@@ -1086,7 +1086,7 @@ Be precise and include only exact matches.
 
 In production, you may want to provide context about the use case and refine instructions further if the output doesn’t match expectations exactly.
 
-### Start Request {#bbox-document-start-request}
+### Start Request
 
 Next, make a request and ensure the response adheres to the defined structures using `bbox_annotation_format` and `document_annotation_format` set to the corresponding schemas:
 
@@ -1226,7 +1226,7 @@ curl --location 'https://api.mistral.ai/v1/ocr' \
 }'
 ```
 
-### BBox and Document Annotation Example Output {#bbox-document-example-output}
+### BBox and Document Annotation Example Output
 
 The BBox and Document Annotation features allows to extract data and annotate images that were extracted from the original document and the full document, below you have one of the images of a document extracted by our OCR Processor.
 

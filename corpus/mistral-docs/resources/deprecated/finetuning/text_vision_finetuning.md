@@ -322,7 +322,7 @@ To create your custom model, you need to create a fine-tuning job. You can fully
 
 A fine-tuning job corresponds to a single training run. You can create a fine-tuning job with the following parameters:
 
-### Create a fine-tuning job {#create-fine-tuning-job}
+### Create a fine-tuning job
 
 - model: the specific model you would like to fine-tune. The choices are:
   - Text Only:
@@ -409,7 +409,7 @@ curl https://api.mistral.ai/v1/fine_tuning/jobs \
 }'
 ```
 
-### Job Status {#job-status}
+### Job Status
 
 After creating a fine-tuning job, you can check the job status using:
 
@@ -432,7 +432,7 @@ curl https://api.mistral.ai/v1/fine_tuning/jobs/<jobid> \
 --header "Authorization: Bearer $MISTRAL_API_KEY"
 ```
 
-### Start a fine-tuning job {#start-fine-tuning-job}
+### Start a fine-tuning job
 
 Initially, the job status will be `"QUEUED"`.
 After a brief period, the status will update to `"VALIDATED"`.
@@ -464,7 +464,7 @@ curl -X POST https://api.mistral.ai/v1/fine_tuning/jobs/<jobid>/start \
 
 You can also list jobs, retrieve a job, or cancel a job.
 
-### List jobs {#list-jobs}
+### List jobs
 
 You can filter and view a list of jobs using various parameters such as `page`, `page_size`, `model`, `created_after`, `created_by_me`, `status`, `wandb_project`, `wandb_name`, and `suffix`. Check out our [API specs](https://docs.mistral.ai/api/#tag/fine-tuning) for details.
 
@@ -487,7 +487,7 @@ curl https://api.mistral.ai/v1/fine_tuning/jobs \
 --header "Authorization: Bearer $MISTRAL_API_KEY"
 ```
 
-### Retrieve a job {#retrieve-job}
+### Retrieve a job
 
 You can retrieve a job and information by its ID.
 
@@ -510,7 +510,7 @@ curl https://api.mistral.ai/v1/fine_tuning/jobs/<jobid> \
 --header "Authorization: Bearer $MISTRAL_API_KEY"
 ```
 
-### Cancel a job {#cancel-job}
+### Cancel a job
 
 You can also cancel a job by its ID if needed.
 
@@ -602,7 +602,7 @@ curl --location --request DELETE 'https://api.mistral.ai/v1/models/ft:classifier
      --header "Authorization: Bearer $MISTRAL_API_KEY"
 ```
 
-## FAQ {#faq}
+## FAQ
 
 ### How to validate data format? {#how-to-validate-data-format}
 

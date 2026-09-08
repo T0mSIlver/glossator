@@ -1491,7 +1491,7 @@ This week, I traveled to Chicago to deliver my final farewell address to the nat
 
 English
 
-### Transcription with Timestamps {#transcription-with-timestamps}
+### Transcription with Timestamps
 
 You can request timestamps for the transcription by passing the `timestamp_granularities` parameter, currently supporting `segment` and `word`.
 It will return the start and end time of each segment in the audio file.
@@ -1874,7 +1874,7 @@ curl --location 'https://api.mistral.ai/v1/audio/transcriptions' \
 }
 ```
 
-### Context biasing {#context-biasing}
+### Context biasing
 
 Provide up to 100 words or phrases to guide the model toward correct spellings of names, technical terms, or domain-specific vocabulary. Particularly useful for proper nouns or industry terminology that standard models often miss. Context biasing is optimized for English; support for other languages is experimental.
 
