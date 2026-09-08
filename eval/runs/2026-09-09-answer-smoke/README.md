@@ -19,10 +19,10 @@ these numbers are used to compare strategies**: an 8B model follows the grounded
 noticeably less well than Medium 3.5 will, so the verification rates below are a floor,
 not an estimate.
 
-Re-run:
+Re-run (Mistral Medium 3.5 is the default; `--out` keeps this directory intact):
 
 ```bash
-uv run python .agent-runs/smoke.py            # Mistral Medium 3.5, the default
+uv run python eval/runs/2026-09-09-answer-smoke/replay.py --out eval/runs/<new-run>
 ```
 
 ## Configuration
