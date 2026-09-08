@@ -1,0 +1,10 @@
+{
+  "dataset": "eval/dev.jsonl",
+  "kind": "translate",
+  "model": "glm-5.3",
+  "n": 36,
+  "prompt_version": "translate-v1",
+  "provider": "zai",
+  "seed": 0,
+  "target_language": "fr"
+}

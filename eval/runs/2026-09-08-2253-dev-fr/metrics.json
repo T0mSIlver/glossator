@@ -1,0 +1,48 @@
+{
+  "cached_calls": 36,
+  "call_ms_total": 0.0,
+  "calls": 36,
+  "calls_by_kind": {
+    "translate": 36
+  },
+  "candidates": 36,
+  "candidates_by_type": {
+    "row": 36
+  },
+  "dataset": "eval/dev-fr.jsonl",
+  "dropped": 0,
+  "dropped_by_reason": {},
+  "error": null,
+  "estimated_usd": 0.0,
+  "failed_calls": 0,
+  "finish_reasons": {
+    "stop": 36
+  },
+  "kept": 36,
+  "kept_by_type": {
+    "row": 36
+  },
+  "model": "glm-5.3",
+  "requested": 36,
+  "requested_by_type": {},
+  "shortfall": 0,
+  "shortfall_by_type": {},
+  "status": "complete",
+  "uncached_usage": {
+    "completion_tokens": 0,
+    "prompt_tokens": 0,
+    "reasoning_tokens": 0
+  },
+  "usage": {
+    "completion_tokens": 4051,
+    "prompt_tokens": 10394,
+    "reasoning_tokens": 0
+  },
+  "usage_by_kind": {
+    "translate": {
+      "completion_tokens": 4051,
+      "prompt_tokens": 10394,
+      "reasoning_tokens": 0
+    }
+  }
+}
