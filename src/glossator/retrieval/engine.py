@@ -157,13 +157,44 @@ class SearchEngine:
         query: str,
         exclude_ids: set[str] | None = None,
         top_k: int | None = None,
+        kinds: frozenset[str] | None = None,
+        locales: frozenset[str] | None = None,
     ) -> list[Hit]:
-        """Hits for a query. ``top_k`` overrides the configured depth for one call."""
-        results = await self.retriever.retrieve(
+        """Hits for a query. ``top_k`` overrides the configured depth for one call.
+
+        ``kinds`` and ``locales`` are per-request metadata filters; they normally
+        live in :class:`RetrievalConfig`, but a serving surface lets a caller
+        set them on one call, so a filtered call builds a transient retriever
+        around a validated copy of the config rather than reconfiguring the
+        engine for everyone else.
+        """
+        retriever = self.retriever
+        if kinds or locales:
+            config = RetrievalConfig(
+                variant=self.config.variant,
+                top_k=top_k or self.config.top_k,
+                ranking_weights=dict(self.config.ranking_weights),
+                kinds=frozenset(kinds or ()),
+                locales=frozenset(locales or ()),
+            )
+            retriever = DocsRetriever(self.index, self.embedder, config)
+        results = await retriever.retrieve(
             query, top_k=top_k or self.config.top_k, exclude_ids=exclude_ids
         )
         logger.info("Search", variant=self.config.variant, query=query, hits=len(results))
         return _hits(results, self.navigation_index, self.context)
+
+    async def document_count(self) -> int:
+        """Documents in this engine's schema, for health and ops surfaces."""
+        response = await self.index._client.query(  # noqa: SLF001 - no public count API
+            {
+                # Vespa rejects a bare `select ... limit 0`; a true filter keeps
+                # this a pure coverage query that returns no hits.
+                "yql": f"select * from {self.config.index_variant.schema_name} where true limit 0",
+                "timeout": "3s",
+            }
+        )
+        return int(response.json.get("root", {}).get("coverage", {}).get("documents", 0))
 
     def navigation_at(
         self, source_id: str, start_offset: int = 0, end_offset: int = 0

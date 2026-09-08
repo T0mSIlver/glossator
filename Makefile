@@ -1,4 +1,4 @@
-.PHONY: installdeps install-workflows ingest search ask mcp test start-examples execute-ingestion
+.PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
 .PHONY: corpus-refresh corpus-check dev-set eval-report
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
@@ -69,6 +69,13 @@ ask:
 ## Usage: make mcp [host=0.0.0.0] [port=8000]
 mcp:
 	uv run python -m entrypoints.mcp_server --http --host $(MCP_HOST) --port $(MCP_PORT)
+
+## Start the HTTP API (uvicorn)
+## Usage: make api [host=0.0.0.0] [port=8080]
+API_HOST := $(or $(host),127.0.0.1)
+API_PORT := $(or $(API_PORT),8080)
+api:
+	uv run uvicorn entrypoints.api:app --host $(API_HOST) --port $(API_PORT)
 
 ## Round-trip a document through the configured backend (skips unless it is set up)
 test:
