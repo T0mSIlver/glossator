@@ -155,9 +155,9 @@ def _tables(order: Sequence[str], configs: Mapping[str, Any], *, types: Sequence
 def _operations(order: Sequence[str], configs: Mapping[str, Any]) -> str:
     lines = [
         "## Latency, cost and failures\n",
-        "| configuration | median ms | p90 ms | rerank calls applied | rerank fallbacks | "
-        "rerank USD | errors |",
-        "|---|---|---|---|---|---|---|",
+        "| configuration | median ms | p90 ms | rerank calls | applied | fell back | "
+        "budget skipped | rerank USD | errors |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for name in order:
         row = configs[name]
@@ -165,8 +165,10 @@ def _operations(order: Sequence[str], configs: Mapping[str, Any]) -> str:
         p90 = row.get("p90_latency_ms")
         lines.append(
             f"| `{name}` | {'--' if median is None else f'{median:.0f}'} | "
-            f"{'--' if p90 is None else f'{p90:.0f}'} | {row['rerank_applied']} | "
-            f"{row['rerank_fallbacks']} | {row['rerank_cost_usd']:.5f} | {row['errors']} |"
+            f"{'--' if p90 is None else f'{p90:.0f}'} | "
+            f"{row.get('rerank_billed_calls', row['rerank_applied'])} | "
+            f"{row['rerank_applied']} | {row['rerank_fallbacks']} | "
+            f"{row.get('rerank_skipped', 0)} | {row['rerank_cost_usd']:.5f} | {row['errors']} |"
         )
     lines.append("")
     lines.append(
@@ -226,7 +228,9 @@ def _conclusion(metrics: Mapping[str, Any], configs: Mapping[str, Any]) -> str:
             continue
         winner = best["configuration"]
         sentence = (
-            f"At the {matching} level, `{winner}` leads on recall@5 with {best['recall@5']:.3f}"
+            f"At the {matching} level, over the "
+            f"{_plural(best.get('questions', 0), 'question')} that matching can score, "
+            f"`{winner}` leads on recall@5 with {best['recall@5']:.3f}"
         )
         runner_up = best["runner_up"]
         if runner_up:
@@ -239,23 +243,34 @@ def _conclusion(metrics: Mapping[str, Any], configs: Mapping[str, Any]) -> str:
                 "alphabetical tie-break and not a difference the dataset can see"
             )
         parts.append(sentence + ".")
-    calls = metrics["rerank_calls"]
+    # Three counts, kept apart: what was billed, what was applied, and what never
+    # left the process because the budget was gone. Dividing the cost by anything
+    # but the billed calls overstates the price of a call.
+    billed = metrics.get("rerank_billed_calls", metrics["rerank_calls"])
+    applied = metrics["rerank_calls"]
     fallbacks = metrics.get("rerank_fallbacks", 0)
-    if calls:
+    skipped = metrics.get("rerank_skipped", 0)
+    if billed:
         sentence = (
-            f"The reranker's ranking was applied {calls} times for "
+            f"The reranker made {_plural(billed, 'call')} for "
             f"${metrics['rerank_cost_usd']:.4f}, about "
-            f"${metrics['rerank_cost_usd'] / calls:.6f} a call"
+            f"${metrics['rerank_cost_usd'] / billed:.6f} a call, and its ranking was "
+            f"applied {applied} of those times"
         )
         if fallbacks:
             sentence += (
-                f"; {_plural(fallbacks, 'further call')} returned a ranking the reordering "
-                "could not use and fell back to retrieval order, which the per-question "
-                "records name"
+                f"; the other {fallbacks} returned a ranking the reordering could not use "
+                "and fell back to retrieval order, which the per-question records name"
             )
         parts.append(sentence + ".")
     else:
-        parts.append("No reranker call was applied in this run.")
+        parts.append("No reranker call was made in this run.")
+    if skipped:
+        parts.append(
+            f"{_plural(skipped, 'question')} of a reranked configuration ran without the "
+            "reranker because the call budget was already spent, so those rows are the "
+            "retrieval order and not a judgement about it."
+        )
     parts.append(
         "This feeds D-012a: the shipped ranking weights are a starting point and the "
         "winning row above is what replaces them, and D-015: whether one listwise call "

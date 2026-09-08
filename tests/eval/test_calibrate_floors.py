@@ -15,6 +15,7 @@ from glossator.eval.calibrate_floors import (
     QuerySimilarities,
     propose,
     recompute,
+    render_readme,
     summarize,
     write_report,
 )
@@ -65,6 +66,32 @@ def test_overlapping_populations_propose_nothing_and_say_why() -> None:
     assert "similarity_floor" not in proposal
 
 
+def test_an_unanswerable_question_never_lowers_the_floor() -> None:
+    """It is in the corpus's vocabulary and has no answer in it, so a floor fitted
+    to accept it would accept everything."""
+    rows = [*SEPARATED, row("unanswerable", 0.61)]
+    proposal = propose(rows)
+    assert proposal["corridor"] is True
+    assert proposal["worst_real_best_hit"] == 0.8
+    assert proposal["similarity_floor"] == 0.735
+
+
+def test_the_unanswerable_questions_are_measured_against_the_proposed_floor() -> None:
+    rows = [*SEPARATED, row("unanswerable", 0.90), row("unanswerable", 0.61)]
+    metrics = summarize(rows, _config())
+    against = metrics["unanswerable_against_the_floor"]
+    assert against == {"questions": 2, "clearing_the_floor": 1, "floor": 0.735}
+    assert metrics["distributions"]["unanswerable"]["queries"] == 2
+    readme = render_readme(_config(), metrics)
+    assert "1 of 2 unanswerable questions still clear the proposed floor of 0.735" in readme
+
+
+def test_nothing_is_measured_against_a_floor_that_was_not_proposed() -> None:
+    metrics = summarize([*OVERLAPPING, row("unanswerable", 0.61)], _config())
+    assert metrics["unanswerable_against_the_floor"]["clearing_the_floor"] is None
+    assert "nothing to measure them against" in render_readme(_config(), metrics)
+
+
 def test_a_population_with_no_similarity_at_all_proposes_nothing() -> None:
     assert propose([r for r in SEPARATED if r.population == "real"])["corridor"] is False
     assert propose([])["corridor"] is False
@@ -95,7 +122,7 @@ def test_the_footing_gate_is_counted_per_population() -> None:
         row("real", 0.80, lexical_footing=True),
     ]
     metrics = summarize(rows, _config())
-    assert metrics["no_lexical_footing"] == {"real": 0, "junk": 1}
+    assert metrics["no_lexical_footing"] == {"real": 0, "junk": 1, "unanswerable": 0}
 
 
 def test_the_readme_prints_the_proposal_and_regenerates_from_the_rows(tmp_path: Path) -> None:

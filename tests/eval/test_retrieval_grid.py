@@ -21,7 +21,7 @@ from glossator.eval.retrieval_grid import (
     recompute,
     select,
 )
-from glossator.eval.retrieval_report import write_report
+from glossator.eval.retrieval_report import render_readme, write_report
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.engine import Hit, SearchTrace
 from glossator.retrieval.reranker import RerankTrace
@@ -263,6 +263,33 @@ def test_the_reranker_stops_at_its_call_budget(tmp_path: Path) -> None:
     ]
     assert [row["reranked"] for row in rows] == [True, True, False]
     assert "budget" in rows[-1]["rerank_error"]
+
+
+def test_a_call_the_budget_stopped_is_not_counted_as_a_fallback(tmp_path: Path) -> None:
+    """A row past the budget sent nothing, so it neither cost anything nor
+    returned a ranking that could not be used."""
+    metrics = run_grid(tmp_path)
+    assert metrics["rerank_billed_calls"] == 2
+    assert metrics["rerank_fallbacks"] == 0
+    assert metrics["rerank_skipped"] == 1
+    reranked = metrics["configurations"]["sec1024-shipped+rerank"]
+    assert reranked["rerank_billed_calls"] == 2
+    assert reranked["rerank_fallbacks"] == 0
+    assert reranked["rerank_skipped"] == 1
+
+    readme = render_readme(json.loads((tmp_path / "run" / "config.json").read_text()), metrics)
+    assert "The reranker made 2 calls" in readme
+    assert "1 question of a reranked configuration ran without the reranker" in readme
+    assert "fell back to retrieval order" not in readme
+
+
+def test_the_winner_is_ranked_over_the_questions_its_matching_can_score(tmp_path: Path) -> None:
+    """The section level scores fewer questions than the page level, so a single
+    dataset-wide count under both would overstate one of them."""
+    metrics = run_grid(tmp_path, limit=12)
+    assert metrics["best"]["page"]["questions"] == metrics["page_scoreable"] == 11
+    assert metrics["best"]["section"]["questions"] == metrics["section_scoreable"] == 9
+    assert metrics["best"]["ranked_on"] == "recall@5 over the questions each matching can score"
 
 
 def test_a_question_that_fails_is_recorded_rather_than_aborting_the_run(tmp_path: Path) -> None:

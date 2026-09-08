@@ -221,9 +221,14 @@ class GridRecord(BaseModel):
     lexical_footing: bool | None = None
     considered: int = 0
     kept: int = 0
+    rerank_attempted: bool = False
+    """Whether a rerank call was actually made and paid for. A row of a reranked
+    configuration has ``rerank`` set and this false when the call budget was
+    already spent, and those rows are not fallbacks: nothing was sent."""
+
     reranked: bool = False
-    """Whether the model's ranking was actually applied. A row can have
-    ``rerank`` set and this false: the call failed, or the budget was spent."""
+    """Whether the model's ranking was applied. Attempted and not reranked is a
+    fallback -- the call happened and its answer could not be used."""
 
     rerank_error: str | None = None
     rerank_cost_usd: float = 0.0
@@ -335,7 +340,7 @@ class GridRun:
 
         if use_rerank:
             self.rerank_calls += 1
-        return _fill(base, hits, trace)
+        return _fill(base, hits, trace, attempted=use_rerank)
 
     async def _embedding(
         self, entry: GridEntry, question: EvalQuestion, engine: Any
@@ -482,9 +487,19 @@ async def summarize(
         "section_scoreable": len(scoreable(questions, Matching.SECTION)),
         "page_scoreable": len(scoreable(questions, Matching.PAGE)),
         "unanswerable": unanswerable,
+        # Three different numbers, and conflating them makes a report lie: calls
+        # that were made and paid for, the subset whose ranking was applied, and
+        # the rows of a reranked configuration that never sent anything because
+        # the budget was gone.
+        "rerank_billed_calls": sum(1 for record in records if record.rerank_attempted),
         "rerank_calls": sum(1 for record in records if record.reranked),
         "rerank_fallbacks": sum(
-            1 for record in records if record.rerank and not record.reranked and not record.error
+            1 for record in records if record.rerank_attempted and not record.reranked
+        ),
+        "rerank_skipped": sum(
+            1
+            for record in records
+            if record.rerank and not record.rerank_attempted and not record.error
         ),
         "rerank_cost_usd": round(sum(record.rerank_cost_usd for record in records), 6),
         "errors": [
@@ -496,7 +511,7 @@ async def summarize(
             for record in records
             if record.error
         ],
-        "best": _best(per_config, config),
+        "best": _best(per_config),
     }
 
 
@@ -527,8 +542,14 @@ def _operational(records: Sequence[GridRecord]) -> dict[str, Any]:
         "median_latency_ms": round(_median(latencies), 1) if latencies else None,
         "p90_latency_ms": round(_percentile(latencies, 0.9), 1) if latencies else None,
         "rerank_applied": reranked,
+        "rerank_billed_calls": sum(1 for record in records if record.rerank_attempted),
         "rerank_fallbacks": sum(
-            1 for record in records if record.rerank and not record.reranked and not record.error
+            1 for record in records if record.rerank_attempted and not record.reranked
+        ),
+        "rerank_skipped": sum(
+            1
+            for record in records
+            if record.rerank and not record.rerank_attempted and not record.error
         ),
         "rerank_cost_usd": round(sum(record.rerank_cost_usd for record in records), 6),
         "rerank_usage": usage.model_dump(mode="json"),
@@ -564,40 +585,47 @@ def _unanswerable(
     }
 
 
-def _best(per_config: Mapping[str, Any], config: Mapping[str, Any]) -> dict[str, Any]:
+def _best(per_config: Mapping[str, Any]) -> dict[str, Any]:
     """The winning configuration per matching, and by how much.
 
-    Ranked on recall@5 over the common question set: recall@1 is the noisiest
-    column on a dataset this size, and recall@10 is close to saturated once the
-    right page is anywhere in the results.
+    Ranked on recall@5 over the questions that matching could score: recall@1 is
+    the noisiest column on a dataset this size, and recall@10 is close to saturated
+    once the right page is anywhere in the results. Each matching carries its own
+    question count, because the section level scores fewer questions than the page
+    level and a report that printed the dataset's size here would overstate both.
     """
     winners: dict[str, Any] = {}
     for matching in Matching:
-        scored = [
-            (name, row["metrics"][str(matching)]["common"].get("overall", {}).get("recall@5"))
+        overall = [
+            (name, row["metrics"][str(matching)]["common"].get("overall") or {})
             for name, row in per_config.items()
         ]
         ranked = sorted(
-            ((name, value) for name, value in scored if value is not None),
+            ((name, row["recall@5"]) for name, row in overall if row.get("recall@5") is not None),
             key=lambda item: (-item[1], item[0]),
         )
         if not ranked:
             continue
+        counted = {row.get("questions", 0) for _name, row in overall if row}
         winners[str(matching)] = {
             "configuration": ranked[0][0],
             "recall@5": ranked[0][1],
+            "questions": max(counted) if counted else 0,
             "runner_up": ranked[1][0] if len(ranked) > 1 else None,
             "margin": round(ranked[0][1] - ranked[1][1], 4) if len(ranked) > 1 else None,
             "ranking": [{"configuration": name, "recall@5": value} for name, value in ranked],
         }
-    winners["ranked_on"] = f"recall@5 over the {config.get('questions', 0)} questions"
+    winners["ranked_on"] = "recall@5 over the questions each matching can score"
     return winners
 
 
-def _fill(record: GridRecord, hits: Sequence[Hit], trace: SearchTrace) -> GridRecord:
+def _fill(
+    record: GridRecord, hits: Sequence[Hit], trace: SearchTrace, *, attempted: bool
+) -> GridRecord:
     rerank = trace.rerank
     return record.model_copy(
         update={
+            "rerank_attempted": attempted,
             "hits": [
                 HitRecord(
                     rank=rank,

@@ -3,6 +3,7 @@
     "page": {
       "configuration": "page128-lexical-heavy",
       "margin": 0.0,
+      "questions": 11,
       "ranking": [
         {
           "configuration": "page128-lexical-heavy",
@@ -17,6 +18,10 @@
           "recall@5": 1.0
         },
         {
+          "configuration": "sec1024-shipped+rerank",
+          "recall@5": 1.0
+        },
+        {
           "configuration": "sec1024-vector-heavy+rerank",
           "recall@5": 1.0
         },
@@ -26,10 +31,6 @@
         },
         {
           "configuration": "page128-vector-heavy",
-          "recall@5": 0.9091
-        },
-        {
-          "configuration": "sec1024-shipped+rerank",
           "recall@5": 0.9091
         },
         {
@@ -60,10 +61,11 @@
       "recall@5": 1.0,
       "runner_up": "page128-shipped"
     },
-    "ranked_on": "recall@5 over the 12 questions",
+    "ranked_on": "recall@5 over the questions each matching can score",
     "section": {
       "configuration": "sec1024-heading-path-off",
       "margin": 0.0,
+      "questions": 9,
       "ranking": [
         {
           "configuration": "sec1024-heading-path-off",
@@ -162,7 +164,7 @@
         "variant": "page128"
       },
       "errors": 0,
-      "median_latency_ms": 7.6,
+      "median_latency_ms": 7.9,
       "metrics": {
         "page": {
           "all": {
@@ -341,12 +343,14 @@
       },
       "name": "page128-lexical-heavy",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 8.7,
+      "p90_latency_ms": 8.4,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -371,7 +375,7 @@
         "variant": "page128"
       },
       "errors": 0,
-      "median_latency_ms": 8.5,
+      "median_latency_ms": 8.0,
       "metrics": {
         "page": {
           "all": {
@@ -554,8 +558,10 @@
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -762,12 +768,14 @@
       },
       "name": "page128-vector-heavy",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 9.8,
+      "p90_latency_ms": 8.9,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -795,7 +803,7 @@
         "variant": "sec1024"
       },
       "errors": 0,
-      "median_latency_ms": 9.2,
+      "median_latency_ms": 8.0,
       "metrics": {
         "page": {
           "all": {
@@ -974,12 +982,14 @@
       },
       "name": "sec1024-heading-path-off",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 9.7,
+      "p90_latency_ms": 9.3,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -1189,12 +1199,14 @@
       },
       "name": "sec1024-lexical-heavy",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 8.9,
+      "p90_latency_ms": 9.0,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -1398,12 +1410,14 @@
       },
       "name": "sec1024-shipped",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 10.2,
+      "p90_latency_ms": 9.8,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -1428,7 +1442,7 @@
         "variant": "sec1024"
       },
       "errors": 0,
-      "median_latency_ms": 5397.0,
+      "median_latency_ms": 3899.4,
       "metrics": {
         "page": {
           "all": {
@@ -1442,13 +1456,13 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.5714,
-              "ndcg@10": 0.6667,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
-              "recall@3": 0.5,
-              "recall@5": 0.5
+              "recall@3": 1.0,
+              "recall@5": 1.0
             },
             "cross_page": {
               "mrr": 1.0,
@@ -1460,13 +1474,13 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8009,
-              "ndcg@10": 0.8412,
+              "mrr": 0.8788,
+              "ndcg@10": 0.9018,
               "questions": 11,
-              "recall@1": 0.6818,
+              "recall@1": 0.7727,
               "recall@10": 1.0,
-              "recall@3": 0.9091,
-              "recall@5": 0.9091
+              "recall@3": 1.0,
+              "recall@5": 1.0
             },
             "single_page": {
               "mrr": 0.8667,
@@ -1489,13 +1503,13 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.5714,
-              "ndcg@10": 0.6667,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
-              "recall@3": 0.5,
-              "recall@5": 0.5
+              "recall@3": 1.0,
+              "recall@5": 1.0
             },
             "cross_page": {
               "mrr": 1.0,
@@ -1507,13 +1521,13 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8009,
-              "ndcg@10": 0.8412,
+              "mrr": 0.8788,
+              "ndcg@10": 0.9018,
               "questions": 11,
-              "recall@1": 0.6818,
+              "recall@1": 0.7727,
               "recall@10": 1.0,
-              "recall@3": 0.9091,
-              "recall@5": 0.9091
+              "recall@3": 1.0,
+              "recall@5": 1.0
             },
             "single_page": {
               "mrr": 0.8667,
@@ -1607,14 +1621,16 @@
       },
       "name": "sec1024-shipped+rerank",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 6529.9,
+      "p90_latency_ms": 4375.9,
       "questions_run": 12,
       "rerank": true,
-      "rerank_applied": 11,
-      "rerank_cost_usd": 0.008838,
-      "rerank_fallbacks": 1,
+      "rerank_applied": 12,
+      "rerank_billed_calls": 12,
+      "rerank_cost_usd": 0.008848,
+      "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
-        "completion_tokens": 4920,
+        "completion_tokens": 4988,
         "prompt_tokens": 54001
       },
       "variant": "sec1024",
@@ -1640,15 +1656,15 @@
         "variant": "sec1024"
       },
       "errors": 0,
-      "median_latency_ms": 8.4,
+      "median_latency_ms": 8.3,
       "metrics": {
         "page": {
           "all": {
             "api_reference": {
-              "mrr": 0.75,
-              "ndcg@10": 0.8155,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1672,10 +1688,10 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.7424,
-              "ndcg@10": 0.7762,
+              "mrr": 0.7879,
+              "ndcg@10": 0.8097,
               "questions": 11,
-              "recall@1": 0.5909,
+              "recall@1": 0.6818,
               "recall@10": 0.9091,
               "recall@3": 0.8182,
               "recall@5": 0.8182
@@ -1692,10 +1708,10 @@
           },
           "common": {
             "api_reference": {
-              "mrr": 0.75,
-              "ndcg@10": 0.8155,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1719,10 +1735,10 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.7424,
-              "ndcg@10": 0.7762,
+              "mrr": 0.7879,
+              "ndcg@10": 0.8097,
               "questions": 11,
-              "recall@1": 0.5909,
+              "recall@1": 0.6818,
               "recall@10": 0.9091,
               "recall@3": 0.8182,
               "recall@5": 0.8182
@@ -1741,10 +1757,10 @@
         "section": {
           "all": {
             "api_reference": {
-              "mrr": 0.75,
-              "ndcg@10": 0.8155,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1759,10 +1775,10 @@
               "recall@5": 0.5
             },
             "overall": {
-              "mrr": 0.5556,
-              "ndcg@10": 0.5847,
+              "mrr": 0.6111,
+              "ndcg@10": 0.6257,
               "questions": 9,
-              "recall@1": 0.4444,
+              "recall@1": 0.5556,
               "recall@10": 0.6667,
               "recall@3": 0.6667,
               "recall@5": 0.6667
@@ -1779,10 +1795,10 @@
           },
           "common": {
             "api_reference": {
-              "mrr": 0.75,
-              "ndcg@10": 0.8155,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1797,10 +1813,10 @@
               "recall@5": 0.5
             },
             "overall": {
-              "mrr": 0.5556,
-              "ndcg@10": 0.5847,
+              "mrr": 0.6111,
+              "ndcg@10": 0.6257,
               "questions": 9,
-              "recall@1": 0.4444,
+              "recall@1": 0.5556,
               "recall@10": 0.6667,
               "recall@3": 0.6667,
               "recall@5": 0.6667
@@ -1819,12 +1835,14 @@
       },
       "name": "sec1024-vector-heavy",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 9.9,
+      "p90_latency_ms": 9.0,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -1852,15 +1870,15 @@
         "variant": "sec1024"
       },
       "errors": 0,
-      "median_latency_ms": 5182.3,
+      "median_latency_ms": 5746.9,
       "metrics": {
         "page": {
           "all": {
             "api_reference": {
-              "mrr": 0.6667,
-              "ndcg@10": 0.75,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1876,7 +1894,7 @@
             },
             "cross_page": {
               "mrr": 1.0,
-              "ndcg@10": 0.9599,
+              "ndcg@10": 1.0,
               "questions": 2,
               "recall@1": 0.75,
               "recall@10": 1.0,
@@ -1884,10 +1902,10 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8788,
-              "ndcg@10": 0.9018,
+              "mrr": 0.9394,
+              "ndcg@10": 0.9545,
               "questions": 11,
-              "recall@1": 0.7727,
+              "recall@1": 0.8636,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1904,10 +1922,10 @@
           },
           "common": {
             "api_reference": {
-              "mrr": 0.6667,
-              "ndcg@10": 0.75,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1923,7 +1941,7 @@
             },
             "cross_page": {
               "mrr": 1.0,
-              "ndcg@10": 0.9599,
+              "ndcg@10": 1.0,
               "questions": 2,
               "recall@1": 0.75,
               "recall@10": 1.0,
@@ -1931,10 +1949,10 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8788,
-              "ndcg@10": 0.9018,
+              "mrr": 0.9394,
+              "ndcg@10": 0.9545,
               "questions": 11,
-              "recall@1": 0.7727,
+              "recall@1": 0.8636,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1953,10 +1971,10 @@
         "section": {
           "all": {
             "api_reference": {
-              "mrr": 0.6667,
-              "ndcg@10": 0.75,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -1971,10 +1989,10 @@
               "recall@5": 0.5
             },
             "overall": {
-              "mrr": 0.5926,
-              "ndcg@10": 0.6111,
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
               "questions": 9,
-              "recall@1": 0.5556,
+              "recall@1": 0.6667,
               "recall@10": 0.6667,
               "recall@3": 0.6667,
               "recall@5": 0.6667
@@ -1991,10 +2009,10 @@
           },
           "common": {
             "api_reference": {
-              "mrr": 0.6667,
-              "ndcg@10": 0.75,
+              "mrr": 1.0,
+              "ndcg@10": 1.0,
               "questions": 2,
-              "recall@1": 0.5,
+              "recall@1": 1.0,
               "recall@10": 1.0,
               "recall@3": 1.0,
               "recall@5": 1.0
@@ -2009,10 +2027,10 @@
               "recall@5": 0.5
             },
             "overall": {
-              "mrr": 0.5926,
-              "ndcg@10": 0.6111,
+              "mrr": 0.6667,
+              "ndcg@10": 0.6667,
               "questions": 9,
-              "recall@1": 0.5556,
+              "recall@1": 0.6667,
               "recall@10": 0.6667,
               "recall@3": 0.6667,
               "recall@5": 0.6667
@@ -2031,15 +2049,17 @@
       },
       "name": "sec1024-vector-heavy+rerank",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 5746.4,
+      "p90_latency_ms": 7939.6,
       "questions_run": 12,
       "rerank": true,
       "rerank_applied": 10,
-      "rerank_cost_usd": 0.009138,
+      "rerank_billed_calls": 12,
+      "rerank_cost_usd": 0.009083,
       "rerank_fallbacks": 2,
+      "rerank_skipped": 0,
       "rerank_usage": {
-        "completion_tokens": 4673,
-        "prompt_tokens": 56248
+        "completion_tokens": 4511,
+        "prompt_tokens": 56040
       },
       "variant": "sec1024",
       "weights": "vector-heavy"
@@ -2064,7 +2084,7 @@
         "variant": "sec128"
       },
       "errors": 0,
-      "median_latency_ms": 5.5,
+      "median_latency_ms": 6.6,
       "metrics": {
         "page": {
           "all": {
@@ -2078,8 +2098,8 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.625,
-              "ndcg@10": 0.7153,
+              "mrr": 0.6,
+              "ndcg@10": 0.6934,
               "questions": 2,
               "recall@1": 0.5,
               "recall@10": 1.0,
@@ -2096,8 +2116,8 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8864,
-              "ndcg@10": 0.9147,
+              "mrr": 0.8818,
+              "ndcg@10": 0.9107,
               "questions": 11,
               "recall@1": 0.7727,
               "recall@10": 1.0,
@@ -2125,8 +2145,8 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.625,
-              "ndcg@10": 0.7153,
+              "mrr": 0.6,
+              "ndcg@10": 0.6934,
               "questions": 2,
               "recall@1": 0.5,
               "recall@10": 1.0,
@@ -2143,8 +2163,8 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8864,
-              "ndcg@10": 0.9147,
+              "mrr": 0.8818,
+              "ndcg@10": 0.9107,
               "questions": 11,
               "recall@1": 0.7727,
               "recall@10": 1.0,
@@ -2243,12 +2263,14 @@
       },
       "name": "sec128-heading-path-off",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 6.1,
+      "p90_latency_ms": 7.0,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -2279,7 +2301,7 @@
         "variant": "sec128"
       },
       "errors": 0,
-      "median_latency_ms": 5.7,
+      "median_latency_ms": 6.3,
       "metrics": {
         "page": {
           "all": {
@@ -2293,8 +2315,8 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.3333,
-              "ndcg@10": 0.4936,
+              "mrr": 0.3214,
+              "ndcg@10": 0.4821,
               "questions": 2,
               "recall@1": 0.0,
               "recall@10": 1.0,
@@ -2311,8 +2333,8 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.7879,
-              "ndcg@10": 0.817,
+              "mrr": 0.7857,
+              "ndcg@10": 0.8149,
               "questions": 11,
               "recall@1": 0.6818,
               "recall@10": 0.9091,
@@ -2340,8 +2362,8 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.3333,
-              "ndcg@10": 0.4936,
+              "mrr": 0.3214,
+              "ndcg@10": 0.4821,
               "questions": 2,
               "recall@1": 0.0,
               "recall@10": 1.0,
@@ -2358,8 +2380,8 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.7879,
-              "ndcg@10": 0.817,
+              "mrr": 0.7857,
+              "ndcg@10": 0.8149,
               "questions": 11,
               "recall@1": 0.6818,
               "recall@10": 0.9091,
@@ -2458,12 +2480,14 @@
       },
       "name": "sec128-lexical-heavy",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 7.5,
+      "p90_latency_ms": 6.5,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -2488,7 +2512,7 @@
         "variant": "sec128"
       },
       "errors": 0,
-      "median_latency_ms": 6.3,
+      "median_latency_ms": 5.9,
       "metrics": {
         "page": {
           "all": {
@@ -2502,11 +2526,11 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.5714,
-              "ndcg@10": 0.6667,
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
               "questions": 2,
               "recall@1": 0.5,
-              "recall@10": 1.0,
+              "recall@10": 0.5,
               "recall@3": 0.5,
               "recall@5": 0.5
             },
@@ -2520,11 +2544,11 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8766,
-              "ndcg@10": 0.9058,
+              "mrr": 0.8636,
+              "ndcg@10": 0.8755,
               "questions": 11,
               "recall@1": 0.7727,
-              "recall@10": 1.0,
+              "recall@10": 0.9091,
               "recall@3": 0.9091,
               "recall@5": 0.9091
             },
@@ -2549,11 +2573,11 @@
               "recall@5": 1.0
             },
             "capability": {
-              "mrr": 0.5714,
-              "ndcg@10": 0.6667,
+              "mrr": 0.5,
+              "ndcg@10": 0.5,
               "questions": 2,
               "recall@1": 0.5,
-              "recall@10": 1.0,
+              "recall@10": 0.5,
               "recall@3": 0.5,
               "recall@5": 0.5
             },
@@ -2567,11 +2591,11 @@
               "recall@5": 1.0
             },
             "overall": {
-              "mrr": 0.8766,
-              "ndcg@10": 0.9058,
+              "mrr": 0.8636,
+              "ndcg@10": 0.8755,
               "questions": 11,
               "recall@1": 0.7727,
-              "recall@10": 1.0,
+              "recall@10": 0.9091,
               "recall@3": 0.9091,
               "recall@5": 0.9091
             },
@@ -2667,12 +2691,14 @@
       },
       "name": "sec128-shipped",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 7.5,
+      "p90_latency_ms": 7.6,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -2700,7 +2726,7 @@
         "variant": "sec128"
       },
       "errors": 0,
-      "median_latency_ms": 6.2,
+      "median_latency_ms": 6.1,
       "metrics": {
         "page": {
           "all": {
@@ -2879,12 +2905,14 @@
       },
       "name": "sec128-vector-heavy",
       "no_lexical_footing": 0,
-      "p90_latency_ms": 6.8,
+      "p90_latency_ms": 6.7,
       "questions_run": 12,
       "rerank": false,
       "rerank_applied": 0,
+      "rerank_billed_calls": 0,
       "rerank_cost_usd": 0.0,
       "rerank_fallbacks": 0,
+      "rerank_skipped": 0,
       "rerank_usage": {
         "completion_tokens": 0,
         "prompt_tokens": 0
@@ -2904,9 +2932,11 @@
     "unanswerable"
   ],
   "questions": 12,
-  "rerank_calls": 21,
-  "rerank_cost_usd": 0.017976,
-  "rerank_fallbacks": 3,
+  "rerank_billed_calls": 24,
+  "rerank_calls": 22,
+  "rerank_cost_usd": 0.017931,
+  "rerank_fallbacks": 2,
+  "rerank_skipped": 0,
   "section_scoreable": 9,
   "status": "complete",
   "unanswerable": {
@@ -2927,7 +2957,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 15.651158336834953,
+          "score": 15.636960691615684,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -2946,7 +2976,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 12.882027823616582,
+          "score": 12.87350923648502,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -2965,7 +2995,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 66.48815689325174,
+          "score": 66.41103539978974,
           "similarity": null,
           "url": "https://docs.mistral.ai/api/endpoint/chat-completions"
         }
@@ -2986,7 +3016,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 18.758667299370074,
+          "score": 18.78615595195653,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -3007,7 +3037,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 15.398515010384518,
+          "score": 15.413739796022083,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -3028,7 +3058,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 78.85917582583346,
+          "score": 79.03256378078089,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -3048,7 +3078,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 18.461559867058018,
+          "score": 18.504868941777563,
           "similarity": null,
           "url": "https://docs.mistral.ai/resources/known-limitations"
         }
@@ -3069,7 +3099,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 21.343901478336825,
+          "score": 21.348275236196855,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -3090,7 +3120,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 18.28876605331663,
+          "score": 18.291170467029225,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -3111,7 +3141,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 80.76707683555054,
+          "score": 80.79478498940016,
           "similarity": null,
           "url": "https://docs.mistral.ai/capabilities/function-calling"
         }
@@ -3131,7 +3161,7 @@
           "rank": 1,
           "rerank_score": null,
           "retrieval_score": null,
-          "score": 20.496805910026577,
+          "score": 20.50458023107812,
           "similarity": null,
           "url": "https://docs.mistral.ai/resources/known-limitations"
         }
@@ -3150,7 +3180,7 @@
           ],
           "rank": 1,
           "rerank_score": 1.0,
-          "retrieval_score": 20.496805910026577,
+          "retrieval_score": 20.50458023107812,
           "score": 1.0,
           "similarity": null,
           "url": "https://docs.mistral.ai/resources/known-limitations"
@@ -3162,19 +3192,18 @@
         "question": "What is the maximum number of tool calls a single assistant message may contain?",
         "question_id": "fx-012",
         "top_hit": {
-          "anchor": "parallel-tool-calls",
-          "chunk_id": "3777c5c7-cd4f-5a62-8b73-59278985d446",
+          "anchor": "function-calling",
+          "chunk_id": "a0e2d5bf-fa7b-538b-82c1-6dbe09e6ac5c",
           "heading_path": [
-            "Function calling",
-            "The call loop",
-            "Parallel tool calls"
+            "Known limitations",
+            "Function calling"
           ],
           "rank": 1,
-          "rerank_score": null,
-          "retrieval_score": 18.28876605331663,
-          "score": 18.28876605331663,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.08929996331904,
+          "score": 1.0,
           "similarity": null,
-          "url": "https://docs.mistral.ai/capabilities/function-calling"
+          "url": "https://docs.mistral.ai/resources/known-limitations"
         }
       }
     ],

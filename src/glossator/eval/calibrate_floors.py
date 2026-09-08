@@ -31,7 +31,7 @@ import structlog
 from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, Field
 
-from glossator.eval.datasets import read_jsonl
+from glossator.eval.datasets import QuestionType, read_jsonl
 from glossator.eval.report import line_chart
 from glossator.eval.run_records import create_run_directory
 from glossator.retrieval.config import DEFAULT_CORPUS_DIR, RetrievalConfig
@@ -40,6 +40,13 @@ from glossator.retrieval.engine import SearchEngine
 logger = structlog.get_logger(__name__)
 
 RUN_KIND = "floor-calibration"
+
+POPULATIONS = ("real", "junk", "unanswerable")
+"""``real`` is an answerable dataset question, ``junk`` a question about another
+subject entirely. ``unanswerable`` is the dataset's own unanswerable type: written
+in the corpus's vocabulary, not answered by it. It is reported separately and
+never used to set the floor -- a floor low enough to accept a question the corpus
+cannot answer accepts everything, which is exactly the failure D-030 is about."""
 
 DEPTHS = (1, 5, 20, 50)
 """Where the similarity is read. 1 is the number a floor is compared against, 5
@@ -149,6 +156,11 @@ def propose(rows: Sequence[QuerySimilarities]) -> dict[str, Any]:
     hit and the best junk query's best hit -- if there is a corridor at all. The
     margin is the largest gap a real query shows between its own best hit and its
     fifth, so that applying it never cuts a real query below five results.
+
+    Only the ``real`` population sets the floor. The dataset's own unanswerable
+    questions are in the corpus's vocabulary but have no answer in it, so a floor
+    fitted to accept them would accept everything; they are measured against the
+    proposal instead (see ``_against_floor``).
     """
     real = [row for row in rows if row.population == "real" and row.best is not None]
     junk = [row for row in rows if row.population == "junk" and row.best is not None]
@@ -191,7 +203,8 @@ def propose(rows: Sequence[QuerySimilarities]) -> dict[str, Any]:
 
 
 def summarize(rows: Sequence[QuerySimilarities], config: Mapping[str, Any]) -> dict[str, Any]:
-    """Both distributions, the proposal, and the counts behind them."""
+    """Every distribution, the proposal, and the counts behind them."""
+    proposal = propose(rows)
     return {
         "kind": RUN_KIND,
         "status": "complete",
@@ -202,15 +215,40 @@ def summarize(rows: Sequence[QuerySimilarities], config: Mapping[str, Any]) -> d
         "errors": [row.query for row in rows if row.error],
         "distributions": {
             population: _distribution([row for row in rows if row.population == population])
-            for population in ("real", "junk")
+            for population in POPULATIONS
         },
         "no_lexical_footing": {
             population: sum(
                 1 for row in rows if row.population == population and row.lexical_footing is False
             )
-            for population in ("real", "junk")
+            for population in POPULATIONS
         },
-        "proposal": propose(rows),
+        "proposal": proposal,
+        "unanswerable_against_the_floor": _against_floor(rows, proposal),
+    }
+
+
+def _against_floor(
+    rows: Sequence[QuerySimilarities], proposal: Mapping[str, Any]
+) -> dict[str, Any]:
+    """How the dataset's unanswerable questions fare against the proposed floor.
+
+    They are the population the floor is really for: questions written in the
+    corpus's own vocabulary that the corpus does not answer. They cannot help set
+    the floor -- a floor fitted to accept them accepts everything -- so they are
+    measured against it instead, and a floor that lets most of them through has not
+    bought what D-030 wanted.
+    """
+    unanswerable = [
+        row for row in rows if row.population == "unanswerable" and row.best is not None
+    ]
+    floor = proposal.get("similarity_floor")
+    if not unanswerable or floor is None:
+        return {"questions": len(unanswerable), "clearing_the_floor": None}
+    return {
+        "questions": len(unanswerable),
+        "clearing_the_floor": sum(1 for row in unanswerable if (row.best or 0.0) >= floor),
+        "floor": floor,
     }
 
 
@@ -262,14 +300,20 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     parts = [
         "# Score floor calibration\n",
         "## What this measures\n",
-        f"Every query -- {config['real_questions']} real questions from "
-        f"`{config['dataset']}` and {config['junk_questions']} hand-written junk questions "
-        "from cooking, veterinary medicine, astronomy and sport -- was searched against "
+        f"Every query -- {config['real_questions']} questions from `{config['dataset']}` "
+        f"and {config['junk_questions']} hand-written junk questions from cooking, "
+        "veterinary medicine, astronomy and sport -- was searched against "
         f"`{config['variant']}` at top-{TOP_K}, and the cosine similarity of each returned "
         "hit was read back. The question is whether an absolute similarity floor exists "
         "that a real question always clears and a junk question never does (D-030). "
         "Without one, a k-nearest-neighbour index has no way to return nothing, and an "
         "unanswerable question gets a confident wrong answer.\n",
+        "Three populations, not two. **real** is an answerable dataset question. **junk** "
+        "is a question about another subject entirely. **unanswerable** is the dataset's "
+        "own unanswerable type: written in this corpus's vocabulary, and not answered by "
+        "it. Only `real` sets the floor -- a floor fitted to accept a question the corpus "
+        "cannot answer would accept everything -- and `unanswerable` is measured against "
+        "the proposal instead.\n",
         "The numbers describe the documents that variant's schema actually held when the "
         f"run happened. The lexical-footing column below was computed against "
         f"`{config['corpus_dir']}`, which is the corpus the vocabulary was read from and "
@@ -284,6 +328,7 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
         "what makes a genuinely empty result reachable.\n",
         "## Proposal\n",
         _proposal(proposal),
+        _unanswerable(metrics),
         "## Figures\n",
         "- `figures/similarity-by-depth.svg`: median similarity at each depth, one line "
         "per population\n",
@@ -304,7 +349,7 @@ def _distribution_table(metrics: Mapping[str, Any]) -> str:
         "| population | depth | n | min | p10 | median | p90 | max |",
         "|---|---|---|---|---|---|---|---|",
     ]
-    for population in ("real", "junk"):
+    for population in POPULATIONS:
         for depth in DEPTHS:
             row = metrics["distributions"][population]["at_depth"][str(depth)]
             cells = " | ".join(
@@ -313,6 +358,33 @@ def _distribution_table(metrics: Mapping[str, Any]) -> str:
             )
             lines.append(f"| {population} | {depth} | {row['n']} | {cells} |")
     return "\n".join(lines)
+
+
+def _unanswerable(metrics: Mapping[str, Any]) -> str:
+    """What the proposed floor would do to the questions it exists for."""
+    against = metrics.get("unanswerable_against_the_floor") or {}
+    questions = against.get("questions", 0)
+    if not questions:
+        return (
+            "## Unanswerable questions\n\n"
+            "The dataset holds none, so nothing here says what the floor would do to the "
+            "case it exists for."
+        )
+    clearing = against.get("clearing_the_floor")
+    if clearing is None:
+        return (
+            "## Unanswerable questions\n\n"
+            f"{questions} of the dataset's questions are unanswerable. No floor was "
+            "proposed, so there is nothing to measure them against."
+        )
+    return (
+        "## Unanswerable questions\n\n"
+        f"{clearing} of {questions} unanswerable questions still clear the proposed floor "
+        f"of {against['floor']}. They are the case the floor exists for, so this is the "
+        "number to watch: a floor most of them clear separates junk from documentation "
+        "and not answerable from unanswerable, and the lexical-footing gate cannot help "
+        "here either, because these questions are written in the corpus's own words."
+    )
 
 
 def _proposal(proposal: Mapping[str, Any]) -> str:
@@ -401,7 +473,7 @@ async def run(
             await measure(
                 engine,
                 question.question,
-                "real",
+                "unanswerable" if question.type is QuestionType.UNANSWERABLE else "real",
                 question_id=question.id,
                 question_type=str(question.type),
             )

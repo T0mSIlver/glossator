@@ -164,7 +164,7 @@ The run writes `eval/runs/<date>-<name>/` with `config.json`, `records.jsonl`,
 the recorded rows by:
 
 ```bash
-make eval-report run=eval/runs/2026-09-08-2307-fixture-grid
+make eval-report run=eval/runs/2026-09-08-2329-fixture-grid
 ```
 
 ### Run the tests

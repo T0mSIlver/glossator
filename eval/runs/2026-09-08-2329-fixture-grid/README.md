@@ -58,11 +58,11 @@ Every row retrieves 10 hits.
 | `sec128-lexical-heavy` | 0.682 | 1.000 | 0.000 | 0.750 | 0.800 |
 | `sec128-heading-path-off` | 0.773 | 1.000 | 0.500 | 0.750 | 0.800 |
 | `sec1024-shipped` | 0.682 | 1.000 | 0.000 | 0.750 | 0.800 |
-| `sec1024-vector-heavy` | 0.591 | 0.500 | 0.000 | 0.750 | 0.800 |
+| `sec1024-vector-heavy` | 0.682 | 1.000 | 0.000 | 0.750 | 0.800 |
 | `sec1024-lexical-heavy` | 0.682 | 1.000 | 0.000 | 0.750 | 0.800 |
 | `sec1024-heading-path-off` | 0.773 | 1.000 | 0.500 | 0.750 | 0.800 |
-| `sec1024-shipped+rerank` | 0.682 | 0.500 | 0.500 | 0.750 | 0.800 |
-| `sec1024-vector-heavy+rerank` | 0.773 | 0.500 | 1.000 | 0.750 | 0.800 |
+| `sec1024-shipped+rerank` | 0.773 | 0.500 | 1.000 | 0.750 | 0.800 |
+| `sec1024-vector-heavy+rerank` | 0.864 | 1.000 | 1.000 | 0.750 | 0.800 |
 
 **recall@3**
 
@@ -79,7 +79,7 @@ Every row retrieves 10 hits.
 | `sec1024-vector-heavy` | 0.818 | 1.000 | 0.500 | 1.000 | 0.800 |
 | `sec1024-lexical-heavy` | 0.818 | 1.000 | 0.500 | 1.000 | 0.800 |
 | `sec1024-heading-path-off` | 0.909 | 1.000 | 0.500 | 1.000 | 1.000 |
-| `sec1024-shipped+rerank` | 0.909 | 1.000 | 0.500 | 1.000 | 1.000 |
+| `sec1024-shipped+rerank` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | `sec1024-vector-heavy+rerank` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
 **recall@5**
@@ -97,7 +97,7 @@ Every row retrieves 10 hits.
 | `sec1024-vector-heavy` | 0.818 | 1.000 | 0.500 | 1.000 | 0.800 |
 | `sec1024-lexical-heavy` | 0.818 | 1.000 | 0.500 | 1.000 | 0.800 |
 | `sec1024-heading-path-off` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| `sec1024-shipped+rerank` | 0.909 | 1.000 | 0.500 | 1.000 | 1.000 |
+| `sec1024-shipped+rerank` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | `sec1024-vector-heavy+rerank` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
 **recall@10**
@@ -107,7 +107,7 @@ Every row retrieves 10 hits.
 | `page128-shipped` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | `page128-vector-heavy` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | `page128-lexical-heavy` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| `sec128-shipped` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| `sec128-shipped` | 0.909 | 1.000 | 0.500 | 1.000 | 1.000 |
 | `sec128-vector-heavy` | 0.909 | 1.000 | 0.500 | 1.000 | 1.000 |
 | `sec128-lexical-heavy` | 0.909 | 1.000 | 1.000 | 1.000 | 0.800 |
 | `sec128-heading-path-off` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
@@ -125,16 +125,16 @@ Every row retrieves 10 hits.
 | `page128-shipped` | 0.882 | 1.000 | 0.750 | 1.000 | 0.840 |
 | `page128-vector-heavy` | 0.877 | 1.000 | 0.750 | 1.000 | 0.829 |
 | `page128-lexical-heavy` | 0.955 | 1.000 | 0.750 | 1.000 | 1.000 |
-| `sec128-shipped` | 0.877 | 1.000 | 0.571 | 1.000 | 0.900 |
+| `sec128-shipped` | 0.864 | 1.000 | 0.500 | 1.000 | 0.900 |
 | `sec128-vector-heavy` | 0.864 | 1.000 | 0.500 | 1.000 | 0.900 |
-| `sec128-lexical-heavy` | 0.788 | 1.000 | 0.333 | 1.000 | 0.800 |
-| `sec128-heading-path-off` | 0.886 | 1.000 | 0.625 | 1.000 | 0.900 |
+| `sec128-lexical-heavy` | 0.786 | 1.000 | 0.321 | 1.000 | 0.800 |
+| `sec128-heading-path-off` | 0.882 | 1.000 | 0.600 | 1.000 | 0.900 |
 | `sec1024-shipped` | 0.801 | 1.000 | 0.321 | 1.000 | 0.833 |
-| `sec1024-vector-heavy` | 0.742 | 0.750 | 0.250 | 1.000 | 0.833 |
+| `sec1024-vector-heavy` | 0.788 | 1.000 | 0.250 | 1.000 | 0.833 |
 | `sec1024-lexical-heavy` | 0.788 | 1.000 | 0.333 | 1.000 | 0.800 |
 | `sec1024-heading-path-off` | 0.886 | 1.000 | 0.625 | 1.000 | 0.900 |
-| `sec1024-shipped+rerank` | 0.801 | 0.667 | 0.571 | 1.000 | 0.867 |
-| `sec1024-vector-heavy+rerank` | 0.879 | 0.667 | 1.000 | 1.000 | 0.867 |
+| `sec1024-shipped+rerank` | 0.879 | 0.667 | 1.000 | 1.000 | 0.867 |
+| `sec1024-vector-heavy+rerank` | 0.939 | 1.000 | 1.000 | 1.000 | 0.867 |
 
 **ndcg@10**
 
@@ -143,16 +143,16 @@ Every row retrieves 10 hits.
 | `page128-shipped` | 0.903 | 1.000 | 0.816 | 0.960 | 0.877 |
 | `page128-vector-heavy` | 0.906 | 1.000 | 0.816 | 1.000 | 0.867 |
 | `page128-lexical-heavy` | 0.955 | 1.000 | 0.816 | 0.939 | 1.000 |
-| `sec128-shipped` | 0.906 | 1.000 | 0.667 | 1.000 | 0.926 |
+| `sec128-shipped` | 0.875 | 1.000 | 0.500 | 1.000 | 0.926 |
 | `sec128-vector-heavy` | 0.868 | 1.000 | 0.500 | 0.960 | 0.926 |
-| `sec128-lexical-heavy` | 0.817 | 1.000 | 0.494 | 1.000 | 0.800 |
-| `sec128-heading-path-off` | 0.915 | 1.000 | 0.715 | 1.000 | 0.926 |
+| `sec128-lexical-heavy` | 0.815 | 1.000 | 0.482 | 1.000 | 0.800 |
+| `sec128-heading-path-off` | 0.911 | 1.000 | 0.693 | 1.000 | 0.926 |
 | `sec1024-shipped` | 0.847 | 1.000 | 0.482 | 1.000 | 0.871 |
-| `sec1024-vector-heavy` | 0.776 | 0.816 | 0.316 | 0.960 | 0.871 |
+| `sec1024-vector-heavy` | 0.810 | 1.000 | 0.316 | 0.960 | 0.871 |
 | `sec1024-lexical-heavy` | 0.817 | 1.000 | 0.494 | 1.000 | 0.800 |
 | `sec1024-heading-path-off` | 0.915 | 1.000 | 0.715 | 1.000 | 0.926 |
-| `sec1024-shipped+rerank` | 0.841 | 0.750 | 0.667 | 0.960 | 0.900 |
-| `sec1024-vector-heavy+rerank` | 0.902 | 0.750 | 1.000 | 0.960 | 0.900 |
+| `sec1024-shipped+rerank` | 0.902 | 0.750 | 1.000 | 0.960 | 0.900 |
+| `sec1024-vector-heavy+rerank` | 0.955 | 1.000 | 1.000 | 1.000 | 0.900 |
 
 Question counts per column: overall 11, api_reference 2, capability 2, cross_page 2, single_page 5.
 
@@ -170,11 +170,11 @@ Question counts per column: overall 11, api_reference 2, capability 2, cross_pag
 | `sec128-lexical-heavy` | 0.556 | 1.000 | 0.000 | -- | 0.600 |
 | `sec128-heading-path-off` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 | `sec1024-shipped` | 0.556 | 1.000 | 0.000 | -- | 0.600 |
-| `sec1024-vector-heavy` | 0.444 | 0.500 | 0.000 | -- | 0.600 |
+| `sec1024-vector-heavy` | 0.556 | 1.000 | 0.000 | -- | 0.600 |
 | `sec1024-lexical-heavy` | 0.556 | 1.000 | 0.000 | -- | 0.600 |
 | `sec1024-heading-path-off` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 | `sec1024-shipped+rerank` | 0.556 | 0.500 | 0.500 | -- | 0.600 |
-| `sec1024-vector-heavy+rerank` | 0.556 | 0.500 | 0.500 | -- | 0.600 |
+| `sec1024-vector-heavy+rerank` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 
 **recall@3**
 
@@ -242,11 +242,11 @@ Question counts per column: overall 11, api_reference 2, capability 2, cross_pag
 | `sec128-lexical-heavy` | 0.593 | 1.000 | 0.167 | -- | 0.600 |
 | `sec128-heading-path-off` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 | `sec1024-shipped` | 0.611 | 1.000 | 0.250 | -- | 0.600 |
-| `sec1024-vector-heavy` | 0.556 | 0.750 | 0.250 | -- | 0.600 |
+| `sec1024-vector-heavy` | 0.611 | 1.000 | 0.250 | -- | 0.600 |
 | `sec1024-lexical-heavy` | 0.593 | 1.000 | 0.167 | -- | 0.600 |
 | `sec1024-heading-path-off` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 | `sec1024-shipped+rerank` | 0.593 | 0.667 | 0.500 | -- | 0.600 |
-| `sec1024-vector-heavy+rerank` | 0.593 | 0.667 | 0.500 | -- | 0.600 |
+| `sec1024-vector-heavy+rerank` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 
 **ndcg@10**
 
@@ -260,31 +260,31 @@ Question counts per column: overall 11, api_reference 2, capability 2, cross_pag
 | `sec128-lexical-heavy` | 0.611 | 1.000 | 0.250 | -- | 0.600 |
 | `sec128-heading-path-off` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 | `sec1024-shipped` | 0.626 | 1.000 | 0.316 | -- | 0.600 |
-| `sec1024-vector-heavy` | 0.585 | 0.816 | 0.316 | -- | 0.600 |
+| `sec1024-vector-heavy` | 0.626 | 1.000 | 0.316 | -- | 0.600 |
 | `sec1024-lexical-heavy` | 0.611 | 1.000 | 0.250 | -- | 0.600 |
 | `sec1024-heading-path-off` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 | `sec1024-shipped+rerank` | 0.611 | 0.750 | 0.500 | -- | 0.600 |
-| `sec1024-vector-heavy+rerank` | 0.611 | 0.750 | 0.500 | -- | 0.600 |
+| `sec1024-vector-heavy+rerank` | 0.667 | 1.000 | 0.500 | -- | 0.600 |
 
 Question counts per column: overall 9, api_reference 2, capability 2, cross_page 0, single_page 5.
 
 ## Latency, cost and failures
 
-| configuration | median ms | p90 ms | rerank calls applied | rerank fallbacks | rerank USD | errors |
-|---|---|---|---|---|---|---|
-| `page128-shipped` | 8 | 9 | 0 | 0 | 0.00000 | 0 |
-| `page128-vector-heavy` | 8 | 10 | 0 | 0 | 0.00000 | 0 |
-| `page128-lexical-heavy` | 8 | 9 | 0 | 0 | 0.00000 | 0 |
-| `sec128-shipped` | 6 | 8 | 0 | 0 | 0.00000 | 0 |
-| `sec128-vector-heavy` | 6 | 7 | 0 | 0 | 0.00000 | 0 |
-| `sec128-lexical-heavy` | 6 | 8 | 0 | 0 | 0.00000 | 0 |
-| `sec128-heading-path-off` | 6 | 6 | 0 | 0 | 0.00000 | 0 |
-| `sec1024-shipped` | 9 | 10 | 0 | 0 | 0.00000 | 0 |
-| `sec1024-vector-heavy` | 8 | 10 | 0 | 0 | 0.00000 | 0 |
-| `sec1024-lexical-heavy` | 8 | 9 | 0 | 0 | 0.00000 | 0 |
-| `sec1024-heading-path-off` | 9 | 10 | 0 | 0 | 0.00000 | 0 |
-| `sec1024-shipped+rerank` | 5397 | 6530 | 11 | 1 | 0.00884 | 0 |
-| `sec1024-vector-heavy+rerank` | 5182 | 5746 | 10 | 2 | 0.00914 | 0 |
+| configuration | median ms | p90 ms | rerank calls | applied | fell back | budget skipped | rerank USD | errors |
+|---|---|---|---|---|---|---|---|---|
+| `page128-shipped` | 8 | 9 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `page128-vector-heavy` | 8 | 9 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `page128-lexical-heavy` | 8 | 8 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec128-shipped` | 6 | 8 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec128-vector-heavy` | 6 | 7 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec128-lexical-heavy` | 6 | 6 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec128-heading-path-off` | 7 | 7 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec1024-shipped` | 9 | 10 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec1024-vector-heavy` | 8 | 9 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec1024-lexical-heavy` | 8 | 9 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec1024-heading-path-off` | 8 | 9 | 0 | 0 | 0 | 0 | 0.00000 | 0 |
+| `sec1024-shipped+rerank` | 3899 | 4376 | 12 | 12 | 0 | 0 | 0.00885 | 0 |
+| `sec1024-vector-heavy+rerank` | 5747 | 7940 | 12 | 10 | 2 | 0 | 0.00908 | 0 |
 
 Latency is wall-clock for one question through one configuration: the Vespa round trip and, where it ran, the reranker's model call. The query's embedding is not in it -- a question is embedded once per embedding model and the vector is reused across every configuration that shares it, so charging that call to one configuration and not the others would be arbitrary.
 
@@ -306,7 +306,7 @@ The dataset holds 1 question with no gold source, so they carry no recall. What 
 | What is the maximum number of tool calls a single assistant message may contain? | `sec1024-lexical-heavy` | https://docs.mistral.ai/capabilities/function-calling#parallel-tool-calls | not checked |
 | What is the maximum number of tool calls a single assistant message may contain? | `sec1024-heading-path-off` | https://docs.mistral.ai/resources/known-limitations#function-calling | not checked |
 | What is the maximum number of tool calls a single assistant message may contain? | `sec1024-shipped+rerank` | https://docs.mistral.ai/resources/known-limitations#function-calling | not checked |
-| What is the maximum number of tool calls a single assistant message may contain? | `sec1024-vector-heavy+rerank` | https://docs.mistral.ai/capabilities/function-calling#parallel-tool-calls | not checked |
+| What is the maximum number of tool calls a single assistant message may contain? | `sec1024-vector-heavy+rerank` | https://docs.mistral.ai/resources/known-limitations#function-calling | not checked |
 
 ## Figures
 
@@ -317,10 +317,10 @@ Regenerated from `metrics.json` by `make eval-report run=<dir>`.
 
 ## Conclusion
 
-At the page level, `page128-lexical-heavy` leads on recall@5 with 1.000, +0.000 over `page128-shipped` (1.000); 5 configurations are tied at that number, so the lead is the alphabetical tie-break and not a difference the dataset can see.
+At the page level, over the 11 questions that matching can score, `page128-lexical-heavy` leads on recall@5 with 1.000, +0.000 over `page128-shipped` (1.000); 6 configurations are tied at that number, so the lead is the alphabetical tie-break and not a difference the dataset can see.
 
-At the section level, `sec1024-heading-path-off` leads on recall@5 with 0.667, +0.000 over `sec1024-lexical-heavy` (0.667); 10 configurations are tied at that number, so the lead is the alphabetical tie-break and not a difference the dataset can see.
+At the section level, over the 9 questions that matching can score, `sec1024-heading-path-off` leads on recall@5 with 0.667, +0.000 over `sec1024-lexical-heavy` (0.667); 10 configurations are tied at that number, so the lead is the alphabetical tie-break and not a difference the dataset can see.
 
-The reranker's ranking was applied 21 times for $0.0180, about $0.000856 a call; 3 further calls returned a ranking the reordering could not use and fell back to retrieval order, which the per-question records name.
+The reranker made 24 calls for $0.0179, about $0.000747 a call, and its ranking was applied 22 of those times; the other 2 returned a ranking the reordering could not use and fell back to retrieval order, which the per-question records name.
 
 This feeds D-012a: the shipped ranking weights are a starting point and the winning row above is what replaces them, and D-015: whether one listwise call buys enough ordering to be worth its latency in the serving path.

@@ -71,8 +71,8 @@
 <circle cx="514.0" cy="94.0" r="2.5" fill="#805ad5"/>
 <line x1="526" y1="154" x2="536" y2="154" stroke="#805ad5" stroke-width="2" stroke-dasharray="6 3"/>
 <text class="v" x="539" y="158">sec1024-shipped</text>
-<polyline points="50.0,134.0 204.7,94.0 359.3,94.0 514.0,94.0" fill="none" stroke="#3b6fd4" stroke-width="2" stroke-dasharray="2 3"/>
-<circle cx="50.0" cy="134.0" r="2.5" fill="#3b6fd4"/>
+<polyline points="50.0,114.0 204.7,94.0 359.3,94.0 514.0,94.0" fill="none" stroke="#3b6fd4" stroke-width="2" stroke-dasharray="2 3"/>
+<circle cx="50.0" cy="114.0" r="2.5" fill="#3b6fd4"/>
 <circle cx="204.7" cy="94.0" r="2.5" fill="#3b6fd4"/>
 <circle cx="359.3" cy="94.0" r="2.5" fill="#3b6fd4"/>
 <circle cx="514.0" cy="94.0" r="2.5" fill="#3b6fd4"/>
@@ -99,8 +99,8 @@
 <circle cx="514.0" cy="94.0" r="2.5" fill="#805ad5"/>
 <line x1="526" y1="218" x2="536" y2="218" stroke="#805ad5" stroke-width="2" stroke-dasharray="2 3"/>
 <text class="v" x="539" y="222">sec1024-shipped+rerank</text>
-<polyline points="50.0,114.0 204.7,94.0 359.3,94.0 514.0,94.0" fill="none" stroke="#3b6fd4" stroke-width="2" stroke-dasharray="9 3 2 3"/>
-<circle cx="50.0" cy="114.0" r="2.5" fill="#3b6fd4"/>
+<polyline points="50.0,94.0 204.7,94.0 359.3,94.0 514.0,94.0" fill="none" stroke="#3b6fd4" stroke-width="2" stroke-dasharray="9 3 2 3"/>
+<circle cx="50.0" cy="94.0" r="2.5" fill="#3b6fd4"/>
 <circle cx="204.7" cy="94.0" r="2.5" fill="#3b6fd4"/>
 <circle cx="359.3" cy="94.0" r="2.5" fill="#3b6fd4"/>
 <circle cx="514.0" cy="94.0" r="2.5" fill="#3b6fd4"/>
