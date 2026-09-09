@@ -33,6 +33,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from glossator.answer.config import AnswerConfig
 from glossator.answer.prompts import REPAIR_INSTRUCTION
+from glossator.clients import chat_reasoning_effort
 
 logger = structlog.get_logger(__name__)
 
@@ -191,6 +192,12 @@ class LLM(Protocol):
     ) -> Completion: ...
 
 
+def _reasoning_kwargs() -> dict[str, Any]:
+    """``reasoning_effort`` for the SDK when the operator set it, else nothing."""
+    effort = chat_reasoning_effort()
+    return {"reasoning_effort": effort} if effort else {}
+
+
 class MistralLLM:
     """Mistral chat completions for the serving path."""
 
@@ -275,6 +282,7 @@ class MistralLLM:
                     ),
                     response_format=settings.response_format_payload(),
                     timeout_ms=self.config.request_timeout_ms,
+                    **_reasoning_kwargs(),
                 )
             except CALL_ERRORS as error:
                 # Recorded first, then judged: an attempt that is not retried is

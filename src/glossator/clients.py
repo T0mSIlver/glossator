@@ -22,6 +22,11 @@ CHAT_API_KEY_VAR = "GLOSSATOR_CHAT_API_KEY"
 ``MISTRAL_API_KEY`` so an open server needs no second variable."""
 
 _API_KEY_VAR = "MISTRAL_API_KEY"
+CHAT_REASONING_EFFORT_VAR = "GLOSSATOR_CHAT_REASONING_EFFORT"
+"""Passed as the SDK's ``reasoning_effort`` on every chat call when set. Meant for
+the local server (D-035c): a llama.cpp Ministral 3 reasons by default and takes
+four to five times longer per call than the API; ``none`` turns that off. Unset
+means the parameter is not sent at all, so API calls are unchanged."""
 
 
 def chat_server_url() -> str | None:
@@ -32,6 +37,11 @@ def chat_server_url() -> str | None:
     hitting the API without a restart in between.
     """
     return os.environ.get(CHAT_SERVER_URL_VAR, "").strip() or None
+
+
+def chat_reasoning_effort() -> str | None:
+    """The reasoning effort to send with chat calls, or ``None`` to send nothing."""
+    return os.environ.get(CHAT_REASONING_EFFORT_VAR, "").strip() or None
 
 
 def chat_client() -> Mistral:
@@ -69,8 +79,10 @@ def _api_key() -> str:
 
 __all__ = [
     "CHAT_API_KEY_VAR",
+    "CHAT_REASONING_EFFORT_VAR",
     "CHAT_SERVER_URL_VAR",
     "chat_client",
+    "chat_reasoning_effort",
     "chat_server_url",
     "embedding_client",
 ]

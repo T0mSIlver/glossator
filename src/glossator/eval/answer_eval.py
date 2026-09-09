@@ -52,7 +52,7 @@ from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig, al
 from glossator.answer.llm import LLMCall, MistralLLM
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.answer.service import STRATEGIES, ask
-from glossator.clients import chat_client, chat_server_url
+from glossator.clients import chat_client, chat_reasoning_effort, chat_server_url
 from glossator.eval.agreement import (
     CorrectnessLabel,
     agreement_report,
@@ -743,6 +743,7 @@ def aggregate(records: Sequence[QuestionRecord], config: Mapping[str, Any]) -> d
         "kind": "answer_eval",
         "model": config.get("model"),
         "generation_server": config.get("generation_server"),
+        "reasoning_effort": config.get("reasoning_effort"),
         "answer_config_overrides": dict(config.get("answer_config_overrides") or {}),
         "judge_model": config.get("judge_model"),
         "judge_models": config.get("judge_models")
@@ -1533,10 +1534,12 @@ def _server_line(config: Mapping[str, Any]) -> str:
     server = config.get("generation_server")
     if not server:
         return "- Generation server: the Mistral API (`https://api.mistral.ai`)"
+    effort = config.get("reasoning_effort")
+    effort_note = f" Chat calls were sent with `reasoning_effort={effort}`." if effort else ""
     return (
         f"- Generation server: `{server}` -- a local server, not the Mistral API. "
         "Every judged number, latency and token count in this run describes that "
-        "server; none of it is comparable with an API run of the same configuration."
+        "server; none of it is comparable with an API run of the same configuration." + effort_note
     )
 
 
@@ -2142,6 +2145,7 @@ async def _run(args: argparse.Namespace) -> None:
         "answer_config": settings.model_dump(mode="json"),
         "answer_config_overrides": overrides,
         "generation_server": chat_server_url(),
+        "reasoning_effort": chat_reasoning_effort(),
         "unpriced_models": sorted(UNPRICED_MODELS),
         "reference_pricing_model": REFERENCE_PRICING_MODEL,
         "notes": list(args.notes),
