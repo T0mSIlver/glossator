@@ -571,7 +571,7 @@ def test_history_text_form_returns_the_service_result(
         calls.append(text)
         return {"form": "text", "text": text, "first": None, "last": None}
 
-    monkeypatch.setattr(api_module.history_service, "phrase_history", phrase_history)
+    monkeypatch.setattr("glossator.history.phrase_history", phrase_history)
 
     response = _request("GET", "/history?text=rate+limits")
 
@@ -601,7 +601,7 @@ def test_history_section_errors_become_bad_param(
     def section_history(section: str, manifest: object) -> dict[str, object]:
         raise ValueError("section must be on docs.mistral.ai")
 
-    monkeypatch.setattr(api_module.history_service, "section_history", section_history)
+    monkeypatch.setattr("glossator.history.section_history", section_history)
 
     response = _request("GET", "/history?section=https://example.com/page")
 
