@@ -1,0 +1,23 @@
+{
+  "datasets": [
+    {
+      "path": "eval/dev-fresh60.jsonl",
+      "sha256": "c663126d79ebf3c0c8cc6000a73be2fd9281c0ae672ae4d42532f1fae8fa7fc0"
+    },
+    {
+      "path": "eval/mined.jsonl",
+      "sha256": "a276e09f853024f2647dad9d7f7c4c8c34e1754dafdf6a6dc4fbb994dfd5b2a2"
+    }
+  ],
+  "deterministic_only": true,
+  "judges": [
+    "glm-5.3",
+    "glm-5.3-flash"
+  ],
+  "kind": "snapshot_labels",
+  "name": "snapshot-labels",
+  "prompt_sha256": "eb1a8e3075de3636048122baf01e67ba54cc8f76ffdf53e73f468d5afe2eb832",
+  "seed": 0,
+  "snapshot_manifest": "eval/snapshots/manifest.json",
+  "snapshot_manifest_sha256": "31d27ea8a14f08155a7d7864eaa442774b3653f9ec195022c4bd792d0c48c41c"
+}
