@@ -25,13 +25,16 @@ import hashlib
 import json
 import math
 import os
+import re
 import statistics
 import time
 from collections.abc import Iterator, Mapping, Sequence
 from contextvars import ContextVar
 from datetime import UTC, datetime
+from functools import cache
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlparse
 
 import httpx
 import structlog
@@ -65,12 +68,16 @@ from glossator.eval.providers import (
     candidate_scope,
 )
 from glossator.eval.run_records import RUN_NAME_RE
+from glossator.ingest.pages import load_page
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
 
 logger = structlog.get_logger(__name__)
 
 RUNS_ROOT = Path("eval/runs")
+MODEL_CARDS_ROOT = Path(__file__).resolve().parents[3] / "corpus" / "mistral-docs" / "models"
+_API_NAMES_ROW = re.compile(r"(?mi)^\|\s*API names?\s*\|(?P<value>.+?)\|\s*$")
+_CODE_VALUE = re.compile(r"`([^`]+)`")
 
 DEFAULT_GENERATION_MODEL = "ministral-14b-2512"
 """The largest Mistral model this key can reach (D-017a): every `mistral-medium-*`,
@@ -350,9 +357,8 @@ def judge_input(question: EvalQuestion, record: QuestionRecord) -> JudgeInput:
 
 
 def gold_url_match(record: QuestionRecord) -> bool:
-    """A verified citation names one of the gold pages."""
-    gold = set(record.gold_urls)
-    return any(citation.url in gold for citation in record.citations)
+    """A verified citation names a gold page or an accepted capability model card."""
+    return _exact_gold_url_match(record) or gold_relaxed_match(record)
 
 
 def gold_anchor_match(record: QuestionRecord) -> bool:
@@ -362,12 +368,64 @@ def gold_anchor_match(record: QuestionRecord) -> bool:
     dataset is saying the page is the answer, and 53% of the corpus's sections
     have no anchor to be more precise about (D-003a).
     """
+    return _exact_gold_anchor_match(record) or gold_relaxed_match(record)
+
+
+def _exact_gold_url_match(record: QuestionRecord) -> bool:
+    gold = set(record.gold_urls)
+    return any(citation.url in gold for citation in record.citations)
+
+
+def _exact_gold_anchor_match(record: QuestionRecord) -> bool:
     pairs = list(zip(record.gold_urls, record.gold_anchors, strict=True))
     return any(
         citation.url == url and (anchor is None or citation.anchor == anchor)
         for citation in record.citations
         for url, anchor in pairs
     )
+
+
+def gold_relaxed_match(record: QuestionRecord) -> bool:
+    """Accept a named model's card as evidence for a capability-matrix question.
+
+    Capability gold points to ``/models`` because the matrix answers the full
+    question. A card for a model named in the question is also valid evidence for
+    that model. The relaxation requires the exact model title or one of the API
+    names declared by that card, and its use is counted separately in the run.
+    """
+    if record.question_type != QuestionType.CAPABILITY.value:
+        return False
+    matrix_gold = [urlparse(url) for url in record.gold_urls]
+    matrix_hosts = {parsed.netloc for parsed in matrix_gold if parsed.path.rstrip("/") == "/models"}
+    if not matrix_hosts:
+        return False
+    for citation in record.citations:
+        parsed = urlparse(citation.url)
+        prefix = "/models/"
+        if parsed.netloc not in matrix_hosts or not parsed.path.startswith(prefix):
+            continue
+        slug = parsed.path.removeprefix(prefix).strip("/")
+        if not slug or "/" in slug:
+            continue
+        if any(_names_model(record.question, name) for name in _model_names(slug)):
+            return True
+    return False
+
+
+@cache
+def _model_names(slug: str) -> tuple[str, ...]:
+    path = MODEL_CARDS_ROOT / f"{slug}.md"
+    if not path.is_file():
+        return ()
+    page = load_page(path)
+    api_names: list[str] = []
+    if row := _API_NAMES_ROW.search(page.body):
+        api_names.extend(_CODE_VALUE.findall(row.group("value")))
+    return (page.title, *api_names)
+
+
+def _names_model(question: str, name: str) -> bool:
+    return bool(re.search(rf"(?<![\w-]){re.escape(name)}(?![\w-])", question, re.IGNORECASE))
 
 
 def tool_calls(record: QuestionRecord) -> int:
@@ -404,10 +462,14 @@ def question_metrics(record: QuestionRecord) -> dict[str, float | None]:
     emitted = len(record.citations) + len(record.unverified_citations)
     fabricated, cosmetic = rejection_counts(record)
     normalized = sum(citation.reason == VERIFIED_AFTER_EMPHASIS for citation in record.citations)
+    relaxed = gold_relaxed_match(record) and not (
+        _exact_gold_url_match(record) and _exact_gold_anchor_match(record)
+    )
     verdict = record.judge.verdict if record.judge else None
     return {
         "cited_url_match": float(gold_url_match(record)) if answerable else None,
         "cited_anchor_match": float(gold_anchor_match(record)) if answerable else None,
+        "gold_relaxed_matches": float(relaxed) if answerable else None,
         "citations_emitted": float(emitted),
         "citations_verified": float(len(record.citations)),
         "citations_fabricated": float(fabricated),
@@ -507,6 +569,7 @@ def cell(records: Sequence[QuestionRecord]) -> dict[str, Any]:
         "fabricated_per_answer": _mean(column("citations_fabricated")),
         "cosmetic_per_answer": _mean(column("citations_cosmetic")),
         "verified_after_normalization": int(sum(column("citations_normalized"))),
+        "gold_relaxed_matches": int(sum(column("gold_relaxed_matches"))),
         "latency_p50_s": (None if not latencies else (_percentile(latencies, 0.5) or 0.0) / 1000),
         "latency_p95_s": (None if not latencies else (_percentile(latencies, 0.95) or 0.0) / 1000),
         "judged": sum(1 for row in per_question if row["correctness"] is not None),
@@ -1003,10 +1066,13 @@ FAMILIES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
         "Citations against the gold sources",
         "Whether the answer's verified citations point at the pages the dataset "
         "says hold the answer. Unanswerable questions have no gold source, so they "
-        "are left out of these two tables rather than counted as failures.",
+        "are left out of these tables rather than counted as failures. Capability "
+        "questions also accept a named model's own card, and the last table counts "
+        "matches that passed only because of that documented relaxation.",
         (
             ("cited_url_match", "a verified citation names a gold page"),
             ("cited_anchor_match", "a verified citation names the gold section"),
+            ("gold_relaxed_matches", "matches accepted through the model-card relaxation"),
         ),
     ),
     (
