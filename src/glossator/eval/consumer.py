@@ -107,7 +107,7 @@ ARM_TOOLS: dict[str, str | None] = {
 """The GLOSSATOR_MCP_TOOLS allowlist each arm's server runs. A0 never sees an
 MCP server at all; A1 and A2 talk to servers started with these allowlists."""
 
-TOOL_SUFFIXES = (
+NAMESPACED_TOOLS = (
     "mistral_docs_search",
     "mistral_docs_open_section",
     "mistral_docs_step",
@@ -116,33 +116,51 @@ TOOL_SUFFIXES = (
     "mistral_docs_answer",
     "mistral_docs_verify_quotes",
     "mistral_docs_history",
-    # The names the tools had before they were namespaced, so recorded runs
-    # keep reading the way they did when they were collected.
-    "search",
-    "open",
-    "navigate",
-    "read",
-    "grep",
-    "ask",
-    "cite",
-    "history",
 )
-"""Every tool name this server has ever served. A harness prefixes them its own
-way -- `glossator_search`, `mcp__mistral-docs__mistral_docs_search` -- so the
-match is on the suffix, longest first."""
+"""The tool names this server serves. Nothing else is called any of these, so
+they are this server's wherever they appear."""
 
-VERIFY_SUFFIXES = ("mistral_docs_verify_quotes", "cite")
+LEGACY_TOOLS = ("search", "open", "navigate", "read", "grep", "ask", "cite", "history")
+"""The names the tools had before they were namespaced, so recorded runs keep
+reading the way they did when they were collected. Every harness has a built-in
+called `read` or `websearch`, so these count only behind a server prefix."""
+
+TOOL_SUFFIXES = NAMESPACED_TOOLS + LEGACY_TOOLS
+
+SERVER_PREFIXES = ("glossator", "mistral-docs", "mistral_docs")
+"""What the consumers' clients have called this server. A harness prefixes a
+tool with the server's name -- `glossator_search`,
+`mistral-docs__mistral_docs_search`, `mcp__mistral-docs__mistral_docs_search`
+-- and that prefix is what separates our `search` from the harness's own."""
+
+VERIFY_TOOLS = ("mistral_docs_verify_quotes",)
+LEGACY_VERIFY_TOOLS = ("cite",)
+VERIFY_SUFFIXES = VERIFY_TOOLS + LEGACY_VERIFY_TOOLS
 """The quote checker, under either name."""
+
+
+def _names_this_server(name: str, tool: str, *, bare: bool) -> bool:
+    """Whether one harness tool name names this server's ``tool``."""
+    if name == tool:
+        return bare
+    if not name.endswith(tool):
+        return False
+    prefix = name[: -len(tool)]
+    return prefix.endswith("__") or prefix.rstrip("_").endswith(SERVER_PREFIXES)
 
 
 def is_server_tool(name: str) -> bool:
     """Whether one harness tool name is one of this server's tools."""
-    return any(name.endswith(suffix) for suffix in TOOL_SUFFIXES)
+    return any(_names_this_server(name, tool, bare=True) for tool in NAMESPACED_TOOLS) or any(
+        _names_this_server(name, tool, bare=False) for tool in LEGACY_TOOLS
+    )
 
 
 def is_verify_tool(name: str) -> bool:
     """Whether one harness tool name is the quote checker."""
-    return any(name.endswith(suffix) for suffix in VERIFY_SUFFIXES)
+    return any(_names_this_server(name, tool, bare=True) for tool in VERIFY_TOOLS) or any(
+        _names_this_server(name, tool, bare=False) for tool in LEGACY_VERIFY_TOOLS
+    )
 
 
 def asked_for_rerank(call: ToolCallRecord) -> bool:
@@ -506,30 +524,42 @@ def _content_blocks(event: Mapping[str, Any]) -> list[dict[str, Any]]:
 def _tool_output_text(content: Any) -> str:
     """What the tool printed, out of a harness's wrapping of the result.
 
-    An MCP result arrives as the JSON object ``{"result": "<printed output>"}``;
-    a built-in tool's result arrives as plain text or as a list of blocks. The
-    printed output is what carries this server's ``error:`` and ``note:`` lines,
-    so it is unwrapped before either is looked for.
+    Each harness wraps a tool result its own way: claude passes the JSON object
+    ``{"result": "<printed output>"}`` as a string, codex passes the MCP result
+    with its ``content`` blocks and its ``structured_content``, and a built-in
+    tool passes plain text or a list of blocks. The printed output is what
+    carries this server's ``error:`` and ``note:`` lines, so it is unwrapped
+    before either is looked for.
     """
+    payload: Any = content
     if isinstance(content, str):
-        text = content
-    elif isinstance(content, list):
-        parts = [
-            str(block.get("text"))
-            if isinstance(block, dict) and isinstance(block.get("text"), str)
-            else json.dumps(block, sort_keys=True)
-            for block in content
-        ]
-        text = "\n".join(parts)
-    else:
-        text = json.dumps(content, sort_keys=True)
-    try:
-        payload = json.loads(text)
-    except ValueError:
-        return text
-    if isinstance(payload, dict) and isinstance(payload.get("result"), str):
-        return str(payload["result"])
-    return text
+        try:
+            payload = json.loads(content)
+        except ValueError:
+            return content
+    if isinstance(payload, dict):
+        blocks = payload.get("content")
+        if isinstance(blocks, list):
+            return _text_blocks(blocks)
+        structured = payload.get("structured_content")
+        if isinstance(structured, dict) and isinstance(structured.get("result"), str):
+            return str(structured["result"])
+        if isinstance(payload.get("result"), str):
+            return str(payload["result"])
+    if isinstance(payload, list):
+        return _text_blocks(payload)
+    if isinstance(payload, str):
+        return payload
+    return json.dumps(payload, sort_keys=True)
+
+
+def _text_blocks(blocks: Sequence[Any]) -> str:
+    return "\n".join(
+        str(block.get("text"))
+        if isinstance(block, dict) and isinstance(block.get("text"), str)
+        else json.dumps(block, sort_keys=True)
+        for block in blocks
+    )
 
 
 def _tool_call_record(name: str, arguments: Any, output: str, failed: bool) -> ToolCallRecord:
@@ -729,10 +759,20 @@ def _codex_tool_call(item: Mapping[str, Any]) -> ToolCallRecord:
     if isinstance(arguments, str):
         with contextlib.suppress(ValueError):
             arguments = json.loads(arguments)
-    output = _tool_output_text(item.get("result") if item.get("result") is not None else "")
     status = str(item.get("status", ""))
     failed = status in ("failed", "errored", "error") or bool(item.get("error"))
+    result = item.get("result")
+    # A call codex refused has no result at all, and the reason it gives is the
+    # only thing the row can carry.
+    output = _tool_output_text(result) if result is not None else _codex_error_text(item)
     return _tool_call_record(name, arguments, output, failed)
+
+
+def _codex_error_text(item: Mapping[str, Any]) -> str:
+    error = item.get("error")
+    if isinstance(error, Mapping):
+        return str(error.get("message", ""))
+    return str(error or "")
 
 
 def parse_codex_tokens(lines: Sequence[str]) -> tuple[HarnessTokens, float]:
@@ -1688,10 +1728,11 @@ def render_figures(metrics: Mapping[str, Any], figures_dir: Path) -> list[str]:
     return written
 
 
-QUARANTINE_FILE = "records-a2-upstream-outage.jsonl"
-"""Rows collected while the answer server could not reach its model. They are
-kept out of the metrics and kept on disk, so the arm can be collected again
-without pretending the outage never happened."""
+QUARANTINE_FILE = "records-a2-set-aside.jsonl"
+"""Answer-arm rows the run does not report: collected while the server could
+not reach its model, or against a model the run has since replaced. They stay
+on disk, out of the metrics, so the arm can be collected again without
+pretending either happened."""
 
 
 def render_readme(
@@ -1722,6 +1763,7 @@ def render_readme(
         f"({JUDGE_VERSION}); citation passages shown to the judge are the verified",
         "  quotes themselves, since a consumer answer keeps no served context.",
         "",
+        *_notes_section(config),
         "## Cells",
         "",
         "| cell | n | correctness | refusal | links resolve | on gold | mcp called "
@@ -1771,6 +1813,19 @@ def render_readme(
         *extra_files,
     ]
     return "\n".join(lines) + "\n"
+
+
+def _notes_section(config: Mapping[str, Any]) -> list[str]:
+    """What a reader has to know about the machine the run reached.
+
+    A run's cells are collected over hours, and the model behind the answer
+    arm and the reranker can be swapped between them; the numbers only mean
+    something next to the record of what was running when.
+    """
+    notes = [str(note) for note in config.get("notes") or []]
+    if not notes:
+        return []
+    return ["## Notes", "", *[f"- {note}" for note in notes], ""]
 
 
 def _fmt(value: Any) -> str:
@@ -1868,6 +1923,7 @@ def _read_config(run_dir: Path) -> dict[str, Any]:
 
 
 MERGED_KEYS = (
+    "notes",
     "consumers",
     "consumer_models",
     "consumer_harnesses",
@@ -1931,6 +1987,16 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     run_parser.add_argument(
         "--fresh", type=int, default=FRESH_COUNT, help="How many fresh questions (seed 0)"
     )
+    run_parser.add_argument(
+        "--note",
+        action="append",
+        default=[],
+        dest="notes",
+        help=(
+            "One line about the machine this run reached, kept in the run's "
+            "config and printed in its README (repeatable)"
+        ),
+    )
     run_parser.add_argument("--mined-path", type=Path, default=MINED_DATASET)
     run_parser.add_argument("--fresh-path", type=Path, default=FRESH_DATASET)
 
@@ -1979,6 +2045,7 @@ async def _run(args: argparse.Namespace) -> None:
         "unanswerable_count": sum(1 for q in questions if q.type.value == "unanswerable"),
         "questions": [question.id for question in questions],
         "prompt_lead": PROMPT_LEAD,
+        "notes": list(args.notes),
         "judge_model": None,
         "judge_prompt_version": JUDGE_VERSION,
         "judge_prompt_hashes": JUDGE_PROMPT_HASHES,
@@ -2031,9 +2098,9 @@ def _score(args: argparse.Namespace) -> None:
     (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
     extra_files = (
         [
-            f"- `{QUARANTINE_FILE}`: rows collected while the answer server",
-            "  could not reach its model. They are out of the metrics, and the",
-            "  cells behind them are collected again once it can.",
+            f"- `{QUARANTINE_FILE}`: answer-arm rows this run does not report,",
+            "  collected while the server could not reach its model or against a",
+            "  model since replaced. Their cells were collected again.",
         ]
         if (run_dir / QUARANTINE_FILE).is_file()
         else []

@@ -33,6 +33,7 @@ from glossator.eval.consumer import (
     parse_claude_events,
     parse_claude_tokens,
     parse_codex_events,
+    parse_codex_tokens,
     parse_opencode_events,
     parse_opencode_tokens,
     prompt_for,
@@ -172,12 +173,22 @@ def test_parse_opencode_events() -> None:
 def test_tool_names_match_on_the_suffix_whatever_the_harness_prefixes() -> None:
     """Harnesses name the same tool their own way; a recorded run keeps reading."""
     assert is_server_tool("mcp__mistral-docs__mistral_docs_search")
+    assert is_server_tool("mistral-docs__mistral_docs_search")
     assert is_server_tool("mistral_docs_read_page")
     assert is_server_tool("glossator_search")
     assert not is_server_tool("webfetch")
     assert is_verify_tool("mcp__mistral-docs__mistral_docs_verify_quotes")
     assert is_verify_tool("glossator_cite")
     assert not is_verify_tool("mistral_docs_search")
+
+
+def test_a_harness_s_own_tool_is_not_this_server_s() -> None:
+    """The tools were once called `search`, `read` and `grep`, and every harness
+    has built-ins by those names: only the server prefix tells them apart."""
+    for own in ("web_search", "websearch", "read", "grep", "bash", "Read", "WebFetch"):
+        assert not is_server_tool(own), own
+    for ours in ("glossator_read", "glossator_grep", "mcp__glossator__search"):
+        assert is_server_tool(ours), ours
 
 
 def test_verdicts_are_read_from_the_old_per_quote_lines() -> None:
@@ -555,6 +566,53 @@ def test_claude_mcp_config_is_written_per_arm(tmp_path: Path) -> None:
 
     without = json.loads(write_claude_mcp_config(tmp_path, None, "s3cret").read_text())
     assert without == {"mcpServers": {}}
+
+
+def test_parse_codex_events() -> None:
+    """A recorded codex run: the last message is the answer, every item is a
+    tool call under the name codex gives it, and the printed output is read out
+    of the MCP result's content blocks.
+
+    The tools in this recording were served by a stand-in that replays this
+    server's own outputs, so the recording is of codex's event stream rather
+    than of a conversation with the live index.
+    """
+    lines = _stream("codex-a1.jsonl")
+
+    answer, calls = parse_codex_events(lines)
+
+    assert answer.startswith("Codestral 25.08 has a context length of **128k tokens**")
+    assert [call.name for call in calls] == [
+        "mistral-docs__mistral_docs_search",
+        "web_search",
+        "mistral-docs__mistral_docs_verify_quotes",
+    ]
+    search = calls[0]
+    assert search.arguments["query"] == "Codestral 25.08 context length"
+    assert search.notes == [
+        "note: index ranking only; rerank=true reorders with a model (about 5 s)"
+    ]
+    assert record_metrics(_record(tool_calls=calls), set())["rerank_asked"] == 1.0
+    assert cite_verdicts(calls) == (1, 0)
+    assert is_server_tool(calls[0].name) and not is_server_tool("web_search")
+    tokens, cost = parse_codex_tokens(lines)
+    assert tokens.input_tokens == 137819 + 103936
+    assert (tokens.output_tokens, tokens.reasoning_tokens, cost) == (535, 138, 0.0)
+    assert consumer_module.codex_failure(lines) is None
+
+
+def test_a_codex_tool_call_refused_for_want_of_approval_is_an_error_row() -> None:
+    """Recorded against a server whose tools carry no annotations: codex asks
+    for approval, nobody is there to give it, and the call fails. The tools
+    this server serves are annotated read-only (D-037b), which is what lets a
+    headless consumer call them at all."""
+    _answer, calls = parse_codex_events(_stream("codex-approval-refused.jsonl"))
+
+    refused_call = calls[0]
+    assert refused_call.name == "mistral-docs__mistral_docs_search"
+    assert refused_call.error is not None
+    assert "requires approval" in refused_call.error
+    assert collect_defects([_record(tool_calls=[refused_call])])[0]["severity"] == "friction"
 
 
 def test_an_exhausted_codex_window_is_an_error_row_not_a_crash() -> None:

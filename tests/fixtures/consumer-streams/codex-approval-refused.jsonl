@@ -1,0 +1,7 @@
+{"type": "thread.started", "thread_id": "01a0886c-381f-7921-b012-cf7f936dd184"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "I\u2019ll look up the model specification in Mistral\u2019s documentation tools and cite the exact documentation page."}}
+{"type": "item.completed", "item": {"id": "item_1", "type": "mcp_tool_call", "server": "mistral-docs", "tool": "mistral_docs_search", "arguments": {"query": "Codestral 25.08 context length", "max_hits": 5, "rerank": true}, "result": null, "error": {"message": "MCP tool call requires approval, but approval policy is never"}, "status": "failed"}}
+{"type": "item.completed", "item": {"id": "exec-b4d809f8-cd0d-4aa5-8dbb-f9bb4a1e60a5", "type": "web_search", "query": "site:docs.mistral.ai Codestral 25.08 context length", "action": {"type": "search", "query": "site:docs.mistral.ai Codestral 25.08 context length"}}}
+{"type": "item.completed", "item": {"id": "item_3", "type": "agent_message", "text": "Codestral 25.08 (`codestral-2508`) has a **128k-token context length**.\n\nSources: [Codestral model page](https://docs.mistral.ai/models/codestral-25-08) and [Mistral context-window limitations](https://docs.mistral.ai/resources/known-limitations)."}}
+{"type": "turn.completed", "usage": {"input_tokens": 87788, "cached_input_tokens": 68608, "cache_write_input_tokens": 0, "output_tokens": 362, "reasoning_output_tokens": 113}}
