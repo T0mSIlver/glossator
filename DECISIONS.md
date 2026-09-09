@@ -931,3 +931,51 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - Repricing: the eval had priced the 14B at zero from the night it had no published price (D-017). With the published Ministral 3 rate, the 15 answer runs cost 1.74 USD (3,539 answer calls, 11.6 million tokens); every priced chat call in every recorded run, reranker calls of the retrieval grid included, sums to 2.81 USD. The console shows 7.04 EUR; the difference is embeddings (three full ingestions, one re-ingestion after D-025b, every query embedding) and calls without a token row, so the recorded spend is a lower bound and the README says so.
 
 **Decision.** Text fragments ship. The resolvability check is part of the evaluation set, reported with the citation metrics, and re-run whenever the verifier or the fragment builder changes. Recorded cost uses the published price table for every model in it; the reference column at Medium 3.5 prices stays for comparability across runs.
+
+---
+
+## D-041a · Eight snapshots indexed; the labels expose a site-wide rename in August
+
+**Status:** decided · 2026-09-09 · `eval/snapshots/manifest.json` (8 snapshots, biweekly from 2026-06-01 plus the pinned commit), schema `docs_snapshot_fulldim` (migration 002, variant `snap1024`), run `2026-09-09-1929-snapshot-labels` (145 questions: fresh 60 and mined 85, times 8 dates, 1,160 cells)
+
+| snapshot | pages | chunks | present, same page | present, moved | pending the judged step |
+|---|---|---|---|---|---|
+| 2026-06-01 | 327 | 3,387 | 44 | 64 | 37 |
+| 2026-06-15 | 332 | 3,485 | 46 | 66 | 33 |
+| 2026-07-01 | 368 | 4,058 | 54 | 65 | 26 |
+| 2026-07-15 | 378 | 4,192 | 54 | 67 | 24 |
+| 2026-08-01 | 392 | 4,281 | 54 | 67 | 24 |
+| 2026-08-15 | 401 | 4,311 | 103 | 23 | 19 |
+| 2026-09-01 | 408 | 4,389 | 125 | 5 | 15 |
+| 2026-09-07 (pinned) | 411 | 4,440 | 135 | 0 | 10 |
+
+**Facts.**
+- One schema holds every date (32,543 chunks) behind a `snapshot` filter on the query-builder path; the three existing schemas were untouched (4,440 / 4,489 / 1,034 documents before and after). The snapshot for the pinned commit reproduces the shipped index chunk for chunk. Embeddings were cached by content hash, so the eight ingestions cost a fraction of eight full runs.
+- The first version of the deterministic label called a span "moved" when it was found on a page other than the gold page; that was wrong, because the spans are the answers' own verified quotes, which may legitimately sit on a non-gold page. The rule now compares with the page the quote was cited from at the pinned commit, and 84% of cells are decided without a model.
+- The moved cells are real: 300 of 357 are the same section under `/studio-api/...` before and `/studio/...` after. The documentation renamed its API section between 1 and 15 August 2026, a second wave landed before 1 September, and nothing has moved since. Every method that keys on URLs, including our own gold links and the redirect table (D-002), lives through this once per rename; the span search does not notice it.
+- Pending cells fall from 37 to 10 from June to September: facts that appeared, or were reworded, over the summer; the judged step (two GLM judges, a human sample) will split those into rephrased, changed and absent. Ten cells are pending at the pinned commit itself, which is the fallback whole-page span failing on anchor-less gold pages, not a missing fact.
+
+**Decision.** The snapshot index and the labels ship. The answer evaluation across the eight dates runs on the local server with reasoning off (D-035c) and is judged after the quota window resets; correctness is read on present cells only, refusal on absent ones. The August rename is the first entry of the changelog the time axis produces, and the history tool's `section` form is what shows it.
+
+---
+
+## D-040a · `cite` shipped; the first blind consumer used it
+
+**Status:** decided · 2026-09-09 · `src/glossator/answer/cite.py`, `POST /cite`, MCP tool `cite`, `GLOSSATOR_MCP_TOOLS` allowlist, `GLOSSATOR_MCP_TOKEN`, `GET /health` on the MCP transport, `skills/mistral-docs/`; run `2026-09-09-1905-consumer-eval` (partial)
+
+**Facts.**
+- `cite` verifies a consumer's quotes against the chunks the server served (or a page's merged chunks when a URL is given), returns fragment links for the ones that hold and a reason for the ones that do not, lists the draft's markers that name nothing, and deduplicates sources by URL and anchor (D-027b). It never rewrites the draft and never calls a model. Nineteen fixture tests cover the cases, including a quote across a chunk boundary.
+- The first blind consumer, a small model (muse spark 1.3 at its lowest reasoning) driven headless with no knowledge of being evaluated, ran 59 cells with no tools and 28 with the retrieval tools plus `cite` before its free tier rate-limited the run. With the tools available it called the server on 28 of 28 questions and `cite` on 27, five tool calls per question at the median (four searches, one open, one cite is the typical shape), in 26 s against 12 s without tools. Without tools it still produced links on 58 of 59 answers, from memory and shell tools; whether those links resolve and whether the answers are right is what the judged pass measures.
+- The mechanism for Work is documented in the exact words of the Connector page: a custom MCP Connector with auto-detected bearer authentication, a workspace Skill that triggers on Mistral product questions and prescribes search, read, draft, `cite`, source list.
+
+**Decision.** The tool set is search, open, navigate, read, grep, cite, ask, history, behind an allowlist so one deployment can expose one arm of the consumer evaluation. The remaining arms (`ask` only; the codex, GLM and sonnet consumers) and the judge run when the quota windows reopen, and the README's recommendation waits for those numbers.
+
+---
+
+## D-023b · Reranker calls made during answer evaluations were not in the call ledger
+
+**Status:** decided · 2026-09-09
+
+**Facts.** The answer evaluation built its search engine without a recorder, so every listwise reranker call it made (one per single-pass question, one per loop round) was neither in `calls.jsonl` nor in the record's trace; only the retrieval grid recorded its reranker calls. That is why the recorded spend (2.81 USD across every recorded chat call, D-036b) sits well under the console's 7.04 EUR: roughly one reranker call of about five thousand tokens per generation call went unrecorded, on top of embeddings. The answers themselves were unaffected.
+
+**Decision.** The answer evaluation and the snapshot evaluation now share one recorder between the engine and the answer model, so reranker calls land in `calls.jsonl` beside generation calls. The evaluations already recorded keep their generation-only ledgers, stated as such; the console figure remains the number of record for spend, and the README says the recorded totals are a lower bound for runs before this date.
