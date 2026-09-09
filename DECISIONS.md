@@ -597,3 +597,23 @@ Separation is the check that catches random weights; raw similarity does not, be
 **Facts.** The host disk sat at 92%. Vespa blocks external feeds above 80% of disk, and the toolkit's generated `services.xml` offers no seam for `<resource-limits>`, so the local deployment carried a hand-patched limit (D-025). At 01:55 a worker redeployed the application package through the toolkit's CLI, which reset the limit; its `make ingest` then had every feed rejected, and because re-indexing deletes a page's chunks before writing the new ones, the `sec1024` schema was left with zero documents. The retrieval grid's two reranked rows and the first floor calibration ran against the empty schema and scored zero; the eleven non-reranked rows had completed before it. The patched package was redeployed and `sec1024` re-ingested (4,440 chunks, zero failures); the reranked rows and the calibration were re-run as separate run directories.
 
 **Decisions.** (1) Ingestion must not delete before it has something to write: the pipeline verifies that the embedding step succeeded and the feed is accepted for the first page before deleting anything, and aborts on the first "Failed to index document" instead of continuing through 411 pages. (2) The README warns that Vespa refuses feeds above 80% disk. (3) Only one process writes to Vespa at a time during evaluation runs.
+
+---
+
+## D-030b · Similarity floors stay off in v1
+
+**Status:** decided · 2026-09-09 · reverses the "to calibrate" part of D-030 · run `eval/runs/2026-09-09-0115-dev-floors`
+
+**Facts** (294 dev questions and 15 junk questions against `sec1024`, cosine of the top-50 hits):
+
+| population | n | best hit, min | best hit, median | best hit, max |
+|---|---|---|---|---|
+| real (answerable) | 244 | 0.696 | 0.865 | 0.927 |
+| junk (cooking, veterinary, astronomy, sport) | 15 | 0.546 | 0.609 | 0.679 |
+| unanswerable (corpus vocabulary) | 50 | 0.723 | 0.825 | 0.871 |
+
+- The corridor between the worst real question and the best junk question is 0.017 wide (0.679 to 0.696); the proposed floor 0.687 sits inside it with no safety margin for a held-out question the corpus phrases differently.
+- All 50 unanswerable questions clear any floor that keeps the real ones, by a wide margin (their median best hit is 0.825). The floor cannot help the refusal case, which is the case that matters for answer quality (D-033).
+- The lexical-footing gate never fires on this corpus: 0 of 15 junk questions lack a content word found somewhere in 411 pages of prose. The vocabulary is too broad for the gate that worked on vidtheque's transcript corpus.
+
+**Decision.** `similarity_floor` and `similarity_margin` stay `None` in v1; the footing check stays available in the trace but gates nothing. Off-topic questions are handled by the answer layer's insufficient-evidence path and measured by the judge. The calibration tool and this run stay in the repository so the decision can be revisited on a corpus where the corridor is wide.
