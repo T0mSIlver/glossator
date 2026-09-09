@@ -3,7 +3,8 @@
 glossator answers technical questions over [docs.mistral.ai](https://docs.mistral.ai)
 with cited sources. It returns Markdown with `[n]` markers and checks each cited
 quote against the retrieved chunk before returning it. FastAPI and MCP use the
-same retrieval and answer code.
+same `glossator.answer.service.ask` function and build their engines with
+`RetrievalConfig.shipped()`.
 
 ## Architecture in ten lines
 
