@@ -14,17 +14,17 @@ depends on a model's opinion, so none of them moves when a judge is swapped.
 The judge answers what code cannot: whether the answer is *right*, whether its
 claims are actually in the passages it cites, and whether each citation supports
 the sentence it hangs on. It is shown the question, the reference answer, the
-gold URLs, the answer and the cited passages verbatim -- and never which strategy
-wrote the answer, so it cannot prefer one.
+answer and the cited passages verbatim. It sees no URL, page identifier, or strategy.
 
 ## Configuration
 
 - Generation model: `ministral-14b-2512`
-- Judge model: `glm-5.3` (answer-judge/v1)
-- Index variant: `sec1024`, top_k 8, context budget 6000 tokens
+- Judge models: `zai:glm-5.3`, `zai:glm-5.3-flash`, `mistral:ministral-14b-2512`; primary first (answer-judge/v2)
+- Index variant: `sec1024`, top_k 8, rerank unknown (off), context budget 6000 tokens
+- Non-English questions rendered in English for retrieval: unknown
 - Dataset: `eval/dev.jsonl`, sha256 `acf3c2e148f1aa4036565ac03dd7a3a7e9bef5d0717529976ce9422b68b35490`
 - Questions: 60; strategies: 3; records: 180
-- Judge prompt hashes: {"judge_citation": "4603459ac6e543de", "judge_system": "b8150fdcba16ff47", "judge_user": "5bbdcd0c47bf9a06"}
+- Judge prompt hashes: {"judge_citation": "d1565f592953cb68", "judge_system": "3b300bf0bcd8ea7f", "judge_user": "4e976b80283c7257"}
 
 `config.json` holds every other parameter, including the price table the USD
 columns were computed with.
@@ -35,27 +35,35 @@ columns were computed with.
 
 ## Results
 
-180 of 180 answers were judged by `glm-5.3` with thinking disabled. 0 answer(s) ended in an error and are recorded with it.
+180 of 180 answers were judged by the primary judge `zai:glm-5.3`. 0 answer(s) ended in an error and are recorded with it.
 
 ### Citations against the gold sources
 
-Whether the answer's verified citations point at the pages the dataset says hold the answer. Unanswerable questions have no gold source, so they are left out of these two tables rather than counted as failures.
+Whether the answer's verified citations point at the pages the dataset says hold the answer. Unanswerable questions have no gold source, so they are left out of these tables rather than counted as failures. Capability questions also accept a named model's own card, and the last table counts matches that passed only because of that documented relaxation.
 
 **cited_url_match** -- a verified citation names a gold page
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.80 | 1.00 | 0.70 | 0.10 | 0.90 | -- | **0.70** |
-| `search_loop` | `ministral-14b-2512` | 0.80 | 1.00 | 0.70 | 0.50 | 0.90 | -- | **0.78** |
-| `outline` | `ministral-14b-2512` | 0.80 | 0.40 | 0.00 | 0.50 | 0.40 | -- | **0.42** |
+| `single_pass` | `ministral-14b-2512` | 0.80 | 1.00 | 0.70 | 0.20 | 0.90 | -- | **0.72** |
+| `search_loop` | `ministral-14b-2512` | 0.80 | 1.00 | 0.70 | 0.60 | 0.90 | -- | **0.80** |
+| `outline` | `ministral-14b-2512` | 0.80 | 0.40 | 0.00 | 0.70 | 0.40 | -- | **0.46** |
 
 **cited_anchor_match** -- a verified citation names the gold section
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.30 | 1.00 | 0.60 | 0.10 | 0.50 | -- | **0.50** |
-| `search_loop` | `ministral-14b-2512` | 0.30 | 1.00 | 0.10 | 0.50 | 0.10 | -- | **0.40** |
-| `outline` | `ministral-14b-2512` | 0.00 | 0.40 | 0.00 | 0.50 | 0.00 | -- | **0.18** |
+| `single_pass` | `ministral-14b-2512` | 0.30 | 1.00 | 0.60 | 0.20 | 0.50 | -- | **0.52** |
+| `search_loop` | `ministral-14b-2512` | 0.30 | 1.00 | 0.10 | 0.60 | 0.10 | -- | **0.42** |
+| `outline` | `ministral-14b-2512` | 0.00 | 0.40 | 0.00 | 0.70 | 0.00 | -- | **0.22** |
+
+**gold_relaxed_matches** -- matches accepted through the model-card relaxation
+
+| strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
+|---|---|---|---|---|---|---|---|---|
+| `single_pass` | `ministral-14b-2512` | 0 | 0 | 0 | 1 | 0 | 0 | **1** |
+| `search_loop` | `ministral-14b-2512` | 0 | 0 | 0 | 1 | 0 | 0 | **1** |
+| `outline` | `ministral-14b-2512` | 0 | 0 | 0 | 2 | 0 | 0 | **2** |
 
 ### Citation verification
 
@@ -123,31 +131,31 @@ Whether the quotes the model wrote are in the sources it named. A fabricated rej
 
 ### Judged quality
 
-GLM's verdicts (D-021), reported beside the deterministic numbers and never merged into them. Correctness scores correct as 1, partial as 0.5, wrong as 0. Groundedness is the fraction of the answer's factual claims the cited passages support. Citation relevance is the fraction of citations that support the sentence they are attached to.
+The primary judge's verdicts (D-021), reported beside the deterministic numbers and never merged into them. Correctness scores correct as 1, partial as 0.5, wrong as 0. Groundedness is the fraction of the answer's factual claims the cited passages support. Citation relevance is the fraction of citations that support the sentence they are attached to.
 
 **correctness** -- correctness against the reference answer
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.90 | 0.65 | 0.60 | 0.80 | 1.00 | 0.90 | **0.81** |
-| `search_loop` | `ministral-14b-2512` | 1.00 | 0.95 | 0.95 | 0.80 | 0.95 | 0.95 | **0.93** |
-| `outline` | `ministral-14b-2512` | 0.75 | 0.60 | 0.15 | 1.00 | 0.60 | 0.80 | **0.65** |
+| `single_pass` | `ministral-14b-2512` | 0.90 | 0.70 | 0.50 | 0.75 | 1.00 | 0.90 | **0.79** |
+| `search_loop` | `ministral-14b-2512` | 1.00 | 0.90 | 0.95 | 0.90 | 0.90 | 0.95 | **0.93** |
+| `outline` | `ministral-14b-2512` | 0.75 | 0.55 | 0.15 | 0.95 | 0.55 | 0.90 | **0.64** |
 
 **groundedness** -- claims supported by the cited passages
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.96 | 0.82 | 0.68 | 0.53 | 0.90 | 0.61 | **0.75** |
-| `search_loop` | `ministral-14b-2512` | 0.87 | 0.86 | 0.88 | 0.61 | 0.90 | 0.75 | **0.81** |
-| `outline` | `ministral-14b-2512` | 0.76 | 0.70 | 0.35 | 0.80 | 0.75 | 0.40 | **0.65** |
+| `single_pass` | `ministral-14b-2512` | 0.96 | 0.82 | 0.61 | 0.58 | 0.89 | 0.64 | **0.75** |
+| `search_loop` | `ministral-14b-2512` | 0.84 | 0.88 | 0.90 | 0.73 | 0.92 | 0.76 | **0.84** |
+| `outline` | `ministral-14b-2512` | 0.78 | 0.69 | 0.36 | 0.78 | 0.68 | 0.44 | **0.64** |
 
 **citation_relevance** -- citations that support their sentence
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 1.00 | 0.91 | 0.81 | 0.77 | 0.90 | 1.00 | **0.89** |
-| `search_loop` | `ministral-14b-2512` | 1.00 | 0.88 | 0.84 | 0.73 | 1.00 | 1.00 | **0.91** |
-| `outline` | `ministral-14b-2512` | 0.91 | 0.88 | 0.96 | 0.89 | 0.75 | 0.62 | **0.85** |
+| `single_pass` | `ministral-14b-2512` | 1.00 | 0.88 | 0.79 | 0.81 | 0.90 | 0.70 | **0.86** |
+| `search_loop` | `ministral-14b-2512` | 0.89 | 0.92 | 0.91 | 0.86 | 1.00 | 0.89 | **0.91** |
+| `outline` | `ministral-14b-2512` | 0.91 | 0.82 | 0.89 | 1.00 | 0.73 | 0.70 | **0.85** |
 
 ### Effort
 
@@ -217,6 +225,32 @@ What each strategy spent to get there.
 | `search_loop` | `ministral-14b-2512` | 2.20 | 3.00 | 3.40 | 2.90 | 2.90 | 4.00 | **3.07** |
 | `outline` | `ministral-14b-2512` | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | **1.00** |
 
+## Agreement
+
+Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses quadratic weights. Exact agreement requires the same label.
+
+### Judge pairs
+
+| first judge | second judge | answers | quadratic-weighted kappa | exact agreement |
+|---|---|---:|---:|---:|
+| `zai:glm-5.3` | `zai:glm-5.3-flash` | 180 | 0.92 | 0.92 |
+| `zai:glm-5.3` | `mistral:ministral-14b-2512` | 180 | 0.52 | 0.76 |
+| `zai:glm-5.3-flash` | `mistral:ministral-14b-2512` | 180 | 0.54 | 0.77 |
+
+### Krippendorff's alpha
+
+| raters | ordinal alpha | pairwise exact agreement |
+|---|---:|---:|
+| configured judges | 0.65 | 0.81 |
+
+### Judge means
+
+| judge | answers | mean correctness | human-labeled answers |
+|---|---:|---:|---:|
+| `zai:glm-5.3` | 180 | 0.79 | -- |
+| `zai:glm-5.3-flash` | 180 | 0.79 | -- |
+| `mistral:ministral-14b-2512` | 180 | 0.82 | -- |
+
 ## Cost and latency
 
 The run made 180 answers over 60 questions:
@@ -228,7 +262,7 @@ percentile 11.9 s.
 
 `ministral-14b-2512` has no published price, so the USD column of this run is zero by construction. The row beside it prices the same recorded tokens at mistral-medium-2604 rates (D-017), which is what the shipped configuration would have cost.
 
-Judging spent 497916 prompt and 45948 completion tokens over 180 call(s) (13516 of them reasoning tokens, with thinking disabled), at a mean of 3.8 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 1.0915 USD.
+Judging spent 1458613 prompt and 120625 completion tokens over 540 call(s) (18557 of them reasoning tokens, with thinking disabled), at a mean of 9.4 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 3.0926 USD.
 
 ## Winner per metric
 

@@ -1,0 +1,3 @@
+{"question_id":"q1","strategy":"single_pass","run":"fixture-run","label":"correct","note":"Matches the reference."}
+{"question_id":"q1","strategy":"search_loop","run":"fixture-run","label":"partial","note":"Misses one limit."}
+{"question_id":"q2","strategy":"single_pass","run":"fixture-run","label":"wrong","note":"Confuses tools with calls."}
