@@ -1058,3 +1058,47 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - The pre-reranker candidate list is unrecoverable for these runs (D-023b); from now on the tool separates a reranker drop from a search miss.
 
 **Decision.** The refusal rule stays as it is. The next product work is on the generator's side: the two prompt rules from D-021b, a "state the exact value or limit before explaining" instruction for the partial-answer shape, and a re-run on Medium or Small once the account allows it; retrieval work is limited to badly worded questions (conditional rewrite, D-035b). The failure table is reported with every answer evaluation from now on.
+
+---
+
+## D-029a · The public surface is rewritten for agents that decide on their own: names, budgets, concise results
+
+**Status:** decided · 2026-09-10 · `docs/context-surface-audit.md` (sources: Anthropic, "Writing tools for agents"; the MCP specification 2025-06-18 on tools and server instructions; Mistral, `vibe/work/connectors/mcp-connectors`, "Current limitations"), two real sessions with the deployed server (Claude Sonnet in Claude Code, Mistral Work), commits 37d5828, 55fe570, dbf0d9d, 1f7c32c
+
+**Facts.**
+- In the Claude Code session the model answered a Mistral question from memory and only searched when told "use glossator": the tools appeared as `glossator-public: search`, nothing in the name said Mistral. In the Work session the connector was called unprompted, and Work rendered every tool result verbatim in its UI: index variant, "hybrid bm25+vector", scores, byte offsets, chunk ids, a paste-ready follow-up query.
+- Measured on the old surface: a five-hit search cost 1,687 tokens of which 34% was documentation text; the score was the rank restated ((total minus position) divided by total) and `navigate` printed 0.000 for every hit; `read` returned 10,516 tokens for one page and a blind consumer received 36,612 characters in one call; the permanent context was 103 tokens of instructions plus 1,379 of descriptions, and Mistral's own known-limitations page says tool descriptions are billed against the message context.
+- Work cannot read MCP resources, prompts or dynamic tool lists, so the `glossator://guide` resource never reaches it; the instructions string and the tool descriptions are the only server-side channel, the workspace Skill the only client-side one.
+- Anthropic's guidance: namespace tools by service, write descriptions for a new hire (purpose first, when to use and when not), return what the agent acts on in natural language with a concise default and a detailed option, prefer meaningful identifiers over technical ones.
+
+**Decision.** Server name `mistral-docs`, title "Mistral documentation search". Tools `mistral_docs_search`, `mistral_docs_open_section`, `mistral_docs_step`, `mistral_docs_read_page`, `mistral_docs_find_on_page`, `mistral_docs_answer`, `mistral_docs_verify_quotes`, `mistral_docs_history`, each description under 120 words with a first line naming what it reads in Mistral's documentation; parameters in plain words (`page_url`, `max_hits`, `max_chunks`, `max_matches`, `steps`). The instructions carry the corpus scope, the never-fabricate rule, the refusal rule and the `next:` convention in 240 tokens. Results are concise by default (URL with anchor, heading path, snippet, chunk id; one truncation note) and `response_format="detailed"` restores scores, offsets and full text for an engineer; a five-hit search now costs 1,098 tokens. `read_page` defaults to eight chunks under a 16,000-character budget, `history` renders under 12,000. Every `DO NOT USE` clause and `next:` hint goes through the registration check, so an allowlisted deployment never names a tool it did not register (the old short names in `GLOSSATOR_MCP_TOOLS` still work, with a warning). Permanent context rose to 240 plus 1,673 tokens for the seven deployed tools, which one search call repays. The `glossator` name stays on the repository.
+
+---
+
+## D-037b · A host may send arguments the schema does not declare; read-only tools say so
+
+**Status:** decided · 2026-09-10 · Mistral Work session of 2026-09-09 23:39; commits 37d5828, 1f7c32c
+
+**Facts.** On the attempt that asks the user to approve a call, Work adds an argument `_confirmationReason` (a sentence saying why it wants to run the tool). Six calls in one two-question session failed with "Unexpected keyword argument" and succeeded only on the retry after "Allowed". The blind consumer harness had recorded zero tool errors over 160 calls, because it sends exactly what the schema declares. Nothing in the Work documentation mentions the argument. The MCP specification defines tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) that a host may use to decide whether a call needs confirmation.
+
+**Decision.** Arguments whose name starts with an underscore are host metadata: the parameter guard drops them before validation and announces it (`note: ignored host argument _confirmationReason`). Every tool is annotated read-only, non-destructive, idempotent and closed-world, so a host that reads the hints has no reason to ask for confirmation. The consumer evaluation gains a host-fidelity arm that sends the extra argument and counts tool errors, since a well-behaved harness cannot see this class of defect.
+
+---
+
+## D-015b · No reranker inside an agent's loop; the reranker stays in `answer`
+
+**Status:** decided · 2026-09-10 · audit measurements from the recorded call ledgers; supersedes the search default of D-015 for the MCP surface only
+
+**Facts.** Every search on the old surface ran one listwise reranker call: 4,111 prompt tokens, 5.2 s, about 0.0007 USD, which is 91% of a search's latency and all of its marginal cost, whatever `max_hits` is. The reranker buys +0.115 page recall@1 and +0.141 section recall@1 (D-035) but only +0.057 and +0.042 at depth 5, and an agent that iterates reads several hits and searches again rather than trusting the first one. In the Work session the model ran one search and five opens on its own.
+
+**Decision.** `mistral_docs_search` takes `rerank`, default false, and says what true costs; `mistral_docs_answer` keeps the reranker because a single decisive retrieval is what it does. The consumer evaluation measures the arm with tools with rerank off against rerank on, on correctness, citation quality, seconds and cost per correct answer.
+
+---
+
+## D-027c · Markers stay; every source list is a Markdown block with the section and the quote
+
+**Status:** decided · 2026-09-10 · `docs/context-surface-audit.md` section on citations; commit 55fe570
+
+**Facts.** The owner found misplaced `[n]` markers sloppy and asked for a "Sources" block with a description and a link, as web-search answers render. In Work, Markdown links are clickable and a bare `[1]` is not. The old `cite` output repeated each fragment URL twice (40% of its payload) and its entries carried no description. Three shapes were compared: markers plus a list, inline Markdown links per claim, a sources-only block. Inline fragment links are about 170 percent-encoded characters that a weak consumer has to reproduce inside prose, and one wrong character breaks the link silently; a sources-only block loses the claim-to-quote pairing that makes a citation checkable (D-027b). A sibling project's rule, "give the user the link, not just the timestamp, one link per cited line", is the same idea with a short link.
+
+**Decision.** Per-claim `[n]` markers stay in the prose. Every source list, from `mistral_docs_answer` and from `mistral_docs_verify_quotes`, is a Markdown "Sources" block, one line per distinct (url, anchor): `[1][3] [Heading path](fragment link) — "quoted sentence"`. `verify_quotes` prints failures in full with a remedy and successes as one count line. The API returns the same block as `sources_markdown` beside the structured citations. Dropping the markers is a rendering switch, kept available if use in Work says otherwise.
