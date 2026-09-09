@@ -165,6 +165,13 @@ the account's quota for it opens.
 Reranked single-pass retrieval closed most of the gap to the search loop, which
 remains available as the thorough mode of `ask`.
 
+Questions in another language are rendered in English for retrieval and answered
+in their own language (`DECISIONS.md` D-008b). On 36 French questions
+(`eval/dev-fr.jsonl`) over the English corpus this took cited-URL match from 0.47
+to 0.80 and correctness from 0.75 to 0.94, against 0.82 and 0.93 for the same
+questions in English; the runs are `eval/runs/*-devfr-shipped/` and
+`eval/runs/*-devfr-translated/`.
+
 ## Retrieval evaluation
 
 The retrieval grid compares index variants, ranking weights, and the listwise
