@@ -766,3 +766,23 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 - Search Toolkit and Vespa questions (29 of 85) exist only in transcripts, because the toolkit has no public issue tracker (D-018). Other Claude Code projects on this machine (159 directories, five mentioning Mistral) held no usable stumble.
 
 **Decision.** `eval/mined.jsonl` is the second reporting set beside the generated dev set: never used for tuning, run with every answer evaluation from now on, and the set the talk leads with, since these are the questions users actually had. Tom validates the rows from `.local/runs/t4/mined-validation.md` before the numbers are quoted.
+
+---
+
+## D-035a · Sanity check on questions never used for tuning, and chunking at the answer level
+
+**Status:** decided · 2026-09-09 · runs `*-fresh60-shipped`, `*-fresh60-page128` (60 stratified dev questions never used in an answer evaluation; `eval/dev-fresh60.jsonl`), single pass, Ministral 14B
+
+| metric | tuned 60, S1024 · W-vec · R | fresh 60, S1024 · W-vec · R | fresh 60, P128 · W-vec · R |
+|---|---|---|---|
+| cited URL matches gold | 0.82 | 0.84 | 0.72 |
+| cited anchor matches gold | 0.62 | 0.74 | 0.34 |
+| quote verification rate | 0.86 | 0.85 | 0.79 |
+| fabricated quotes per answer | 0.40 | 0.53 | 0.75 |
+| refusal correct | 0.92 | 0.87 | 0.85 |
+| correctness (judge) | 0.93 | 0.84 | 0.81 (44 of 60 judged) |
+| prompt tokens per answer | 2.0k | 2.2k | 4.8k |
+
+**Facts.** The retrieval-side numbers hold on unseen questions (URL and anchor match are equal or better), so the shipped configuration was not tuned to the sixty questions it was chosen on; judged correctness is 8 points lower on the fresh slice, within what sixty questions and one judge can swing (a 95% interval on 60 is about ±0.09), and the judge study (T1) re-scores both slices with blinded prompts and several judges before that gap is read further. Whole-page chunks lose at the answer level as well as in the grid: 12 points of URL precision, 40 of anchor precision, more fabricated quotes, and twice the prompt tokens, because a page-sized context gives the model more text to misquote from. Fifteen judge calls on the P128 run failed with z.ai per-minute 429s while another process was judging; the answers are recorded and the re-judge pass covers them.
+
+**Decision.** Section chunks stay (D-034). All later answer evaluations report both the tuned slice and the fresh slice, plus the mined set (D-038), so tuning and reporting never share a slice again.
