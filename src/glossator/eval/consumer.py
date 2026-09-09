@@ -883,7 +883,10 @@ def codex_command(
     """
     command = ["codex", "exec", "--skip-git-repo-check", "--ignore-user-config", "-m", spec.model]
     if spec.variant is not None:
-        command += ["-c", f"model_reasoning_effort='\"{spec.variant}\"'"]
+        # The value is TOML, and there is no shell here to strip the quotes a
+        # shell command line would carry: the effort has to arrive as the TOML
+        # string "low", not as the six characters '"low"'.
+        command += ["-c", f'model_reasoning_effort="{spec.variant}"']
     if mcp_url is not None:
         command += [
             "-c",

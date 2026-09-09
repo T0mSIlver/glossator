@@ -638,7 +638,8 @@ def test_codex_command_names_the_verified_mcp_keys() -> None:
     assert command[-1] == "-", "the prompt arrives on stdin"
     assert "mcp_servers.mistral-docs.url=http://127.0.0.1:8111/mcp" in command
     assert "mcp_servers.mistral-docs.bearer_token_env_var=GLOSSATOR_MCP_TOKEN" in command
-    assert "model_reasoning_effort='\"low\"'" in command
+    # TOML, with no shell to strip a shell command line's quotes.
+    assert 'model_reasoning_effort="low"' in command
     # No server at all in A0, and the token never travels on the command line.
     without = codex_command(spec, Path("/tmp/a.md"), None)
     assert not any("mcp_servers" in part for part in without)
