@@ -67,9 +67,9 @@ schema.
 
 | Route | Input | Output |
 |---|---|---|
-| `POST /ask` | `question`; optional `strategy`, `variant`, `model` | answer Markdown, verified citations, trace, usage, cost, latency |
+| `POST /ask` | `question`; optional `strategy`, `variant`, `model` | answer Markdown, verified citations, the rendered `sources_markdown` block, trace, usage, cost, latency |
 | `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
-| `POST /cite` | `draft`, `quotes` (`n`, `quote`, plus `chunk_id` or page `url`); optional `variant` | per-quote verdicts with fragment links, uncovered markers, deduplicated sources |
+| `POST /cite` | `draft`, `quotes` (`n`, `quote`, plus `chunk_id` or page `url`); optional `variant` | per-quote verdicts, uncovered markers, deduplicated sources, the rendered `sources_markdown` block |
 | `GET /pages/{path}` | documentation path; optional `variant`, `start_offset`, `top_k` | up to 100 page sections in reading order; `truncated` says whether more exist |
 | `GET /history` | exactly one of `text`, `section`, `question` | a phrase's first and last stored snapshot, a section's state and diff per date, or the top retrieved section per date |
 | `GET /health` | none | Vespa counts, corpus commit, and embedding-probe status |
@@ -181,10 +181,11 @@ probe passed, and the registered tool names, so the Connectors Debugger and
 the tunnel can check the server.
 
 `skills/mistral-docs/SKILL.md` is a workspace Skill for documentation
-questions: search first with the glossator connector, open or read the sections
-relied on, write the answer with `[n]` markers and verbatim quotes, call
-`cite`, drop any marker that did not verify, paste the source list, never
-answer from memory, and say when the documentation does not answer. Its
+questions: search first with the mistral-docs connector, open or read the
+sections relied on, write the answer with `[n]` markers and verbatim quotes,
+call `mistral_docs_verify_quotes`, drop any marker that did not verify, paste
+the Sources block, never answer from memory, and say when the documentation
+does not answer. Its
 `README.md` explains how to add it as a workspace Skill, and
 `custom-instructions.md` holds three sentences a workspace admin can paste into
 `Context` > `Instructions`.

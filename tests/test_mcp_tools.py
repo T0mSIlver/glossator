@@ -805,10 +805,13 @@ def test_ask_prints_sources_verification_and_next(mcp_server: Any, monkeypatch: 
 
     assert "Use server-sent events [1]" in out
     assert "Sources (1 verified):" in out
-    # The source line prints the fragment link: it carries the anchor inside it
-    # and scrolls a supporting browser to the quoted span.
-    assert "[1] https://docs.mistral.ai/page#a-section:~:text=alpha%20content" in out
-    assert " | Page > A section" in out
+    # One Markdown link per source: its text is the section path, its href the
+    # fragment that scrolls a supporting browser to the quoted sentence.
+    assert (
+        "[1] [Page > A section]"
+        "(https://docs.mistral.ai/page#a-section:~:text=alpha%20content)"
+        ' — "alpha content"' in out
+    )
     assert "citations verified: 1/2" in out
     assert 'next: mistral_docs_open_section(chunk_id="c1")' in out
     # The rejected citation is a plain drop, never a link.
@@ -1052,11 +1055,13 @@ def test_cite_verifies_a_chunk_quote_and_prints_the_source_list(
         },
     )
 
-    assert "[1] verified:" in out
-    assert "https://docs.mistral.ai/page#a-section" in out
-    assert "[1] https://docs.mistral.ai/page#a-section" in out
+    assert "verified: 1 of 1 quotes ([1])" in out
+    assert "Sources (1 verified):" in out
+    assert "[1] [Page > A section](https://docs.mistral.ai/page#a-section:~:text=" in out
+    # The fragment link is printed once, in the block, not again per quote.
+    assert out.count(":~:text=") == 1
     assert "markers with no verified quote" not in out
-    assert "paste the source list as-is" in out
+    assert "paste the Sources block as-is" in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
 
 
@@ -1081,8 +1086,8 @@ def test_cite_verifies_through_a_page_url_and_rejects_a_fabrication(
         },
     )
 
-    assert "[1] verified:" in out
-    assert "[2] NOT verified: quote is not in the cited source" in out
+    assert "verified: 1 of 2 quotes ([1])" in out
+    assert "[2] NOT verified: quote is not in the cited source — " in out
     assert "markers with no verified quote: [2], [3]" in out
 
 
@@ -1156,8 +1161,8 @@ def test_ask_prints_one_entry_per_source(mcp_server: Any, monkeypatch: Any) -> N
 
     out = _call(mcp_server, "mistral_docs_answer", {"question": "how do I stream?"})
 
-    assert "[1], [2] https://docs.mistral.ai/page#a-section" in out
-    assert out.count("https://docs.mistral.ai/page#a-section | Page > A section") == 1
+    assert "[1][2] [Page > A section](" in out
+    assert out.count("Page > A section") == 1
 
 
 def test_the_allowlist_registers_only_the_named_tools(

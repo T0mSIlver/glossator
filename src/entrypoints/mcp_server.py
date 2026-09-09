@@ -26,7 +26,7 @@ from entrypoints.param_suggestions import suggest_fields
 from glossator import history as history_service
 from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
-from glossator.answer.citations import Answer
+from glossator.answer.citations import Answer, RejectionReason
 from glossator.answer.cite import (
     CiteInputError,
     CiteQuote,
@@ -1147,20 +1147,34 @@ def _cite_next_hint() -> str:
 
 
 def _cite_text(result: cite_engine.CiteResult) -> str:
-    """One cite result as text: verdicts, uncovered markers, the source list."""
+    """One cite result as text: failures, a count, uncovered markers, sources.
+
+    A verified quote used to print its fragment URL in a verdict line and again
+    under its source entry, and a fragment URL is 170 characters of encoded
+    quote. The link is printed once, in the Sources block; what a caller has to
+    act on is the list of failures, so those stay in full.
+    """
     lines = []
     for line in result.notes:
         lines.append(line)
     if result.notes:
         lines.append("")
+    verified = [item for item in result.quotes if item.verified]
     for item in result.quotes:
         if item.verified:
-            detail = item.fragment_url or item.citation_url or ""
-            if item.emphasis_normalized:
-                detail += " (verified after emphasis normalization)"
-            lines.append(f"[{item.n}] verified: {detail}")
-        else:
-            lines.append(f"[{item.n}] NOT verified: {item.reason or 'unverified'}")
+            continue
+        lines.append(
+            f"[{item.n}] NOT verified: {item.reason or 'unverified'} — {_cite_remedy(item.reason)}"
+        )
+    if result.quotes:
+        named = ", ".join(f"[{item.n}]" for item in verified)
+        emphasis = [item.n for item in verified if item.emphasis_normalized]
+        count = f"verified: {len(verified)} of {len(result.quotes)} quotes"
+        if named:
+            count += f" ({named})"
+        if emphasis:
+            count += f"; {', '.join(f'[{n}]' for n in emphasis)} after emphasis normalization"
+        lines.append(count)
     lines.append("")
     if result.unverified_markers:
         named = ", ".join(f"[{n}]" for n in result.unverified_markers)
@@ -1169,10 +1183,22 @@ def _cite_text(result: cite_engine.CiteResult) -> str:
             "against a quoted source."
         )
         lines.append("")
-    lines.append(result.source_list_markdown)
+    lines.append(result.sources_markdown)
     lines.append("")
     lines.append(f"next: {result.next}")
     return "\n".join(lines).rstrip()
+
+
+def _cite_remedy(reason: str | None) -> str:
+    """What to do about one failed quote, by the reason it failed."""
+    if reason == RejectionReason.TOO_SHORT:
+        return "quote a whole sentence from the chunk"
+    if reason == RejectionReason.FABRICATED:
+        return _hint(
+            (OPEN_SECTION, f"{OPEN_SECTION}(chunk_id=…) and copy the sentence verbatim"),
+            (SEARCH, f"{SEARCH}(query=…) for a source that states the claim"),
+        )
+    return "check the chunk_id or url against the result that printed it"
 
 
 def _answer_text(question: str, answer: Answer) -> str:

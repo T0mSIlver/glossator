@@ -29,6 +29,7 @@ def _hit(n: int = 1) -> Any:
         anchor=ANCHOR,
         citation_url=f"{URL}#{ANCHOR}",
         heading_path=("Chat completions", "Streaming"),
+        heading_line="Chat completions > Streaming",
         page_title="Chat completions",
         kind="doc",
         locale="en",
@@ -605,12 +606,14 @@ def test_cite_verifies_a_chunk_quote_with_a_fragment_link() -> None:
                     "fragment_url": (
                         f"{URL}#{ANCHOR}:~:text=Server%2Dsent%20events%20carry%20the%20response."
                     ),
+                    "text": "Server-sent events carry the response.",
                 }
             ],
-            "heading": "",
+            "heading": "Chat completions > Streaming",
         }
     ]
-    assert "[1]" in body["source_list_markdown"]
+    assert body["sources_markdown"].startswith("Sources (1 verified):")
+    assert "[1] [Chat completions > Streaming](" in body["sources_markdown"]
     assert body["request_id"] == "cite-1"
     assert response.headers["X-Request-Id"] == "cite-1"
 
@@ -764,12 +767,21 @@ def test_ask_lists_one_source_entry_per_url_and_anchor(
             "citation_url": f"{URL}#{ANCHOR}",
             "numbers": [1, 2],
             "quotes": [
-                {"n": 1, "fragment_url": f"{URL}#{ANCHOR}:~:text=Server."},
-                {"n": 2, "fragment_url": f"{URL}#{ANCHOR}:~:text=Server."},
+                {
+                    "n": 1,
+                    "fragment_url": f"{URL}#{ANCHOR}:~:text=Server.",
+                    "text": "Server-sent events carry the response.",
+                },
+                {
+                    "n": 2,
+                    "fragment_url": f"{URL}#{ANCHOR}:~:text=Server.",
+                    "text": "Server-sent events carry the response.",
+                },
             ],
             "heading": "",
         }
     ]
+    assert body["sources_markdown"].splitlines()[1].startswith("[1][2] [")
 
 
 def test_history_section_errors_become_bad_param(

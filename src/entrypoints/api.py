@@ -31,6 +31,7 @@ from glossator.answer.cite import (
     CiteResult,
     SourceEntry,
     entries_with_headings,
+    sources_markdown,
 )
 from glossator.answer.config import (
     DEFAULT_VARIANT,
@@ -410,7 +411,11 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
     for citation in payload["trace"]["unverified_citations"]:
         if citation["url"]:
             citation["citation_url"] = _citation_url(citation["url"], citation["anchor"])
-    payload["sources"] = [entry.model_dump() for entry in _deduped_sources(answer)]
+    entries = _deduped_sources(answer)
+    payload["sources"] = [entry.model_dump() for entry in entries]
+    # The same block the MCP answer prints, so a consumer of either surface
+    # pastes the identical sources under the identical answer.
+    payload["sources_markdown"] = sources_markdown(entries)
     payload["trace_summary"] = answer.trace.summary()
     payload["request_id"] = request.state.request_id
     return payload

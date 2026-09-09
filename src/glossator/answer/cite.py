@@ -72,6 +72,12 @@ class VerifiedQuote(BaseModel):
     url: str | None = None
     anchor: str | None = None
     chunk_id: str | None = None
+    quote: str = ""
+    """The submitted quote, so the source list can show what was checked."""
+
+    heading: str = ""
+    """The section path of the chunk the quote was checked against."""
+
     emphasis_normalized: bool = False
     """True when the quote verified only after emphasis normalization."""
 
@@ -89,6 +95,8 @@ class SourceQuote(BaseModel):
 
     n: int
     fragment_url: str | None = None
+    text: str = ""
+    """The quoted sentence, printed under its source in the rendered block."""
 
 
 class SourceEntry(BaseModel):
@@ -115,7 +123,9 @@ class CiteResult(BaseModel):
     unverified_markers: list[int] = Field(default_factory=list)
     """Draft ``[n]`` markers that name no verified quote: remove or fix them."""
     sources: list[SourceEntry] = Field(default_factory=list)
-    source_list_markdown: str = ""
+    sources_markdown: str = ""
+    """The rendered Markdown block, ready to paste under an answer."""
+
     notes: list[str] = Field(default_factory=list)
     """Announced clamps: quotes cut to 20, the draft cut to 20,000 characters."""
     next: str = ""
@@ -155,12 +165,21 @@ def dedupe_sources(
             )
             grouped[key] = entry
             order.append(key)
+        # The heading is the entry's description in the rendered block. The
+        # answer path passes it separately through entries_with_headings; a
+        # verified quote carries its own, so cite entries have one too.
+        heading = grouped[key].heading or getattr(item, "heading", "")
         entry = grouped[key].model_copy(
             update={
                 "numbers": [*grouped[key].numbers, item.n],
+                "heading": heading,
                 "quotes": [
                     *grouped[key].quotes,
-                    SourceQuote(n=item.n, fragment_url=item.fragment_url),
+                    SourceQuote(
+                        n=item.n,
+                        fragment_url=item.fragment_url,
+                        text=getattr(item, "quote", ""),
+                    ),
                 ],
             }
         )
@@ -176,26 +195,40 @@ def entries_with_headings(
     entries = dedupe_sources(items)
     out: list[SourceEntry] = []
     for entry in entries:
-        heading = " > ".join(headings[n] for n in entry.numbers if headings.get(n))
+        # One entry, one section path: several markers on one source are the
+        # same section, so the paths are deduplicated rather than concatenated.
+        paths = list(dict.fromkeys(headings[n] for n in entry.numbers if headings.get(n)))
+        heading = " > ".join(paths)
         out.append(entry.model_copy(update={"heading": heading}) if heading else entry)
     return out
 
 
 def sources_markdown(entries: list[SourceEntry]) -> str:
-    """A ready-to-paste Markdown source list over deduplicated entries."""
+    """A ready-to-paste Markdown source list over deduplicated entries.
+
+    One line per distinct (url, anchor): the markers that point at it, a link
+    whose text is the section path and whose href is the text fragment that
+    scrolls to the quoted sentence, and the sentence itself. A bare URL is at
+    the mercy of a renderer's autolinking, and an `[n]` alone is inert text.
+    """
     if not entries:
         return "Sources (0 verified):\n(none)"
     lines = [f"Sources ({sum(len(entry.numbers) for entry in entries)} verified):"]
     for entry in entries:
-        numbers = ", ".join(f"[{n}]" for n in entry.numbers)
-        line = f"{numbers} {entry.citation_url}"
-        if entry.heading:
-            line += f" | {entry.heading}"
+        numbers = "".join(f"[{n}]" for n in entry.numbers)
+        first = entry.quotes[0] if entry.quotes else None
+        href = (first.fragment_url if first else None) or entry.citation_url
+        label = _link_label(entry.heading or entry.citation_url)
+        line = f"{numbers} [{label}]({href})"
+        if first and first.text.strip():
+            line += f' — "{" ".join(first.text.split())}"'
         lines.append(line)
-        for quote in entry.quotes:
-            if quote.fragment_url and quote.fragment_url != entry.citation_url:
-                lines.append(f"  [{quote.n}] {quote.fragment_url}")
     return "\n".join(lines)
+
+
+def _link_label(text: str) -> str:
+    """Link text that cannot close its own bracket."""
+    return text.replace("[", "(").replace("]", ")")
 
 
 def _single_chunk_source(n: int, content: str, url: str, anchor: str | None) -> Source:
@@ -271,9 +304,9 @@ async def cite_draft(
     if verified_count:
         next_hint = (
             "keep only the verified quotes; drop every [n] in "
-            f"{unverified} or fix it against a quoted source, then paste the source list"
+            f"{unverified} or fix it against a quoted source, then paste the Sources block"
             if unverified
-            else "every [n] in the draft verified; paste the source list as-is"
+            else "every [n] in the draft verified; paste the Sources block as-is"
         )
     else:
         next_hint = (
@@ -284,7 +317,7 @@ async def cite_draft(
         quotes=checked,
         unverified_markers=unverified,
         sources=entries,
-        source_list_markdown=sources_markdown(entries),
+        sources_markdown=sources_markdown(entries),
         notes=notes,
         next=next_hint,
     )
@@ -315,6 +348,7 @@ async def _cite_chunk(
             url=hit.url,
             anchor=hit.anchor,
             chunk_id=hit.chunk_id,
+            quote=quote.quote,
         )
     span = matched_source_quote(quote.quote, hit.content, min_quote_chars=min_quote_chars)
     return VerifiedQuote(
@@ -325,6 +359,8 @@ async def _cite_chunk(
         url=hit.url,
         anchor=hit.anchor,
         chunk_id=hit.chunk_id,
+        quote=quote.quote,
+        heading=hit.heading_line or hit.page_title,
         emphasis_normalized=reason == VERIFIED_AFTER_EMPHASIS,
     )
 
@@ -366,6 +402,8 @@ async def _cite_url(quote: CiteQuote, *, engine: DocsIndex, min_quote_chars: int
             url=source.url,
             anchor=source.anchor,
             chunk_id=chunk_id,
+            quote=quote.quote,
+            heading=" > ".join(source.heading_path) or source.page_title,
             emphasis_normalized=reason == VERIFIED_AFTER_EMPHASIS,
         )
     first = context.sources[0]

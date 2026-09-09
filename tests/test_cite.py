@@ -230,7 +230,40 @@ def test_duplicate_sources_collapse_to_one_entry() -> None:
     assert entry.anchor == ANCHOR
     assert entry.citation_url == f"{URL}#{ANCHOR}"
     assert entry.numbers == [1, 2, 3]
-    assert "[1], [2], [3]" in result.source_list_markdown
+    assert "[1][2][3] [" in result.sources_markdown
+
+
+def test_the_sources_block_is_markdown_links_with_the_heading_and_the_quote() -> None:
+    result = _run(
+        "It streams [1].",
+        [CiteQuote(n=1, chunk_id="c1", quote="Streaming returns server-sent events")],
+        engine=_Engine([_hit("c1", "Streaming returns server-sent events here", start=0, end=20)]),
+    )
+
+    (line,) = result.sources_markdown.splitlines()[1:]
+    assert line.startswith("[1] [")
+    assert "](https://docs.mistral.ai/page#a-section:~:text=" in line
+    assert line.endswith('— "Streaming returns server-sent events"')
+    assert result.sources[0].heading
+
+
+def test_an_entry_falls_back_to_the_canonical_link_without_a_fragment() -> None:
+    from glossator.answer.cite import SourceEntry, SourceQuote, sources_markdown
+
+    block = sources_markdown(
+        [
+            SourceEntry(
+                url=URL,
+                anchor=ANCHOR,
+                citation_url=f"{URL}#{ANCHOR}",
+                numbers=[1],
+                quotes=[SourceQuote(n=1, fragment_url=None, text="a sentence")],
+                heading="Streaming",
+            )
+        ]
+    )
+
+    assert block.splitlines()[1] == f'[1] [Streaming]({URL}#{ANCHOR}) — "a sentence"'
 
 
 def test_sections_with_different_anchors_stay_separate() -> None:
