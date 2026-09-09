@@ -39,7 +39,8 @@ stdio transport is configured in `.mcp.json` and `.vibe/config.toml`.
 `MISTRAL_API_KEY`, `VESPA_QUERY_PORT`, `VESPA_CONFIG_PORT`, `VESPA_ENDPOINT`,
 `VESPA_CONFIG_URL`, and `WORKSPACE_ROOT` (used by the Bruno API export). The
 API server also reads `GLOSSATOR_CORPUS_DIR`, and the MCP server reads
-`GLOSSATOR_VARIANT`, `GLOSSATOR_MODEL`, and `GLOSSATOR_CORPUS_DIR`. Do not put
+`GLOSSATOR_VARIANT`, `GLOSSATOR_MODEL`, `GLOSSATOR_CORPUS_DIR`,
+`GLOSSATOR_MCP_TOKEN`, and `GLOSSATOR_MCP_TOOLS`. Do not put
 schema names in `.env`.
 
 Vespa blocks feeds when disk usage exceeds 80% by default. Ingestion tests a small
@@ -60,6 +61,7 @@ schema.
 |---|---|---|
 | `POST /ask` | `question`; optional `strategy`, `variant`, `model` | answer Markdown, verified citations, trace, usage, cost, latency |
 | `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
+| `POST /cite` | `draft`, `quotes` (`n`, `quote`, plus `chunk_id` or page `url`); optional `variant` | per-quote verdicts with fragment links, uncovered markers, deduplicated sources |
 | `GET /pages/{path}` | documentation path; optional `variant`, `start_offset`, `top_k` | up to 100 page sections in reading order; `truncated` says whether more exist |
 | `GET /health` | none | Vespa counts, corpus commit, and embedding-probe status |
 | `GET /version` | none | package version, variants, and allowed generation models |
@@ -101,6 +103,7 @@ uv run python -m entrypoints.mcp_server
 | `read(source_id, start_offset, end_offset, top_k=20)` | Read a known page range without ranking it again. |
 | `grep(source_id, pattern, mode="phrase", top_k=5)` | Match a phrase or terms inside one page. |
 | `ask(question, strategy="single_pass")` | Generate an answer and print only verified citations as links. |
+| `cite(draft, quotes)` | Verify your own quotes against the chunks they name; keep only verified quotes. |
 
 Every tool response ends with `next:`. The server announces clamps, rejects
 unknown parameters with `E_BAD_PARAM`, and prints a citation URL on each hit.
@@ -115,6 +118,52 @@ documents them in `/openapi.json`. It exposes exactly three resources:
 
 The MCP server cannot ingest or delete content. Corpus changes go through the
 adapter, manifest checks, and ingestion command.
+
+Set `GLOSSATOR_MCP_TOOLS` to a comma-separated subset of tool names to register
+only those tools (unset means every tool). The server instructions, the
+`glossator://guide` resource, and `GET /health` then cover only the registered
+tools.
+
+## Mistral Work
+
+Serve the MCP server over HTTP behind a tunnel, then register it as a custom
+MCP Connector. From the documentation page on MCP Connectors, in its exact
+words:
+
+1. Open the `Connectors` page.
+2. Click `+ Add Connector` and switch to the `Custom MCP Connector` tab.
+3. Fill in the required fields:
+   - **Connector name**: a unique identifier (no spaces or special characters).
+   - **Server URL**: the full URL of your MCP-compatible server.
+   - **Description** (optional): a short explanation of what this Connector does.
+4. Click `Connect`. The platform detects the server's authentication method automatically.
+
+Authentication, again in the page's exact words:
+
+> Our platform auto-detects the authentication method when you provide the server URL:
+>
+> - **No authentication**: for publicly accessible or trusted internal servers.
+> - **HTTP Bearer Token / Basic Auth**: for servers that require credentials in the `Authorization` header.
+> - **OAuth 2.1** (with dynamic client registration): for servers using standard OAuth 2.1 delegated access. You'll be guided through the consent flow.
+
+Set `GLOSSATOR_MCP_TOKEN` on the server. Every MCP HTTP request must then
+carry `Authorization: Bearer <token>`; requests without it get a 401 naming
+the missing header. Work detects "bearer" automatically when registering the
+Connector. Pre-authorize the read functions (`search`, `ask`, `cite`) per
+Connector so they run without approval prompts, and keep write functions on
+manual approval; the server exposes no write functions. `GET /health` needs no
+header and reports the served variant, the chunk count, whether the embedding
+probe passed, and the registered tool names, so the Connectors Debugger and
+the tunnel can check the server.
+
+`skills/mistral-docs/SKILL.md` is a workspace Skill for documentation
+questions: search first with the glossator connector, open or read the sections
+relied on, write the answer with `[n]` markers and verbatim quotes, call
+`cite`, drop any marker that did not verify, paste the source list, never
+answer from memory, and say when the documentation does not answer. Its
+`README.md` explains how to add it as a workspace Skill, and
+`custom-instructions.md` holds three sentences a workspace admin can paste into
+`Context` > `Instructions`.
 
 ## Search and index variants
 
