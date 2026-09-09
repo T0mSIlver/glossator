@@ -786,3 +786,13 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 **Facts.** The retrieval-side numbers hold on unseen questions (URL and anchor match are equal or better), so the shipped configuration was not tuned to the sixty questions it was chosen on; judged correctness is 8 points lower on the fresh slice, within what sixty questions and one judge can swing (a 95% interval on 60 is about ±0.09), and the judge study (T1) re-scores both slices with blinded prompts and several judges before that gap is read further. Whole-page chunks lose at the answer level as well as in the grid: 12 points of URL precision, 40 of anchor precision, more fabricated quotes, and twice the prompt tokens, because a page-sized context gives the model more text to misquote from. Fifteen judge calls on the P128 run failed with z.ai per-minute 429s while another process was judging; the answers are recorded and the re-judge pass covers them.
 
 **Decision.** Section chunks stay (D-034). All later answer evaluations report both the tuned slice and the fresh slice, plus the mined set (D-038), so tuning and reporting never share a slice again.
+
+---
+
+## D-027b · Citation convention: one marker per claim, one entry per source
+
+**Status:** decided · 2026-09-09
+
+**Decision.** Every factual sentence carries the `[n]` of the source it leans on, so a number repeats when several claims come from one source; the source list shows each source once (deduplicated by URL and anchor), with the checked quotes under it, and each citation links to the exact sentence through a text fragment (D-036). Two sources on one page with different anchors stay separate, since they are two deep links.
+
+**Facts.** Per-claim numbered markers over a deduplicated source list is the convention of Perplexity and of ChatGPT search, and the reason reviewers rate Perplexity's answers easier to audit claim by claim. Vidtheque found that many lines under one link made the model cite the wrong moment and moved to one link per line (D-029). The test the convention has to pass: point at a sentence, click once, land on the paragraph. The verifier makes each marker a checked quote, so the marker is evidence rather than decoration; a marker naming nothing is stripped.
