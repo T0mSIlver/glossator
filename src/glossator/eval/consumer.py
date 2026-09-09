@@ -13,6 +13,13 @@ Every consumer runs from a scratch directory outside the repository with no
 repository files visible, so it cannot read the corpus from disk. Shell tools
 stay available in every arm: the comparison is between whole agents.
 
+Three harnesses are driven headless -- opencode, claude and codex -- each from
+the cell's own directory, with the arm's MCP server declared in a file that
+directory holds and the machine's own settings, servers and plugins switched
+off, so what a cell can reach is exactly what its arm gives it. Their event
+streams are parsed into one record shape, and each stream is copied into the
+run directory beside the row it produced.
+
 Subcommands (``run`` collects answers, ``judge`` grades them, ``score``
 reports) are resumable independently: ``run`` skips (consumer, arm, question)
 cells that already have a record, and ``judge`` skips rows the requested judge
