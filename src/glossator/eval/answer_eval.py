@@ -167,6 +167,7 @@ JUDGE_PROMPT_HASHES = {
 
 JUDGE_TEMPERATURE = 0.0
 JUDGE_MAX_TOKENS = 1200
+JUDGE_PROVIDER_ATTEMPTS = 3
 
 
 class CitationVerdict(BaseModel):
@@ -1064,27 +1065,39 @@ async def judge_one(
     rendered = payload.render()
     started = time.perf_counter()
     with candidate_scope(f"{record.question_id}:{record.strategy}"), call_scope("judge"):
-        try:
-            completion = await provider.complete(
-                [
-                    {"role": "system", "content": JUDGE_SYSTEM},
-                    {"role": "user", "content": rendered},
-                ],
-                model=model,
-                temperature=JUDGE_TEMPERATURE,
-                max_tokens=JUDGE_MAX_TOKENS,
-                response_schema=JudgeVerdict,
-                thinking="disabled" if provider.name == "zai" else None,
-            )
-        except ProviderCallError as error:
-            return JudgeRecord(
-                model=model,
-                provider=provider.name,
-                prompt_version=JUDGE_VERSION,
-                input_text=rendered,
-                error=str(error),
-                latency_ms=(time.perf_counter() - started) * 1000,
-            )
+        for attempt in range(JUDGE_PROVIDER_ATTEMPTS):
+            try:
+                completion = await provider.complete(
+                    [
+                        {"role": "system", "content": JUDGE_SYSTEM},
+                        {"role": "user", "content": rendered},
+                    ],
+                    model=model,
+                    temperature=JUDGE_TEMPERATURE,
+                    max_tokens=JUDGE_MAX_TOKENS,
+                    response_schema=JudgeVerdict,
+                    thinking="disabled" if provider.name == "zai" else None,
+                )
+                break
+            except ProviderCallError as error:
+                last = attempt == JUDGE_PROVIDER_ATTEMPTS - 1
+                if last or "HTTP 429" not in str(error):
+                    return JudgeRecord(
+                        model=model,
+                        provider=provider.name,
+                        prompt_version=JUDGE_VERSION,
+                        input_text=rendered,
+                        error=str(error),
+                        latency_ms=(time.perf_counter() - started) * 1000,
+                    )
+                delay = (5.0 if provider.name == "zai" else 20.0) * (attempt + 1)
+                logger.warning(
+                    "Judge rate limited, backing off",
+                    provider=provider.name,
+                    model=model,
+                    delay=delay,
+                )
+                await asyncio.sleep(delay)
     verdict = completion.parsed if isinstance(completion.parsed, JudgeVerdict) else None
     return JudgeRecord(
         model=model,
@@ -1671,7 +1684,11 @@ async def _rejudge_record(
     providers: Mapping[ProviderName, OpenAICompatibleProvider],
 ) -> QuestionRecord:
     judgements = dict(record.judges)
-    missing = [judge for judge in judges if judge.identifier not in judgements]
+    missing = [
+        judge
+        for judge in judges
+        if judge.identifier not in judgements or judgements[judge.identifier].verdict is None
+    ]
     if missing:
         judgements.update(await judge_with_models(record, missing, providers))
     return record.model_copy(
