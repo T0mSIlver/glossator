@@ -26,6 +26,7 @@ _CODE = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.DOTALL)
 _FENCES = (re.compile(r"(?m)^[ \t]*```"), re.compile(r"(?m)^[ \t]*~~~"))
 _EMPHASIS = frozenset("*_`")
 _WHITESPACE = re.compile(r"\s+")
+_MARKER_WITH_SPACE = re.compile(r" ?\[([1-9]\d{0,2})\]")
 
 DEFAULT_MIN_QUOTE_CHARS = 8
 """Fallback for callers with no `AnswerConfig` to hand; the live value is
@@ -201,7 +202,7 @@ def strip_markers(text: str, numbers: Collection[int]) -> str:
         in_code = any(start <= match.start() < end for start, end in code_ranges)
         return match.group(0) if in_code or int(match.group(1)) not in numbers else ""
 
-    return MARKER.sub(replace, text)
+    return _MARKER_WITH_SPACE.sub(replace, text)
 
 
 def normalize(text: str) -> str:

@@ -96,7 +96,7 @@ def test_a_stray_prose_marker_is_removed_and_kept_in_the_trace(config: AnswerCon
         )
     )
 
-    assert answer.answer_markdown == "Use `messages[3]` as shown [1]. Stray ."
+    assert answer.answer_markdown == "Use `messages[3]` as shown [1]. Stray."
     assert answer.trace.unmatched_markers == [3]
 
 
@@ -114,7 +114,7 @@ def test_refusal_markers_without_citations_are_removed(config: AnswerConfig) -> 
         )
     )
 
-    assert answer.answer_markdown == "The documentation does not say ."
+    assert answer.answer_markdown == "The documentation does not say."
     assert answer.trace.unmatched_markers == [1, 2, 3]
 
 

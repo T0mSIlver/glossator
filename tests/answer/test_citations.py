@@ -144,7 +144,7 @@ def test_an_inline_code_span_is_not_a_citation_marker() -> None:
 
 def test_stripping_a_prose_marker_keeps_the_same_marker_in_inline_code() -> None:
     assert strip_markers("Stray [2], but `messages[2]` is code.", {2}) == (
-        "Stray , but `messages[2]` is code."
+        "Stray, but `messages[2]` is code."
     )
 
 
