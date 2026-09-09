@@ -295,6 +295,7 @@ def _svg(metrics: Mapping[str, Any]) -> str:
     gap = 35
     maximum = max((cell["cells"] for cell in metrics["per_snapshot"].values()), default=1)
     colors = {"present": "#2f855a", "changed": "#d69e2e", "absent": "#c53030"}
+    pending_color = "#a0aec0"
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
         f'viewBox="0 0 {width} {height}">',
@@ -317,6 +318,14 @@ def _svg(metrics: Mapping[str, Any]) -> str:
             parts.append(
                 f'<rect x="{x}" y="{y:.1f}" width="{bar_width}" '
                 f'height="{segment:.1f}" fill="{colors[label]}"/>'
+            )
+        pending = counts.get("unknown", 0)
+        if pending:
+            segment = chart_height * pending / maximum
+            y -= segment
+            parts.append(
+                f'<rect x="{x}" y="{y:.1f}" width="{bar_width}" '
+                f'height="{segment:.1f}" fill="{pending_color}"/>'
             )
         parts.append(
             f'<text x="{x + bar_width / 2}" y="370" text-anchor="middle" '
@@ -355,6 +364,9 @@ A cell is `present` when a verified supporting quote occurs in that snapshot. A
 match on another page is marked as moved. If no quote matches, GLM 5.3 and GLM
 5.3 Flash compare the reference answer with the five highest-scoring lexical
 pages. The primary judge assigns `present_rephrased`, `changed`, or `absent`.
+Cells still waiting for that judged step are `unknown` (shown grey): a later run
+without `--deterministic-only` judges exactly those cells and never re-decides
+the rest.
 
 Correctness can only be scored on present cells because an answer cannot be
 correct when its fact is missing or has a different dated value. Absent cells
@@ -383,7 +395,16 @@ async def label(
     manifest_path: Path = DEFAULT_MANIFEST,
     runs_root: Path = RUNS_ROOT,
     seed: int = LABEL_SEED,
+    deterministic_only: bool = False,
 ) -> tuple[Path, dict[str, Any]]:
+    """Decide one availability cell per question and snapshot.
+
+    With ``deterministic_only`` the exact-span step runs and every other cell is
+    recorded as ``pending_judges`` (label ``unknown``) with its lexical top pages,
+    so the judged step can fill it in later without re-deciding anything. A later
+    run without the flag drops the pending rows and judges them; finished cells
+    are never re-decided.
+    """
     questions = _load_questions(datasets)
     snapshots = _built_snapshots(manifest_path)
     run_path = _run_path(name, runs_root)
@@ -394,21 +415,30 @@ async def label(
     calls_path.touch()
     labels_path.touch()
     records_path.touch()
-    existing = [json.loads(line) for line in labels_path.read_text().splitlines() if line]
+    stored = [json.loads(line) for line in labels_path.read_text().splitlines() if line]
+    existing = [row for row in stored if row.get("decided_by") != "pending_judges"]
+    if len(existing) != len(stored):
+        # Pending rows are placeholders for a later judged pass: drop them here so
+        # the resume below re-examines exactly those cells instead of duplicating
+        # them, and keep both files in sync with what the metrics are computed from.
+        labels_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in existing))
+        records_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in existing))
     done = {(row["question_id"], row["snapshot"]) for row in existing}
     quotes = _verified_quotes(runs_root)
     fallbacks = _fallback_spans(questions)
     recorder = LabelCallRecorder(calls_path)
-    providers = {
-        model: OpenAICompatibleProvider(
-            "zai",
-            asyncio.Semaphore(1),
-            caller_tag="eval.snapshots",
-            recorder=recorder,
-            seed=seed,
-        )
-        for model in (PRIMARY_JUDGE, SECONDARY_JUDGE)
-    }
+    providers: Mapping[str, OpenAICompatibleProvider] = {}
+    if not deterministic_only:
+        providers = {
+            model: OpenAICompatibleProvider(
+                "zai",
+                asyncio.Semaphore(1),
+                caller_tag="eval.snapshots",
+                recorder=recorder,
+                seed=seed,
+            )
+            for model in (PRIMARY_JUDGE, SECONDARY_JUDGE)
+        }
     try:
         for snapshot in snapshots:
             documents = load_documents(Path(snapshot.corpus_dir).expanduser())
@@ -420,6 +450,15 @@ async def label(
                 spans = quotes.get(question.id) or fallbacks.get(question.id, [])
                 cell = _exact_cell(question, spans, documents)
                 top_pages: list[dict[str, str]] = []
+                if cell is None and deterministic_only:
+                    top_pages = _top_pages(lexical, question.reference_answer)
+                    cell = {
+                        "label": "unknown",
+                        "moved": False,
+                        "decided_by": "pending_judges",
+                        "page": None,
+                        "judges": {},
+                    }
                 if cell is None:
                     top_pages = _top_pages(lexical, question.reference_answer)
                     cell_label, judges = await _judge_cell(question, top_pages, providers)
@@ -456,6 +495,7 @@ async def label(
         "snapshot_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "judges": [PRIMARY_JUDGE, SECONDARY_JUDGE],
         "seed": seed,
+        "deterministic_only": deterministic_only,
         "prompt_sha256": hashlib.sha256(JUDGE_SYSTEM.encode()).hexdigest(),
     }
     (run_path / "config.json").write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
@@ -475,6 +515,40 @@ def _labels_by_key(path: Path) -> dict[tuple[str, str], str]:
         (row["question_id"], row["snapshot"]): row["label"]
         for row in (json.loads(line) for line in path.read_text().splitlines() if line)
     }
+
+
+def score_snapshot_records(
+    records: Sequence[Mapping[str, Any]], snapshots: Sequence[SnapshotRecord]
+) -> dict[str, Any]:
+    """Correctness on present cells and refusal on absent cells, per snapshot.
+
+    Rows without a judge verdict (a run with ``--skip-judge``) contribute their
+    cell counts but no score: correctness and refusal stay ``None`` until judges
+    fill them in.
+    """
+    per_snapshot: dict[str, Any] = {}
+    for snapshot in snapshots:
+        cells = [row for row in records if row["snapshot"] == snapshot.date]
+        present = [
+            row for row in cells if row["availability_label"] in {"present", "present_rephrased"}
+        ]
+        absent = [row for row in cells if row["availability_label"] == "absent"]
+        correctness = []
+        for row in present:
+            verdict = (row.get("judge") or {}).get("verdict") or {}
+            score = {"wrong": 0.0, "partial": 0.5, "correct": 1.0}.get(
+                verdict.get("correctness", "")
+            )
+            if score is not None:
+                correctness.append(score)
+        refusal = [bool(row["insufficient_evidence"]) for row in absent]
+        per_snapshot[snapshot.date] = {
+            "present_cells": len(present),
+            "absent_cells": len(absent),
+            "correctness_present": statistics.fmean(correctness) if correctness else None,
+            "refusal_rate_absent": statistics.fmean(refusal) if refusal else None,
+        }
+    return per_snapshot
 
 
 def _eval_svg(metrics: Mapping[str, Any]) -> str:
@@ -517,6 +591,12 @@ def _eval_readme(metrics: Mapping[str, Any], dataset: Path, labels_path: Path) -
             f"| {date} | {cell['present_cells']} | {correctness_text} | "
             f"{cell['absent_cells']} | {refusal_text} |"
         )
+    skipped = (
+        "\nJudges were skipped for this run (`--skip-judge`): correctness and refusal "
+        "are empty until a judged pass fills them in.\n"
+        if metrics.get("judge_skipped")
+        else ""
+    )
     return f"""# Answer evaluation across snapshots
 
 Each question ran once against each dated `snap1024` partition with the shipped
@@ -526,7 +606,7 @@ wording. Refusal includes only cells labeled absent.
 
 - Dataset: `{dataset}`, sha256 `{dataset_hash(dataset)}`
 - Availability labels: `{labels_path}`
-
+{skipped}
 | snapshot | present cells | correctness | absent cells | refusal rate |
 |---|---:|---:|---:|---:|
 {chr(10).join(rows)}
@@ -543,7 +623,14 @@ async def run_snapshot_eval(
     labels_path: Path,
     manifest_path: Path = DEFAULT_MANIFEST,
     runs_root: Path = RUNS_ROOT,
+    skip_judge: bool = False,
 ) -> tuple[Path, dict[str, Any]]:
+    """Answer one dataset against every snapshot partition.
+
+    Generation always goes to ``GLOSSATOR_CHAT_SERVER_URL`` (never the Mistral
+    API). With ``skip_judge`` the answers are recorded and scored later: rows
+    carry no judge verdict, so correctness and refusal stay ``None``.
+    """
     server_url = os.environ.get("GLOSSATOR_CHAT_SERVER_URL")
     if not server_url:
         raise RuntimeError("GLOSSATOR_CHAT_SERVER_URL is not set; snapshot generation was not run")
@@ -565,12 +652,13 @@ async def run_snapshot_eval(
         "strategies": ["single_pass"],
         "model": generation_model,
         "generation_server": server_url,
-        "judge_models": ["zai:glm-5.3"],
+        "judge_models": [] if skip_judge else ["zai:glm-5.3"],
+        "judge_skipped": skip_judge,
     }
     directory = RunDirectory.open(run_path, config)
     settings = AnswerConfig(model=generation_model)
     llm = MistralLLM(settings, client=build_client(), recorder=AnswerCallRecorder(directory))
-    judges = [JudgeModel(provider="zai", model=PRIMARY_JUDGE)]
+    judges = [] if skip_judge else [JudgeModel(provider="zai", model=PRIMARY_JUDGE)]
     providers = make_judge_providers(judges, directory)
     records: list[dict[str, Any]] = []
     try:
@@ -590,7 +678,7 @@ async def run_snapshot_eval(
                     engine=engine,
                     llm=llm,
                 )
-                if record.error is None:
+                if record.error is None and not skip_judge:
                     verdicts = await judge_with_models(record, judges, providers)
                     record = record.model_copy(
                         update={"judge": verdicts[judges[0].identifier], "judges": verdicts}
@@ -602,26 +690,12 @@ async def run_snapshot_eval(
                 _append(directory.records_path, row)
     finally:
         await asyncio.gather(*(provider.aclose() for provider in providers.values()))
-    per_snapshot: dict[str, Any] = {}
-    for snapshot in snapshots:
-        cells = [row for row in records if row["snapshot"] == snapshot.date]
-        present = [
-            row for row in cells if row["availability_label"] in {"present", "present_rephrased"}
-        ]
-        absent = [row for row in cells if row["availability_label"] == "absent"]
-        correctness = [
-            {"wrong": 0.0, "partial": 0.5, "correct": 1.0}[row["judge"]["verdict"]["correctness"]]
-            for row in present
-            if row.get("judge", {}).get("verdict")
-        ]
-        refusal = [bool(row["insufficient_evidence"]) for row in absent]
-        per_snapshot[snapshot.date] = {
-            "present_cells": len(present),
-            "absent_cells": len(absent),
-            "correctness_present": statistics.fmean(correctness) if correctness else None,
-            "refusal_rate_absent": statistics.fmean(refusal) if refusal else None,
-        }
-    metrics = {"records": len(records), "per_snapshot": per_snapshot}
+    per_snapshot = score_snapshot_records(records, snapshots)
+    metrics = {
+        "records": len(records),
+        "per_snapshot": per_snapshot,
+        "judge_skipped": skip_judge,
+    }
     by_question: dict[str, list[dict[str, Any]]] = {}
     for row in records:
         by_question.setdefault(str(row["question_id"]), []).append(row)
@@ -659,12 +733,24 @@ def _parser() -> argparse.ArgumentParser:
     label_parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     label_parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
     label_parser.add_argument("--seed", type=int, default=LABEL_SEED)
+    label_parser.add_argument(
+        "--deterministic-only",
+        action="store_true",
+        help="Run only the exact-span step; cells needing a judge are stored as "
+        "pending_judges for a later judged pass.",
+    )
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--dataset", type=Path, required=True)
     run_parser.add_argument("--name", required=True)
     run_parser.add_argument("--labels", type=Path, required=True)
     run_parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     run_parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
+    run_parser.add_argument(
+        "--skip-judge",
+        action="store_true",
+        help="Record answers without judge verdicts; correctness and refusal stay "
+        "empty until judges run later.",
+    )
     return parser
 
 
@@ -676,6 +762,7 @@ async def _main(args: argparse.Namespace) -> None:
             manifest_path=args.manifest,
             runs_root=args.runs_root,
             seed=args.seed,
+            deterministic_only=args.deterministic_only,
         )
     else:
         path, metrics = await run_snapshot_eval(
@@ -684,6 +771,7 @@ async def _main(args: argparse.Namespace) -> None:
             labels_path=args.labels,
             manifest_path=args.manifest,
             runs_root=args.runs_root,
+            skip_judge=args.skip_judge,
         )
     print(json.dumps({"run_dir": str(path), **metrics}, indent=2))
 
