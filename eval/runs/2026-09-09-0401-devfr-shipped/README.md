@@ -14,17 +14,17 @@ depends on a model's opinion, so none of them moves when a judge is swapped.
 The judge answers what code cannot: whether the answer is *right*, whether its
 claims are actually in the passages it cites, and whether each citation supports
 the sentence it hangs on. It is shown the question, the reference answer, the
-gold URLs, the answer and the cited passages verbatim -- and never which strategy
-wrote the answer, so it cannot prefer one.
+answer and the cited passages verbatim. It sees no URL, page identifier, or strategy.
 
 ## Configuration
 
 - Generation model: `ministral-14b-2512`
-- Judge model: `glm-5.3` (answer-judge/v1)
+- Judge models: `zai:glm-5.3`, `zai:glm-5.3-flash`, `mistral:ministral-14b-2512`; primary first (answer-judge/v2)
 - Index variant: `sec1024`, top_k 8, rerank True (ministral-14b-2512), context budget 6000 tokens
+- Non-English questions rendered in English for retrieval: unknown
 - Dataset: `eval/dev-fr.jsonl`, sha256 `f5241bb42ec5cf23b23408fb7b71342f6368ab09f8f23bbd8da80d670f81c73e`
 - Questions: 36; strategies: 1; records: 36
-- Judge prompt hashes: {"judge_citation": "4603459ac6e543de", "judge_system": "b8150fdcba16ff47", "judge_user": "5bbdcd0c47bf9a06"}
+- Judge prompt hashes: {"judge_citation": "d1565f592953cb68", "judge_system": "3b300bf0bcd8ea7f", "judge_user": "4e976b80283c7257"}
 
 `config.json` holds every other parameter, including the price table the USD
 columns were computed with.
@@ -35,7 +35,7 @@ columns were computed with.
 
 ## Results
 
-36 of 36 answers were judged by `glm-5.3` with thinking disabled. 0 answer(s) ended in an error and are recorded with it.
+36 of 36 answers were judged by the primary judge `zai:glm-5.3`. 0 answer(s) ended in an error and are recorded with it.
 
 ### Citations against the gold sources
 
@@ -111,25 +111,25 @@ Whether the quotes the model wrote are in the sources it named. A fabricated rej
 
 ### Judged quality
 
-GLM's verdicts (D-021), reported beside the deterministic numbers and never merged into them. Correctness scores correct as 1, partial as 0.5, wrong as 0. Groundedness is the fraction of the answer's factual claims the cited passages support. Citation relevance is the fraction of citations that support the sentence they are attached to.
+The primary judge's verdicts (D-021), reported beside the deterministic numbers and never merged into them. Correctness scores correct as 1, partial as 0.5, wrong as 0. Groundedness is the fraction of the answer's factual claims the cited passages support. Citation relevance is the fraction of citations that support the sentence they are attached to.
 
 **correctness** -- correctness against the reference answer
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.58 | 0.33 | 0.75 | 0.92 | 0.92 | 1.00 | **0.75** |
+| `single_pass` | `ministral-14b-2512` | 0.58 | 0.33 | 0.67 | 0.83 | 0.83 | 1.00 | **0.71** |
 
 **groundedness** -- claims supported by the cited passages
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.58 | 0.61 | 0.55 | 0.94 | 0.72 | 0.42 | **0.65** |
+| `single_pass` | `ministral-14b-2512` | 0.70 | 0.65 | 0.67 | 0.80 | 0.76 | 0.88 | **0.74** |
 
 **citation_relevance** -- citations that support their sentence
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 1.00 | 0.88 | 1.00 | 0.92 | 0.94 | 1.00 | **0.95** |
+| `single_pass` | `ministral-14b-2512` | 1.00 | 0.88 | 1.00 | 1.00 | 0.89 | 1.00 | **0.95** |
 
 ### Effort
 
@@ -183,6 +183,32 @@ What each strategy spent to get there.
 |---|---|---|---|---|---|---|---|---|
 | `single_pass` | `ministral-14b-2512` | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | **1.00** |
 
+## Agreement
+
+Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses quadratic weights. Exact agreement requires the same label.
+
+### Judge pairs
+
+| first judge | second judge | answers | quadratic-weighted kappa | exact agreement |
+|---|---|---:|---:|---:|
+| `zai:glm-5.3` | `zai:glm-5.3-flash` | 36 | 0.91 | 0.89 |
+| `zai:glm-5.3` | `mistral:ministral-14b-2512` | 36 | 0.51 | 0.75 |
+| `zai:glm-5.3-flash` | `mistral:ministral-14b-2512` | 36 | 0.43 | 0.64 |
+
+### Krippendorff's alpha
+
+| raters | ordinal alpha | pairwise exact agreement |
+|---|---:|---:|
+| configured judges | 0.63 | 0.76 |
+
+### Judge means
+
+| judge | answers | mean correctness | human-labeled answers |
+|---|---:|---:|---:|
+| `zai:glm-5.3` | 36 | 0.71 | -- |
+| `zai:glm-5.3-flash` | 36 | 0.71 | -- |
+| `mistral:ministral-14b-2512` | 36 | 0.79 | -- |
+
 ## Cost and latency
 
 The run made 36 answers over 36 questions:
@@ -194,7 +220,7 @@ percentile 20.2 s.
 
 `ministral-14b-2512` has no published price, so the USD column of this run is zero by construction. The row beside it prices the same recorded tokens at mistral-medium-2604 rates (D-017), which is what the shipped configuration would have cost.
 
-Judging spent 68562 prompt and 8781 completion tokens over 36 call(s) (2382 of them reasoning tokens, with thinking disabled), at a mean of 6.0 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.1687 USD.
+Judging spent 199855 prompt and 23592 completion tokens over 108 call(s) (3761 of them reasoning tokens, with thinking disabled), at a mean of 11.3 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.4767 USD.
 
 ## Winner per metric
 

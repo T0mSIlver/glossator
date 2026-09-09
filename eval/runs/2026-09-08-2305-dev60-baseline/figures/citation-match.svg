@@ -2,17 +2,17 @@
 <style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
 <text class="t" x="16" y="22">Citations landing on a gold source</text>
 <text x="240" y="51.0" text-anchor="end">single_pass</text>
-<rect x="248" y="39.0" width="348.2" height="7" fill="#3b6fd4"/>
-<rect x="248" y="47.0" width="248.7" height="7" fill="#c05621"/>
-<text class="v" x="646" y="51.0">0.7 / 0.5</text>
+<rect x="248" y="39.0" width="349.2" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="252.2" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">0.72 / 0.52</text>
 <text x="240" y="77.0" text-anchor="end">search_loop</text>
 <rect x="248" y="65.0" width="388.0" height="7" fill="#3b6fd4"/>
-<rect x="248" y="73.0" width="199.0" height="7" fill="#c05621"/>
-<text class="v" x="646" y="77.0">0.78 / 0.4</text>
+<rect x="248" y="73.0" width="203.7" height="7" fill="#c05621"/>
+<text class="v" x="646" y="77.0">0.8 / 0.42</text>
 <text x="240" y="103.0" text-anchor="end">outline</text>
-<rect x="248" y="91.0" width="208.9" height="7" fill="#3b6fd4"/>
-<rect x="248" y="99.0" width="89.5" height="7" fill="#c05621"/>
-<text class="v" x="646" y="103.0">0.42 / 0.18</text>
+<rect x="248" y="91.0" width="223.1" height="7" fill="#3b6fd4"/>
+<rect x="248" y="99.0" width="106.7" height="7" fill="#c05621"/>
+<text class="v" x="646" y="103.0">0.46 / 0.22</text>
 <rect x="16" y="131" width="10" height="10" fill="#3b6fd4"/>
 <text class="v" x="30" y="140">gold URL</text>
 <rect x="100" y="131" width="10" height="10" fill="#c05621"/>

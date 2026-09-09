@@ -8,10 +8,10 @@
 <text class="v" x="58" y="300" text-anchor="end">0</text>
 <text class="v" x="58" y="52" text-anchor="end">1.00</text>
 <text class="v" x="696" y="312" text-anchor="end">8.6</text>
-<circle cx="288.4" cy="90.7" r="6" fill="#3b6fd4"/>
-<text class="v" x="298.4" y="94.7">single_pass (3.0, 0.81)</text>
+<circle cx="288.4" cy="94.9" r="6" fill="#3b6fd4"/>
+<text class="v" x="298.4" y="98.9">single_pass (3.0, 0.79)</text>
 <circle cx="613.6" cy="58.9" r="6" fill="#c05621"/>
 <text class="v" x="623.6" y="62.9">search_loop (7.4, 0.93)</text>
-<circle cx="337.0" cy="130.9" r="6" fill="#2f855a"/>
-<text class="v" x="347.0" y="134.9">outline (3.7, 0.65)</text>
+<circle cx="337.0" cy="133.0" r="6" fill="#2f855a"/>
+<text class="v" x="347.0" y="137.0">outline (3.7, 0.64)</text>
 </svg>

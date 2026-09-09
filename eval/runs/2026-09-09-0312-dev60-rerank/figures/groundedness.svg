@@ -2,13 +2,13 @@
 <style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
 <text class="t" x="16" y="22">Groundedness and citation relevance</text>
 <text x="240" y="51.0" text-anchor="end">single_pass</text>
-<rect x="248" y="39.0" width="322.5" height="7" fill="#3b6fd4"/>
-<rect x="248" y="47.0" width="370.5" height="7" fill="#c05621"/>
-<text class="v" x="646" y="51.0">0.818021 / 0.939815</text>
+<rect x="248" y="39.0" width="322.6" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="368.8" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">0.816552 / 0.933642</text>
 <text x="240" y="77.0" text-anchor="end">search_loop</text>
-<rect x="248" y="65.0" width="335.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="65.0" width="327.2" height="7" fill="#3b6fd4"/>
 <rect x="248" y="73.0" width="388.0" height="7" fill="#c05621"/>
-<text class="v" x="646" y="77.0">0.849733 / 0.984242</text>
+<text class="v" x="646" y="77.0">0.828168 / 0.982121</text>
 <rect x="16" y="105" width="10" height="10" fill="#3b6fd4"/>
 <text class="v" x="30" y="114">groundedness</text>
 <rect x="132" y="105" width="10" height="10" fill="#c05621"/>

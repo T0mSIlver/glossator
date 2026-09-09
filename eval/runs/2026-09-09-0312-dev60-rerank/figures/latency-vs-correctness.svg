@@ -10,6 +10,6 @@
 <text class="v" x="696" y="312" text-anchor="end">23.8</text>
 <circle cx="256.6" cy="61.0" r="6" fill="#3b6fd4"/>
 <text class="v" x="266.6" y="65.0">single_pass (7.2, 0.93)</text>
-<circle cx="613.6" cy="54.7" r="6" fill="#c05621"/>
-<text class="v" x="623.6" y="58.7">search_loop (20.7, 0.95)</text>
+<circle cx="613.6" cy="56.8" r="6" fill="#c05621"/>
+<text class="v" x="623.6" y="60.8">search_loop (20.7, 0.94)</text>
 </svg>
