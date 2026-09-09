@@ -1,175 +1,218 @@
 # glossator
 
 glossator answers technical questions over [docs.mistral.ai](https://docs.mistral.ai)
-with cited sources: every factual sentence carries an `[n]` marker, and every
-citation carries a verbatim quote that is checked against the chunk it names
-before the answer is returned. It is served two ways — an HTTP API and an MCP
-server — over one retrieval engine.
+with cited sources. It returns Markdown with `[n]` markers and checks each cited
+quote against the retrieved chunk before returning it. FastAPI and MCP use the
+same retrieval and answer code.
 
-## Architecture, in ten lines
+## Architecture in ten lines
 
-1. The corpus is vendored: 411 normalized markdown pages converted from the
-   docs repo's MDX (`src/glossator/corpus/mistral_docs/`), pinned to commit
-   `2e094f7…`, with per-page sha256 hashes in a manifest.
-2. Ingest chunks pages into sections (never across a heading, ~600-token
-   target) and embeds each chunk with `mistral-embed` (`src/glossator/ingest/`).
-3. Vespa stores one schema per index variant; hybrid BM25 + vector search and
-   two-phase ranking happen inside it (`src/glossator/index/`,
-   `src/glossator/retrieval/`).
-4. Hits are citable units: url, anchor, heading path, offsets.
-5. The answer layer assembles context, generates with structured output, and
-   verifies each citation's quote in code (`src/glossator/answer/`).
-6. `src/entrypoints/api.py` (FastAPI) and `src/entrypoints/mcp_server.py` are
-   thin surfaces over the same engine and the same `ask` call.
-7. Evaluation runs live under `eval/runs/`, one self-describing directory per
-   run (`src/glossator/eval/`).
+1. The repository vendors 411 normalized documentation pages at a pinned source commit.
+2. The corpus adapter converts the documentation MDX, OpenAPI file, and model data to Markdown.
+3. Ingestion splits pages at headings with a 600-token target and a 1,024-token cap.
+4. Mistral embeddings map each chunk to either 128 or 1,024 dimensions.
+5. Vespa stores one schema for each index variant.
+6. Vespa combines BM25 and vector features in a two-phase ranking profile.
+7. Search hits carry a URL, anchor, heading path, page offsets, and an opaque chunk ID.
+8. The answer layer gathers context, generates structured output, and verifies quoted citations.
+9. FastAPI and MCP share lazily constructed `SearchEngine` instances.
+10. Evaluation records every query, model call, hit, score, citation, cost, and latency.
 
-## Quickstart
+## Five-minute start
 
 ```bash
-make installdeps          # uv sync
-# put MISTRAL_API_KEY=... in .env (ports optional: VESPA_QUERY_PORT, VESPA_CONFIG_PORT)
-make setup-vespa          # start Vespa, apply schema migrations
+make installdeps
+# Add MISTRAL_API_KEY=... to .env.
+make setup-vespa
 make ingest corpus=corpus/mistral-docs variant=sec1024
-make search query="how do I stream a chat completion"
-make ask question="how do I stream a chat completion" model=ministral-8b-2512
-make api                  # HTTP API on 127.0.0.1:8080 (make api host=0.0.0.0 port=9000)
-make mcp                  # MCP server, HTTP transport on 127.0.0.1:8000
+make ask question="How do I stream a chat completion?" model=ministral-14b-2512
+make api
+make mcp
 ```
 
-Notes:
+The API listens on `127.0.0.1:8080`. The MCP HTTP transport listens on
+`127.0.0.1:8000/mcp`. Override either address with `host=` and `port=`. The MCP
+stdio transport is configured in `.mcp.json` and `.vibe/config.toml`.
 
-- `make ask` defaults to Mistral Medium 3.5. On a free-tier key that model is
-  rate-limited to zero (DECISIONS.md D-017a); pass `model=ministral-8b-2512`
-  until the account is provisioned.
-- The MCP server serves the variant named by `GLOSSATOR_VARIANT` (default
-  `sec1024`) and can pin its generation model with `GLOSSATOR_MODEL`.
-- Vespa blocks feeding above 80% host disk usage (D-025).
+`.env` holds secrets and ports only. Supported settings are `MISTRAL_API_KEY`,
+`VESPA_QUERY_PORT`, and `VESPA_CONFIG_PORT`. The MCP server also reads
+`GLOSSATOR_VARIANT` and `GLOSSATOR_MODEL`. Do not put schema names in `.env`.
+
+Mistral Medium 3.5 is the shipped generation default. The current free-tier key
+has a zero request quota for that model, so recorded checks and evaluations use
+`ministral-14b-2512`. Vespa refuses feeds when host disk use exceeds its 80%
+default limit.
 
 ## HTTP API
 
-`make api` (or `uv run uvicorn entrypoints.api:app --host 127.0.0.1 --port 8080`).
-Interactive docs at `/docs`; the OpenAPI schema at `/openapi.json`.
+Run `make api`, then open `/docs` for Swagger UI or `/openapi.json` for the
+schema.
 
-| Route | Body / params | Returns |
+| Route | Input | Output |
 |---|---|---|
-| `POST /ask` | `question`, optional `strategy` (`single_pass` \| `search_loop` \| `outline`), `variant`, `model` | the `Answer`: markdown with `[n]` markers, citations (url, anchor, quote, verified), trace + trace summary, token usage, cost, latency |
-| `POST /search` | `query`, `top_k` (1–100), `kinds` (`doc`\|`api`\|`model`), `locales`, `exclude_ids`, `variant` | hits with url, anchor, citation url, heading path, preview, score, chunk id, offsets |
-| `GET /pages/{path}` | e.g. `/pages/api/endpoint/chat` | the page's sections in reading order, from the index |
-| `GET /health` | — | Vespa reachability, per-variant document counts, corpus commit |
-| `GET /version` | — | version, index variants, generation models |
+| `POST /ask` | `question`; optional `strategy`, `variant`, `model` | answer Markdown, verified citations, trace, usage, cost, latency |
+| `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
+| `GET /pages/{path}` | documentation path and optional `variant` | page sections in reading order |
+| `GET /health` | none | Vespa counts, corpus commit, and embedding-probe status |
+| `GET /version` | none | package version, variants, and allowed generation models |
 
-Errors are typed JSON — `{"error": {"code", "message", "next"}}` — with codes
-like `E_BAD_PARAM` (400/422), `E_UNKNOWN_PAGE` (404), `E_UPSTREAM` (503/500).
-Send `X-Request-Id` to have it echoed on the response and in the logs.
+Every error uses `{"error":{"code","message","next"}}`. Clients can send
+`X-Request-Id`; the API echoes it in the response header and `/ask` body. When
+the header is absent, the API creates an ID.
+
+```bash
+curl -s http://127.0.0.1:8080/search \
+  -H 'content-type: application/json' \
+  -d '{"query":"streaming chat completions","top_k":3}'
+
+curl -s http://127.0.0.1:8080/ask \
+  -H 'content-type: application/json' \
+  -d '{"question":"How do I stream a chat completion?","model":"ministral-14b-2512"}'
+```
 
 ## MCP server
 
-`make mcp` serves HTTP on `127.0.0.1:8000/mcp`; stdio is the default transport
-for `.mcp.json` (Claude Code) and `.vibe/config.toml` (Vibe). The server
-instructions, the `glossator://guide` resource, and every `next:` line teach
-the same flow. Read-only by design: the index is built by `make ingest`, never
-from a tool call (D-026).
+`make mcp` starts the streamable HTTP transport. Run the module without
+`--http` for stdio:
+
+```bash
+uv run python -m entrypoints.mcp_server
+```
 
 | Tool | Purpose |
 |---|---|
-| `search(query, top_k=5, kinds, locales, exclude_ids)` | Hybrid BM25 + vector search; every hit prints its `url#anchor`, chunk id, offsets |
-| `open(chunk_id, window=2)` | A chunk and its neighbours, in reading order |
-| `navigate(source_id, start_offset, end_offset, direction, top_k=1)` | Step forward/backward through a page |
-| `read(source_id, start_offset, end_offset, top_k=20)` | Fetch a known offset range (or the whole page) verbatim |
-| `grep(source_id, pattern, mode="phrase", top_k=5)` | Exact phrase or terms within one page |
-| `ask(question, strategy="single_pass")` | Answer with verified citations: `[n]` markers, numbered source list, `citations verified: x/y` |
+| `search(query, top_k=5, kinds, locales, exclude_ids)` | Find citable sections by meaning or keywords. |
+| `open(chunk_id, window=2)` | Read a hit with nearby chunks in page order. |
+| `navigate(source_id, start_offset, end_offset, direction, top_k=1)` | Step forward or backward through a page. |
+| `read(source_id, start_offset, end_offset, top_k=20)` | Read a known page range without ranking it again. |
+| `grep(source_id, pattern, mode="phrase", top_k=5)` | Match a phrase or terms inside one page. |
+| `ask(question, strategy="single_pass")` | Generate an answer and print only verified citations as links. |
 
-Responses are text tuned for agents: a `next:` hint on every response,
-announced clamps (`note: clamped server-side: top_k=500 → 50`), typed errors
-(`E_BAD_PARAM`, `E_UNKNOWN_PAGE`, `E_UNKNOWN_CHUNK`, `E_EMPTY_QUERY`, `E_BUSY`,
-`E_UPSTREAM`), and empty results that say which kind of empty they are.
-Three resources exist and no others: `glossator://guide` (rules and flow),
-`glossator://index` (page list), `glossator://context` (limits, id formats,
-corpus commit, counts, model ids).
+Every tool response ends with `next:`. The server announces clamps, rejects
+unknown parameters with `E_BAD_PARAM`, and prints a citation URL on each hit.
+It exposes exactly three resources:
 
-```bash
-make mcp
-npx @modelcontextprotocol/inspector http://127.0.0.1:8000/mcp   # explore the surface
-```
+- `glossator://guide` contains the tool flow and shared rules.
+- `glossator://index` lists every page as URL, title, and kind.
+- `glossator://context` reports limits, ID formats, corpus commit, counts, and model IDs.
 
-## Index variants
+The MCP server cannot ingest or delete content. Corpus changes go through the
+adapter, manifest checks, and ingestion command.
 
-One Vespa schema per (chunking, embedding) pair, so the eval grid can compare
-them on the same corpus. The table lives in `src/glossator/index/variants.py`.
+## Search and index variants
 
-| variant | schema | chunking | embedding model |
+| Variant | Vespa schema | Chunking | Embedding model |
 |---|---|---|---|
-| `page128` | `docs_page_lowdim` | whole-page markdown chunks (the starter's splitter) | `mistral-embed-dim128-2510` |
-| `sec128` | `docs_section_lowdim` | one or more chunks per heading section | `mistral-embed-dim128-2510` |
-| `sec1024` | `docs_section_fulldim` | one or more chunks per heading section | `mistral-embed` |
-
-## Evaluation
-
-Datasets live in `eval/` (`eval/dev-smoke.jsonl` so far); every run writes a
-self-describing directory under `eval/runs/<date>-<name>/` — `README.md`
-(what was measured and concluded), `config.json`, `records.jsonl` (per
-question: hits, context, prompts, raw model output, verified citations, usage,
-latency), `calls.jsonl` (every LLM call verbatim), `metrics.json`, `figures/`.
+| `page128` | `docs_page_lowdim` | whole-page chunks | `mistral-embed-dim128-2510` |
+| `sec128` | `docs_section_lowdim` | heading sections | `mistral-embed-dim128-2510` |
+| `sec1024` | `docs_section_fulldim` | heading sections | `mistral-embed` |
 
 ```bash
-make dev-set      # generate the development question set (GLM, D-020)
-make eval-report run=eval/runs/2026-09-08-2218-dev-smoke   # regenerate a run's README + figures
+make search query="Which models support function calling?" variant=sec1024 top_k=10
+uv run python -m glossator.retrieval "How do I stream?" --rerank
+uv run python -m glossator.retrieval "What causes feline hyperthyroidism?" --footing
 ```
 
-Published runs so far (the placeholder the retrieval/answer grids will fill):
+The embedding probe checks five fixed semantic pairs and one stored-vector round
+trip before ingestion and serving. Retrieval can also apply an absolute cosine
+floor, a margin below the best hit, and a lexical-footing check. The floors stay
+off until a run on the full corpus supports them.
 
-| run | what it measured | headline result |
+## Answer evaluation
+
+The answer evaluator runs each question through the selected strategies. Code
+checks source matches, quote verification, refusal behavior, usage, latency, and
+cost. A blinded model judge scores correctness, groundedness, and citation
+relevance.
+
+```bash
+make eval-answers dataset=eval/dev.jsonl name=answers-dev
+make eval-answers dataset=tests/fixtures/answer-questions.jsonl \
+  name=answers-fixture strategies=single_pass variant=sec128 limit=4
+```
+
+The 60-question baseline in
+`eval/runs/2026-09-08-2305-dev60-baseline/` used `ministral-14b-2512` for
+answers and `glm-5.3` for judging.
+
+| Strategy | Correctness | Groundedness | Correct refusal | Gold URL cited | Median latency | Prompt tokens |
+|---|---:|---:|---:|---:|---:|---:|
+| `single_pass` | 0.81 | 0.75 | 0.82 | 0.70 | 3.0 s | 1.9k |
+| `search_loop` | 0.93 | 0.81 | 0.88 | 0.78 | 7.4 s | 16.0k |
+| `outline` | 0.65 | 0.65 | 0.72 | 0.42 | 3.7 s | 8.9k |
+
+## Retrieval evaluation
+
+The retrieval grid compares index variants, ranking weights, and the listwise
+reranker. It reports page-level and section-level metrics separately because
+many documentation headings have no live anchor.
+
+```bash
+make eval-retrieval dataset=eval/dev.jsonl name=dev
+make eval-retrieval dataset=eval/dev.jsonl name=quick \
+  configs=sec1024-shipped limit=20
+make calibrate-floors dataset=eval/dev.jsonl name=dev
+```
+
+Each run writes `config.json`, `records.jsonl`, `calls.jsonl`, `metrics.json`, a
+README, and figures under `eval/runs/<date>-<name>/`. Rebuild its report with:
+
+```bash
+make eval-report run=eval/runs/2026-09-08-2329-fixture-grid
+```
+
+| Run | Scope | Result |
 |---|---|---|
-| `eval/runs/2026-09-08-2218-dev-smoke/` | retrieval smoke on the dev-smoke set | first scores for the section variants |
-| `eval/runs/2026-09-09-answer-smoke/` | five questions × three strategies, Ministral 8B | `outline` alone refused the unanswerable question (D-027a) |
-| `eval/runs/…-retrieval-grid/` | ranking-weight grid | _to be run_ |
-| `eval/runs/…-answer-grid/` | top_k / context budget / strategy grid | _to be run_ |
+| `eval/runs/2026-09-08-2305-dev60-baseline/` | 60 questions and three answer strategies | `search_loop` led quality and used 8.4 times the prompt tokens of `single_pass`. |
+| `eval/runs/2026-09-08-2329-fixture-grid/` | 12-question retrieval fixture and 13 configurations | Both reranked `sec1024` rows reached page recall@3 of 1.00. |
+| `eval/runs/2026-09-08-2331-fixture-floors/` | fixture similarity calibration | A fixture corridor existed; no production floor was adopted. |
+| `eval/runs/<held-out-run>/` | private held-out questions | Pending. |
 
-Which model produced which table is stated in each run's README (D-017a);
-dataset generation and judging use GLM through the z.ai API, disclosed per run.
+Dataset generation and judging use GLM through the z.ai API. Serving uses only
+Mistral models. Every run names its models and prompt hashes.
 
 ## Corpus provenance
 
-- Source: `mistralai/platform-docs-public`, pinned at commit
-  `2e094f7bbe1395de4a738a3483def3573143d973` (2026-09-07), converted from MDX
-  to normalized markdown by `src/glossator/corpus/mistral_docs/` (D-001).
-- License: Apache-2.0, notice kept at `corpus/mistral-docs/LICENSE` and
-  `NOTICE` (D-009).
-- 411 pages: 296 docs, 49 API reference, 66 model cards; French is measured,
-  not yet indexed (D-008).
+- Source repository: `mistralai/platform-docs-public`.
+- Source commit: `2e094f7bbe1395de4a738a3483def3573143d973`, dated 2026-09-07.
+- License: Apache-2.0, preserved in `corpus/mistral-docs/LICENSE` and `NOTICE`.
+- Contents: 296 documentation pages, 49 API reference pages, and 66 model cards.
 
 ```bash
-make corpus-refresh            # rebuild from the docs repo (REF=<commit|tag|branch> to move the pin)
-make corpus-check              # offline tests + every URL and anchor against the live site
+make corpus-refresh
+make corpus-refresh REF=<commit-or-tag>
+make corpus-check
 ```
 
-`corpus-check` also runs weekly in CI (`.github/workflows/ci.yml`) so a site
-change that breaks anchors is caught without a local run.
+`make corpus-check` runs offline corpus tests and validates every URL and anchor
+against the live site. CI runs the live check weekly.
 
-## Layout
+## Repository layout
 
-```
+```text
 src/glossator/
-├── corpus/mistral_docs/  docs repo MDX → normalized markdown (corpus-specific)
-├── ingest/               pages → sections → chunks → embed → index (make ingest)
-├── index/                Vespa app, variants, migrations
-├── retrieval/            engine, retriever, ranking config (make search)
-├── answer/               context assembly, generation, citation verification (make ask)
-└── eval/                 datasets, providers, run records, reports
-src/entrypoints/          api.py (FastAPI), mcp_server.py
-corpus/                   vendored corpus + manifest + upstream LICENSE
-eval/                     datasets and run directories
-tests/                    make test; backend tests skip without Vespa/key
-.mcp.json / .vibe/        MCP server configs for Claude Code / Vibe
+  corpus/mistral_docs/   MDX, OpenAPI, and model data to normalized Markdown
+  ingest/                pages to sections, chunks, embeddings, and Vespa
+  index/                 Vespa application, variants, and migrations
+  retrieval/             hybrid search, reranking, floors, and probe
+  answer/                context, generation, and citation verification
+  eval/                  datasets, metrics, run records, and reports
+src/entrypoints/          FastAPI, MCP, and CLI entrypoints
+corpus/                   vendored corpus, manifest, license, and notice
+eval/                     datasets, grids, and committed run directories
+tests/                    offline tests and optional backend integration tests
 ```
 
-`DECISIONS.md` records every choice with the facts behind it; read it before
-changing behaviour.
+`DECISIONS.md` records the facts behind product behavior. Append a new entry when
+a change reverses an existing decision.
 
 ## Development
 
 ```bash
-uv run ruff format . && uv run ruff check --fix . && uv run mypy src
-uv run pytest -q          # or: make test
+uv run ruff format .
+uv run ruff check --fix .
+uv run mypy
+uv run pytest -q
 ```
+
+Tests that need Vespa or an API key skip when those services are unavailable.
