@@ -1276,10 +1276,16 @@ async def run(
     if any(judge.provider == "zai" for judge in judge_models):
         await wait_for_quota(quota_ceiling)
 
+    # One recorder for both layers: the reranker's calls belong in the run's
+    # calls.jsonl beside the generation calls (D-023). Before this the engine had
+    # no recorder, so every reranker call made during an answer run went
+    # unrecorded and the run's cost understated the Mistral spend.
+    recorder = AnswerCallRecorder(run_dir)
     engine = SearchEngine(
-        RetrievalConfig.shipped(variant=variant, top_k=settings.top_k, rerank=rerank)
+        RetrievalConfig.shipped(variant=variant, top_k=settings.top_k, rerank=rerank),
+        recorder=recorder,
     )
-    llm = MistralLLM(settings, client=chat_client(), recorder=AnswerCallRecorder(run_dir))
+    llm = MistralLLM(settings, client=chat_client(), recorder=recorder)
     providers = make_judge_providers(judge_models, run_dir)
     try:
         for question, strategy in pending:

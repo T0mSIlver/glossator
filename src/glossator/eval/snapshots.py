@@ -674,7 +674,8 @@ async def run_snapshot_eval(
     }
     directory = RunDirectory.open(run_path, config)
     settings = AnswerConfig(model=generation_model)
-    llm = MistralLLM(settings, client=chat_client(), recorder=AnswerCallRecorder(directory))
+    recorder = AnswerCallRecorder(directory)
+    llm = MistralLLM(settings, client=chat_client(), recorder=recorder)
     judges = [] if skip_judge else [JudgeModel(provider="zai", model=PRIMARY_JUDGE)]
     providers = make_judge_providers(judges, directory)
     records: list[dict[str, Any]] = []
@@ -683,7 +684,8 @@ async def run_snapshot_eval(
             engine = SearchEngine(
                 RetrievalConfig.shipped(
                     variant="snap1024", snapshot=snapshot.date, top_k=settings.top_k
-                )
+                ),
+                recorder=recorder,
             )
             for question in questions:
                 record = await answer_one(
