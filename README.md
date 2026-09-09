@@ -370,6 +370,10 @@ Dockerfile                the application image: MCP server, API, and ingestion 
 `DECISIONS.md` records the facts behind product behavior. Append a new entry when
 a change reverses an existing decision.
 
+`docs/search-toolkit.md` assesses the Mistral Search Toolkit as used here: which
+parts were kept, which were worked around, and which were replaced, with a
+reproduction for each.
+
 ## Development
 
 ```bash
