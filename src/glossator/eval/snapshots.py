@@ -11,6 +11,7 @@ import random
 import statistics
 from collections import Counter
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
@@ -45,6 +46,14 @@ PRIMARY_JUDGE = "glm-5.3"
 SECONDARY_JUDGE = "glm-5.3-flash"
 LABEL_SEED = 0
 PAGE_PROMPT_CHARS = 6000
+
+
+@dataclass(frozen=True, slots=True)
+class Span:
+    """A supporting span and the page it was cited from at the pinned commit."""
+
+    page: str
+    text: str
 
 
 class FactVerdict(BaseModel):
@@ -98,8 +107,11 @@ def _load_questions(paths: Sequence[Path]) -> list[tuple[str, EvalQuestion]]:
     return rows
 
 
-def _verified_quotes(runs_root: Path = RUNS_ROOT) -> dict[str, list[str]]:
-    quotes: dict[str, list[str]] = {}
+def _verified_quotes(runs_root: Path = RUNS_ROOT) -> dict[str, list[Span]]:
+    """The spans an answer relied on, each with the page it was cited from at the
+    pinned commit. A span found on that same page at an older snapshot is
+    ``present``; found on another page it is ``present`` and ``moved``."""
+    quotes: dict[str, list[Span]] = {}
     patterns = ("*fresh60-shipped", "*mined-shipped")
     for pattern in patterns:
         for run_dir in sorted(runs_root.glob(pattern)):
@@ -111,7 +123,7 @@ def _verified_quotes(runs_root: Path = RUNS_ROOT) -> dict[str, list[str]]:
                 if row.get("strategy") != "single_pass":
                     continue
                 found = [
-                    str(citation["quote"])
+                    Span(page=str(citation.get("url") or ""), text=str(citation["quote"]))
                     for citation in row.get("citations", [])
                     if citation.get("verified", True) and citation.get("quote")
                 ]
@@ -122,23 +134,23 @@ def _verified_quotes(runs_root: Path = RUNS_ROOT) -> dict[str, list[str]]:
 
 def _fallback_spans(
     questions: Sequence[tuple[str, EvalQuestion]], corpus_dir: Path = CURRENT_CORPUS
-) -> dict[str, list[str]]:
+) -> dict[str, list[Span]]:
     documents = {document.url: document for document in load_documents(corpus_dir)}
-    spans: dict[str, list[str]] = {}
+    spans: dict[str, list[Span]] = {}
     for _dataset, question in questions:
-        selected: list[str] = []
+        selected: list[Span] = []
         for gold in question.gold:
             document = documents.get(gold.url)
             if document is None:
                 continue
             if gold.anchor is None:
-                selected.append(document.page.body)
+                selected.append(Span(page=gold.url, text=document.page.body))
                 continue
             section = next(
                 (item for item in document.sections if item.own_anchor == gold.anchor), None
             )
             if section is not None:
-                selected.append(block_text(document, section))
+                selected.append(Span(page=gold.url, text=block_text(document, section)))
         if selected:
             spans[question.id] = selected
     return spans
@@ -154,28 +166,33 @@ def _search(text: str, span: str) -> bool:
 
 def _exact_cell(
     question: EvalQuestion,
-    spans: Sequence[str],
+    spans: Sequence[Span],
     documents: Sequence[CorpusDocument],
 ) -> dict[str, Any] | None:
-    gold_urls = {source.url for source in question.gold}
-    for document in documents:
-        if document.url in gold_urls and any(_search(document.page.body, span) for span in spans):
+    """Deterministic step: a span found on the page it was cited from at the
+    pinned commit is ``present``; found only on another page it is ``present``
+    and ``moved``; found nowhere, the cell goes to the judged step."""
+    by_url = {document.url: document for document in documents}
+    for span in spans:
+        home = by_url.get(span.page)
+        if home is not None and _search(home.page.body, span.text):
             return {
                 "label": "present",
                 "moved": False,
                 "decided_by": "exact_span",
-                "page": document.url,
+                "page": home.url,
                 "judges": {},
             }
-    for document in documents:
-        if any(_search(document.page.body, span) for span in spans):
-            return {
-                "label": "present",
-                "moved": True,
-                "decided_by": "exact_span",
-                "page": document.url,
-                "judges": {},
-            }
+    for span in spans:
+        for document in documents:
+            if document.url != span.page and _search(document.page.body, span.text):
+                return {
+                    "label": "present",
+                    "moved": True,
+                    "decided_by": "exact_span",
+                    "page": document.url,
+                    "judges": {},
+                }
     return None
 
 
@@ -477,7 +494,7 @@ async def label(
                     "question": question.question,
                     "reference_answer": question.reference_answer,
                     "gold": [source.model_dump(mode="json") for source in question.gold],
-                    "supporting_spans": list(spans),
+                    "supporting_spans": [{"page": span.page, "text": span.text} for span in spans],
                     "top_pages": top_pages,
                 }
                 _append(labels_path, row)
