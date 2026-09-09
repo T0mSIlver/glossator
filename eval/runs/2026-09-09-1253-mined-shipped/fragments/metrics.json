@@ -1,0 +1,44 @@
+{
+  "by_question_type": {
+    "api_reference": {
+      "checked": 4,
+      "found": 4,
+      "html_eligible": 4,
+      "share_found_among_html_eligible": 1.0,
+      "tab_panel_excluded": 0
+    },
+    "cross_page": {
+      "checked": 5,
+      "found": 3,
+      "html_eligible": 5,
+      "share_found_among_html_eligible": 0.6,
+      "tab_panel_excluded": 0
+    },
+    "single_page": {
+      "checked": 46,
+      "found": 39,
+      "html_eligible": 45,
+      "share_found_among_html_eligible": 0.8666666666666667,
+      "tab_panel_excluded": 1
+    },
+    "unanswerable": {
+      "checked": 5,
+      "found": 4,
+      "html_eligible": 4,
+      "share_found_among_html_eligible": 1.0,
+      "tab_panel_excluded": 1
+    }
+  },
+  "checked": 60,
+  "failures": {
+    "text absent": 10
+  },
+  "found": 50,
+  "html_eligible": 58,
+  "kind": "fragment_resolvability",
+  "sample_requested": 60,
+  "seed": 0,
+  "share_found": 0.8333333333333334,
+  "share_found_among_html_eligible": 0.8620689655172413,
+  "tab_panel_excluded": 2
+}

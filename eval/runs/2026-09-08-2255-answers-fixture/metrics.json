@@ -1,4 +1,15 @@
 {
+  "agreement": {
+    "krippendorff_alpha_ordinal": null,
+    "pairwise": [],
+    "per_judge": {
+      "zai:glm-5.3": {
+        "items": 4,
+        "mean_correctness": 0.875
+      }
+    },
+    "percentage_agreement": null
+  },
   "by_strategy": {
     "single_pass": {
       "all": {
@@ -14,6 +25,7 @@
         "distinct_sources_cited": 0.75,
         "errors": 0,
         "fabricated_per_answer": 0.0,
+        "gold_relaxed_matches": 0,
         "groundedness": 1.0,
         "judge_calls": 4,
         "judge_failures": 0,
@@ -38,8 +50,8 @@
         "tool_calls": 0.0,
         "unmatched_markers_per_answer": 1.5,
         "unverified_citations_per_answer": 0.0,
-        "usd": 0.0,
-        "usd_total": 0.0,
+        "usd": 0.00043942499999999996,
+        "usd_total": 0.0017576999999999998,
         "verified_after_normalization": 4,
         "wrong": 0.0
       },
@@ -57,6 +69,7 @@
           "distinct_sources_cited": 1.0,
           "errors": 0,
           "fabricated_per_answer": 0.0,
+          "gold_relaxed_matches": 0,
           "groundedness": 1.0,
           "judge_calls": 1,
           "judge_failures": 0,
@@ -81,8 +94,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.0,
           "unverified_citations_per_answer": 0.0,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.00033029999999999995,
+          "usd_total": 0.00033029999999999995,
           "verified_after_normalization": 0,
           "wrong": 0.0
         },
@@ -99,6 +112,7 @@
           "distinct_sources_cited": 1.0,
           "errors": 0,
           "fabricated_per_answer": 0.0,
+          "gold_relaxed_matches": 0,
           "groundedness": 1.0,
           "judge_calls": 1,
           "judge_failures": 0,
@@ -123,8 +137,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.0,
           "unverified_citations_per_answer": 0.0,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.0004275,
+          "usd_total": 0.0004275,
           "verified_after_normalization": 4,
           "wrong": 0.0
         },
@@ -141,6 +155,7 @@
           "distinct_sources_cited": 1.0,
           "errors": 0,
           "fabricated_per_answer": 0.0,
+          "gold_relaxed_matches": 0,
           "groundedness": 1.0,
           "judge_calls": 1,
           "judge_failures": 0,
@@ -165,8 +180,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.0,
           "unverified_citations_per_answer": 0.0,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.0007194,
+          "usd_total": 0.0007194,
           "verified_after_normalization": 0,
           "wrong": 0.0
         },
@@ -183,6 +198,7 @@
           "distinct_sources_cited": 0.0,
           "errors": 0,
           "fabricated_per_answer": 0.0,
+          "gold_relaxed_matches": 0,
           "groundedness": null,
           "judge_calls": 1,
           "judge_failures": 0,
@@ -207,8 +223,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 6.0,
           "unverified_citations_per_answer": 0.0,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.00028049999999999993,
+          "usd_total": 0.00028049999999999993,
           "verified_after_normalization": 0,
           "wrong": 0.0
         }
@@ -219,6 +235,9 @@
   "dataset_sha256": "ef184ab31296f7caf57659e5ef6f24bd591e5841089c67c09d031d535cde5a7a",
   "error": null,
   "judge_model": "glm-5.3",
+  "judge_models": [
+    "glm-5.3"
+  ],
   "kind": "answer_eval",
   "model": "ministral-14b-2512",
   "question_types": [
@@ -246,6 +265,7 @@
     "distinct_sources_cited": 0.75,
     "errors": 0,
     "fabricated_per_answer": 0.0,
+    "gold_relaxed_matches": 0,
     "groundedness": 1.0,
     "judge_calls": 4,
     "judge_failures": 0,
@@ -270,8 +290,8 @@
     "tool_calls": 0.0,
     "unmatched_markers_per_answer": 1.5,
     "unverified_citations_per_answer": 0.0,
-    "usd": 0.0,
-    "usd_total": 0.0,
+    "usd": 0.00043942499999999996,
+    "usd_total": 0.0017576999999999998,
     "verified_after_normalization": 4,
     "wrong": 0.0
   },

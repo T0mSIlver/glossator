@@ -30,12 +30,11 @@ from typing import Any
 import structlog
 from dotenv import load_dotenv
 
-from glossator.answer.config import AnswerConfig, ModelPrice
+from glossator.answer.config import PRICES, AnswerConfig, ModelPrice, aliased_price
 from glossator.clients import chat_server_url
 from glossator.eval.answer_eval import (
     DEFAULT_GENERATION_MODEL,
     DEFAULT_JUDGE_MODEL,
-    EVAL_PRICES,
     JUDGE_MAX_TOKENS,
     JUDGE_PROMPT_HASHES,
     JUDGE_TEMPERATURE,
@@ -118,13 +117,21 @@ def resolve_judge_models(value: str) -> list[JudgeModel]:
 
 
 def eval_prices(model: str) -> dict[str, ModelPrice]:
-    """The eval price table, extended with a zero entry for a model it lacks.
+    """The eval price table, with the local-server alias priced, not zeroed.
 
-    A local server reports ids the published list has never seen; the run
-    proceeds with cost 0 and one warning per model (D-035c), tokens recorded.
+    The request names ``llamacpp/ministral3-14b`` while the response reports
+    ``ministral3-14b``; both price as Ministral 3 14B at the published API rate
+    applied to a local run (D-035c). A model with no published price and no
+    alias still proceeds with cost 0 and one warning, tokens recorded.
     """
-    prices = dict(EVAL_PRICES)
-    prices.setdefault(model, ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0))
+    prices = dict(PRICES)
+    if model not in prices:
+        alias = aliased_price(model)
+        prices[model] = (
+            alias
+            if alias is not None
+            else ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0)
+        )
     return prices
 
 
@@ -187,6 +194,12 @@ async def run_one(
         ),
         configuration.overrides,
     )
+    server = chat_server_url()
+    pricing_note = (
+        "Costs use the published Ministral 3 API rate applied to a local run."
+        if server and aliased_price(args.model) is not None
+        else None
+    )
     run_config: dict[str, Any] = {
         "kind": "answer_eval",
         "name": run_name,
@@ -205,7 +218,7 @@ async def run_one(
         "variant": args.variant,
         "strategies": ["search_loop"],
         "model": args.model,
-        "generation_server": chat_server_url(),
+        "generation_server": server,
         "judge_model": judges[0].identifier if judges else None,
         "judge_models": [judge.identifier for judge in judges],
         "judge_prompt_version": JUDGE_VERSION,
@@ -233,6 +246,7 @@ async def run_one(
             f"{SHIPPED_POINT['searches_per_round']}, tool_result_chars "
             f"{SHIPPED_POINT['tool_result_chars']})"
         ]
+        + ([pricing_note] if pricing_note else [])
         + list(args.note or []),
     }
     run_dir = RunDirectory.open(run_path, run_config)
@@ -394,6 +408,14 @@ def render_readme(config: dict[str, Any], metrics: dict[str, Any]) -> str:
         )
     notes = "\n".join(f"- {note}" for note in metrics.get("notes") or [])
     notes_section = f"\n\n## Notes on this run\n\n{notes}" if notes else ""
+    judge_sentence = (
+        "The judge was skipped for this grid (`--skip-judge`), so the judged "
+        "columns (correctness, groundedness) are empty; every row holds its "
+        "answers, traces, tokens and latencies, and a later `rejudge` fills the "
+        "judged columns without re-running generation."
+        if not metrics.get("judge_model")
+        else f"Judge: `{metrics['judge_model']}`."
+    )
     figures = "\n".join(
         f"- `figures/{figure_name(axis, what)}`"
         for axis, _values in AXIS_VALUES
@@ -427,6 +449,8 @@ named in `config.json`.
 ## Results
 
 {chr(10).join(lines)}
+
+{judge_sentence}
 
 ## Figures
 

@@ -1,4 +1,15 @@
 {
+  "agreement": {
+    "krippendorff_alpha_ordinal": null,
+    "pairwise": [],
+    "per_judge": {
+      "zai:glm-5.3": {
+        "items": 120,
+        "mean_correctness": 0.8166666666666667
+      }
+    },
+    "percentage_agreement": null
+  },
   "by_strategy": {
     "single_pass": {
       "all": {
@@ -39,8 +50,8 @@
         "tool_calls": 0.0,
         "unmatched_markers_per_answer": 0.15833333333333333,
         "unverified_citations_per_answer": 0.4583333333333333,
-        "usd": 0.0,
-        "usd_total": 0.0,
+        "usd": 0.0003900475,
+        "usd_total": 0.0468057,
         "verified_after_normalization": 36,
         "wrong": 0.11666666666666667
       },
@@ -83,8 +94,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.15,
           "unverified_citations_per_answer": 0.3,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.00039837,
+          "usd_total": 0.0079674,
           "verified_after_normalization": 11,
           "wrong": 0.15
         },
@@ -126,8 +137,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.05,
           "unverified_citations_per_answer": 0.6,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.00041427,
+          "usd_total": 0.0082854,
           "verified_after_normalization": 12,
           "wrong": 0.15
         },
@@ -169,8 +180,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.3,
           "unverified_citations_per_answer": 0.75,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.000417045,
+          "usd_total": 0.0083409,
           "verified_after_normalization": 4,
           "wrong": 0.15
         },
@@ -212,8 +223,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.1,
           "unverified_citations_per_answer": 0.65,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.00043069500000000004,
+          "usd_total": 0.0086139,
           "verified_after_normalization": 6,
           "wrong": 0.15
         },
@@ -255,8 +266,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.05,
           "unverified_citations_per_answer": 0.25,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.00034596750000000004,
+          "usd_total": 0.00691935,
           "verified_after_normalization": 3,
           "wrong": 0.0
         },
@@ -298,8 +309,8 @@
           "tool_calls": 0.0,
           "unmatched_markers_per_answer": 0.3,
           "unverified_citations_per_answer": 0.2,
-          "usd": 0.0,
-          "usd_total": 0.0,
+          "usd": 0.0003339375,
+          "usd_total": 0.00667875,
           "verified_after_normalization": 0,
           "wrong": 0.1
         }
@@ -310,6 +321,9 @@
   "dataset_sha256": "acf3c2e148f1aa4036565ac03dd7a3a7e9bef5d0717529976ce9422b68b35490",
   "error": null,
   "judge_model": "glm-5.3",
+  "judge_models": [
+    "glm-5.3"
+  ],
   "kind": "answer_eval",
   "model": "ministral-14b-2512",
   "question_types": [
@@ -364,8 +378,8 @@
     "tool_calls": 0.0,
     "unmatched_markers_per_answer": 0.15833333333333333,
     "unverified_citations_per_answer": 0.4583333333333333,
-    "usd": 0.0,
-    "usd_total": 0.0,
+    "usd": 0.0003900475,
+    "usd_total": 0.0468057,
     "verified_after_normalization": 36,
     "wrong": 0.11666666666666667
   },

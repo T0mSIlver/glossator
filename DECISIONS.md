@@ -911,3 +911,23 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Facts.** The fragment text is built from the quote with every `*`, `_` and backtick removed, so a quoted code block reading `function_name` and `tool_call_id` becomes `functionname` and `toolcallid` in the link; the rendered page keeps the underscores, so the browser finds no match and falls back to the section anchor. The verifier's second pass strips the same characters, which is why the quote still verified.
 
 **Decision.** Strip emphasis markers only where they act as Markdown emphasis (at token boundaries), never inside a word, and build the fragment from the matched span of the source text rather than from the model's rendering of it. A resolvability check fetches the live page for a sample of verified citations, extracts its text, and reports the share of fragments whose text is found; that share is published with the citation metrics, and if it stays low after the fix the feature is removed rather than shipped half working.
+
+---
+
+## D-036b · Fragment links resolve on the live pages for five citations in six; cost is recorded again
+
+**Status:** decided · 2026-09-09 · `glossator.eval.fragments` (resolvability check, 60-citation samples, seed 0, cached page fetches committed under each run directory); `answer_eval recost` on 15 answer runs
+
+| run | links | found in sample | tab-panel exclusions | found among citations the HTML can contain |
+|---|---|---|---|---|
+| mined-shipped | before the fix | 33 of 60 | 5 | 0.60 |
+| mined-shipped | source-span links | 50 of 60 | 2 | 0.86 |
+| fresh60-shipped | source-span links | 49 of 60 | 2 | 0.85 |
+
+**Facts.**
+- The fix of D-036a (emphasis markers removed only at token boundaries, the fragment built from the matched span of the source text) changed 166 of 564 verified links on the mined run and lifted resolvability from 0.60 to 0.86; the fresh slice, which predates D-036 and had no links, lands at 0.85.
+- The remaining misses are documented one by one in `fragments/results.jsonl`: quotes from non-default tab panels (absent from the HTML, D-003), Markdown table delimiters, link syntax and heading markers that do not appear in rendered text, text present only in the page's data scripts, and a few live pages that have moved on from the pinned commit. The check treats none of those as visible page text, so the number is a floor for what a browser highlights.
+- A model quote that drops the underscores of an identifier no longer passes the emphasis-only verification pass, which is the intended tightening.
+- Repricing: the eval had priced the 14B at zero from the night it had no published price (D-017). With the published Ministral 3 rate, the 15 answer runs cost 1.74 USD (3,539 answer calls, 11.6 million tokens); every priced chat call in every recorded run, reranker calls of the retrieval grid included, sums to 2.81 USD. The console shows 7.04 EUR; the difference is embeddings (three full ingestions, one re-ingestion after D-025b, every query embedding) and calls without a token row, so the recorded spend is a lower bound and the README says so.
+
+**Decision.** Text fragments ship. The resolvability check is part of the evaluation set, reported with the citation metrics, and re-run whenever the verifier or the fragment builder changes. Recorded cost uses the published price table for every model in it; the reference column at Medium 3.5 prices stays for comparability across runs.

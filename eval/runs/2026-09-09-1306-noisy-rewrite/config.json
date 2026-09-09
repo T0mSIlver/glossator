@@ -14,8 +14,8 @@
     "picker_max_tokens": 300,
     "prices": {
       "ministral-14b-2512": {
-        "input_usd_per_mtok": 0.0,
-        "output_usd_per_mtok": 0.0
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.15
       },
       "ministral-8b-2512": {
         "input_usd_per_mtok": 0.15,
@@ -190,7 +190,7 @@
   "top_k": 8,
   "translate_for_retrieval": true,
   "unpriced_models": [
-    "ministral-14b-2512"
+    "glm-5.3"
   ],
   "variant": "sec1024"
 }

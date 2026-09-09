@@ -50,6 +50,31 @@ PRICES: dict[str, ModelPrice] = {
 
 DEFAULT_VARIANT = "sec1024"
 
+LOCAL_MINISTRAL_3_14B_MARKER = "ministral3-14b"
+"""Substring the local llama.cpp server uses in the ids it reports.
+
+The request names ``llamacpp/ministral3-14b`` while the response reports
+``ministral3-14b`` (no prefix, no date); neither matches the published id
+``ministral-14b-2512``. Any id containing this marker prices as Ministral 3 14B
+at the published API rate, with the run recording that the rate was applied to
+a local run rather than to API tokens.
+"""
+
+
+def aliased_price(model: str) -> ModelPrice | None:
+    """The published price for a model id, following the local-server alias.
+
+    Exact ids come straight from the price table; an id containing the local
+    Ministral 3 14B marker prices as ``MINISTRAL_3_14B``. Anything else has no
+    published price.
+    """
+    price = PRICES.get(model)
+    if price is not None:
+        return price
+    if LOCAL_MINISTRAL_3_14B_MARKER in model:
+        return PRICES[MINISTRAL_3_14B]
+    return None
+
 
 class AnswerConfig(BaseModel):
     """One answering configuration: which model, how much context, how hard to look."""
@@ -133,12 +158,15 @@ class AnswerConfig(BaseModel):
     def cost_usd(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
         """USD for one call. An unpriced model costs 0 and says so once (D-035c).
 
-        A local server reports model ids the price list has never seen; the run
-        is allowed to proceed, the warning is logged once per model per process
-        rather than per call, and the token counts are recorded either way so a
-        price added later can be applied to a run that already happened.
+        A local-server id containing the Ministral 3 14B marker prices at the
+        published Ministral 3 API rate applied to a local run; the token counts
+        are recorded either way so a price added later can be applied to a run
+        that already happened. A genuinely unpriced model logs once per model
+        per process rather than per call.
         """
         price = self.prices.get(model)
+        if price is None and LOCAL_MINISTRAL_3_14B_MARKER in model:
+            price = self.prices.get(MINISTRAL_3_14B) or PRICES[MINISTRAL_3_14B]
         if price is None:
             if model not in _WARNED_UNPRICED:
                 _WARNED_UNPRICED.add(model)
@@ -156,16 +184,18 @@ def known_serving_model(model: str) -> bool:
     """Whether a serving entrypoint should accept this model id.
 
     The Mistral API path serves priced models only (D-017); a local chat server
-    (D-035c) reports ids the price list has never seen, and those are accepted,
+    (D-035c) reports aliased Ministral 3 14B ids, which are accepted and priced
+    at the published API rate, and any other id when a server is configured,
     costing 0 with one warning per model per process. The check lives at the
     entrypoints rather than in ``AnswerConfig`` because it is a question about
     what this deployment serves, not about what a run may record.
     """
-    return model in PRICES or chat_server_url() is not None
+    return model in PRICES or aliased_price(model) is not None or chat_server_url() is not None
 
 
 __all__ = [
     "DEFAULT_VARIANT",
+    "LOCAL_MINISTRAL_3_14B_MARKER",
     "MINISTRAL_3_14B",
     "MINISTRAL_3_8B",
     "MISTRAL_EMBED",
@@ -174,5 +204,6 @@ __all__ = [
     "PRICES",
     "AnswerConfig",
     "ModelPrice",
+    "aliased_price",
     "known_serving_model",
 ]
