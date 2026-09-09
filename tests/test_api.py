@@ -1,10 +1,4 @@
-"""The API surface: each route's happy path, validation, and the error shape.
-
-No backend and no API key are needed: engines are injected through the
-registry's ``engines`` dict and ``ask`` is faked at the service seam, so the
-tests exercise the HTTP layer — routing, validation, the typed error contract
-and the request-id plumbing — against pure fakes.
-"""
+"""HTTP route, validation, typed-error, and request-ID tests."""
 
 import asyncio
 from types import SimpleNamespace
@@ -13,6 +7,7 @@ from typing import Any
 import httpx
 import pytest
 from httpx import ASGITransport
+from mistralai.search.toolkit.retrieval.errors import RetrieverException
 
 from entrypoints.api import app, registry
 from glossator.answer import service as answer_service
@@ -234,6 +229,18 @@ def test_ask_rejects_an_unknown_variant_with_a_typed_error(
     assert "sec1024" in error["next"]
 
 
+def test_ask_rejects_an_unpriced_model_with_a_typed_error(
+    fake_ask: list[dict[str, Any]],
+) -> None:
+    response = _request("POST", "/ask", json={"question": "q", "model": "latest-maybe"})
+
+    assert response.status_code == 400
+    error = response.json()["error"]
+    assert error["code"] == "E_BAD_PARAM"
+    assert "latest-maybe" in error["message"]
+    assert "ministral-14b-2512" in error["next"]
+
+
 def test_ask_validation_errors_use_the_typed_shape() -> None:
     response = _request("POST", "/ask", json={"question": ""})
 
@@ -341,6 +348,7 @@ def test_health_reports_counts_and_corpus() -> None:
     assert body["corpus"]["pages"] == 411
     assert body["corpus"]["source_commit"].startswith("2e094f7")
     assert body["corpus"]["kinds"]["doc"] == 296
+    assert body["embedding_probe"]["status"] in {"not_run", "passed"}
 
 
 def test_health_is_a_typed_503_when_no_variant_answers() -> None:
@@ -373,6 +381,23 @@ def test_request_id_is_minted_when_absent_and_echoed_when_sent() -> None:
 
     assert minted.headers["X-Request-Id"]
     assert echoed.headers["X-Request-Id"] == "abc-123"
+
+
+def test_minted_request_id_is_in_the_ask_body(fake_ask: list[dict[str, Any]]) -> None:
+    response = _request("POST", "/ask", json={"question": "how do I stream?"})
+
+    assert response.json()["request_id"] == response.headers["X-Request-Id"]
+
+
+def test_search_upstream_failures_are_a_typed_503() -> None:
+    _engine().fail = RetrieverException("vespa down")
+
+    response = _request("POST", "/search", json={"query": "streaming"})
+
+    assert response.status_code == 503
+    error = response.json()["error"]
+    assert error["code"] == "E_UPSTREAM"
+    assert "retry the identical request" in error["next"]
 
 
 def test_unhandled_failures_keep_the_typed_shape() -> None:

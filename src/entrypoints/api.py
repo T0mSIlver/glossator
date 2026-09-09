@@ -1,14 +1,4 @@
-"""FastAPI service over the glossator engine.
-
-One engine per index variant, built lazily and shared by every route; ``ask``
-goes through :mod:`glossator.answer.service` so the API, the CLI and the eval
-grid make the same call. Handlers are async end to end — the engine and the
-answer service are async, and a sync call in the request path would block the
-event loop for the length of a model round-trip.
-
-Errors share one JSON shape, code + message + ``next`` hint, so a client can
-react to the code without parsing prose.
-"""
+"""FastAPI routes for retrieval, cited answers, health, and version data."""
 
 import asyncio
 import json
@@ -25,13 +15,16 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from mistralai.search.toolkit.retrieval.errors import RetrieverException
+from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from glossator.answer import service as answer_service
-from glossator.answer.config import DEFAULT_VARIANT, PRICES, AnswerConfig, ModelPrice
+from glossator.answer.config import DEFAULT_VARIANT, PRICES, AnswerConfig
 from glossator.index.variants import VARIANTS, get_variant
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
+from glossator.retrieval.probe import check_embedding_once
 
 load_dotenv(override=True)
 
@@ -48,15 +41,13 @@ def _package_version() -> str:
         return "0.0.0+unknown"
 
 
-# ---------------------------------------------------------------------------
-# Typed errors
-# ---------------------------------------------------------------------------
+PACKAGE_VERSION = _package_version()
 
 
 class ApiError(Exception):
     """One typed failure: a code, a message, and the next call to make."""
 
-    def __init__(self, status_code: int, code: str, message: str, next_hint: str | None = None):
+    def __init__(self, status_code: int, code: str, message: str, next_hint: str):
         super().__init__(message)
         self.status_code = status_code
         self.code = code
@@ -73,11 +64,6 @@ def _error_body(
     if request_id:
         error["request_id"] = request_id
     return {"error": error}
-
-
-# ---------------------------------------------------------------------------
-# The engine registry: one SearchEngine per variant, built lazily
-# ---------------------------------------------------------------------------
 
 
 class EngineRegistry:
@@ -109,11 +95,6 @@ def _require_variant(variant: str) -> None:
             str(exc),
             next_hint=f"use one of {sorted(VARIANTS)}",
         ) from exc
-
-
-# ---------------------------------------------------------------------------
-# Request and response models
-# ---------------------------------------------------------------------------
 
 
 class AskRequest(BaseModel):
@@ -198,6 +179,7 @@ class HealthResponse(BaseModel):
     vespa: Literal["reachable", "unreachable"]
     default_variant: str
     variants: dict[str, VariantHealth]
+    embedding_probe: dict[str, Any]
     corpus: dict[str, Any] | None
     version: str
 
@@ -211,26 +193,23 @@ class VersionResponse(BaseModel):
     generation_models: list[str]
 
 
-# ---------------------------------------------------------------------------
-# Application
-# ---------------------------------------------------------------------------
-
 registry = EngineRegistry()
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    # Fail fast on a missing key, the way the MCP server does; Vespa is not
-    # contacted until the first query, so it is probed by /health, not here.
+    # Refuse traffic when the configured embeddings fail the semantic probe.
     if not registry.engines:
         registry.get(DEFAULT_VARIANT)
+    probe = await check_embedding_once(DEFAULT_VARIANT)
+    app.state.embedding_probe = {"status": "passed", **probe.as_dict()}
     logger.info("Startup", default_variant=DEFAULT_VARIANT, variants=sorted(VARIANTS))
     yield
 
 
 app = FastAPI(
     title="glossator",
-    version=_package_version(),
+    version=PACKAGE_VERSION,
     description="Answers technical questions over Mistral's documentation, with cited sources.",
     lifespan=lifespan,
 )
@@ -241,6 +220,7 @@ app.state.engines = registry
 async def request_id_middleware(request: Request, call_next: Any) -> Any:
     """Echo or mint an X-Request-Id; it rides the logs and every response."""
     request_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:16]
+    request.state.request_id = request_id
     structlog.contextvars.bind_contextvars(request_id=request_id)
     started = time.perf_counter()
     response = await call_next(request)
@@ -258,7 +238,7 @@ async def request_id_middleware(request: Request, call_next: Any) -> Any:
 
 @app.exception_handler(ApiError)
 async def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
-    request_id = request.headers.get("x-request-id") or getattr(request.state, "request_id", None)
+    request_id = getattr(request.state, "request_id", None)
     return JSONResponse(
         status_code=exc.status_code,
         content=_error_body(exc.code, exc.message, exc.next_hint, request_id),
@@ -277,7 +257,7 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
             "E_BAD_PARAM",
             f"invalid request: {fields}",
             "the response's 'message' names the fields; see /openapi.json for the schema",
-            request.headers.get("x-request-id"),
+            getattr(request.state, "request_id", None),
         ),
     )
 
@@ -291,33 +271,14 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
             "E_INTERNAL",
             "the request failed in an unexpected way; it has been logged",
             "retry; if it repeats, check GET /health before reporting",
-            request.headers.get("x-request-id"),
+            getattr(request.state, "request_id", None),
         ),
     )
 
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
-
 def _answer_config(model: str | None) -> AnswerConfig:
-    """AnswerConfig for the request, pricing any model the default table lacks at zero.
-
-    The account's free tier (D-017a) makes reachable-but-unpriced model ids the
-    normal case for live checks, and token usage is recorded either way, so an
-    unknown id is priced at 0 with a log line rather than rejected here — the
-    API itself will say whether the id exists.
-    """
-    if model is None:
-        return AnswerConfig()
-    if model in PRICES:
-        return AnswerConfig(model=model)
-    logger.warning("No price for model, cost recorded as zero", model=model)
-    return AnswerConfig(
-        model=model,
-        prices={**PRICES, model: ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0)},
-    )
+    """Build a validated answer configuration for one request."""
+    return AnswerConfig(model=model) if model is not None else AnswerConfig()
 
 
 @app.post("/ask")
@@ -330,13 +291,30 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
             next_hint=f"use one of {sorted(answer_service.STRATEGIES)}",
         )
     engine = registry.get(body.variant)
-    answer = await answer_service.ask(
-        body.question,
-        strategy=body.strategy,
-        variant=body.variant,
-        engine=engine,
-        config=_answer_config(body.model),
-    )
+    try:
+        config = _answer_config(body.model)
+    except ValidationError as exc:
+        raise ApiError(
+            400,
+            "E_BAD_PARAM",
+            str(exc),
+            next_hint=f"model must be one of {sorted(PRICES)}",
+        ) from exc
+    try:
+        answer = await answer_service.ask(
+            body.question,
+            strategy=body.strategy,
+            variant=body.variant,
+            engine=engine,
+            config=config,
+        )
+    except (RetrieverException, IndexException, RuntimeError) as exc:
+        raise ApiError(
+            503,
+            "E_UPSTREAM",
+            f"answer generation failed: {exc}",
+            "retry the identical request; if it repeats, check GET /health",
+        ) from exc
     payload: dict[str, Any] = answer.model_dump()
     for citation in payload["citations"]:
         citation["citation_url"] = _citation_url(citation["url"], citation["anchor"])
@@ -344,7 +322,7 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
         if citation["url"]:
             citation["citation_url"] = _citation_url(citation["url"], citation["anchor"])
     payload["trace_summary"] = answer.trace.summary()
-    payload["request_id"] = request.headers.get("x-request-id")
+    payload["request_id"] = request.state.request_id
     return payload
 
 
@@ -388,15 +366,28 @@ async def search(body: SearchRequest) -> SearchResponse:
             locales=body.locales,
         )
     except ValidationError as exc:
-        raise ApiError(400, "E_BAD_PARAM", str(exc)) from exc
+        raise ApiError(
+            400,
+            "E_BAD_PARAM",
+            str(exc),
+            "locales look like 'en' or 'pt-BR'; kinds are doc, api, model",
+        ) from exc
     engine = registry.get(body.variant)
-    hits = await engine.search(
-        body.query,
-        exclude_ids=set(body.exclude_ids) or None,
-        top_k=body.top_k,
-        kinds=body.kinds or None,
-        locales=body.locales or None,
-    )
+    try:
+        hits = await engine.search(
+            body.query,
+            exclude_ids=set(body.exclude_ids) or None,
+            top_k=body.top_k,
+            kinds=body.kinds or None,
+            locales=body.locales or None,
+        )
+    except RetrieverException as exc:
+        raise ApiError(
+            503,
+            "E_UPSTREAM",
+            f"search failed: {exc}",
+            "retry the identical request; if it repeats, check GET /health",
+        ) from exc
     return SearchResponse(
         query=body.query,
         variant=body.variant,
@@ -416,7 +407,22 @@ async def page(page_path: str, variant: str = DEFAULT_VARIANT) -> PageResponse:
         )
     url = f"https://docs.mistral.ai/{clean}"
     engine = registry.get(variant)
-    sections = await engine.navigation_at(url).read(None, None, top_k=PAGE_SECTION_CAP)
+    try:
+        sections = await engine.navigation_at(url).read(None, None, top_k=PAGE_SECTION_CAP)
+    except SourceNotFoundError as exc:
+        raise ApiError(
+            404,
+            "E_UNKNOWN_PAGE",
+            f"no indexed page at /{clean}",
+            "use the url exactly as a search hit printed it; POST /search to find pages",
+        ) from exc
+    except IndexException as exc:
+        raise ApiError(
+            503,
+            "E_UPSTREAM",
+            f"page read failed: {exc}",
+            "retry the identical request; if it repeats, check GET /health",
+        ) from exc
     if not sections:
         raise ApiError(
             404,
@@ -466,6 +472,9 @@ def _corpus_info() -> dict[str, Any] | None:
     }
 
 
+CORPUS_INFO = _corpus_info()
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     counts: dict[str, VariantHealth] = {}
@@ -495,8 +504,9 @@ async def health() -> HealthResponse:
         vespa=vespa,
         default_variant=DEFAULT_VARIANT,
         variants=counts,
-        corpus=_corpus_info(),
-        version=_package_version(),
+        embedding_probe=getattr(app.state, "embedding_probe", {"status": "not_run"}),
+        corpus=CORPUS_INFO,
+        version=PACKAGE_VERSION,
     )
 
 
@@ -504,7 +514,7 @@ async def health() -> HealthResponse:
 async def version_route() -> VersionResponse:
     return VersionResponse(
         name="glossator",
-        version=_package_version(),
+        version=PACKAGE_VERSION,
         variants=sorted(VARIANTS),
         generation_models=sorted(PRICES),
     )

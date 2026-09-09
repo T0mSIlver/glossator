@@ -1,20 +1,4 @@
-"""The MCP surface keeps the shape the agent loop depends on (D-029).
-
-- The tool set is exactly the six read tools; the index stays unwritable from
-  an agent loop.
-- Descriptions stay under 120 words with a complete first line under 80
-  characters; shared rules live once in `glossator://guide`.
-- Every response ends with a `next:` line; clamps are announced, unknown
-  parameter names are a typed `E_BAD_PARAM` naming the right one, and every
-  hit line carries its own `url#anchor`.
-- `ask` renders verified citations as links and rejected ones as plain drops.
-
-No backend and no API key are needed: the engine is replaced with a recording
-fake and `ask` with a canned service. `mcp_server` fails fast at import without
-`MISTRAL_API_KEY` and loads `.env` with `override=True`, so the fixture
-neutralises the dotenv load and sets a placeholder key -- it is never used to
-make a call.
-"""
+"""MCP tool, resource, response, and error-contract tests."""
 
 import asyncio
 import dataclasses
@@ -25,10 +9,11 @@ from typing import Any
 import pytest
 from fastmcp.exceptions import ToolError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
+from mistralai.search.toolkit.search.errors import SourceNotFoundError
 
 from glossator.answer.citations import Answer, Citation, Trace, TracedSource
 from glossator.answer.llm import TokenUsage
-from glossator.retrieval.engine import Hit
+from glossator.retrieval.engine import Hit, SearchTrace
 
 TOOLS = {"search", "open", "navigate", "read", "grep", "ask"}
 
@@ -70,33 +55,49 @@ def _hit(chunk_id: str, content: str, *, anchor: str | None = "a-section") -> Hi
 
 
 class FakeNavigation:
-    def __init__(self, hits: list[Hit]) -> None:
+    def __init__(self, hits: list[Hit], *, missing: bool = False) -> None:
         self.hits = hits
+        self.missing = missing
+
+    def _require_page(self) -> None:
+        if self.missing:
+            raise SourceNotFoundError("https://docs.mistral.ai/nope")
 
     async def around(self, window: int = 2) -> list[Hit]:
+        self._require_page()
         return self.hits
 
     async def next(self, top_k: int = 1) -> list[Hit]:
+        self._require_page()
         return self.hits[:top_k]
 
     async def previous(self, top_k: int = 1) -> list[Hit]:
+        self._require_page()
         return []
 
     async def read(
         self, start: int | None = None, end: int | None = None, top_k: int = 20
     ) -> list[Hit]:
+        self._require_page()
         return self.hits[:top_k]
 
     async def grep(self, pattern: str, mode: Any = None, top_k: int = 5) -> list[Hit]:
+        self._require_page()
         return self.hits[:top_k]
 
 
 class FakeEngine:
     """One page, two chunks; records what the tools forwarded."""
 
-    def __init__(self, hits: list[Hit] | None = None, empty: bool = False) -> None:
+    def __init__(
+        self,
+        hits: list[Hit] | None = None,
+        empty: bool = False,
+        missing_page: bool = False,
+    ) -> None:
         self.hits = hits if hits is not None else [_hit("c1", "alpha content"), _hit("c2", "beta")]
         self.empty = empty
+        self.missing_page = missing_page
         self.search_calls: list[dict[str, Any]] = []
 
     async def search(
@@ -112,10 +113,27 @@ class FakeEngine:
         )
         return [] if self.empty else self.hits[: top_k or 5]
 
+    async def search_with_trace(
+        self,
+        query: str,
+        exclude_ids: set[str] | None = None,
+        top_k: int | None = None,
+        kinds: frozenset[str] | None = None,
+        locales: frozenset[str] | None = None,
+    ) -> tuple[list[Hit], SearchTrace]:
+        hits = await self.search(query, exclude_ids, top_k, kinds, locales)
+        return hits, SearchTrace(
+            query=query,
+            variant="sec1024",
+            considered=len(hits),
+            kept=len(hits),
+            latency_ms=1.0,
+        )
+
     async def get_chunk(self, chunk_id: str) -> Hit | None:
         for hit in self.hits:
             if hit.chunk_id == chunk_id:
-                anchor = _hit(chunk_id, "anchor chunk")
+                anchor = _hit(chunk_id, hit.content)
                 return dataclasses.replace(
                     anchor,
                     navigation=FakeNavigation(self.hits),  # type: ignore[arg-type]
@@ -123,7 +141,7 @@ class FakeEngine:
         return None
 
     def navigation_at(self, source_id: str, start: int = 0, end: int = 0) -> FakeNavigation:
-        return FakeNavigation([] if self.empty else self.hits)
+        return FakeNavigation([] if self.empty else self.hits, missing=self.missing_page)
 
     async def document_count(self) -> int:
         return 4430
@@ -138,11 +156,6 @@ def _call_error(server: Any, name: str, arguments: dict[str, Any]) -> str:
     with pytest.raises(ToolError) as excinfo:
         asyncio.run(server.mcp.call_tool(name, arguments))
     return str(excinfo.value)
-
-
-# ---------------------------------------------------------------------------
-# The tool set and its descriptions
-# ---------------------------------------------------------------------------
 
 
 def test_the_tool_set_is_exactly_the_six_read_tools(mcp_server: Any) -> None:
@@ -183,11 +196,6 @@ def test_instructions_name_the_flow_the_guide_and_the_sin(mcp_server: Any) -> No
     assert "never fabricate documentation URLs or anchors" in instructions
 
 
-# ---------------------------------------------------------------------------
-# search
-# ---------------------------------------------------------------------------
-
-
 def test_search_happy_path_carries_per_unit_citations_and_next(mcp_server: Any) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
@@ -206,7 +214,7 @@ def test_search_full_page_prints_a_copy_pasteable_deeper_call(mcp_server: Any) -
 
     out = _call(mcp_server, "search", {"query": "streaming", "top_k": 2})
 
-    assert "Results: 2/2" in out
+    assert "Results: 2/2 kept/considered" in out
     assert 'exclude_ids=["c1", "c2"]' in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
 
@@ -220,6 +228,26 @@ def test_search_clamps_and_announces_and_bounds_the_engine_call(mcp_server: Any)
     assert "note: clamped server-side: top_k=500 → 50" in out
     # The clamp bounds the query itself, so 500 never reaches the engine.
     assert engine.search_calls[0]["top_k"] == 50
+
+
+def test_search_pagination_keeps_filters_and_prior_exclusions(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+
+    out = _call(
+        mcp_server,
+        "search",
+        {
+            "query": "streaming",
+            "top_k": 2,
+            "kinds": ["doc"],
+            "locales": ["en"],
+            "exclude_ids": ["old"],
+        },
+    )
+
+    assert 'exclude_ids=["old", "c1", "c2"]' in out
+    assert 'kinds=["doc"]' in out
+    assert 'locales=["en"]' in out
 
 
 def test_search_empty_says_which_kind_and_echoes_the_query(mcp_server: Any) -> None:
@@ -264,11 +292,6 @@ def test_unknown_parameters_with_no_close_match_list_the_schema(mcp_server: Any)
     assert "grep accepts:" in text
 
 
-# ---------------------------------------------------------------------------
-# open / navigate / read / grep
-# ---------------------------------------------------------------------------
-
-
 def test_open_windows_around_the_chunk_and_marks_it(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
 
@@ -285,6 +308,17 @@ def test_open_clamps_the_window_and_announces_it(mcp_server: Any) -> None:
     out = _call(mcp_server, "open", {"chunk_id": "c1", "window": 99})
 
     assert "note: clamped server-side: window=99 → 10" in out
+
+
+def test_open_truncation_names_a_read_call_that_accepts_every_parameter(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(hits=[_hit("c1", "x" * 1500)])
+
+    out = _call(mcp_server, "open", {"chunk_id": "c1"})
+
+    assert (
+        'read(source_id="https://docs.mistral.ai/page", start_offset=10, '
+        "end_offset=20, top_k=1)" in out
+    )
 
 
 def test_open_unknown_chunk_is_a_typed_error(mcp_server: Any) -> None:
@@ -352,6 +386,24 @@ def test_navigate_rejects_a_bad_direction(mcp_server: Any) -> None:
     assert "next" in text
 
 
+def test_navigate_unknown_page_is_a_typed_error(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(missing_page=True)
+
+    text = _call_error(
+        mcp_server,
+        "navigate",
+        {
+            "source_id": "https://docs.mistral.ai/nope",
+            "start_offset": 0,
+            "end_offset": 1,
+            "direction": "next",
+        },
+    )
+
+    assert "E_UNKNOWN_PAGE" in text
+    assert "next:" in text
+
+
 def test_read_returns_the_page_with_next(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
 
@@ -362,8 +414,18 @@ def test_read_returns_the_page_with_next(mcp_server: Any) -> None:
     assert out.rstrip().splitlines()[-1].startswith("next:")
 
 
+def test_read_returns_long_chunk_content_without_truncating_it(mcp_server: Any) -> None:
+    content = "first line\n" + "x" * 1400 + "\nlast line"
+    mcp_server._engine = FakeEngine(hits=[_hit("c1", content)])
+
+    out = _call(mcp_server, "read", {"source_id": "https://docs.mistral.ai/page"})
+
+    assert content in out
+    assert "[truncated" not in out
+
+
 def test_read_unknown_page_is_a_typed_error(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(empty=True)
+    mcp_server._engine = FakeEngine(missing_page=True)
 
     text = _call_error(mcp_server, "read", {"source_id": "https://docs.mistral.ai/nope"})
 
@@ -391,7 +453,7 @@ def test_grep_empty_names_the_kind_of_empty(mcp_server: Any) -> None:
     )
 
     assert 'Results: 0 chunks on this page contain the phrase "alpha"' in out
-    assert "the page is indexed; the words are not on it" in out
+    assert "The page is indexed; the words are not on it" in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
 
 
@@ -408,9 +470,17 @@ def test_grep_rejects_an_empty_pattern(mcp_server: Any) -> None:
     assert "E_EMPTY_QUERY" in text
 
 
-# ---------------------------------------------------------------------------
-# ask
-# ---------------------------------------------------------------------------
+def test_grep_unknown_page_is_a_typed_error(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(missing_page=True)
+
+    text = _call_error(
+        mcp_server,
+        "grep",
+        {"source_id": "https://docs.mistral.ai/nope", "pattern": "alpha"},
+    )
+
+    assert "E_UNKNOWN_PAGE" in text
+    assert "next:" in text
 
 
 def _fake_answer(insufficient: bool = False) -> Answer:
@@ -482,7 +552,7 @@ def test_ask_prints_sources_verification_and_next(mcp_server: Any, monkeypatch: 
 
     assert "Use server-sent events [1]" in out
     assert "Sources (1 verified):" in out
-    assert "[1] https://docs.mistral.ai/page#a-section — Page > A section" in out
+    assert "[1] https://docs.mistral.ai/page#a-section | Page > A section" in out
     assert "citations verified: 1/2" in out
     assert 'next: open(chunk_id="c1")' in out
     # The rejected citation is a plain drop, never a link.
@@ -517,11 +587,6 @@ def test_ask_rejects_an_unknown_strategy(mcp_server: Any) -> None:
     assert "next:" in text
 
 
-# ---------------------------------------------------------------------------
-# Admission and upstream failures
-# ---------------------------------------------------------------------------
-
-
 def test_busy_tells_the_caller_to_retry_the_identical_call(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
 
@@ -545,7 +610,9 @@ def test_upstream_failure_is_typed_with_a_retry_hint(mcp_server: Any) -> None:
     class ExplodingEngine:
         config: Any = None
 
-        async def search(self, query: str, **kwargs: Any) -> list[Hit]:
+        async def search_with_trace(
+            self, query: str, **kwargs: Any
+        ) -> tuple[list[Hit], SearchTrace]:
             raise RetrieverException("vespa down")
 
     mcp_server._engine = ExplodingEngine()
@@ -554,11 +621,6 @@ def test_upstream_failure_is_typed_with_a_retry_hint(mcp_server: Any) -> None:
 
     assert "E_UPSTREAM" in text
     assert "retry the identical call" in text
-
-
-# ---------------------------------------------------------------------------
-# Resources
-# ---------------------------------------------------------------------------
 
 
 def _read_resource(server: Any, uri: str) -> str:
@@ -583,7 +645,7 @@ def test_the_guide_states_the_flow_the_limits_and_no_other_uris(mcp_server: Any)
     assert "Never fabricate documentation URLs or anchors" in guide
     assert "There are no other URIs" in guide
     assert "glossator://index" in guide and "glossator://context" in guide
-    assert "| `search.top_k` | 1–50 | 5 |" in guide
+    assert "| `search.top_k` | 1-50 | 5 |" in guide
     assert "E_BAD_PARAM" in guide
 
 
@@ -608,6 +670,7 @@ def test_the_context_resource_publishes_limits_formats_and_counts(mcp_server: An
     assert context["limits"]["search.top_k"] == [1, 50]
     assert "chunk_id" in context["id_formats"]
     assert context["models"]["generation_default"] == "mistral-medium-2604"
+    assert "ministral-14b-2512" in context["models"]["generation_available"]
     assert context["resources"] == [
         "glossator://guide",
         "glossator://index",

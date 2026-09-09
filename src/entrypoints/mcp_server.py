@@ -1,17 +1,4 @@
-"""MCP server over the glossator engine: search, navigation, and answers.
-
-Read-only on purpose. The corpus is vendored and indexed by `make ingest` from a
-manifest whose hashes are checked, so every chunk in the index can be traced to
-a committed page at a known upstream commit; no tool writes to the index
-(D-026).
-
-The surface follows the rules D-029 distils from vidtheque's consumer
-evaluations: short tool descriptions with the shared rules lifted into the
-`glossator://guide` resource, three resources and no others, every response
-ending in a `next:` hint, clamps announced, unknown parameter names rejected
-with `E_BAD_PARAM` naming the right one, empty results that say which kind of
-empty they are, and typed errors that name the next call.
-"""
+"""Read-only MCP tools for search, page navigation, and cited answers."""
 
 import argparse
 import asyncio
@@ -27,9 +14,9 @@ from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware import Middleware
-from mistralai.search.toolkit.plugins.vespa.errors import VespaClientError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search import GrepMode
+from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
 
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer
@@ -38,19 +25,15 @@ from glossator.answer.config import (
     MISTRAL_MEDIUM_3_5,
     PRICES,
     AnswerConfig,
-    ModelPrice,
 )
 from glossator.index.variants import VARIANTS
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import Hit, SearchEngine
+from glossator.retrieval.probe import check_embedding_once
 
 load_dotenv(override=True)
 
 logger = structlog.get_logger(__name__)
-
-# ---------------------------------------------------------------------------
-# Startup — fail fast if the environment is misconfigured
-# ---------------------------------------------------------------------------
 
 if not os.environ.get("MISTRAL_API_KEY"):
     raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
@@ -72,22 +55,11 @@ _model_env = os.environ.get("GLOSSATOR_MODEL", "")
 
 
 def _answer_config() -> AnswerConfig:
-    if not _model_env:
-        return AnswerConfig()
-    if _model_env in PRICES:
-        return AnswerConfig(model=_model_env)
-    # An unpriced id is priced at 0 with a log line rather than rejected: on the
-    # free tier every call is free, and usage is recorded either way.
-    logger.warning("No price for model, cost recorded as zero", model=_model_env)
-    return AnswerConfig(
-        model=_model_env,
-        prices={**PRICES, _model_env: ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0)},
-    )
+    return AnswerConfig(model=_model_env) if _model_env else AnswerConfig()
 
 
-# Building the engine resolves the variant, matches the embedder to its model,
-# and checks that the schema supports navigation — all before the first request.
-_engine = SearchEngine(RetrievalConfig(variant=_variant_name))
+# Construction checks the variant, embedding model, and navigation support.
+_engine = SearchEngine(RetrievalConfig(variant=_variant_name, check_lexical_footing=True))
 
 # Extra engines for the other variants, for the context resource's document
 # counts. Built lazily, reused once built; counts are cached briefly so a
@@ -113,10 +85,6 @@ LIMITS: dict[str, tuple[int, int, int]] = {
 }
 """name -> (low, high, default). Published in glossator://context."""
 
-# ---------------------------------------------------------------------------
-# Typed errors and server-side clamps
-# ---------------------------------------------------------------------------
-
 
 def _error(code: str, message: str, next_hint: str) -> ToolError:
     return ToolError("\n".join([f"error: {code}", message, f"next: {next_hint}"]))
@@ -130,7 +98,7 @@ def _unknown_chunk(chunk_id: str) -> ToolError:
     return _error(
         "E_UNKNOWN_CHUNK",
         f'chunk id "{chunk_id}" is not in the index.',
-        "use a chunk id exactly as a search or open result printed it — never one "
+        "use a chunk id exactly as a search or open result printed it; never use one "
         "recalled from memory. search(query=...) lists chunk ids.",
     )
 
@@ -139,7 +107,7 @@ def _unknown_page(source_id: str) -> ToolError:
     return _error(
         "E_UNKNOWN_PAGE",
         f'no indexed page has source_id "{source_id}".',
-        "use the source_id exactly as a hit printed it — never a URL recalled from "
+        "use the source_id exactly as a hit printed it; never use a URL recalled from "
         "memory. glossator://index lists every indexed page.",
     )
 
@@ -156,7 +124,7 @@ def _busy() -> ToolError:
     return _error(
         "E_BUSY",
         f"the server is already running {_ADMISSION_SLOTS} concurrent engine calls.",
-        "retry the IDENTICAL call in 1s — do not reformulate the query, a different "
+        "retry the IDENTICAL call in 1s; do not reformulate the query. A different "
         "one is refused exactly as fast. The limit is on concurrent calls, not on "
         "what a query costs.",
     )
@@ -168,7 +136,7 @@ def _upstream(operation: str, cause: Exception) -> ToolError:
         "E_UPSTREAM",
         f"{operation} failed against the search index: {cause}",
         "retry the identical call in 1s; if it repeats, the index or the Mistral API "
-        "may be down — ask again later rather than rephrasing.",
+        "may be down. Ask again later instead of rephrasing.",
     )
 
 
@@ -184,12 +152,7 @@ def _clamp(kind: str, value: int | None) -> tuple[int, str | None]:
     return applied, f"note: clamped server-side: {name}={value} → {applied}"
 
 
-# ---------------------------------------------------------------------------
-# Response text: hit blocks, pagination, next hints
-# ---------------------------------------------------------------------------
-
-
-def _hit_block(hit: Hit, n: int, chars: int, mark: bool = False) -> str:
+def _hit_block(hit: Hit, n: int, chars: int | None, mark: bool = False) -> str:
     """One retrieved unit, always carrying its own citation url and handle.
 
     Long payloads print the anchor on each unit so a citation never reuses the
@@ -207,9 +170,16 @@ def _hit_block(hit: Hit, n: int, chars: int, mark: bool = False) -> str:
     if hit.start_offset is not None and hit.end_offset is not None:
         handle += f" · offsets {hit.start_offset}..{hit.end_offset}"
     lines.append(f"    {handle}")
-    preview = " ".join(hit.content.split())
-    if len(preview) > chars:
-        preview = preview[:chars] + " …[truncated — open(chunk_id=…) for the full chunk]"
+    preview = hit.content if chars is None else " ".join(hit.content.split())
+    if chars is not None and len(preview) > chars:
+        if hit.start_offset is not None and hit.end_offset is not None:
+            continuation = (
+                f'read(source_id="{hit.source_id}", start_offset={hit.start_offset}, '
+                f"end_offset={hit.end_offset}, top_k=1)"
+            )
+        else:
+            continuation = f'read(source_id="{hit.source_id}", top_k=1)'
+        preview = preview[:chars] + f" …[truncated; use {continuation}]"
     lines.append(f"    {preview}")
     return "\n".join(lines)
 
@@ -218,17 +188,13 @@ def _source_id_of(hit: Hit) -> str:
     return hit.source_id
 
 
-def _deeper_search_line(query: str, ids: list[str], **fixed: str) -> str:
+def _deeper_search_line(query: str, ids: list[str], **fixed: Any) -> str:
     """A copy-pasteable call that excludes exactly what this page returned."""
     id_list = ", ".join(json.dumps(i) for i in ids)
-    parts = [f'query="{query}"', f"exclude_ids=[{id_list}]"]
+    parts = [f"query={json.dumps(query)}", f"exclude_ids=[{id_list}]"]
     parts += [f"{k}={json.dumps(v)}" for k, v in fixed.items()]
     return f"search({', '.join(parts)})"
 
-
-# ---------------------------------------------------------------------------
-# The server
-# ---------------------------------------------------------------------------
 
 mcp: FastMCP = FastMCP(
     "glossator",
@@ -297,7 +263,7 @@ class _ParamGuard(Middleware):
         many = len(unknown) > 1
         raise _bad_param(
             f"unknown parameter{'s' if many else ''} for {name}: "
-            f"{', '.join(f'{w}=' for w in unknown)} — "
+            f"{', '.join(f'{w}=' for w in unknown)}; "
             f"{'they were' if many else 'it was'} rejected, not applied; a filter you "
             "think you passed was not.",
             ("did you mean " + ", ".join(suggestions) + "? " if suggestions else "")
@@ -327,7 +293,7 @@ async def search(
     """Search the indexed Mistral documentation by meaning or keywords.
     Every hit carries its own url#anchor and a chunk id for open().
 
-    USE WHEN: you need where the docs say something — a parameter, a limit, a
+    USE WHEN: you need where the docs state a parameter, a limit, a
     concept, a code pattern.
 
     DO NOT USE: to answer a question end to end (ask does that with verified
@@ -353,7 +319,7 @@ async def search(
     if bad_kinds:
         raise _bad_param(
             f"unknown page kind(s) {bad_kinds} in kinds.",
-            'kinds are "doc", "api", "model" — or omit the parameter for no filter.',
+            'kinds are "doc", "api", "model"; omit the parameter for no filter.',
         )
     filter_note = None
     if kinds_set or locales_set:
@@ -367,7 +333,7 @@ async def search(
 
     async with _admission_or_busy():
         try:
-            hits = await _engine.search(
+            hits, trace = await _engine.search_with_trace(
                 query,
                 exclude_ids=set(exclude_ids) if exclude_ids else None,
                 top_k=applied,
@@ -382,6 +348,12 @@ async def search(
         lines.append(note)
     if filter_note:
         lines.append(filter_note)
+    lines.append(f"hits: {trace.kept}/{trace.considered} kept/considered")
+    if trace.lexical_footing is False:
+        lines.append(
+            "note: no lexical footing in the corpus; vector retrieval still ran, "
+            f"missing terms={list(trace.missing_terms)}"
+        )
     lines.append("")
     for i, hit in enumerate(hits, 1):
         lines.append(_hit_block(hit, i, PREVIEW_CHARS))
@@ -389,15 +361,27 @@ async def search(
     if not hits:
         lines.extend(_empty_search(query, kinds_set, locales_set, exclude_ids or []))
     elif len(hits) == applied:
-        lines.append(f"Results: {len(hits)}/{applied} (the page was full — more may exist)")
+        lines.append(
+            f"Results: {trace.kept}/{trace.considered} kept/considered "
+            f"(top_k={applied} was full; more may exist)"
+        )
         lines.append("go deeper, copy-paste:")
-        lines.append("  " + _deeper_search_line(query, [h.chunk_id for h in hits]))
+        seen_ids = list(dict.fromkeys([*(exclude_ids or []), *(hit.chunk_id for hit in hits)]))
+        fixed: dict[str, Any] = {}
+        if kinds:
+            fixed["kinds"] = kinds
+        if locales:
+            fixed["locales"] = locales
+        lines.append("  " + _deeper_search_line(query, seen_ids, **fixed))
         lines.append(
             f'next: open(chunk_id="{hits[0].chunk_id}") to read hit 1 in context, '
             f'or ask(question="{query}") for a grounded answer'
         )
     else:
-        lines.append(f"Results: {len(hits)} (all that matched within top_k={applied})")
+        lines.append(
+            f"Results: {trace.kept}/{trace.considered} kept/considered "
+            f"(all that matched within top_k={applied})"
+        )
         lines.append(
             f'next: open(chunk_id="{hits[0].chunk_id}") to read hit 1 in context, '
             f'or ask(question="{query}") for a grounded answer'
@@ -415,7 +399,7 @@ def _empty_search(
     if kinds or locales:
         why.append("no page matched the kind/locale filter")
     why.append(
-        "the corpus may lack the topic, or the phrasing may differ — this index "
+        "the corpus may lack the topic, or the phrasing may differ. This index "
         "covers docs.mistral.ai guides, API reference and model cards only"
     )
     lines = [
@@ -451,7 +435,7 @@ async def open(chunk_id: str, window: int = 2) -> str:
     """Read a chunk and its neighbours in reading order, on its own page.
     The hit you pass is marked *; window chunks each side, offsets shown.
 
-    USE WHEN: a search hit looks promising and you need the context around it —
+    USE WHEN: a search hit looks promising and you need the context around it,
     the definition before the sentence, the rows cut off a table.
 
     DO NOT USE: to fetch a known offset range verbatim (read); to step one
@@ -467,16 +451,16 @@ async def open(chunk_id: str, window: int = 2) -> str:
     async with _admission_or_busy():
         try:
             anchor = await _engine.get_chunk(chunk_id)
-        except VespaClientError as exc:
+        except IndexException as exc:
             raise _upstream(f"open({chunk_id!r})", exc) from exc
         if anchor is None or anchor.navigation is None:
             raise _unknown_chunk(chunk_id)
         try:
             hits = await anchor.navigation.around(window=applied)
-        except VespaClientError as exc:
+        except IndexException as exc:
             raise _upstream(f"open({chunk_id!r})", exc) from exc
 
-    lines = [f'page: {anchor.url} — "{anchor.page_title}"']
+    lines = [f'page: {anchor.url} | "{anchor.page_title}"']
     if note:
         lines.append(note)
     lines.append(
@@ -531,7 +515,9 @@ async def navigate(
                 if direction == "previous"
                 else navigation.next(top_k=applied)
             )
-        except VespaClientError as exc:
+        except SourceNotFoundError as exc:
+            raise _unknown_page(source_id) from exc
+        except IndexException as exc:
             raise _upstream(f"navigate({source_id!r}, {direction})", exc) from exc
     if not hits:
         lines = [
@@ -566,10 +552,10 @@ async def read(
     """Fetch the chunks of one page between two offsets, verbatim.
     Omit both offsets for the whole page in reading order.
 
-    USE WHEN: you know the page and the range — following an outline, or
+    USE WHEN: you know the page and range, such as when following an outline or
     re-reading a section without re-ranking anything.
 
-    DO NOT USE: to expand around one search hit (open — cheaper, pass just the
+    DO NOT USE: to expand around one search hit (open is cheaper; pass just the
     id); to find where something is (search).
 
     START WITH no offsets, top_k=20.
@@ -583,22 +569,28 @@ async def read(
     applied, note = _clamp("read.top_k", top_k)
     async with _admission_or_busy():
         try:
-            hits = await _engine.navigation_at(source_id).read(
-                start_offset, end_offset, top_k=applied
-            )
-        except VespaClientError as exc:
+            navigation = _engine.navigation_at(source_id)
+            hits = await navigation.read(start_offset, end_offset, top_k=applied)
+        except SourceNotFoundError as exc:
+            raise _unknown_page(source_id) from exc
+        except IndexException as exc:
             raise _upstream(f"read({source_id!r})", exc) from exc
     if not hits:
         if start_offset is None and end_offset is None:
-            raise _unknown_page(source_id)
+            return "\n".join(
+                [
+                    f"Results: 0 content chunks on indexed page {source_id}",
+                    "next: search(query=…) to find another page with content",
+                ]
+            )
         raise _error(
-            "E_UNKNOWN_PAGE",
+            "E_BAD_PARAM",
             f"no chunk of {source_id} lies inside offsets "
             f"{start_offset}..{end_offset if end_offset is not None else 'end'}.",
-            "this is an offset problem, not a missing page — read() with no offsets "
+            "this is an offset problem, not a missing page. read() with no offsets "
             "returns the whole page; or open(chunk_id=…) around a hit you hold.",
         )
-    lines = [f'page: {source_id} — "{hits[0].page_title}"']
+    lines = [f'page: {source_id} | "{hits[0].page_title}"']
     if note:
         lines.append(note)
     if start_offset is not None or end_offset is not None:
@@ -608,14 +600,19 @@ async def read(
         )
     lines.append("")
     for i, hit in enumerate(hits, 1):
-        lines.append(_hit_block(hit, i, OPEN_PREVIEW_CHARS))
+        lines.append(_hit_block(hit, i, None))
         lines.append("")
     if len(hits) == applied:
         lines.append(f"Results: {len(hits)} chunks (top_k={applied}; the page may have more)")
-        lines.append(
-            f"next: re-run with top_k=100 for the rest, or grep(source_id="
-            f'"{source_id}", pattern="…") to jump to an exact phrase'
-        )
+        if hits[-1].end_offset is not None:
+            lines.append(
+                f'next: read(source_id="{source_id}", start_offset={hits[-1].end_offset}, '
+                f"top_k={applied}) to continue after this page of chunks"
+            )
+        else:
+            lines.append(
+                f'next: grep(source_id="{source_id}", pattern="…") to jump to an exact phrase'
+            )
     else:
         lines.append(f"Results: {len(hits)} chunks (the whole requested range)")
         lines.append(
@@ -628,9 +625,9 @@ async def read(
 @mcp.tool()
 async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 5) -> str:
     """Find an exact phrase or set of terms inside one indexed page.
-    Lexical only — it goes to the words, not the meaning.
+    It matches words, not meaning.
 
-    USE WHEN: you have a page in play and need where it says exactly this — an
+    USE WHEN: you have a page and need an exact error string, parameter name, or
     error string, a parameter name, a heading.
 
     DO NOT USE: corpus-wide search (search); semantic matching (search).
@@ -653,10 +650,11 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
     applied, note = _clamp("grep.top_k", top_k)
     async with _admission_or_busy():
         try:
-            hits = await _engine.navigation_at(source_id).grep(
-                pattern, mode=GrepMode(mode), top_k=applied
-            )
-        except VespaClientError as exc:
+            navigation = _engine.navigation_at(source_id)
+            hits = await navigation.grep(pattern, mode=GrepMode(mode), top_k=applied)
+        except SourceNotFoundError as exc:
+            raise _unknown_page(source_id) from exc
+        except IndexException as exc:
             raise _upstream(f"grep({source_id!r}, {pattern!r})", exc) from exc
     lines = [f"matches for {json.dumps(pattern)} (mode={mode}) on {source_id}"]
     if note:
@@ -666,7 +664,7 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
         lines.append(
             f"Results: 0 chunks on this page contain the "
             f"{'phrase' if mode == 'phrase' else 'terms'} "
-            f"{json.dumps(pattern)} — the page is indexed; the words are not on it."
+            f"{json.dumps(pattern)}. The page is indexed; the words are not on it."
         )
         lines.append(
             f'next: search(query="{pattern}") corpus-wide, or grep with mode="term" '
@@ -687,7 +685,7 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
     Returns the answer with [n] markers, a numbered source list, and how many
     citations' quotes verified against their chunks.
 
-    USE WHEN: the user wants an answer, not a document list — the server
+    USE WHEN: the user wants an answer rather than a document list. The server
     retrieves, generates, and checks every quote itself.
 
     DO NOT USE: to browse or explore (search and the navigation tools); when
@@ -730,14 +728,14 @@ def _answer_text(question: str, answer: Answer) -> str:
     if answer.insufficient_evidence:
         lines.append(
             "insufficient evidence: no citation could be verified against the retrieved "
-            "sources — treat the text above as unsupported."
+            "sources. Treat the text above as unsupported."
         )
         lines.append("")
     lines.append(f"Sources ({len(verified)} verified):")
     for citation in verified:
         heading = headings.get(citation.n, "")
         lines.append(
-            f"[{citation.n}] {citation.citation_url}" + (f" — {heading}" if heading else "")
+            f"[{citation.n}] {citation.citation_url}" + (f" | {heading}" if heading else "")
         )
     if not verified:
         lines.append("(none)")
@@ -745,7 +743,7 @@ def _answer_text(question: str, answer: Answer) -> str:
     for citation in rejected:
         shown = citation.quote if len(citation.quote) <= 60 else citation.quote[:60] + "…"
         lines.append(
-            f"[{citation.n}] dropped, no link — {citation.reason or 'unverified'} "
+            f"[{citation.n}] dropped, no link | {citation.reason or 'unverified'} "
             f"(quote: {json.dumps(shown)}); do not cite it"
         )
     lines.append(
@@ -763,11 +761,6 @@ def _answer_text(question: str, answer: Answer) -> str:
         nxt += ', or ask with strategy="outline" to read whole pages before answering'
     lines.append(nxt)
     return "\n".join(lines)
-
-
-# ---------------------------------------------------------------------------
-# Resources: exactly three, and the guide says so
-# ---------------------------------------------------------------------------
 
 
 def _manifest_pages() -> list[dict[str, Any]]:
@@ -798,12 +791,12 @@ def guide_resource() -> str:
 
 def _guide_text() -> str:
     limits_rows = "\n".join(
-        f"| `{name}` | {low}–{high} | {default} |" for name, (low, high, default) in LIMITS.items()
+        f"| `{name}` | {low}-{high} | {default} |" for name, (low, high, default) in LIMITS.items()
     )
     return f"""# Using glossator
 
 Mistral's documentation, indexed as citable sections. Every hit prints its
-citation target as `url#anchor` — cite that exact string, never a URL or anchor
+citation target as `url#anchor`. Cite that exact string, never a URL or anchor
 from memory: many sections have no anchor, and a made-up one points a reader
 nowhere.
 
@@ -820,16 +813,16 @@ Prefer `ask` for questions and the navigation tools for exploration.
 
 There are exactly three, and this is the list:
 
-- `glossator://guide` — this document.
-- `glossator://index` — every page: url, title, kind, one per line.
-- `glossator://context` — limits, id formats, corpus commit, document counts, model ids.
+- `glossator://guide`: this document.
+- `glossator://index`: every page, with url, title, and kind on one line.
+- `glossator://context`: limits, id formats, corpus commit, document counts, and model ids.
 
 There are no other URIs. `glossator://help` and `glossator://page/<url>` do not
-exist — drill down with tools, not with invented resource URIs.
+exist. Use tools to drill down instead of inventing resource URIs.
 
 ## Server-side limits
 
-Values outside these are clamped, never silently — a `note:` line names every
+Values outside these ranges are clamped. A `note:` line names every
 value the server moved:
 
 | Parameter | Range | Default |
@@ -854,20 +847,20 @@ parameter you can name changes how hard a question is worked.
 - An empty result says which kind of empty it is and echoes your query. A
   `note:` line names a value the server moved or a leg that could not apply.
 - Unknown parameter names are rejected with `E_BAD_PARAM` naming the right one
-  — a call that returns results applied every argument you sent.
+  before running. A call that returns results applied every argument you sent.
 - Errors are typed (`E_BAD_PARAM`, `E_UNKNOWN_PAGE`, `E_UNKNOWN_CHUNK`,
   `E_EMPTY_QUERY`, `E_BUSY`, `E_UPSTREAM`) and carry a `next:` line. `E_BUSY`
   says retry the identical call; rephrasing is refused exactly as fast.
 - The index covers docs.mistral.ai guides, API reference and model cards
   (commit and counts in `glossator://context`). It is not the whole internet:
-  if the corpus lacks a topic, say so — do not answer from memory.
+  if the corpus lacks a topic, say so. Do not answer from memory.
 """
 
 
 @mcp.resource(
     "glossator://index",
     name="Indexed pages",
-    description="Every page in the index: url, title, kind — one per line.",
+    description="Every indexed page with its url, title, and kind on one line.",
     mime_type="text/tab-separated-values",
 )
 def index_resource() -> str:
@@ -938,14 +931,13 @@ async def context_resource() -> str:
         },
         "models": {
             "generation_default": MISTRAL_MEDIUM_3_5,
+            "generation_served": _answer_config().model,
+            "generation_available": sorted(PRICES),
             "embedding": VARIANTS[_variant_name].embedding_model_name,
         },
         "resources": ["glossator://guide", "glossator://index", "glossator://context"],
     }
     return json.dumps(payload, indent=2)
-
-
-# ---------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
@@ -967,6 +959,8 @@ if __name__ == "__main__":
         help="Bind port (HTTP mode only, default: 8000).",
     )
     args = parser.parse_args()
+
+    asyncio.run(check_embedding_once(_variant_name))
 
     if args.http:
         mcp.run(transport="http", host=args.host, port=args.port)

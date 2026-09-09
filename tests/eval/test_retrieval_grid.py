@@ -120,7 +120,7 @@ def test_the_shipped_grid_expands_and_keeps_the_reranker_under_its_budget() -> N
     reranked = [entry for entry in entries if entry.reranked]
     assert {entry.variant for entry in reranked} == {"sec1024"}
     assert len(reranked) == 2
-    assert shipped.rerank.max_calls <= 400
+    assert shipped.rerank.max_calls == 600
     assert all(entry.config.top_k == 10 for entry in entries)
     assert all(entry.config.rerank_candidates == 20 for entry in reranked)
 

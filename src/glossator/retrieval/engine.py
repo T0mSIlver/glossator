@@ -239,10 +239,18 @@ class SearchEngine:
         *,
         rerank: bool | None = None,
         embedding: list[float] | None = None,
+        kinds: frozenset[str] | None = None,
+        locales: frozenset[str] | None = None,
     ) -> list[Hit]:
         """Hits for a query. ``top_k`` overrides the configured depth for one call."""
         hits, _trace = await self.search_with_trace(
-            query, exclude_ids=exclude_ids, top_k=top_k, rerank=rerank, embedding=embedding
+            query,
+            exclude_ids=exclude_ids,
+            top_k=top_k,
+            rerank=rerank,
+            embedding=embedding,
+            kinds=kinds,
+            locales=locales,
         )
         return hits
 
@@ -254,6 +262,8 @@ class SearchEngine:
         *,
         rerank: bool | None = None,
         embedding: list[float] | None = None,
+        kinds: frozenset[str] | None = None,
+        locales: frozenset[str] | None = None,
     ) -> tuple[list[Hit], SearchTrace]:
         """The same search, with the record of what it did to the result set.
 
@@ -270,10 +280,11 @@ class SearchEngine:
         depth = top_k or self.config.top_k
         reranking = self.config.rerank if rerank is None else rerank
         candidates = max(depth, self.config.rerank_candidates) if reranking else depth
+        retriever = self._retriever_for(kinds, locales)
 
         if embedding is None and self.config.scores_similarity:
-            embedding = await self.retriever.embed_query(query, context=self.context)
-        results = await self.retriever.retrieve(
+            embedding = await retriever.embed_query(query, context=self.context)
+        results = await retriever.retrieve(
             query, top_k=candidates, exclude_ids=exclude_ids, embedding=embedding
         )
         hits = _hits(results, self.navigation_index, self.context)
@@ -283,7 +294,7 @@ class SearchEngine:
         dropped_floor = dropped_margin = 0
         if self.config.scores_similarity and embedding is not None and hits:
             hits, best_similarity, dropped_floor, dropped_margin = await self._apply_floors(
-                embedding, hits
+                embedding, hits, retriever
             )
 
         rerank_trace: RerankTrace | None = None
@@ -317,11 +328,27 @@ class SearchEngine:
         )
         return hits, trace
 
+    def _retriever_for(
+        self,
+        kinds: frozenset[str] | None,
+        locales: frozenset[str] | None,
+    ) -> DocsRetriever:
+        """Apply request filters without changing the engine shared by other callers."""
+        if kinds is None and locales is None:
+            return self.retriever
+        values = self.config.model_dump()
+        if kinds is not None:
+            values["kinds"] = kinds
+        if locales is not None:
+            values["locales"] = locales
+        config = RetrievalConfig.model_validate(values)
+        return DocsRetriever(self.index, self.embedder, config)
+
     async def _apply_floors(
-        self, embedding: list[float], hits: list[Hit]
+        self, embedding: list[float], hits: list[Hit], retriever: DocsRetriever | None = None
     ) -> tuple[list[Hit], float | None, int, int]:
         """Attach each hit's cosine similarity and drop the ones below the floors."""
-        similarities = await self.retriever.cosine_similarities(
+        similarities = await (retriever or self.retriever).cosine_similarities(
             embedding, [hit.chunk_id for hit in hits], context=self.context
         )
         measured = [replace(hit, similarity=similarities.get(hit.chunk_id)) for hit in hits]
@@ -384,6 +411,28 @@ class SearchEngine:
         """Resolve an opaque chunk id back to a hit, for a caller that kept only the id."""
         result = await self.navigation_index.get_chunk(chunk_id, context=self.context)
         return _hit(result, self.navigation_index, self.context) if result else None
+
+    async def document_count(self) -> int:
+        """Return the number of documents in this engine's index variant."""
+        response = await self.index._client.query(  # noqa: SLF001 - toolkit has no count API
+            {
+                "yql": (
+                    f"select * from {self.config.index_variant.schema_name} where true limit 0"
+                ),
+                "timeout": "3s",
+            }
+        )
+        payload = response.json
+        if not isinstance(payload, dict):
+            return 0
+        root = payload.get("root")
+        if not isinstance(root, dict):
+            return 0
+        coverage = root.get("coverage")
+        if not isinstance(coverage, dict):
+            return 0
+        documents = coverage.get("documents", 0)
+        return int(documents) if isinstance(documents, int | float | str) else 0
 
 
 async def search(query: str, config: RetrievalConfig | None = None) -> list[Hit]:
