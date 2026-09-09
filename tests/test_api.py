@@ -7,8 +7,10 @@ from typing import Any
 import httpx
 import pytest
 from httpx import ASGITransport
+from mistralai.client.errors import MistralError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 
+from entrypoints import api as api_module
 from entrypoints.api import app, registry
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer, Citation, Trace
@@ -46,6 +48,8 @@ class FakeNavigation:
     async def read(
         self, start: int | None = None, end: int | None = None, top_k: int = 20
     ) -> list[Any]:
+        if start is not None:
+            return [s for s in self.sections if (s.start_offset or 0) >= start][:top_k]
         return self.sections[:top_k]
 
 
@@ -345,10 +349,55 @@ def test_health_reports_counts_and_corpus() -> None:
     assert body["vespa"] == "reachable"
     assert set(body["variants"]) == set(VARIANTS)
     assert body["variants"]["sec1024"]["documents"] == len(VARIANTS["sec1024"].schema_name)
-    assert body["corpus"]["pages"] == 411
-    assert body["corpus"]["source_commit"].startswith("2e094f7")
-    assert body["corpus"]["kinds"]["doc"] == 296
+    # Shape only: the vendored corpus is refreshed independently of these routes.
+    corpus = body["corpus"]
+    assert corpus is not None
+    assert corpus["pages"] > 0
+    assert corpus["source_commit"]
+    assert corpus["kinds"]
     assert body["embedding_probe"]["status"] in {"not_run", "passed"}
+
+
+def test_health_is_degraded_when_one_variant_is_down() -> None:
+    registry.engines.clear()
+    names = sorted(VARIANTS)
+    for name in names:
+        registry.engines[name] = FakeEngine(
+            fail=RuntimeError("connection refused") if name == names[0] else None
+        )
+
+    response = _request("GET", "/health")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "degraded"
+    assert body["vespa"] == "reachable"
+    assert body["variants"][names[0]]["documents"] is None
+    assert body["variants"][names[1]]["documents"] is not None
+
+
+def test_a_failed_startup_probe_degrades_health(monkeypatch: pytest.MonkeyPatch) -> None:
+    registry.engines.clear()
+    for name in VARIANTS:
+        registry.engines[name] = FakeEngine(count=len(VARIANTS[name].schema_name))
+
+    async def failing(variant: str) -> Any:
+        raise RuntimeError("embeddings unreachable")
+
+    monkeypatch.setattr(api_module, "check_embedding_once", failing)
+
+    async def run() -> None:
+        async with api_module.lifespan(api_module.app):
+            pass
+
+    asyncio.run(run())
+    try:
+        assert api_module.app.state.embedding_probe["status"] == "failed"
+        response = _request("GET", "/health")
+        assert response.status_code == 200
+        assert response.json()["status"] == "degraded"
+    finally:
+        del api_module.app.state.embedding_probe
 
 
 def test_health_is_a_typed_503_when_no_variant_answers() -> None:
@@ -409,3 +458,99 @@ def test_unhandled_failures_keep_the_typed_shape() -> None:
     error = response.json()["error"]
     assert error["code"] == "E_INTERNAL"
     assert error["next"]
+
+
+def test_error_bodies_carry_the_request_id() -> None:
+    response = _request(
+        "POST",
+        "/ask",
+        json={"question": "q", "strategy": "teleport"},
+        headers={"X-Request-Id": "err-17"},
+    )
+
+    error = response.json()["error"]
+    assert error["request_id"] == "err-17"
+    assert response.headers["X-Request-Id"] == "err-17"
+
+
+def test_ask_forwards_the_requested_model(fake_ask: list[dict[str, Any]]) -> None:
+    _request("POST", "/ask", json={"question": "q", "model": "ministral-14b-2512"})
+
+    assert fake_ask[0]["config"].model == "ministral-14b-2512"
+
+
+def test_ask_generation_failures_are_a_typed_503_upstream(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def quota_blocked(*args: Any, **kwargs: Any) -> Answer:
+        raise MistralError(
+            "quota exceeded",
+            httpx.Response(
+                429, request=httpx.Request("POST", "https://api.mistral.ai/v1/chat/completions")
+            ),
+        )
+
+    monkeypatch.setattr(answer_service, "ask", quota_blocked)
+
+    response = _request("POST", "/ask", json={"question": "how do I stream?"})
+
+    assert response.status_code == 503
+    error = response.json()["error"]
+    assert error["code"] == "E_UPSTREAM"
+    assert "quota exceeded" in error["message"]
+    assert "retry the identical request" in error["next"]
+
+
+def test_search_unknown_variant_hint_names_the_variants() -> None:
+    response = _request("POST", "/search", json={"query": "streaming", "variant": "sec2048"})
+
+    assert response.status_code == 400
+    error = response.json()["error"]
+    assert error["code"] == "E_BAD_PARAM"
+    assert "sec2048" in error["message"]
+    assert error["next"] == f"use one of {sorted(VARIANTS)}"
+    # The hint must not send the client rewriting locales instead.
+    assert "locales" not in error["next"]
+
+
+def test_search_unknown_field_is_rejected_with_a_suggestion() -> None:
+    response = _request("POST", "/search", json={"query": "streaming", "limit": 5})
+
+    assert response.status_code == 422
+    error = response.json()["error"]
+    assert error["code"] == "E_BAD_PARAM"
+    assert "limit" in error["message"]
+    assert "did you mean limit= → top_k=?" in error["next"]
+    assert "/search accepts:" in error["next"]
+    assert "query" in error["next"] and "top_k" in error["next"]
+
+
+def test_pages_truncation_is_recoverable_by_offset() -> None:
+    _engine().sections = [_hit(n) for n in range(1, 151)]
+
+    first = _request("GET", "/pages/api/endpoint/chat")
+
+    assert first.status_code == 200
+    body = first.json()
+    assert len(body["sections"]) == 100
+    assert body["truncated"] is True
+
+    resume_at = body["sections"][-1]["end_offset"]
+    second = _request("GET", f"/pages/api/endpoint/chat?start_offset={resume_at}")
+
+    assert second.status_code == 200
+    rest = second.json()
+    assert len(rest["sections"]) == 50
+    assert rest["truncated"] is False
+    assert rest["sections"][0]["section_index"] == 101
+
+
+def test_pages_honours_a_smaller_top_k() -> None:
+    _engine().sections = [_hit(n) for n in range(1, 6)]
+
+    response = _request("GET", "/pages/api/endpoint/chat?top_k=2")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert [s["section_index"] for s in body["sections"]] == [1, 2]
+    assert body["truncated"] is True

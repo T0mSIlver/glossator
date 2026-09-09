@@ -2,7 +2,6 @@
 
 import argparse
 import asyncio
-import difflib
 import json
 import os
 import time
@@ -17,7 +16,9 @@ from fastmcp.server.middleware import Middleware
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search import GrepMode
 from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
+from pydantic import ValidationError
 
+from entrypoints.param_suggestions import suggest_fields
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer
 from glossator.answer.config import (
@@ -199,10 +200,11 @@ def _deeper_search_line(query: str, ids: list[str], **fixed: Any) -> str:
 mcp: FastMCP = FastMCP(
     "glossator",
     instructions=(
-        "Start with search, open and read the section before answering; prefer "
-        "`ask` for questions and the navigation tools for exploration. Read "
-        "`glossator://guide` for the shared rules; never fabricate documentation "
-        "URLs or anchors: cite only a URL and anchor exactly as a tool printed them."
+        "Start with search, then open the hit to read the section in context "
+        "before answering; prefer `ask` for questions and the navigation tools "
+        "for exploration. Read `glossator://guide` for the shared rules; never "
+        "fabricate documentation URLs or anchors: cite only a URL and anchor "
+        "exactly as a tool printed them."
     ),
 )
 
@@ -215,33 +217,6 @@ class _ParamGuard(Middleware):
     at ``tools/call``, where the raw arguments still exist, and answers with
     ``E_BAD_PARAM`` naming the parameter the caller probably meant.
     """
-
-    ALIASES: dict[str, tuple[str, ...]] = {
-        "q": ("query",),
-        "text": ("query",),
-        "search": ("query",),
-        "keyword": ("query",),
-        "keywords": ("query",),
-        "question": ("query",),
-        "limit": ("top_k",),
-        "k": ("top_k",),
-        "n": ("top_k",),
-        "num": ("top_k",),
-        "max_results": ("top_k",),
-        "id": ("chunk_id",),
-        "chunk": ("chunk_id",),
-        "chunkid": ("chunk_id",),
-        "url": ("source_id",),
-        "page": ("source_id",),
-        "page_url": ("source_id",),
-        "start": ("start_offset",),
-        "end": ("end_offset",),
-        "window_size": ("window",),
-        "dir": ("direction",),
-        "filter": ("kinds",),
-        "lang": ("locales",),
-        "language": ("locales",),
-    }
 
     def __init__(self, server: FastMCP) -> None:
         self.server = server
@@ -256,10 +231,7 @@ class _ParamGuard(Middleware):
         unknown = [k for k in arguments if k not in known and not k.startswith("_")]
         if not unknown:
             return await call_next(context)
-        suggestions = []
-        for wrong in unknown:
-            right = self._suggest(wrong, known)
-            suggestions.append(f"{wrong}= → {right}=" if right else f"{wrong}= (no close match)")
+        suggestions = suggest_fields(unknown, known)
         many = len(unknown) > 1
         raise _bad_param(
             f"unknown parameter{'s' if many else ''} for {name}: "
@@ -269,13 +241,6 @@ class _ParamGuard(Middleware):
             ("did you mean " + ", ".join(suggestions) + "? " if suggestions else "")
             + f"{name} accepts: {', '.join(sorted(known))}.",
         )
-
-    def _suggest(self, name: str, known: set[str]) -> str | None:
-        for candidate in self.ALIASES.get(name.lower(), ()):
-            if candidate in known:
-                return candidate
-        close = difflib.get_close_matches(name.lower(), sorted(known), n=1, cutoff=0.75)
-        return close[0] if close else None
 
 
 _guard = _ParamGuard(mcp)
@@ -527,9 +492,14 @@ async def navigate(
             "next: open(chunk_id=…) around a hit you hold, or search(query=…) to change page",
         ]
         return "\n".join(lines)
-    lines = [
+    count = (
         f"{direction} {len(hits)} chunk(s) from offsets {start_offset}..{end_offset} on {source_id}"
-    ]
+    )
+    if len(hits) == applied:
+        count += f" (top_k={applied} was full; more may exist)"
+    else:
+        count += " (every chunk in this direction)"
+    lines = [count]
     if note:
         lines.append(note)
     lines.append("")
@@ -613,7 +583,7 @@ async def read(
                 f'next: grep(source_id="{source_id}", pattern="…") to jump to an exact phrase'
             )
     else:
-        lines.append(f"Results: {len(hits)} chunks (the whole requested range)")
+        lines.append(f"Results: {len(hits)} chunks (the whole requested range; none dropped)")
         lines.append(
             f'next: grep(source_id="{source_id}", pattern="…") for an exact '
             "phrase on this page, or search(query=…) to change page"
@@ -673,7 +643,12 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
     for i, hit in enumerate(hits, 1):
         lines.append(_hit_block(hit, i, OPEN_PREVIEW_CHARS))
         lines.append("")
-    lines.append(f"Results: {len(hits)} chunks matched")
+    count = f"Results: {len(hits)} chunks matched"
+    if len(hits) == applied:
+        count += f" (top_k={applied} was full; more matches may exist)"
+    else:
+        count += " (every match on this page)"
+    lines.append(count)
     lines.append(f'next: open(chunk_id="{hits[0].chunk_id}") for context around match 1')
     return "\n".join(lines).rstrip()
 
@@ -703,6 +678,15 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
             f"strategy={strategy!r} is not one of {sorted(answer_service.STRATEGIES)}.",
             f"choose from {sorted(answer_service.STRATEGIES)}; single_pass is the cheapest.",
         )
+    try:
+        config = _answer_config()
+    except ValidationError as exc:
+        # A bad GLOSSATOR_MODEL is deterministic misconfiguration: retrying the
+        # identical call, as E_UPSTREAM tells a client to, can never fix it.
+        raise _bad_param(
+            f"the GLOSSATOR_MODEL setting is invalid: {exc}",
+            f"GLOSSATOR_MODEL must be one of {sorted(PRICES)}",
+        ) from exc
     async with _admission_or_busy():
         try:
             answer = await answer_service.ask(
@@ -710,7 +694,7 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
                 strategy=strategy,
                 variant=_variant_name,
                 engine=_engine,
-                config=_answer_config(),
+                config=config,
             )
         except Exception as exc:  # the service already retries its own transient errors
             raise _upstream(f"ask({question!r})", exc) from exc
@@ -745,8 +729,11 @@ def _answer_text(question: str, answer: Answer) -> str:
             f"[{citation.n}] dropped, no link | {citation.reason or 'unverified'} "
             f"(quote: {json.dumps(shown)}); do not cite it"
         )
+    verified_count = (
+        f"citations verified: {len(verified)}/{total}" if total else "no citations were proposed"
+    )
     lines.append(
-        f"citations verified: {len(verified)}/{total} · strategy {answer.strategy} on "
+        f"{verified_count} · strategy {answer.strategy} on "
         f"{answer.trace.variant} · {answer.usage.prompt_tokens} in / "
         f"{answer.usage.completion_tokens} out tokens · {answer.latency_ms / 1000:.1f}s"
     )
@@ -775,7 +762,9 @@ def _manifest_pages() -> list[dict[str, Any]]:
 
 def _corpus_commit(pages: list[dict[str, Any]]) -> str:
     commits = {str(page.get("source_commit")) for page in pages if page.get("source_commit")}
-    return (sorted(commits)[0], f"{len(commits)} commits")[len(commits) != 1]
+    if len(commits) == 1:
+        return next(iter(commits))
+    return f"{len(commits)} commits"
 
 
 @mcp.resource(
@@ -898,7 +887,9 @@ async def _variant_documents(name: str) -> int | None:
     mime_type="application/json",
 )
 async def context_resource() -> str:
-    pages = _manifest_pages()
+    # The manifest is a file read inside an async handler; threaded so a slow
+    # disk never blocks the event loop.
+    pages = await asyncio.to_thread(_manifest_pages)
     kinds: dict[str, int] = {}
     for page in pages:
         kind = str(page.get("kind", "?"))
