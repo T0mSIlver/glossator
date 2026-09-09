@@ -409,6 +409,9 @@ def resolve(
             )
             continue
         located = _located_span(quote, source.content, min_quote_chars=min_quote_chars)
+        chunk_id: str | None
+        reason: str | None
+        source_quote: str | None
         if len(normalize(quote)) < min_quote_chars:
             ok, chunk_id, reason = False, None, RejectionReason.TOO_SHORT
             source_quote = None
