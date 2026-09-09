@@ -6,10 +6,12 @@ the alias moves, and D-023 wants every number traceable to the model that
 produced it.
 """
 
-from typing import Annotated, Self
+from typing import Annotated, Literal
 
 import structlog
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
+
+from glossator.clients import chat_server_url
 
 logger = structlog.get_logger(__name__)
 
@@ -49,6 +51,31 @@ PRICES: dict[str, ModelPrice] = {
 }
 
 DEFAULT_VARIANT = "sec1024"
+
+LOCAL_MINISTRAL_3_14B_MARKER = "ministral3-14b"
+"""Substring the local llama.cpp server uses in the ids it reports.
+
+The request names ``llamacpp/ministral3-14b`` while the response reports
+``ministral3-14b`` (no prefix, no date); neither matches the published id
+``ministral-14b-2512``. Any id containing this marker prices as Ministral 3 14B
+at the published API rate, with the run recording that the rate was applied to
+a local run rather than to API tokens.
+"""
+
+
+def aliased_price(model: str) -> ModelPrice | None:
+    """The published price for a model id, following the local-server alias.
+
+    Exact ids come straight from the price table; an id containing the local
+    Ministral 3 14B marker prices as ``MINISTRAL_3_14B``. Anything else has no
+    published price.
+    """
+    price = PRICES.get(model)
+    if price is not None:
+        return price
+    if LOCAL_MINISTRAL_3_14B_MARKER in model:
+        return PRICES[MINISTRAL_3_14B]
+    return None
 
 
 class AnswerConfig(BaseModel):
@@ -104,13 +131,22 @@ class AnswerConfig(BaseModel):
     picker_max_tokens: int = 300
     """The outline picker returns a handful of numbers and one sentence."""
 
-    tool_result_chars: int = 600
+    tool_result_chars: int | None = 600
     """Tool results are previews. The loop only has to decide what to look at
     next; the final generation re-reads the full chunks through context
-    assembly, so paying for whole chunks twice buys nothing."""
+    assembly, so paying for whole chunks twice buys nothing. ``None`` is the
+    explicit "full" size (D-035c): no preview is cut at all, rather than a
+    number that has to track the longest chunk."""
 
     open_result_chars: int = 1600
     """`open` and `read` are deliberate drill-downs, so they show more."""
+
+    response_format: Literal["json_schema", "json_object"] = "json_schema"
+    """What structured requests send as ``response_format``. The API honours a
+    full JSON schema; a server that does not (llama.cpp behind some templates)
+    gets ``json_object`` plus the schema described in the prompt, with the same
+    validation and repair on the way back. Recorded with every run so a fallback
+    is a stated configuration, never a silent degrade (D-035c)."""
 
     page_cap: int = 4
     page_read_top_k: int = 40
@@ -121,34 +157,47 @@ class AnswerConfig(BaseModel):
 
     prices: dict[str, ModelPrice] = Field(default_factory=lambda: dict(PRICES))
 
-    @model_validator(mode="after")
-    def _validate(self) -> Self:
-        if self.model not in self.prices:
-            raise ValueError(
-                f"no price for model {self.model!r}; "
-                f"priced models: {sorted(self.prices)} (add it to PRICES, D-017)"
-            )
-        return self
-
     def cost_usd(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
-        """USD for one call. An unpriced model costs 0 and says so, loudly.
+        """USD for one call. An unpriced model costs 0 and says so once (D-035c).
 
-        Token counts are recorded either way, so a price added later can be
-        applied to a run that already happened.
+        A local-server id containing the Ministral 3 14B marker prices at the
+        published Ministral 3 API rate applied to a local run; the token counts
+        are recorded either way so a price added later can be applied to a run
+        that already happened. A genuinely unpriced model logs once per model
+        per process rather than per call.
         """
         price = self.prices.get(model)
-        if price is None and "ministral3-14b" in model.casefold():
-            price = self.prices.get(LOCAL_MINISTRAL_3_14B)
+        if price is None and LOCAL_MINISTRAL_3_14B_MARKER in model.casefold():
+            price = self.prices.get(MINISTRAL_3_14B) or PRICES[MINISTRAL_3_14B]
         if price is None:
-            logger.warning("No price for model, cost recorded as zero", model=model)
+            if model not in _WARNED_UNPRICED:
+                _WARNED_UNPRICED.add(model)
+                logger.warning("No price for model, cost recorded as zero", model=model)
             return 0.0
         return (
             prompt_tokens * price.input_usd_per_mtok + completion_tokens * price.output_usd_per_mtok
         ) / 1_000_000
 
 
+_WARNED_UNPRICED: set[str] = set()
+
+
+def known_serving_model(model: str) -> bool:
+    """Whether a serving entrypoint should accept this model id.
+
+    The Mistral API path serves priced models only (D-017); a local chat server
+    (D-035c) reports aliased Ministral 3 14B ids, which are accepted and priced
+    at the published API rate, and any other id when a server is configured,
+    costing 0 with one warning per model per process. The check lives at the
+    entrypoints rather than in ``AnswerConfig`` because it is a question about
+    what this deployment serves, not about what a run may record.
+    """
+    return model in PRICES or aliased_price(model) is not None or chat_server_url() is not None
+
+
 __all__ = [
     "DEFAULT_VARIANT",
+    "LOCAL_MINISTRAL_3_14B_MARKER",
     "MINISTRAL_3_14B",
     "LOCAL_MINISTRAL_3_14B",
     "MINISTRAL_3_8B",
@@ -158,4 +207,6 @@ __all__ = [
     "PRICES",
     "AnswerConfig",
     "ModelPrice",
+    "aliased_price",
+    "known_serving_model",
 ]

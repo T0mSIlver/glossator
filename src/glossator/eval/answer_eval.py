@@ -48,10 +48,11 @@ from glossator.answer.citations import (
     RejectionReason,
     Trace,
 )
-from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig
+from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig, aliased_price
 from glossator.answer.llm import LLMCall, MistralLLM
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
-from glossator.answer.service import STRATEGIES, ask, build_client
+from glossator.answer.service import STRATEGIES, ask
+from glossator.clients import chat_client, chat_server_url
 from glossator.eval.agreement import (
     CorrectnessLabel,
     agreement_report,
@@ -489,6 +490,18 @@ def rounds(record: QuestionRecord) -> int:
     return record.trace.rounds if record.trace is not None else 0
 
 
+def hit_round_cap(record: QuestionRecord) -> bool:
+    """Whether the loop ran out of rounds before it stopped itself.
+
+    A configuration whose answers keep hitting the cap is one where the model
+    wanted to keep looking; read beside `rounds`, it says whether the mean is
+    the model's choice or the configuration's (D-035c).
+    """
+    if record.trace is None:
+        return False
+    return any(event.kind == "loop" and event.name == "round_cap" for event in record.trace.events)
+
+
 def rejection_counts(record: QuestionRecord) -> tuple[int, int]:
     """Rejected citations split into fabricated and cosmetic.
 
@@ -540,6 +553,7 @@ def question_metrics(record: QuestionRecord) -> dict[str, float | None]:
         "reference_usd": reference_cost_usd(record.usage),
         "tool_calls": float(tool_calls(record)),
         "rounds": float(rounds(record)),
+        "round_cap_hit": float(hit_round_cap(record)),
         "errors": float(record.error is not None),
         "correctness": CORRECTNESS_SCORE[verdict.correctness] if verdict else None,
         "correct": float(verdict.correctness == "correct") if verdict else None,
@@ -580,6 +594,7 @@ MEAN_METRICS: dict[str, int] = {
     "reference_usd": 4,
     "tool_calls": 2,
     "rounds": 2,
+    "round_cap_hit": 2,
 }
 
 
@@ -727,6 +742,8 @@ def aggregate(records: Sequence[QuestionRecord], config: Mapping[str, Any]) -> d
     return {
         "kind": "answer_eval",
         "model": config.get("model"),
+        "generation_server": config.get("generation_server"),
+        "answer_config_overrides": dict(config.get("answer_config_overrides") or {}),
         "judge_model": config.get("judge_model"),
         "judge_models": config.get("judge_models")
         or ([config.get("judge_model")] if config.get("judge_model") else []),
@@ -840,6 +857,32 @@ class RunDirectory:
         self.records.append(record)
         self._append(self.records_path, json.loads(record.model_dump_json()))
 
+    def drop_error_records(self) -> int:
+        """Remove the rows that ended in an error, so a resume regenerates them.
+
+        Rows with an answer are the run's paid-for output and stay; the calls
+        that failed stay in `calls.jsonl`, which is an append-only ledger.
+        Rewritten from the stored lines rather than re-serialized models, so
+        fields this model does not know about survive the rewrite.
+        """
+        lines = [line for line in self.records_path.read_text().splitlines() if line.strip()]
+        kept_lines: list[str] = []
+        kept: list[QuestionRecord] = []
+        for line in lines:
+            record = QuestionRecord.model_validate_json(line)
+            if record.error is None:
+                kept_lines.append(line)
+                kept.append(record)
+        dropped = len(lines) - len(kept_lines)
+        if dropped:
+            temporary = self.records_path.with_suffix(f".{os.getpid()}.tmp")
+            with temporary.open("w") as handle:
+                for line in kept_lines:
+                    handle.write(line + "\n")
+            temporary.replace(self.records_path)
+            self.records = kept
+        return dropped
+
     def replace_records(self, records: Sequence[QuestionRecord]) -> None:
         """Checkpoint judge fields without normalizing the stored answer or trace."""
         stored = [json.loads(line) for line in self.records_path.read_text().splitlines()]
@@ -931,6 +974,56 @@ def read_records(path: Path) -> list[QuestionRecord]:
         for line in path.read_text().splitlines()
         if line.strip()
     ]
+
+
+def parse_answer_config_value(raw: str) -> Any:
+    """One ``--answer-config`` value as the field's own type would spell it.
+
+    Integers, floats, ``true``/``false`` and ``null``/``none`` arrive as
+    themselves; anything else is a string the model validates or rejects. There
+    is no comma-list or nested structure because no ``AnswerConfig`` field takes
+    one from the command line.
+    """
+    text = raw.strip()
+    lowered = text.casefold()
+    if lowered in ("null", "none"):
+        return None
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    for cast in (int, float):
+        try:
+            return cast(text)
+        except ValueError:
+            continue
+    return text
+
+
+def parse_answer_config(items: Sequence[str]) -> dict[str, Any]:
+    """``key=value`` strings into the override dict ``AnswerConfig`` validates."""
+    overrides: dict[str, Any] = {}
+    for item in items:
+        key, separator, value = item.partition("=")
+        key = key.strip()
+        if not separator or not key:
+            raise ValueError(f"--answer-config expects key=value, got {item!r}")
+        if key in overrides:
+            raise ValueError(f"--answer-config received {key!r} twice")
+        overrides[key] = parse_answer_config_value(value)
+    return overrides
+
+
+def apply_answer_config(settings: AnswerConfig, overrides: Mapping[str, Any]) -> AnswerConfig:
+    """Revalidate the whole configuration with the overrides on top.
+
+    The model does the validating (field names, types, bounds), so a typo in a
+    key or a value the field will not hold is refused here, before any question
+    is asked.
+    """
+    if not overrides:
+        return settings
+    return AnswerConfig.model_validate({**settings.model_dump(), **overrides})
 
 
 def resolve_run_directory(name: str, *, root: Path = RUNS_ROOT) -> Path:
@@ -1156,12 +1249,21 @@ async def run(
     settings: AnswerConfig,
     quota_ceiling: int = QUOTA_CEILING_PERCENT,
     rerank: bool = True,
+    retry_errors: bool = False,
 ) -> dict[str, Any]:
     """Every question through every strategy, judged, recorded, summarized.
 
     Questions run one at a time: the Mistral account is on the free tier, where
     concurrency buys 429s rather than throughput (D-028).
+
+    ``retry_errors`` regenerates the rows whose record carries an error -- the
+    429s and timeouts a resumed run would otherwise keep forever -- and leaves
+    every answered row alone.
     """
+    if retry_errors:
+        dropped = run_dir.drop_error_records()
+        if dropped:
+            logger.info("Dropping error rows for regeneration", records=dropped)
     done = run_dir.done
     pending = [
         (question, strategy)
@@ -1176,7 +1278,7 @@ async def run(
     engine = SearchEngine(
         RetrievalConfig.shipped(variant=variant, top_k=settings.top_k, rerank=rerank)
     )
-    llm = MistralLLM(settings, client=build_client(), recorder=AnswerCallRecorder(run_dir))
+    llm = MistralLLM(settings, client=chat_client(), recorder=AnswerCallRecorder(run_dir))
     providers = make_judge_providers(judge_models, run_dir)
     try:
         for question, strategy in pending:
@@ -1267,6 +1369,7 @@ FAMILIES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
             ("reference_usd", f"USD per question at {REFERENCE_PRICING_MODEL} prices"),
             ("tool_calls", "tool calls per answer"),
             ("rounds", "rounds per answer"),
+            ("round_cap_hit", "share of answers that ran out of rounds"),
         ),
     ),
 )
@@ -1425,18 +1528,46 @@ def _agreement_section(metrics: Mapping[str, Any]) -> str:
     )
 
 
+def _server_line(config: Mapping[str, Any]) -> str:
+    """The generation server, stated so a local-server run cannot pose as an API run."""
+    server = config.get("generation_server")
+    if not server:
+        return "- Generation server: the Mistral API (`https://api.mistral.ai`)"
+    return (
+        f"- Generation server: `{server}` -- a local server, not the Mistral API. "
+        "Every judged number, latency and token count in this run describes that "
+        "server; none of it is comparable with an API run of the same configuration."
+    )
+
+
+def _overrides_line(config: Mapping[str, Any]) -> str:
+    overrides = dict(config.get("answer_config_overrides") or {})
+    if not overrides:
+        return "- Answer-config overrides: none (the shipped configuration)"
+    rendered = ", ".join(f"{key}={value!r}" for key, value in sorted(overrides.items()))
+    return f"- Answer-config overrides: {rendered}"
+
+
 def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     """The run README (D-023). Every sentence in it is computed from the records."""
     totals = metrics["totals"]
-    unpriced = metrics["model"] not in PRICES
-    price_note = (
-        f"\n\n`{metrics['model']}` has no published price, so the USD column of this "
-        f"run is zero by construction. The row beside it prices the same recorded "
-        f"tokens at {REFERENCE_PRICING_MODEL} rates (D-017), which is what the "
-        "shipped configuration would have cost."
-        if unpriced
-        else ""
-    )
+    model = str(metrics["model"])
+    alias = aliased_price(model) if model not in PRICES else None
+    unpriced = model not in PRICES and alias is None
+    if unpriced:
+        price_note = (
+            f"\n\n`{model}` has no published price, so the USD column of this "
+            f"run is zero by construction. The row beside it prices the same recorded "
+            f"tokens at {REFERENCE_PRICING_MODEL} rates (D-017), which is what the "
+            "shipped configuration would have cost."
+        )
+    elif alias is not None:
+        price_note = (
+            f"\n\n`{model}` is a local-server alias for Ministral 3 14B: costs use "
+            "the published Ministral 3 API rate applied to a local run, not API tokens."
+        )
+    else:
+        price_note = ""
     judged = (
         f"{totals['judged']} of {metrics['records']} answers were judged by "
         f"the primary judge `{metrics['judge_model']}`."
@@ -1495,9 +1626,15 @@ answer and the cited passages verbatim. It sees no URL, page identifier, or stra
 ## Configuration
 
 - Generation model: `{metrics["model"]}`
+{_server_line(config)}
+{_overrides_line(config)}
 - Judge models: {", ".join(f"`{model}`" for model in metrics.get("judge_models") or []) or "none (--skip-judge)"}; primary first ({JUDGE_VERSION})
 - Index variant: `{metrics["variant"]}`, top_k {config.get("top_k")}, rerank {config.get("rerank", "unknown")} ({config.get("rerank_model") or "off"}), context budget \
 {config.get("context_token_budget")} tokens
+- Search loop caps: round_cap {config.get("answer_config", {}).get("round_cap", "unknown")}, \
+searches_per_round {config.get("answer_config", {}).get("searches_per_round", "unknown")}, \
+tool_result_chars {config.get("answer_config", {}).get("tool_result_chars", "unknown")}, \
+response_format {config.get("answer_config", {}).get("response_format", "unknown")}
 - Non-English questions rendered in English for retrieval: \
 {config.get("translate_for_retrieval", "unknown")}
 - Question reworded into the documentation's vocabulary for retrieval: \
@@ -1663,7 +1800,8 @@ def regenerate(run_dir: Path) -> dict[str, Any]:
 
 
 def _cost_from_row(row: Mapping[str, Any]) -> float:
-    price = PRICES.get(str(row.get("model") or ""))
+    model = str(row.get("model") or "")
+    price = PRICES.get(model) or aliased_price(model)
     usage = row.get("usage")
     if price is None or not isinstance(usage, Mapping):
         return 0.0
@@ -1719,7 +1857,9 @@ def recost(run_dir: Path) -> dict[str, Any]:
         {
             str(row.get("model"))
             for row in [*call_rows, *record_rows]
-            if row.get("model") and str(row.get("model")) not in PRICES
+            if row.get("model")
+            and str(row.get("model")) not in PRICES
+            and aliased_price(str(row.get("model"))) is None
         }
     )
 
@@ -1878,6 +2018,26 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         action="store_false",
         help="Retrieve without the listwise reranker (the shipped default reranks)",
     )
+    parser.add_argument(
+        "--answer-config",
+        action="append",
+        default=[],
+        dest="answer_config",
+        metavar="KEY=VALUE",
+        help=(
+            "Override one AnswerConfig field by name (round_cap=6, "
+            "searches_per_round=4, tool_result_chars=1500, tool_result_chars=null "
+            "for full previews, response_format=json_object); repeatable"
+        ),
+    )
+    parser.add_argument(
+        "--retry-errors",
+        action="store_true",
+        help=(
+            "On resume, regenerate the rows whose record carries an error "
+            "(429s, timeouts); rows with an answer are kept"
+        ),
+    )
     parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
     parser.add_argument(
         "--note",
@@ -1918,13 +2078,24 @@ async def _run(args: argparse.Namespace) -> None:
     questions = read_jsonl(args.dataset)
     if args.limit is not None:
         questions = stratified_subset(questions, args.limit, args.seed)
-    settings = AnswerConfig(
-        model=args.model,
-        top_k=args.top_k,
-        translate_for_retrieval=args.translate_for_retrieval,
-        rewrite_for_retrieval=args.rewrite_for_retrieval,
-        prices=PRICES,
+    try:
+        overrides = parse_answer_config(args.answer_config)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
+    settings = apply_answer_config(
+        AnswerConfig(
+            model=args.model,
+            top_k=args.top_k,
+            translate_for_retrieval=args.translate_for_retrieval,
+            rewrite_for_retrieval=args.rewrite_for_retrieval,
+            prices=PRICES,
+        ),
+        overrides,
     )
+    if overrides and "model" in overrides and overrides["model"] != args.model:
+        # The model is a column of every table; letting --answer-config model=...
+        # disagree with --model would record two different truths.
+        raise SystemExit("set the model with --model, not --answer-config")
     try:
         judge_models = (
             []
@@ -1969,6 +2140,8 @@ async def _run(args: argparse.Namespace) -> None:
         "rerank_model": RERANK_MODEL if args.rerank else None,
         "context_token_budget": settings.context_token_budget,
         "answer_config": settings.model_dump(mode="json"),
+        "answer_config_overrides": overrides,
+        "generation_server": chat_server_url(),
         "unpriced_models": sorted(UNPRICED_MODELS),
         "reference_pricing_model": REFERENCE_PRICING_MODEL,
         "notes": list(args.notes),
@@ -1985,6 +2158,7 @@ async def _run(args: argparse.Namespace) -> None:
             settings=settings,
             quota_ceiling=args.quota_ceiling,
             rerank=args.rerank,
+            retry_errors=args.retry_errors,
         )
     except Exception as error:
         run_dir.finalize(status="failed", error=f"{type(error).__name__}: {error}")
@@ -2060,8 +2234,11 @@ __all__ = [
     "QuestionRecord",
     "RunDirectory",
     "aggregate",
+    "apply_answer_config",
     "cell",
     "judge_input",
+    "parse_answer_config",
+    "parse_answer_config_value",
     "question_metrics",
     "recost",
     "regenerate",

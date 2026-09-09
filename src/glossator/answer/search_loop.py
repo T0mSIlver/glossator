@@ -136,7 +136,7 @@ class ToolResult:
     message: str | None = None
     notes: tuple[str, ...] = ()
 
-    def content(self, fresh: list[Hit], returned: int, limit: int) -> str:
+    def content(self, fresh: list[Hit], returned: int, limit: int | None) -> str:
         body = self.message or _render(fresh, returned, limit)
         return "\n".join([body, *self.notes])
 
@@ -331,7 +331,7 @@ def _over_round_cap(invocations: tuple[ToolInvocation, ...], searches_per_round:
     return dropped
 
 
-def _result_chars(tool: str, config: AnswerConfig) -> int:
+def _result_chars(tool: str, config: AnswerConfig) -> int | None:
     return config.tool_result_chars if tool == CAPPED_TOOL else config.open_result_chars
 
 
@@ -343,8 +343,12 @@ def _collect(collected: dict[str, Hit], hits: list[Hit]) -> list[Hit]:
     return fresh
 
 
-def _render(hits: list[Hit], returned: int, limit: int) -> str:
-    """A tool result: enough to judge relevance, not the whole chunk."""
+def _render(hits: list[Hit], returned: int, limit: int | None) -> str:
+    """A tool result: enough to judge relevance, not the whole chunk.
+
+    ``limit`` is ``None`` in the grid's "full" configuration (D-035c): the whole
+    collapsed chunk is shown, and only the no-new-chunks message stays short.
+    """
     if not hits:
         return (
             f"No new chunks: all {returned} results were already collected. "

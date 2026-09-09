@@ -20,7 +20,6 @@ beside them, so a reviewer can see how much headroom each one has.
 """
 
 import math
-import os
 from dataclasses import dataclass
 from typing import Any
 
@@ -29,6 +28,7 @@ from mistralai.client import Mistral
 from mistralai.search.toolkit.embedding import Embedder, MistralEmbedder
 from mistralai.search.toolkit.plugins.vespa.search.query import VespaSearchQuery
 
+from glossator.clients import embedding_client
 from glossator.index import get_index, get_variant
 from glossator.index.variants import IndexVariant
 from glossator.retrieval.context import restrict_to
@@ -280,10 +280,7 @@ _PROBED: dict[str, ProbeResult] = {}
 
 
 def _client() -> Mistral:
-    key = os.environ.get("MISTRAL_API_KEY", "")
-    if not key:
-        raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
-    return Mistral(api_key=key)
+    return embedding_client()
 
 
 def cosine(left: list[float], right: list[float]) -> float:

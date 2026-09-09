@@ -30,7 +30,12 @@ from glossator.answer.cite import (
     CiteResult,
     entries_with_headings,
 )
-from glossator.answer.config import DEFAULT_VARIANT, PRICES, AnswerConfig
+from glossator.answer.config import (
+    DEFAULT_VARIANT,
+    PRICES,
+    AnswerConfig,
+    known_serving_model,
+)
 from glossator.answer.llm import CALL_ERRORS
 from glossator.index.variants import VARIANTS, get_variant
 from glossator.retrieval.config import KINDS, RetrievalConfig
@@ -333,7 +338,16 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
 
 
 def _answer_config(model: str | None) -> AnswerConfig:
-    """Build a validated answer configuration for one request."""
+    """Build a validated answer configuration for one request.
+
+    A model the price table does not know is refused at the door, unless a local
+    chat server is configured, whose ids the table has never seen (D-035c).
+    """
+    if model is not None and not known_serving_model(model):
+        raise ValueError(
+            f"no price for model {model!r}; priced models: {sorted(PRICES)} "
+            "(or set GLOSSATOR_CHAT_SERVER_URL to serve from a local server)"
+        )
     return AnswerConfig(model=model) if model is not None else AnswerConfig()
 
 
@@ -360,12 +374,13 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
     engine = registry.get(body.variant)
     try:
         config = _answer_config(body.model)
-    except ValidationError as exc:
+    except (ValidationError, ValueError) as exc:
         raise ApiError(
             400,
             "E_BAD_PARAM",
             str(exc),
-            next_hint=f"model must be one of {sorted(PRICES)}",
+            next_hint=f"model must be one of {sorted(PRICES)} "
+            "(or set GLOSSATOR_CHAT_SERVER_URL for a local server)",
         ) from exc
     try:
         answer = await answer_service.ask(

@@ -6,8 +6,6 @@ means a caller never has to build an engine, a client or a config to ask a
 question, and an evaluation varies exactly the arguments a user could vary.
 """
 
-import os
-
 import structlog
 from mistralai.client import Mistral
 
@@ -19,6 +17,7 @@ from glossator.answer.llm import LLM, CallRecorder, MistralLLM
 from glossator.answer.outline import answer as outline_answer
 from glossator.answer.search_loop import answer as search_loop_answer
 from glossator.answer.single_pass import answer as single_pass_answer
+from glossator.clients import chat_client
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
 
@@ -46,9 +45,10 @@ async def ask(
     builds the index client once instead of once per question.
 
     ``model`` names the generation model, which an evaluation varies per run and
-    reports as a column of every table (D-017a). It is revalidated rather than
-    copied in, so a model with no price in the table is refused here instead of
-    silently costing zero.
+    reports as a column of every table (D-017a). A model with no price in the
+    table costs zero and says so once per process (D-035c): a local server
+    reports ids the price list has never seen, and refusing them would make
+    every local-server run impossible.
     """
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown strategy {strategy!r}; available: {sorted(STRATEGIES)}")
@@ -63,34 +63,15 @@ async def ask(
     if model is not None and model != settings.model:
         settings = AnswerConfig.model_validate({**settings.model_dump(), "model": model})
     index = engine or SearchEngine(RetrievalConfig.shipped(variant=variant, top_k=settings.top_k))
-    generator = llm or MistralLLM(settings, client=build_generation_client(), recorder=recorder)
+    generator = llm or MistralLLM(settings, client=chat_client(), recorder=recorder)
 
     logger.info("Ask", strategy=strategy, variant=variant, question=question)
     return await STRATEGIES[strategy](question, engine=index, llm=generator, config=settings)
 
 
 def build_client() -> Mistral:
-    """The Mistral API client: embeddings, reranking, and default generation."""
-    key = os.environ.get("MISTRAL_API_KEY", "")
-    if not key:
-        raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
-    return Mistral(api_key=key)
+    """The chat client, under the name the earlier run scripts import."""
+    return chat_client()
 
 
-def build_generation_client() -> Mistral:
-    """The answer-generation client.
-
-    Points at the local generation server when ``GLOSSATOR_CHAT_SERVER_URL`` is
-    set (the server needs no key), otherwise at the Mistral API. Only generation
-    goes through here: retrieval's reranker keeps ``build_client`` so shipped
-    reranking never depends on which server answers are generated on.
-    """
-    server_url = os.environ.get("GLOSSATOR_CHAT_SERVER_URL")
-    if server_url:
-        return Mistral(
-            api_key=os.environ.get("GLOSSATOR_CHAT_API_KEY", "local"), server_url=server_url
-        )
-    return build_client()
-
-
-__all__ = ["STRATEGIES", "ask", "build_client", "build_generation_client"]
+__all__ = ["STRATEGIES", "ask", "build_client"]

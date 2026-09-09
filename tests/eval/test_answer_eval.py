@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from glossator.answer.citations import (
     VERIFIED_AFTER_EMPHASIS,
@@ -19,7 +20,7 @@ from glossator.answer.citations import (
     TracedSource,
     TraceEvent,
 )
-from glossator.answer.config import MINISTRAL_3_14B
+from glossator.answer.config import MINISTRAL_3_14B, AnswerConfig
 from glossator.answer.llm import TokenUsage
 from glossator.eval.answer_eval import (
     JUDGE_VERSION,
@@ -29,8 +30,11 @@ from glossator.eval.answer_eval import (
     QuestionRecord,
     RunDirectory,
     aggregate,
+    apply_answer_config,
     cell,
     judge_input,
+    parse_answer_config,
+    parse_answer_config_value,
     parse_judge_models,
     question_metrics,
     recost,
@@ -38,6 +42,7 @@ from glossator.eval.answer_eval import (
     rejudge,
     render_readme,
     resolve_run_directory,
+    run,
     source_texts,
 )
 from glossator.eval.datasets import (
@@ -836,3 +841,211 @@ def test_a_run_with_no_records_still_renders_rather_than_dividing_by_zero(tmp_pa
     metrics = run.finalize(status="failed", error="the index was unreachable")
     assert metrics["records"] == 0
     assert "Answer evaluation" in (path / "README.md").read_text()
+
+
+# --------------------------------------------------------------------------- #
+# --answer-config: loop caps and any other field as command-line axes
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("6", 6),
+        ("1500", 1500),
+        ("1.5", 1.5),
+        ("true", True),
+        ("false", False),
+        ("null", None),
+        ("none", None),
+        ("json_object", "json_object"),
+        ("", ""),
+    ],
+)
+def test_answer_config_values_parse_as_their_own_types(raw: str, expected: object) -> None:
+    assert parse_answer_config_value(raw) == expected
+
+
+def test_answer_config_items_parse_into_validated_overrides() -> None:
+    overrides = parse_answer_config(
+        ["round_cap=6", "searches_per_round=4", "tool_result_chars=null"]
+    )
+    settings = apply_answer_config(AnswerConfig(), overrides)
+    assert settings.round_cap == 6
+    assert settings.searches_per_round == 4
+    assert settings.tool_result_chars is None
+
+
+def test_an_unknown_answer_config_key_is_refused_before_anything_runs() -> None:
+    overrides = parse_answer_config(["round_capp=6"])
+    with pytest.raises(Exception, match="round_capp"):
+        apply_answer_config(
+            AnswerConfig(),
+            overrides,
+        )
+
+
+def test_a_value_the_field_will_not_hold_is_refused() -> None:
+    overrides = parse_answer_config(["round_cap=many"])
+    with pytest.raises(ValidationError, match="round_cap"):
+        apply_answer_config(
+            AnswerConfig(),
+            overrides,
+        )
+
+
+def test_a_repeated_answer_config_key_is_refused() -> None:
+    with pytest.raises(ValueError, match="round_cap"):
+        parse_answer_config(["round_cap=6", "round_cap=8"])
+
+
+# --------------------------------------------------------------------------- #
+# The generation server, recorded wherever a run is read
+# --------------------------------------------------------------------------- #
+
+
+def test_a_local_generation_server_is_recorded_in_metrics_and_readme(tmp_path: Path) -> None:
+    server = "http://gpu.example:8081/v1"
+    config = {**config_for(tmp_path), "generation_server": server}
+    metrics = aggregate([record(judge=verdict("correct"))], config)
+    assert metrics["generation_server"] == server
+
+    readme = render_readme(config, {**metrics, "status": "complete", "error": None})
+    assert server in readme
+    assert "not the Mistral API" in readme
+
+
+def test_an_api_run_says_which_server_it_used(tmp_path: Path) -> None:
+    config = {**config_for(tmp_path), "generation_server": None}
+    metrics = aggregate([], config)
+    assert metrics["generation_server"] is None
+    readme = render_readme(config, {**metrics, "status": "complete", "error": None})
+    assert "Generation server: the Mistral API" in readme
+
+
+def test_answer_config_overrides_land_in_metrics_and_readme(tmp_path: Path) -> None:
+    config = {
+        **config_for(tmp_path),
+        "generation_server": None,
+        "answer_config_overrides": {"round_cap": 6, "tool_result_chars": None},
+    }
+    metrics = aggregate([], config)
+    assert metrics["answer_config_overrides"] == {"round_cap": 6, "tool_result_chars": None}
+    readme = render_readme(config, {**metrics, "status": "complete", "error": None})
+    assert "round_cap=6" in readme
+    assert "tool_result_chars=None" in readme
+
+
+# --------------------------------------------------------------------------- #
+# --retry-errors: the rows a run lost are regenerated, the answers are kept
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.asyncio
+async def test_retry_errors_regenerates_error_rows_and_keeps_answered_rows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The fake LLM stands in for the whole answering surface: `answer_one` is
+    replaced, so no model, index or network is reached -- the test is about
+    which rows a resume chooses to run again."""
+    path = tmp_path / "run"
+    run_dir = RunDirectory.open(path, config_for(path))
+    second = question().model_copy(update={"id": "q2"})
+    questions = [question(), second]
+    fail_q1 = True
+
+    async def fake_answer_one(asked: object, strategy: str, **kwargs: object) -> QuestionRecord:
+        del kwargs
+        question_id = asked.id  # type: ignore[attr-defined]
+        row = record(question_id=question_id, strategy=strategy)
+        if question_id == "q1" and fail_q1:
+            return row.model_copy(update={"error": "SDKError: HTTP 429"})
+        return row
+
+    class FakeEngine:
+        pass
+
+    monkeypatch.setattr("glossator.eval.answer_eval.SearchEngine", lambda *a, **k: FakeEngine())
+    monkeypatch.setattr("glossator.eval.answer_eval.MistralLLM", lambda *a, **k: object())
+    monkeypatch.setattr("glossator.eval.answer_eval.answer_one", fake_answer_one)
+
+    await run(
+        questions,
+        strategies=["single_pass"],
+        variant="sec128",
+        model="ministral-14b-2512",
+        judge_models=[],
+        run_dir=run_dir,
+        settings=AnswerConfig(),
+    )
+    stored = [json.loads(line) for line in (path / "records.jsonl").read_text().splitlines()]
+    assert [(row["question_id"], row["error"]) for row in stored] == [
+        ("q1", "SDKError: HTTP 429"),
+        ("q2", None),
+    ]
+
+    # A plain resume keeps the error row: it is a recorded pair.
+    run_dir = RunDirectory.open(path, config_for(path))
+    await run(
+        questions,
+        strategies=["single_pass"],
+        variant="sec128",
+        model="ministral-14b-2512",
+        judge_models=[],
+        run_dir=run_dir,
+        settings=AnswerConfig(),
+    )
+    assert (path / "records.jsonl").read_text().count("\n") == 2
+
+    # --retry-errors drops exactly the error row and regenerates it.
+    fail_q1 = False
+    run_dir = RunDirectory.open(path, config_for(path))
+    metrics = await run(
+        questions,
+        strategies=["single_pass"],
+        variant="sec128",
+        model="ministral-14b-2512",
+        judge_models=[],
+        run_dir=run_dir,
+        settings=AnswerConfig(),
+        retry_errors=True,
+    )
+    stored = [json.loads(line) for line in (path / "records.jsonl").read_text().splitlines()]
+    # The kept row keeps its place on disk and the regenerated row is appended.
+    assert sorted((row["question_id"], row["error"]) for row in stored) == [
+        ("q1", None),
+        ("q2", None),
+    ]
+    assert metrics["totals"]["errors"] == 0
+
+
+def test_drop_error_records_keeps_fields_it_does_not_know(tmp_path: Path) -> None:
+    path = tmp_path / "run"
+    run = RunDirectory.open(path, config_for(path))
+    run.record(record(question_id="q1"))
+    errored = record(question_id="q2").model_copy(update={"error": "timeout"})
+    run.record(errored)
+    stored = json.loads((path / "records.jsonl").read_text().splitlines()[1])
+    stored["legacy_record_field"] = "kept"
+    lines = (path / "records.jsonl").read_text().splitlines()
+    lines[1] = json.dumps(stored)
+    (path / "records.jsonl").write_text("\n".join(lines) + "\n")
+
+    reopened = RunDirectory.open(path, config_for(path))
+    assert reopened.drop_error_records() == 1
+    kept = (path / "records.jsonl").read_text().splitlines()
+    assert len(kept) == 1
+    assert json.loads(kept[0])["question_id"] == "q1"
+    # And dropping again is a no-op, not a second rewrite.
+    assert reopened.drop_error_records() == 0
+
+
+def test_round_cap_hit_is_read_off_the_trace() -> None:
+    capped = trace((1, PAGE, "body"))
+    capped = capped.model_copy(
+        update={
+            "events": [*capped.events, TraceEvent(step=9, kind="loop", name="round_cap", round=4)]
+        }
+    )
+    assert question_metrics(record(trace_value=capped))["round_cap_hit"] == 1.0
+    assert question_metrics(record())["round_cap_hit"] == 0.0

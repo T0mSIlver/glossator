@@ -15,7 +15,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Protocol, cast
+from typing import Any, Literal, Protocol, cast
 
 import httpx
 import structlog
@@ -106,6 +106,10 @@ class LLMCall(BaseModel):
     tools: list[ToolSpec] | None = None
     tool_choice: str | None = None
     response_schema: str | None = None
+    response_format: str | None = None
+    """How a structured request was sent: `json_schema` or `json_object`. Part
+    of the record so a run on a server that ignores schemas says which mode its
+    numbers were produced under (D-035c)."""
     response: dict[str, Any] | None = None
     text: str = ""
     parsed: dict[str, Any] | None = None
@@ -221,6 +225,7 @@ class MistralLLM:
             tools=tools,
             tool_choice=tool_choice,
             response_schema=response_schema,
+            response_format=self.config.response_format,
             purpose=purpose,
         )
         calls: list[LLMCall] = []
@@ -268,7 +273,7 @@ class MistralLLM:
                     tool_choice=cast(
                         ChatCompletionRequestToolChoiceTypedDict | None, settings.tool_choice
                     ),
-                    response_format=settings.response_format(),
+                    response_format=settings.response_format_payload(),
                     timeout_ms=self.config.request_timeout_ms,
                 )
             except CALL_ERRORS as error:
@@ -362,11 +367,18 @@ class _Settings(BaseModel):
     tools: list[ToolSpec] | None
     tool_choice: str | None
     response_schema: type[BaseModel] | None
+    response_format: Literal["json_schema", "json_object"]
     purpose: str
 
-    def response_format(self) -> ResponseFormatTypedDict | None:
+    def response_format_payload(self) -> ResponseFormatTypedDict | None:
         if self.response_schema is None:
             return None
+        if self.response_format == "json_object":
+            # The schema still reaches the model, in the prompt's words, and the
+            # response is validated and repaired exactly as a json_schema
+            # response would be. The record names the mode, so this is never a
+            # silent degrade.
+            return cast(ResponseFormatTypedDict, {"type": "json_object"})
         return response_format_from_pydantic_model(self.response_schema)
 
 
@@ -385,7 +397,28 @@ def _blank_call(messages: list[Message], settings: _Settings, attempt: int) -> L
         response_schema=(
             settings.response_schema.__name__ if settings.response_schema is not None else None
         ),
+        response_format=(
+            settings.response_format if settings.response_schema is not None else None
+        ),
     )
+
+
+def _strip_fences(text: str) -> str:
+    """Unwrap a ```json fence around a structured response (D-035c).
+
+    The local server returns ``json_object`` responses inside a fence; the API
+    returns the bare body. The raw text stays in the record; only the parsed
+    copy is unwrapped, so the fallback is stated configuration, not silent
+    degrade.
+    """
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+        lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        stripped = "\n".join(lines).strip()
+    return stripped
 
 
 def _parse(text: str, schema: type[BaseModel] | None) -> tuple[dict[str, Any] | None, str | None]:
@@ -393,7 +426,7 @@ def _parse(text: str, schema: type[BaseModel] | None) -> tuple[dict[str, Any] | 
     if schema is None:
         return None, None
     try:
-        payload = json.loads(text)
+        payload = json.loads(_strip_fences(text))
     except json.JSONDecodeError as error:
         return None, f"response is not JSON: {error}"
     try:

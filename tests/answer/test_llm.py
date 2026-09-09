@@ -131,6 +131,47 @@ def test_a_structured_response_is_parsed() -> None:
     assert client.chat.requests[0]["response_format"]["type"] == "json_schema"
 
 
+def test_json_object_mode_sends_the_bare_type_and_still_validates() -> None:
+    """The fallback for a server that does not honour a JSON schema (D-035c):
+    the request asks only for a JSON object, the schema lives in the prompt's
+    words, and the response is validated and repaired exactly as before."""
+    llm, client = build(
+        [response(content="prose first"), response(content='{"answer": "42"}')],
+        config=AnswerConfig(retry_base_seconds=0.0, response_format="json_object"),
+    )
+
+    completion = complete(llm, response_schema=Shape)
+
+    assert client.chat.requests[0]["response_format"] == {"type": "json_object"}
+    assert isinstance(completion.parsed, Shape)
+    # The mode is part of the call record, so a run on a fallback is never silent.
+    assert completion.calls[0].response_format == "json_object"
+
+
+def test_a_fenced_json_object_response_parses_without_repair() -> None:
+    """llama.cpp serves ``json_object`` inside a ```json fence (D-035c): the
+    fence is stripped before parsing, so the fallback needs no repair call."""
+    llm, client = build(
+        [response(content='```json\n{"answer": "42"}\n```')],
+        config=AnswerConfig(retry_base_seconds=0.0, response_format="json_object"),
+    )
+
+    completion = complete(llm, response_schema=Shape)
+
+    assert isinstance(completion.parsed, Shape)
+    assert completion.parsed.answer == "42"
+    assert len(completion.calls) == 1
+
+
+def test_the_mode_a_structured_call_ran_under_is_recorded() -> None:
+    recorder = Collector()
+    llm, _client = build([response(content='{"answer": "42"}')], recorder)
+
+    complete(llm, response_schema=Shape)
+
+    assert recorder.calls[0].response_format == "json_schema"
+
+
 def test_invalid_json_is_repaired_once() -> None:
     llm, client = build([response(content="not json"), response(content='{"answer": "42"}')])
 
@@ -265,9 +306,19 @@ def test_an_unpriced_model_costs_zero_rather_than_a_guess() -> None:
     assert AnswerConfig().cost_usd("some-future-model", 1_000_000, 1_000_000) == 0.0
 
 
-def test_a_config_naming_an_unpriced_model_is_refused() -> None:
-    with pytest.raises(ValueError, match="no price for model"):
-        AnswerConfig(model="some-future-model")
+def test_an_unpriced_model_is_allowed_and_warns_once_not_per_call() -> None:
+    """A local server reports ids the price list has never seen (D-035c): the
+    run proceeds, the tokens are recorded, and the warning says so once per
+    model per process. The warned set is the log's gate, so asserting on it is
+    asserting on the once-ness."""
+    import glossator.answer.config as config_module
+
+    config_module._WARNED_UNPRICED.discard("some-future-model")
+    settings = AnswerConfig(model="some-future-model")
+
+    assert settings.cost_usd("some-future-model", 1_000, 100) == 0.0
+    assert settings.cost_usd("some-future-model", 1_000, 100) == 0.0
+    assert "some-future-model" in config_module._WARNED_UNPRICED
 
 
 def test_a_price_override_is_honoured() -> None:
