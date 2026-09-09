@@ -2,12 +2,15 @@
   "dataset": "eval/dev-fresh60.jsonl",
   "dataset_sha256": "c663126d79ebf3c0c8cc6000a73be2fd9281c0ae672ae4d42532f1fae8fa7fc0",
   "generation_server": "http://192.168.1.183:8080",
-  "judge_models": [],
-  "judge_skipped": true,
+  "judge_models": [
+    "zai:glm-5.3"
+  ],
+  "judge_skipped": false,
   "kind": "snapshot_eval",
   "model": "llamacpp/ministral3-14b",
   "name": "snapshot-eval",
-  "resumed_records": 0,
+  "notes": [],
+  "resumed_records": 480,
   "run_dir": "eval/runs/2026-09-09-1949-snapshot-eval",
   "strategies": [
     "single_pass"
