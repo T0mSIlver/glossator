@@ -10,11 +10,21 @@ import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol
+from uuid import uuid4
 
 import structlog
 from mistralai.client import Mistral
+from mistralai.search.toolkit.context import IngestContext
+from mistralai.search.toolkit.document import (
+    Document,
+    DocumentChunk,
+    compute_char_locator,
+    compute_id,
+)
 from mistralai.search.toolkit.embedding import MistralEmbedder
 from mistralai.search.toolkit.ingestion.pipelines import Pipeline
+from mistralai.search.toolkit.search.errors import IndexingError
 
 from glossator.index import get_index, get_variant
 from glossator.index.variants import IndexVariant
@@ -60,6 +70,20 @@ class PartialIngestError(RuntimeError):
         self.report = report
 
 
+class IndexWritePreflightError(RuntimeError):
+    """The target schema rejected a harmless write before ingestion started."""
+
+
+class WritableIndex(Protocol):
+    async def index_document(
+        self, document: Document, context: IngestContext = IngestContext()
+    ) -> None: ...
+
+    async def delete_document(
+        self, doc_id: str, context: IngestContext = IngestContext()
+    ) -> None: ...
+
+
 @dataclass(frozen=True, slots=True)
 class IngestReport:
     """What one ingest run did, for the CLI and for the cost log."""
@@ -89,6 +113,8 @@ async def _run_batch(
     paths: list[Path],
     ingest_one: Callable[[Path], Awaitable[None]],
     sequential: bool = False,
+    stop_on_index_failure: bool = False,
+    max_concurrency: int | None = None,
 ) -> list[Path]:
     """Ingest every path, returning the ones that raised.
 
@@ -104,14 +130,92 @@ async def _run_batch(
             except Exception as exc:  # noqa: BLE001 - reported per page, never fatal
                 failed.append(path)
                 logger.error("Failed to ingest page", path=str(path), error=str(exc))
+                if stop_on_index_failure and isinstance(exc, IndexingError):
+                    break
         return failed
 
-    results = await asyncio.gather(*(ingest_one(path) for path in paths), return_exceptions=True)
-    for path, result in zip(paths, results, strict=True):
-        if isinstance(result, BaseException):
+    async def attempt(path: Path) -> tuple[Path, Exception | None]:
+        try:
+            await ingest_one(path)
+        except Exception as exc:  # noqa: BLE001 - returned with its page and reported below
+            return path, exc
+        return path, None
+
+    if not stop_on_index_failure:
+        results = await asyncio.gather(*(attempt(path) for path in paths))
+        for path, error in results:
+            if error is not None:
+                failed.append(path)
+                logger.error("Failed to ingest page", path=str(path), error=str(error))
+        return failed
+
+    waiting = iter(paths)
+    active: set[asyncio.Task[tuple[Path, Exception | None]]] = set()
+    for _ in range(max_concurrency or len(paths)):
+        try:
+            candidate = next(waiting)
+        except StopIteration:
+            break
+        active.add(asyncio.create_task(attempt(candidate)))
+    while active:
+        done, active = await asyncio.wait(active, return_when=asyncio.FIRST_COMPLETED)
+        stop = False
+        for task in done:
+            path, error = task.result()
+            if error is None:
+                continue
             failed.append(path)
-            logger.error("Failed to ingest page", path=str(path), error=str(result))
+            logger.error("Failed to ingest page", path=str(path), error=str(error))
+            stop = stop or isinstance(error, IndexingError)
+        if stop:
+            for task in active:
+                task.cancel()
+            await asyncio.gather(*active, return_exceptions=True)
+            break
+        for _ in range(len(done)):
+            try:
+                candidate = next(waiting)
+            except StopIteration:
+                break
+            active.add(asyncio.create_task(attempt(candidate)))
     return failed
+
+
+async def _verify_index_writable(index: WritableIndex, variant: IndexVariant) -> None:
+    """Feed and remove one small document before any corpus page can be deleted."""
+    content = "glossator ingestion write probe"
+    probe_id = f"glossator-write-probe-{uuid4().hex}"
+    locator = compute_char_locator(0, len(content))
+    probe = Document(
+        id=probe_id,
+        source_id=probe_id,
+        content=content,
+        chunks=[
+            DocumentChunk(
+                id=compute_id(probe_id, locator),
+                source_id=probe_id,
+                locator=locator,
+                start_offset=0,
+                end_offset=len(content),
+                content=content,
+                embedding=[1.0, *([0.0] * (variant.embedding_dimensions - 1))],
+            )
+        ],
+    )
+    try:
+        await index.index_document(probe)
+    except Exception as exc:  # noqa: BLE001 - backend failures share this safety message
+        raise IndexWritePreflightError(
+            f"Refusing to ingest into schema {variant.schema_name!r}: the write probe was "
+            "rejected. Vespa may be blocking feeds because disk usage exceeds its resource limit."
+        ) from exc
+    try:
+        await index.delete_document(probe.id)
+    except Exception as exc:  # noqa: BLE001 - leaving the probe behind is not a safe start
+        raise IndexWritePreflightError(
+            f"Refusing to ingest into schema {variant.schema_name!r}: the write probe could not "
+            "be removed after a successful feed."
+        ) from exc
 
 
 def build_pipeline(variant: IndexVariant, client: Mistral | None = None) -> Pipeline:
@@ -152,12 +256,15 @@ async def ingest_corpus(
     verified = verify_manifest(corpus_dir)
 
     pipeline = build_pipeline(resolved, client=client)
+    await _verify_index_writable(pipeline.stores[0], resolved)
     semaphore = asyncio.Semaphore(concurrency)
     log = logger.bind(variant=resolved.name, schema=resolved.schema_name, pages=len(paths))
     log.info("Ingesting corpus", corpus_dir=str(corpus_dir), manifest_pages=verified)
 
     chunks = 0
     tokens = 0
+    indexed_pages: set[Path] = set()
+    index_failures: set[Path] = set()
 
     async def ingest_one(path: Path) -> None:
         nonlocal chunks, tokens
@@ -165,23 +272,38 @@ async def ingest_corpus(
             page = load_page(path)
             # No checkpoint key: extraction here is a frontmatter split, so caching
             # it would cost more than it saves and would hide corpus edits.
-            document = await pipeline.run_file(page_file(page))
+            try:
+                document = await pipeline.run_file(page_file(page))
+            except IndexingError:
+                index_failures.add(path)
+                raise
             chunks += len(document.chunks)
             tokens += int(document.metadata.get("embed_total_tokens") or 0)
+            indexed_pages.add(path)
             logger.debug("Indexed page", url=page.url, chunks=len(document.chunks))
 
-    failed = await _run_batch(paths, ingest_one)
-    if failed:
+    failed = await _run_batch(
+        paths,
+        ingest_one,
+        stop_on_index_failure=not allow_partial,
+        max_concurrency=concurrency,
+    )
+    if failed and (allow_partial or not index_failures):
         # One sequential retry pass. What fails here is a rate limit the embedder's
         # own backoff ran out of attempts on, and a corpus indexed except for the
         # pages that happened to collide is worse than a slower run.
         log.info("Retrying pages that failed", count=len(failed))
-        failed = await _run_batch(failed, ingest_one, sequential=True)
+        failed = await _run_batch(
+            failed,
+            ingest_one,
+            sequential=True,
+            stop_on_index_failure=not allow_partial,
+        )
     failures = [str(path) for path in failed]
 
     report = IngestReport(
         variant=resolved.name,
-        pages=len(paths) - len(failures),
+        pages=len(indexed_pages),
         chunks=chunks,
         embedding_tokens=tokens,
         failures=tuple(failures),

@@ -9,11 +9,50 @@ import asyncio
 import shutil
 from collections.abc import Iterable
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
 
 import pytest
+from mistralai.search.toolkit.context import IngestContext
+from mistralai.search.toolkit.document import Document
+from mistralai.search.toolkit.search.errors import IndexingError
 
+from glossator.index.variants import get_variant
 from glossator.ingest.pages import CorpusError, verify_manifest
-from glossator.ingest.pipeline import IngestReport, PartialIngestError, ingest_corpus
+from glossator.ingest.pipeline import (
+    IndexWritePreflightError,
+    IngestReport,
+    PartialIngestError,
+    _verify_index_writable,
+    ingest_corpus,
+)
+
+
+class FakeIndex:
+    def __init__(self, *, reject: bool = False) -> None:
+        self.reject = reject
+        self.indexed: list[Document] = []
+        self.deleted: list[str] = []
+
+    async def index_document(
+        self, document: Document, context: IngestContext = IngestContext()
+    ) -> None:
+        if self.reject:
+            raise IndexingError("Failed to index document")
+        self.indexed.append(document)
+
+    async def delete_document(self, doc_id: str, context: IngestContext = IngestContext()) -> None:
+        self.deleted.append(doc_id)
+
+
+class RejectingPipeline:
+    def __init__(self, index: FakeIndex) -> None:
+        self.stores = [index]
+        self.paths: list[str] = []
+
+    async def run_file(self, file: Any) -> None:
+        self.paths.append(file.path)
+        raise IndexingError("Failed to index document")
 
 
 @pytest.fixture
@@ -63,6 +102,54 @@ def test_ingest_refuses_a_corpus_that_does_not_match_its_manifest(
         asyncio.run(ingest_corpus(corpus_copy, "sec128"))
 
 
+def test_the_write_probe_is_fed_and_deleted_before_ingestion() -> None:
+    index = FakeIndex()
+
+    asyncio.run(_verify_index_writable(index, get_variant("sec128")))
+
+    assert len(index.indexed) == 1
+    assert len(index.indexed[0].chunks[0].embedding or []) == 128
+    assert index.deleted == [index.indexed[0].id]
+
+
+def test_a_rejected_write_probe_names_the_schema_and_likely_disk_cause() -> None:
+    index = FakeIndex(reject=True)
+
+    with pytest.raises(IndexWritePreflightError, match="docs_section_lowdim") as raised:
+        asyncio.run(_verify_index_writable(index, get_variant("sec128")))
+
+    assert "disk usage" in str(raised.value)
+    assert index.deleted == []
+
+
+def test_ingestion_stops_after_the_first_page_feed_failure(
+    corpus_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import glossator.ingest.pipeline as pipeline_module
+
+    pipeline = RejectingPipeline(FakeIndex())
+    monkeypatch.setattr(pipeline_module, "build_pipeline", lambda *a, **k: pipeline)
+
+    with pytest.raises(PartialIngestError):
+        asyncio.run(ingest_corpus(corpus_dir, "sec128", concurrency=1))
+
+    assert len(pipeline.paths) == 1
+
+
+def test_allow_partial_continues_after_page_feed_failures(
+    corpus_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import glossator.ingest.pipeline as pipeline_module
+
+    pipeline = RejectingPipeline(FakeIndex())
+    monkeypatch.setattr(pipeline_module, "build_pipeline", lambda *a, **k: pipeline)
+
+    report = asyncio.run(ingest_corpus(corpus_dir, "sec128", concurrency=1, allow_partial=True))
+
+    assert len(set(pipeline.paths)) == 9
+    assert len(report.failures) == 9
+
+
 def test_a_partial_run_raises_rather_than_returning(
     corpus_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -70,12 +157,14 @@ def test_a_partial_run_raises_rather_than_returning(
     import glossator.ingest.pipeline as pipeline_module
 
     async def _all_fail(
-        paths: Iterable[Path], ingest_one: object, sequential: bool = False
+        paths: Iterable[Path], ingest_one: object, sequential: bool = False, **kwargs: object
     ) -> list[Path]:
         return list(paths)
 
     monkeypatch.setattr(pipeline_module, "_run_batch", _all_fail)
-    monkeypatch.setattr(pipeline_module, "build_pipeline", lambda *a, **k: None)
+    monkeypatch.setattr(
+        pipeline_module, "build_pipeline", lambda *a, **k: SimpleNamespace(stores=[FakeIndex()])
+    )
 
     with pytest.raises(PartialIngestError) as raised:
         asyncio.run(ingest_corpus(corpus_dir, "sec128"))
@@ -92,12 +181,14 @@ def test_allow_partial_returns_the_report_instead(
     import glossator.ingest.pipeline as pipeline_module
 
     async def _all_fail(
-        paths: Iterable[Path], ingest_one: object, sequential: bool = False
+        paths: Iterable[Path], ingest_one: object, sequential: bool = False, **kwargs: object
     ) -> list[Path]:
         return list(paths)
 
     monkeypatch.setattr(pipeline_module, "_run_batch", _all_fail)
-    monkeypatch.setattr(pipeline_module, "build_pipeline", lambda *a, **k: None)
+    monkeypatch.setattr(
+        pipeline_module, "build_pipeline", lambda *a, **k: SimpleNamespace(stores=[FakeIndex()])
+    )
 
     report = asyncio.run(ingest_corpus(corpus_dir, "sec128", allow_partial=True))
 

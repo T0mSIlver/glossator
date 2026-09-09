@@ -1,9 +1,9 @@
 """Metadata the pipeline attaches to documents and chunks.
 
 Declared as toolkit metadata subclasses rather than loose dict keys so the field
-names are typed once. Every chunk key here has a same-named root field in the
-Vespa schema, which is what makes the store promote it out of the opaque
-metadata blob into an indexed, filterable field.
+names are typed once. Citation and retrieval fields have same-named root fields
+in Vespa. Provenance fields that do not need filtering remain in the opaque
+metadata blob.
 """
 
 from mistralai.search.toolkit.document import (
