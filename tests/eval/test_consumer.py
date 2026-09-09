@@ -446,6 +446,8 @@ def test_samples_render_arms_side_by_side() -> None:
     ]
     text = render_samples(records, consumer="opencode-muse-minimal")
     assert "### A0" in text and "### A1" in text and "From memory" in text
+    # A run of one consumer scored with another's name still shows its answers.
+    assert render_samples(records, consumer="claude-sonnet-low") == text
 
 
 def test_opencode_command_names_lowest_variant() -> None:

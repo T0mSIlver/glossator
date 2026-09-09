@@ -1773,7 +1773,16 @@ def render_defects(defects: Sequence[Mapping[str, str]]) -> str:
 
 
 def render_samples(records: Sequence[ConsumerRecord], *, consumer: str, seed: int = 0) -> str:
-    """Ten seeded questions, the arms' answers side by side for one consumer."""
+    """Ten seeded questions, the arms' answers side by side for one consumer.
+
+    A run collected by one consumer is scored with the default name of
+    another often enough that an empty samples file is the likelier mistake
+    than a deliberately empty one, so a name no record carries falls back to
+    the first consumer in the run.
+    """
+    present = [record.consumer for record in records]
+    if consumer not in present and present:
+        consumer = present[0]
     question_ids = sorted({r.question_id for r in records if r.consumer == consumer})
     chosen = random.Random(seed).sample(question_ids, min(10, len(question_ids)))
     by_key = {(r.question_id, r.arm): r for r in records if r.consumer == consumer}
