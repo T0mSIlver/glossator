@@ -6,6 +6,8 @@ import asyncio
 import json
 from pathlib import Path
 
+import pytest
+
 from glossator.eval import consumer as consumer_module
 from glossator.eval.consumer import (
     ConsumerRecord,
@@ -529,6 +531,41 @@ def test_the_transcript_travels_with_the_run(tmp_path: Path) -> None:
         copy_transcript(run_dir, tmp_path / "gone.jsonl", consumer="c", arm="A0", question_id="q")
         == ""
     )
+
+
+def test_a_second_consumer_joins_the_run_it_is_added_to() -> None:
+    """Consumers run one command each, so the config has to describe every
+    consumer the records hold, not the last command's."""
+    first = {
+        "consumers": ["claude-sonnet-low"],
+        "consumer_models": {"claude-sonnet-low": "sonnet"},
+        "arms": ["A0", "A1"],
+        "questions": ["mined-001"],
+        "judge_model": "zai:glm-5.3",
+    }
+    second = {
+        "consumers": ["codex-gpt-luna-low"],
+        "consumer_models": {"codex-gpt-luna-low": "gpt-5.6-luna"},
+        "arms": ["A1", "A2"],
+        "questions": ["mined-001"],
+        "judge_model": None,
+    }
+
+    merged = consumer_module.merge_config(first, second)
+
+    assert merged["consumers"] == ["claude-sonnet-low", "codex-gpt-luna-low"]
+    assert merged["consumer_models"] == {
+        "claude-sonnet-low": "sonnet",
+        "codex-gpt-luna-low": "gpt-5.6-luna",
+    }
+    assert merged["arms"] == ["A0", "A1", "A2"]
+    assert merged["judge_model"] == "zai:glm-5.3"
+    assert consumer_module.merge_config({}, second) == second
+
+
+def test_a_run_directory_refuses_a_different_question_set() -> None:
+    with pytest.raises(SystemExit):
+        consumer_module.merge_config({"questions": ["mined-001"]}, {"questions": ["mined-002"]})
 
 
 def test_corpus_page_urls_empty_without_manifest(tmp_path: Path) -> None:
