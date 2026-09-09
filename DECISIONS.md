@@ -1033,3 +1033,28 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Facts.** The consumer evaluation (D-040a) writes the harness event streams of every consumer conversation under a scratch directory outside the repository, and only the extracted answer, tool calls and links into the run's records. About one hundred conversations so far take 5.7 MB. A reviewer of the run cannot open the conversation behind a row. The review pass also found that `--rejudge` could not change a verdict because the provider replayed its disk cache without a nonce, that the consumer runner had no `--retry-errors`, and that the run directory lacked its README, metrics, figures and call ledger; those three are fixed.
 
 **Decision.** Consumer runs copy each conversation's event stream into `<run>/transcripts/<consumer>/<arm>/<question_id>.jsonl` at collection time, so the run directory is complete on its own (D-023). The scratch directory stays the consumer's working directory and nothing else.
+
+---
+
+## D-042 · When an answer fails, it is the generator, not retrieval
+
+**Status:** decided · 2026-09-09 · `glossator.eval.failures` (`make failures`), run `2026-09-09-2028-failure-analysis` over five answer runs (575 answers), rules stated in its README, 38 tests
+
+| run | answers | failed | retrieval miss | context miss | generation failure | refusal failure |
+|---|---|---|---|---|---|---|
+| mined-shipped | 170 | 52 (0.31) | 1 | 0 | 39 | 12 |
+| fresh60-shipped | 60 | 17 (0.28) | 2 | 0 | 7 | 8 |
+| dev60-rerank | 120 | 21 (0.18) | 1 | 0 | 8 | 12 |
+| clean-single | 120 | 30 (0.25) | 3 | 0 | 11 | 16 |
+| noisy-single | 105 | 44 (0.42) | 13 | 0 | 12 | 19 |
+| all | 575 | 164 (0.29) | 20 | 0 | 77 | 67 |
+
+**Facts.**
+- Classes are decided in order from the records alone: no gold page among the retrieved chunks (retrieval miss); a gold chunk retrieved but dropped from the context (context miss); the gold section in the context and the answer still partial or wrong (generation failure, sub-labelled by what the citations say); a refusal with the gold section in context or an answer to an unanswerable question (refusal failure). Chunk ids resolve to pages offline by re-chunking the vendored corpus (6,397 of 6,397 ids resolved).
+- Generation is the largest class, 47% of failures, and 53 of the 77 had a verified quote from the gold section in the answer: the model read the right passage and still answered short or wrong, most often one parameter or limit short of the reference on the mined set. This is the column a stronger generation model moves (D-017a), and the clearest evidence that the ceiling is the 14B model, not the pipeline.
+- Retrieval misses are 1 to 3% of answers on well-formed questions and 12% on badly worded ones (D-035b); context misses are zero in every run, so the context budget is not a lever.
+- Refusal failures split 35 false refusals and 32 missed refusals. The failure tool suggested trusting a verified citation over the model's insufficient-evidence flag; the recorded runs say no: the correct answers that were refused carried no verified quote at all (their refusal came from the "no verified citation" rule, not from the flag), while 43 correctly refused unanswerable questions do carry a verified quote and would flip to wrong answers under that change. The lever on false refusals is quoting, not the flag.
+- The reference-defect flag's first signal does not discriminate (the judge names the reference on 91% of passing answers too, because the prompt tells it to grade against the reference); the human-lenient signal (D-021b) marks 4 rows. The judged check is implemented and not yet run.
+- The pre-reranker candidate list is unrecoverable for these runs (D-023b); from now on the tool separates a reranker drop from a search miss.
+
+**Decision.** The refusal rule stays as it is. The next product work is on the generator's side: the two prompt rules from D-021b, a "state the exact value or limit before explaining" instruction for the partial-answer shape, and a re-run on Medium or Small once the account allows it; retrieval work is limited to badly worded questions (conditional rewrite, D-035b). The failure table is reported with every answer evaluation from now on.
