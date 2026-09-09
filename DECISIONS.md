@@ -107,7 +107,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 
 **Decision.** The normalized markdown corpus and its manifest (source commit, per-page URL, content hash) are committed. A `make corpus-refresh` target clones the docs repo at a chosen ref and regenerates it. Apache-2.0 license and attribution for the docs are kept alongside.
 
-**Facts.** Reviewers must run the project from the README in minutes; cloning and parsing the docs repo at first run adds a network dependency and a failure surface. The docs repo is Apache-2.0, which permits redistribution with notice.
+**Facts.** A reader must be able to run the project from the README in minutes; cloning and parsing the docs repo at first run adds a network dependency and a failure surface. The docs repo is Apache-2.0, which permits redistribution with notice.
 
 ---
 
