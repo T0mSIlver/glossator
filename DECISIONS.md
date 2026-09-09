@@ -730,3 +730,13 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 **Facts.** Language detection is deterministic (stopword scores with diacritics folded, `und` for non-Latin scripts) and was right on 294 of 294 English and 36 of 36 French questions, so English questions pay nothing. The rendering is one structured call (about 215 tokens, 0.7 s median, 0 failures in 36) recorded like every other call; the model still sees the original question and answers in its language. The extra latency is mostly a longer generation now that the sources are usable (two cited sources per answer instead of 1.3). Fabricated quotes did not move: French prose around English sources still costs two thirds of a mistranslated quote per answer, the one French-specific failure that remains; a French index (D-008 option b) would address it by letting citations land on French pages.
 
 **Decision.** `translate_for_retrieval` is on by default in the answer layer. The MCP `search` tool and the retrieval CLI still search the raw query; rendering there is a follow-up. D-008 is closed for v1 with option (a) plus rendering.
+
+---
+
+## D-036 · Citations deep-link to the quoted sentence with text fragments
+
+**Status:** decided · 2026-09-09
+
+**Decision.** Every verified citation carries a second link, `url#anchor:~:text=<quote>` (URL Fragment Text Directives), built from the quote the verifier already checked; the canonical `url#anchor` stays beside it. Chromium, Safari 16 and Firefox 131 and later scroll to and highlight the span; other browsers land on the anchor or the page. Quotes over 120 characters use the `start,end` form.
+
+**Facts.** Most headings on docs.mistral.ai have no anchor (D-003a), so a citation often lands on a section top or the page top even when the engine holds the exact sentence. The verified quote is, by construction, a span of the page; on three citations checked by hand the stripped quote occurs exactly once in the vendored page. Rehosting the documentation with generated anchors was rejected: the brief asks for links back to the documentation pages, and a mirror would break that.
