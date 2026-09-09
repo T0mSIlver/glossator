@@ -147,7 +147,17 @@ Sources:
 - [Limits and lifecycle | Mistral Docs](https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle)
 - [Vibe | Mistral Docs](https://docs.mistral.ai/vibe)
 
-### A1: not run
+### A1 (judge: not judged)
+
+Documentation doesn't specify any of this — no per-request page-count cap or per-minute rate limit for `MistralAI-User`.
+
+What the docs say about `MistralAI-User`:
+- It's the crawler used for "user actions in Vibe" — when a user asks a question, Vibe "may **visit a web page** to help answer" and cites it, and it "governs which sites these user requests can be made to." No numeric cap on the number of pages per request is mentioned. ([docs.mistral.ai/robots#mistralai-user](https://docs.mistral.ai/robots#mistralai-user))
+- The related "Open URL" feature explicitly fetches only a **single page** per URL you paste (no crawling/following links), and you can paste multiple URLs in one chat — but no maximum count is documented. ([docs.mistral.ai/vibe/work/web-search-open-url#limitations](https://docs.mistral.ai/vibe/work/web-search-open-url#limitations), [...#multiple-urls](https://docs.mistral.ai/vibe/work/web-search-open-url#multiple-urls))
+
+Rate limits: I only found general API rate-limit documentation (requests/second, tokens/minute for La Plateforme completions/OCR), which applies to API usage, not to the `MistralAI-User` crawler specifically. There is no documented per-minute rate limit for `MistralAI-User` requests. ([docs.mistral.ai/admin/billing-usage/usage-limits](https://docs.mistral.ai/admin/billing-usage/usage-limits#completion-rate-limits))
+
+If you need an authoritative number for either limit, it isn't published in Mistral's docs — you'd have to ask Mistral directly.
 
 ### A2: not run
 
@@ -168,7 +178,16 @@ Sources:
 - [Deployments | Mistral Docs](https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/deployments)
 - [Workflows | Mistral Docs](https://docs.mistral.ai/studio-api/workflows/building-workflows/workflows)
 
-### A1: not run
+### A1 (judge: not judged)
+
+For `GET /v1/workflows/deployments/{name}`:
+
+- **Required:** `name` (string, path) — the deployment name.
+- **Optional:** `workflow_name` (string or null, query) — scopes the deployment's serving status to that specific workflow.
+
+Response: `200` returns a `DeploymentDetailResponse`; `422` on validation error.
+
+Source: [Workflows Deployments API > Get Deployment](https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-get_deployment_v1_workflows_deployments_name_get)
 
 ### A2: not run
 
@@ -293,6 +312,20 @@ Sources:
 - [Search the web | Mistral Docs](https://docs.mistral.ai/le-chat/research-analysis/web-search)
 - [Choose Chat, Work, or Code | Mistral Docs](https://docs.mistral.ai/vibe/choose-chat-work-code)
 
-### A1: not run
+### A1 (judge: not judged)
+
+For fetching live data from Gmail, Drive, or Notion, use **Connectors**, not Web Search.
+
+**Connectors** [1] are secure bridges between Work and your external tools/data sources. They let Work retrieve, analyze, and act on data from services like Gmail, Google Drive, GitHub, or Notion as part of a task — e.g., "Check my Gmail for unread messages about the quarterly report and summarize them." You connect each app once (most use a direct OAuth flow), and org admins can disable specific connectors.
+
+**Web search** [2] is a different capability: it lets Work fetch current information from across the public internet to answer a prompt (with sources), not from your private connected apps. There's also a related "Open URL" mode for analyzing a specific page you already have a link to.
+
+In short:
+- Need data from your own Gmail/Drive/Notion/Jira/Slack/etc. → **Connectors**
+- Need up-to-date info from the public web → **Web Search**
+
+Sources:
+- [Connect tools with Connectors](https://docs.mistral.ai/vibe/work/connectors)
+- [Search the web > Web search](https://docs.mistral.ai/vibe/work/web-search-open-url#web-search)
 
 ### A2: not run

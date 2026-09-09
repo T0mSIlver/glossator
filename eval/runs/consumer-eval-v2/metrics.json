@@ -19,20 +19,20 @@
     },
     "claude-sonnet-low / A1": {
       "bad_param_errors": 0.0,
-      "cite_called": 0.42857142857142855,
+      "cite_called": 0.4666666666666667,
       "cite_rejected": 0.0,
-      "cite_verified": 0.8571428571428571,
-      "clamps": 2.857142857142857,
+      "cite_verified": 0.9333333333333333,
+      "clamps": 2.7666666666666666,
       "correctness": null,
       "errors": 0,
-      "latency_p50": 21.895545842009597,
-      "links_on_gold": 0.8125,
-      "links_resolve": 0.888888888888889,
+      "latency_p50": 21.49404339096509,
+      "links_on_gold": 0.8260869565217391,
+      "links_resolve": 0.9222222222222223,
       "mcp_called": 1.0,
-      "n": 21,
-      "refusal_correct": 0.7619047619047619,
-      "tokens_total": 185068.66666666666,
-      "tool_calls": 5.142857142857143
+      "n": 30,
+      "refusal_correct": 0.8,
+      "tokens_total": 188328.56666666668,
+      "tool_calls": 5.233333333333333
     }
   },
   "correctness_cost": {
@@ -47,5 +47,5 @@
     "share_found": 0.0
   },
   "judged": 0,
-  "records": 51
+  "records": 60
 }

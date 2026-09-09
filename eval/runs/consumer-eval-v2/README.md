@@ -20,7 +20,7 @@ arm, so the comparison is between whole agents.
 | cell | n | correctness | refusal | links resolve | on gold | mcp called | cite verified | tool calls | bad params | p50 s |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | claude-sonnet-low / A0 | 30 | -- | 0.70 | 0.35 | 0.48 | 0.00 | 0.00 | 3.93 | 0.00 | 22.14 |
-| claude-sonnet-low / A1 | 21 | -- | 0.76 | 0.89 | 0.81 | 1.00 | 0.86 | 5.14 | 0.00 | 21.90 |
+| claude-sonnet-low / A1 | 30 | -- | 0.80 | 0.92 | 0.83 | 1.00 | 0.93 | 5.23 | 0.00 | 21.49 |
 
 Correctness is the blind judge's 1 / 0.5 / 0 mean where judged, else `--`.
 `links resolve` is the share of answer URLs landing on a corpus page;
@@ -45,3 +45,6 @@ heuristic over the answer text (declines for lack of documentation).
   `transcript`.
 - `calls.jsonl`: the judge's calls, verbatim. The consumers' own model
   calls are their harnesses', not this server's.
+- `records-a2-upstream-outage.jsonl`: rows collected while the answer server
+  could not reach its model. They are out of the metrics, and the
+  cells behind them are collected again once it can.
