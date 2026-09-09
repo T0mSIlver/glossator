@@ -846,3 +846,68 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - The loop is not uniformly better under noise: it loses typos and keyword-only questions to the plain single pass, because its own reformulations wander.
 
 **Decisions.** The default stays single pass: six points on badly worded questions do not pay for 3.3 times the latency and 4.6 times the cost, and the loop is the documented thorough mode. `rewrite_for_retrieval` stays off by default and available per request; the follow-up the split points at is rewriting only when the first retrieval comes back weak (a low top score or no lexical footing), which would take the gains on vague and wrong-term questions without the loss on clean ones. Refusal is now reported on noisy questions as well, since the generated set understates false refusals.
+
+---
+
+## D-039 · What the product is for: agents without a filesystem, and questions the source cannot answer
+
+**Status:** decided · 2026-09-09 · product direction round; research memo on the documentation-server field (codex web research, 25 searches, sources dated 2026-09-09)
+
+**Facts.**
+- A coding agent with the SDK checked out can grep it. That covers questions about how a parameter is spelled; it does not cover rate limits, prices, deprecation dates, the capability matrix, regional availability, or what changed last month. Of the 85 real questions in `eval/mined.jsonl` (D-038), 54 came from GitHub issues opened by people who had the SDK and still failed.
+- Agents inside Mistral Work, Le Chat, scheduled tasks and chat bots have no filesystem and no grep. Work reaches external knowledge only through Connectors, Libraries, Skills and custom instructions (`vibe/work/*` pages in the corpus).
+- The field, checked 2026-09-09: Context7, Mintlify hosted MCP, GitMCP, llms.txt, the GitHub MCP server, DeepWiki, and the Cloudflare, Stripe, Vercel and Supabase documentation servers all return passages for the calling agent to interpret (DeepWiki also generates an answer); citations stop at the page for all of them; only Context7 and Mintlify pin a version; none publishes a retrieval or answer evaluation; none documents quote verification or text-fragment links. Mistral's own `llms.txt` still lists 75 legacy `/docs/*.md` paths that return 404, and Mistral's official MCP server exposes Studio Skills, not documentation search.
+- The one published study close to "grep versus docs server" (510 sessions, 9 August 2026, menges.dev) found agents never called a merely available code-context server and did as well with repository tools on grep-shaped questions; it recommends comparing whole agents, verifying the tool was actually called, repeating trials, and reporting cost per successful task.
+
+**Decision.** The product is grounded documentation for agents that cannot grep and for product questions the source does not contain, with the evaluation pipeline as a second deliverable: run on every documentation version, it is a documentation-quality tool (D-041). The differentiators the README and the talk claim are the ones the field lacks: a commit-pinned corpus, tested section anchors, verified quotes with text-fragment links, a refusal path, and a published evaluation. Exact-symbol questions are conceded to grep. The consumer evaluation (D-040) follows the study's recommendations: shell tools available in every arm, tool calls verified, cost per correct answer reported.
+
+---
+
+## D-040 · Tools for agents that can call tools: `cite` verifies, `ask` stays as the measured fallback
+
+**Status:** decided · 2026-09-09 · supersedes the reading of `ask` as "context injection as a tool"
+
+**Facts.**
+- Context was injected into the prompt because models could not call tools. A consumer model that can call `search`, `open`, `read` and `grep` (D-029) can gather the same context itself, so an `ask` tool that runs a second model inside the server costs a nested generation and adds nothing a capable consumer could not do.
+- What the consumer cannot do is verify its own citations: checking that a quoted span exists in the chunk it names needs both texts, which only the server has. The verifier (D-027) already does this for the server's own answers.
+- Mistral Work decides on its own when to call a Connector; custom instructions "don't change how tools execute", Skills take precedence over custom instructions when active, and activation is the model's decision (`vibe/work/custom-instructions`, `vibe/work/skills`). There is no hook that forces a tool call per message.
+- Consumers without a model of their own (a support widget, a batch script, a Slack bot) need an endpoint that returns a finished, cited answer; that is what the assignment text describes and what `/ask` is.
+
+**Decision.** The MCP surface gains a `cite` tool: the consumer sends its draft answer and the quotes it relied on; the server verifies each quote against the chunks it served, returns a fragment link for each quote that holds and a reason for each that does not, and never rewrites the answer. `ask` stays, for consumers without a model and as the path whose quality is measured (0.93 tuned, 0.84 fresh, 0.79 mined). A blind consumer evaluation with weak models at low reasoning (D-032) runs three arms per consumer, no tools, retrieval tools plus `cite`, and `ask`, and reports correctness, citation precision, whether the tool was called, and cost per correct answer; the README recommends whichever arm wins for capable consumers and keeps `ask` for the others. In Work the documented mechanism is a workspace Skill that triggers on Mistral product questions and instructs the model to search first, cite through `cite`, and never answer from memory.
+
+---
+
+## D-041 · The time axis: the pipeline is a function of a commit, so it runs on every commit
+
+**Status:** decided · 2026-09-09 · snapshot evaluation and history tool; the docs repository history was fetched in full on 2026-09-09 (1,294 commits since 2023-12-22)
+
+**Facts.**
+- The corpus adapter (D-002) turns one commit of `mistralai/platform-docs-public` into the corpus, and the evaluation runs in minutes, so both can run at any commit. A pipeline tuned on one commit and never run on another has no evidence that it survives the next docs release; the assignment leaves "the level of depth" to the candidate and asks for retrieval evaluation, so depth on evaluation over time is in scope.
+- The repository has had three layouts: Docusaurus `docs/` until 20 October 2025 (27 to 87 Markdown files), a Next.js `src/app` tree until 28 May 2026 (267 to 373), and the current `src/content/<locale>/docs` tree since (1,256 to 1,419 files including French). The adapter reads the current layout only.
+- Between two snapshots a fortnight apart most chunks are unchanged, so embeddings cached by content hash make a new snapshot cost a fraction of a full ingestion (a full sec1024 ingestion is about 1,033 chunks).
+- Whether a question was answerable at an older snapshot must be decided on content, not on the page: sections move. The verifier's whitespace-normalized span search over the whole snapshot decides "present" (same page or moved) deterministically; a span found nowhere goes to a judged step (reference answer against the top five lexically retrieved pages of the snapshot: same fact, different value, or not stated), with a second judge and a human sample, and the tables report the two kinds of cells separately.
+
+**Decision.** Eight biweekly snapshots from 1 June 2026 to the pinned commit, on the current layout, ingested into one schema with a `snapshot` field and the shipped weights; correctness is reported on present cells only, refusal rate on absent cells, and answers that change between snapshots are reported as the changelog in question form. A `history` tool exposes the stored snapshots without any model inside it: first and last appearance of a phrase, the state of a section at each date with the diff when it changed, and for a question the top retrieved section per date. A scheduled refresh workflow (weekly: pull, re-vendor, ingest changed pages, run the fixed question set, publish the diff) is committed with a manual trigger only, so it spends nothing until enabled. Adapters for the two older layouts, and the product graph built on the snapshots, are recorded as later work.
+
+---
+
+## D-035c · Loop caps are evaluated on a local Ministral 3 endpoint, as relative numbers
+
+**Status:** decided · 2026-09-09
+
+**Facts.**
+- The search loop stops after 4 rounds with 4 searches per round and shows the model 600-character previews of search results (1,600 for `open`); none of the three values was ever varied. The final generation reads the full chunks of everything the loop collected, so a preview never truncates the answer's context; the risk is that the loop discards, or never reads, a chunk whose relevant sentence sat past the preview.
+- The Mistral credits stand at 7.04 of 10 EUR used on 2026-09-09 (console), the promised 20 USD are not yet credited, and every answer evaluation spends Ministral calls; the eval records store a cost of 0 for every call although token counts are recorded (18.8 million Ministral tokens across 5,515 recorded calls, about 2.8 USD at the published Ministral 3 rate), which is a recording bug to fix.
+- Tom hosts Ministral 3 on his own GPU (llama.cpp, tool-calling template); the SDK client accepts a `server_url`, so chat calls can go there while embeddings stay on the API, which llama.cpp does not serve.
+
+**Decision.** Chat clients (answer model, reranker, translation) read an optional server URL from the environment; the grid over rounds (4, 6, 8), searches per round (4, 6) and preview size (600, 1,500, full) runs there on 60 questions, one axis at a time from the shipped point, with the GLM judge. Its numbers are relative comparisons between configurations on a quantized local model; every shipped figure keeps coming from the API. No further Mistral credits are spent before the promised credits arrive, except about 0.2 EUR of embeddings for the snapshots (D-041). Cost recording is fixed so every call carries its price, and the recorded totals are reconciled against the console.
+
+---
+
+## D-036a · Fragment links must survive code identifiers
+
+**Status:** decided · 2026-09-09 · found while showing a demo answer from run `2026-09-09-1253-mined-shipped`
+
+**Facts.** The fragment text is built from the quote with every `*`, `_` and backtick removed, so a quoted code block reading `function_name` and `tool_call_id` becomes `functionname` and `toolcallid` in the link; the rendered page keeps the underscores, so the browser finds no match and falls back to the section anchor. The verifier's second pass strips the same characters, which is why the quote still verified.
+
+**Decision.** Strip emphasis markers only where they act as Markdown emphasis (at token boundaries), never inside a word, and build the fragment from the matched span of the source text rather than from the model's rendering of it. A resolvability check fetches the live page for a sample of verified citations, extracts its text, and reports the share of fragments whose text is found; that share is published with the citation metrics, and if it stays low after the fix the feature is removed rather than shipped half working.
