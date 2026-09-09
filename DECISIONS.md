@@ -811,3 +811,17 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 - Human labels were not yet available; the reader, matching and confusion-matrix code are tested on a fixture.
 
 **Decision.** GLM 5.3 stays the primary judge for published tables, GLM 5.3 Flash the second (kappa 0.87, faster), Ministral 14B the independent dissent check that is reported but never the primary. Every table now carries all three judges' means. Tom's labels from the annotation page decide whether Flash can become the primary and give the judge-versus-human number this record still lacks.
+
+**D-038a · First numbers on the mined set** (run `*-mined-shipped`, 85 questions, shipped configuration, Ministral 14B, primary judge before blinding; 7 answers lost to free-tier 429s while other evaluations ran, to be re-run):
+
+| metric | single_pass | search_loop | single_pass on the generated dev slice |
+|---|---|---|---|
+| correctness (judge) | 0.79 | 0.85 | 0.93 |
+| judged partial | 0.23 | 0.24 | 0.05 |
+| cited URL matches gold | 0.86 | 0.78 | 0.82 |
+| refusal correct | 0.92 | 0.93 | 0.92 |
+| fabricated quotes per answer | 0.59 | 0.82 | 0.40 |
+| correctness on the 9 mined unanswerables | 0.67 | 0.69 | (0.9 on generated ones) |
+| latency p50 | 12.0 s | 36.8 s | 7.2 s |
+
+Real questions are found as well as generated ones (URL match 0.86) but answered less precisely: a quarter of the answers are partial, because these questions ask for one exact parameter, format or limit and the answer stops short of it or adds an unsupported detail. The mined unanswerables are the hardest cell, as D-038 predicted: relevant context exists and the model over-reaches from it. The search loop buys 6 points here at three times the latency. These are the numbers the talk leads with, and the ones the next product changes are measured against.
