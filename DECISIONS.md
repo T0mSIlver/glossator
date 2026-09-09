@@ -617,3 +617,32 @@ Separation is the check that catches random weights; raw similarity does not, be
 - The lexical-footing gate never fires on this corpus: 0 of 15 junk questions lack a content word found somewhere in 411 pages of prose. The vocabulary is too broad for the gate that worked on vidtheque's transcript corpus.
 
 **Decision.** `similarity_floor` and `similarity_margin` stay `None` in v1; the footing check stays available in the trace but gates nothing. Off-topic questions are handled by the answer layer's insufficient-evidence path and measured by the judge. The calibration tool and this run stay in the repository so the decision can be revisited on a corpus where the corridor is wide.
+
+---
+
+## D-034 · Shipped retrieval: section chunks, vector-heavy weights, listwise reranker on
+
+**Status:** decided · 2026-09-09 · run `eval/runs/2026-09-09-0136-dev-grid-v2` (294 dev questions, 13 configurations, 20 hits per row collapsed to distinct pages or sections before scoring, reranker on Ministral 14B)
+
+| configuration | page r@1 | page r@5 | page r@10 | page MRR | section r@1 | section r@5 | section MRR | median ms |
+|---|---|---|---|---|---|---|---|---|
+| page128-shipped (starter chunking, 128 dims) | 0.619 | 0.900 | 0.959 | 0.816 | 0 | 0 | 0 | 12 |
+| sec128-shipped | 0.619 | 0.871 | 0.941 | 0.791 | 0.747 | 0.915 | 0.814 | 7 |
+| sec128-vector-heavy | 0.605 | 0.879 | 0.920 | 0.789 | 0.761 | 0.958 | 0.841 | 6 |
+| sec1024-shipped | 0.592 | 0.861 | 0.936 | 0.771 | 0.704 | 0.880 | 0.784 | 11 |
+| sec1024-vector-heavy | 0.596 | 0.863 | 0.926 | 0.774 | 0.732 | 0.937 | 0.807 | 9 |
+| sec1024-lexical-heavy | 0.584 | 0.859 | 0.900 | 0.765 | 0.662 | 0.866 | 0.752 | 9 |
+| sec1024-heading-path-off | 0.600 | 0.869 | 0.916 | 0.786 | 0.697 | 0.887 | 0.780 | 9 |
+| sec1024-shipped+rerank | 0.703 | 0.895 | 0.939 | 0.868 | 0.817 | 0.922 | 0.864 | 4,427 |
+| **sec1024-vector-heavy+rerank** | **0.711** | **0.920** | 0.934 | **0.880** | **0.873** | **0.979** | **0.918** | 4,392 |
+
+Section-level numbers cover the 142 questions whose gold names an anchor; page-level numbers cover all 244 answerable questions.
+
+**Facts.**
+- Whole-page chunks (the starter's splitter) cannot deep-link at all (section recall 0) and only match section chunks at page level once the depth is equalized: ten page chunks are eight distinct pages, ten section chunks are six. The 20-hit depth is what makes page-level numbers comparable across chunkings.
+- The reranker is the largest single gain: page recall@1 from 0.60 to 0.71, section recall@1 from 0.73 to 0.87, API-reference recall@1 from 0.64 to 0.90, at a median 4.4 s per query and 0.0007 USD per call on Ministral (0.0009 at Small 4 prices); 37 of 294 calls (13%) returned a ranking that could not be applied and fell back to retrieval order.
+- Vector-heavy weights (closeness 8, BM25 0.3) beat the migration's baked-in weights on section metrics for both dimensions; lexical-heavy weights lose everywhere; switching heading-path BM25 off changes little.
+- 128 dimensions are not worse than 1024 without the reranker (section recall@1 0.747 against 0.704); the reranker was only run on 1024. Storage is the only cost difference, since the embedding tokens are the same.
+- Capability questions stay hard for retrieval at rank 1 (0.51 reranked): the gold is the matrix page while model cards also carry the fact (D-033).
+
+**Decision.** The product serves `RetrievalConfig.shipped()`: `sec1024`, vector-heavy weights, reranker on, with `rerank=False` as the documented fast path (median 9 ms). The reranker's serving model is Mistral Small 4 (D-017); `GLOSSATOR_RERANK_MODEL` overrides it, and every evaluation records the model used. Reranking on `sec128` and the reranker prompt's 13% fallback rate are the two follow-ups the numbers point at.
