@@ -1,0 +1,98 @@
+{
+  "arm_tools": {
+    "A0": null,
+    "A1": "search,open,navigate,read,grep,cite"
+  },
+  "arms": [
+    "A0",
+    "A1"
+  ],
+  "consumer_models": {
+    "opencode-muse-minimal": "opencode/muse-spark-1.3-contributor-free"
+  },
+  "consumer_variants": {
+    "opencode-muse-minimal": "minimal"
+  },
+  "consumers": [
+    "opencode-muse-minimal"
+  ],
+  "fresh_count": 20,
+  "judge_model": null,
+  "judge_prompt_hashes": {
+    "judge_citation": "d1565f592953cb68",
+    "judge_system": "3b300bf0bcd8ea7f",
+    "judge_user": "4e976b80283c7257"
+  },
+  "judge_prompt_version": "answer-judge/v2",
+  "kind": "consumer_eval",
+  "mcp_urls": {
+    "A1": "http://127.0.0.1:8000/mcp"
+  },
+  "mined_count": 40,
+  "name": "2026-09-09-1905-consumer-eval",
+  "prompt_lead": "You are helping a developer with Mistral's platform. Answer precisely and cite the documentation pages you used with links.",
+  "question_count": 60,
+  "questions": [
+    "mined-040",
+    "mined-080",
+    "mined-084",
+    "mined-043",
+    "mined-058",
+    "mined-003",
+    "mined-052",
+    "mined-054",
+    "mined-082",
+    "mined-015",
+    "mined-070",
+    "mined-001",
+    "mined-021",
+    "mined-037",
+    "mined-011",
+    "mined-029",
+    "mined-048",
+    "mined-078",
+    "mined-045",
+    "mined-013",
+    "mined-049",
+    "mined-025",
+    "mined-027",
+    "mined-051",
+    "mined-030",
+    "mined-079",
+    "mined-077",
+    "mined-018",
+    "mined-069",
+    "mined-016",
+    "mined-007",
+    "mined-010",
+    "mined-053",
+    "mined-060",
+    "mined-046",
+    "mined-024",
+    "mined-055",
+    "mined-066",
+    "mined-059",
+    "mined-014",
+    "dev-044",
+    "dev-159",
+    "dev-196",
+    "dev-247",
+    "dev-277",
+    "dev-215",
+    "dev-222",
+    "dev-166",
+    "dev-097",
+    "dev-245",
+    "dev-268",
+    "dev-209",
+    "dev-033",
+    "dev-072",
+    "dev-012",
+    "dev-237",
+    "dev-079",
+    "dev-218",
+    "dev-035",
+    "dev-252"
+  ],
+  "run_dir": "eval/runs/2026-09-09-1905-consumer-eval"
+}
