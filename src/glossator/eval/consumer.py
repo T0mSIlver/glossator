@@ -1206,7 +1206,7 @@ def render_defects(defects: Sequence[Mapping[str, str]]) -> str:
         "# Surface defects",
         "",
         "Every wrong turn a consumer took, with the transcript path, a severity,",
-        "and a proposed fix in prose. The server is not fixed in this stream.",
+        "and a proposed fix in prose. Fixes to the server belong in their own change.",
         "",
     ]
     if not defects:
