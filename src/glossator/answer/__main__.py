@@ -10,7 +10,7 @@ import asyncio
 from dotenv import load_dotenv
 
 from glossator.answer.citations import Answer
-from glossator.answer.config import DEFAULT_VARIANT, AnswerConfig
+from glossator.answer.config import DEFAULT_VARIANT
 from glossator.answer.llm import JsonlCallRecorder
 from glossator.answer.service import STRATEGIES, ask
 from glossator.index.variants import VARIANTS
@@ -49,7 +49,10 @@ def _print(answer: Answer) -> None:
         print("insufficient evidence")
     print(f"Citations ({len(answer.citations)} verified):")
     for citation in answer.citations:
-        print(f"  [{citation.n}] verified  {citation.citation_url}")
+        # A citation that only matched after normalization is still verified, but
+        # the eval counts it apart, so the CLI says so too.
+        note = f"  ({citation.reason})" if citation.reason else ""
+        print(f"  [{citation.n}] verified  {citation.citation_url}{note}")
         print(f'      "{citation.quote}"')
     for citation in answer.trace.unverified_citations:
         print(f"  [{citation.n}] REJECTED  {citation.reason}")
@@ -78,8 +81,8 @@ async def main() -> None:
             args.question,
             strategy=args.strategy,
             variant=args.variant,
+            model=args.model,
             recorder=recorder,
-            config=AnswerConfig(model=args.model) if args.model else None,
         )
     finally:
         if recorder is not None:

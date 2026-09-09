@@ -167,8 +167,8 @@ def summarize(
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
     """Every number the README and the figures are built from."""
-    candidate_types = Counter(row["generator_type"] for row in record_rows)
-    kept_types = Counter(row["generator_type"] for row in record_rows if row["kept"])
+    candidate_types = Counter(row.get("generator_type", "row") for row in record_rows)
+    kept_types = Counter(row.get("generator_type", "row") for row in record_rows if row["kept"])
     dropped_reasons: Counter[str] = Counter()
     for row in record_rows:
         if not row["kept"]:
@@ -290,6 +290,8 @@ def _conclusion(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
 
 
 def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
+    if config.get("kind", "generate") != "generate":
+        return _render_generic_readme(config, metrics)
     reason_lines = [
         f"- {reason}: {count}" for reason, count in metrics["dropped_by_reason"].items()
     ] or ["- None"]
@@ -352,6 +354,36 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
         "- `figures/tokens-by-call-kind.svg`: tokens spent on generating against checking\n\n"
         "## Conclusion\n\n"
         f"{_conclusion(config, metrics)}\n"
+    )
+
+
+def _render_generic_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
+    """A run of another kind (a translation, a probe): the same records, plainer prose."""
+    usage = metrics["usage"]
+    uncached = metrics["uncached_usage"]
+    kind_lines = [
+        f"- {kind}: {count} calls, {metrics['usage_by_kind'][kind]['prompt_tokens']} prompt "
+        f"+ {metrics['usage_by_kind'][kind]['completion_tokens']} completion tokens"
+        for kind, count in metrics["calls_by_kind"].items()
+    ] or ["- No calls were made"]
+    config_lines = [f"- {key}: {value}" for key, value in sorted(config.items())]
+    dataset = metrics["dataset"] or "No dataset was written"
+    return (
+        f"# {config.get('kind', 'run').capitalize()} run\n\n"
+        f"Status: {metrics['status']}."
+        + (f" {_as_sentence(metrics['error'])}" if metrics.get("error") else "")
+        + "\n\n"
+        "## Configuration\n\n" + "\n".join(config_lines) + "\n\n"
+        "## Records\n\n"
+        f"- rows: {metrics['candidates']}, kept: {metrics['kept']}\n"
+        f"- dataset: {dataset}\n\n"
+        "## Calls\n\n" + "\n".join(kind_lines) + "\n\n"
+        f"- total: {metrics['calls']} calls ({metrics['cached_calls']} cached), "
+        f"{usage['prompt_tokens']} prompt + {usage['completion_tokens']} completion tokens "
+        f"({usage['reasoning_tokens']} reasoning); uncached {uncached['prompt_tokens']} + "
+        f"{uncached['completion_tokens']}; estimated {metrics['estimated_usd']:.4f} USD "
+        "against the Mistral budget\n\n"
+        "Every call is in `calls.jsonl` and every row in `records.jsonl`.\n"
     )
 
 

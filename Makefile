@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check dev-set eval-report
+.PHONY: corpus-refresh corpus-check dev-set eval-report eval-answers eval-retrieval calibrate-floors
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -9,6 +9,8 @@ endif
 
 MCP_HOST := $(or $(host),127.0.0.1)
 MCP_PORT := $(or $(port),8000)
+API_HOST := $(or $(host),127.0.0.1)
+API_PORT := $(or $(port),8080)
 VESPA_CONTAINER := glossator-vespa
 VESPA_QUERY_PORT := $(or $(VESPA_QUERY_PORT),18080)
 VESPA_CONFIG_PORT := $(or $(VESPA_CONFIG_PORT),19072)
@@ -27,18 +29,7 @@ installdeps:
 setup-vespa: start-vespa migrate-vespa
 
 start-vespa:
-	# One Vespa per machine (fixed name and ports), shared across worktrees:
-	# reuse the running container instead of colliding on the name.
-	@if docker inspect $(VESPA_CONTAINER) >/dev/null 2>&1; then \
-		echo "$(VESPA_CONTAINER) exists — starting it"; \
-		docker start $(VESPA_CONTAINER) >/dev/null; \
-	else \
-		docker compose up -d --wait vespa; \
-	fi
-	@for i in $$(seq 1 60); do \
-		curl -sf $(VESPA_CONFIG_URL)/state/v1/health >/dev/null && break; \
-		sleep 2; \
-	done
+	docker compose up -d --wait vespa
 	@$(MAKE) verify-vespa
 
 verify-vespa:
@@ -72,21 +63,19 @@ search:
 	uv run python -m glossator.retrieval "$(query)" $(if $(variant),--variant $(variant),) $(if $(top_k),--top-k $(top_k),)
 
 ## Answer a question from the documentation, with verified citations
-## Usage: make ask question="how do I stream a chat completion" [strategy=single_pass] [variant=sec1024] [model=ministral-14b-2512] [record=path]
+## Usage: make ask question="how do I stream a chat completion" [strategy=single_pass] [variant=sec1024] [model=id] [record=path]
 ask:
 	uv run python -m glossator.answer "$(question)" $(if $(strategy),--strategy $(strategy),) $(if $(variant),--variant $(variant),) $(if $(model),--model $(model),) $(if $(record),--record $(record),)
+
+## Start the HTTP API
+## Usage: make api [host=0.0.0.0] [port=8080]
+api:
+	uv run uvicorn entrypoints.api:app --host $(API_HOST) --port $(API_PORT)
 
 ## Start the MCP server in HTTP mode
 ## Usage: make mcp [host=0.0.0.0] [port=8000]
 mcp:
 	uv run python -m entrypoints.mcp_server --http --host $(MCP_HOST) --port $(MCP_PORT)
-
-## Start the HTTP API (uvicorn)
-## Usage: make api [host=0.0.0.0] [port=8080]
-API_HOST := $(or $(host),127.0.0.1)
-API_PORT := $(or $(API_PORT),8080)
-api:
-	uv run uvicorn entrypoints.api:app --host $(API_HOST) --port $(API_PORT)
 
 ## Round-trip a document through the configured backend (skips unless it is set up)
 test:
@@ -95,6 +84,33 @@ test:
 ## Generate the 300-question development set
 dev-set:
 	uv run python -m glossator.eval.generate --corpus corpus/mistral-docs --out eval/dev.jsonl --n 300 --provider zai --model glm-5.3-flash --seed 0
+
+## Score a question dataset through the answer strategies
+## Usage: make eval-answers dataset=eval/dev.jsonl name=answers-dev [strategies=single_pass,search_loop,outline] [variant=sec1024] [limit=N] [model=id] [judge_model=glm-5.3] [skip_judge=1]
+eval-answers:
+	uv run python -m glossator.eval.answer_eval --dataset $(dataset) --name $(name) \
+		$(if $(strategies),--strategies $(strategies),) \
+		$(if $(variant),--variant $(variant),) \
+		$(if $(limit),--limit $(limit),) \
+		$(if $(model),--model $(model),) \
+		$(if $(judge_model),--judge-model $(judge_model),) \
+		$(if $(note),--note "$(note)",) \
+		$(if $(skip_judge),--skip-judge,)
+## Run every question through every retrieval configuration in the grid
+## Usage: make eval-retrieval dataset=eval/dev.jsonl name=dev [configs=a,b] [limit=N]
+eval-retrieval:
+	uv run python -m glossator.eval.retrieval_grid \
+		--dataset $(dataset) \
+		--grid $(or $(grid),eval/configs/retrieval-grid.yaml) \
+		--name $(name) \
+		$(if $(configs),--configs $(configs),) \
+		$(if $(limit),--limit $(limit),)
+
+## Measure the similarity corridor between real and junk questions (D-030)
+## Usage: make calibrate-floors dataset=eval/dev.jsonl name=dev [variant=sec1024]
+calibrate-floors:
+	uv run python -m glossator.eval.calibrate_floors \
+		--dataset $(dataset) --name $(name) $(if $(variant),--variant $(variant),)
 
 ## Regenerate a run's README and figures from its records
 ## Usage: make eval-report run=eval/runs/2026-09-08-2312-dev-smoke

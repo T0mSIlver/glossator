@@ -19,6 +19,7 @@ logger = structlog.get_logger(__name__)
 MISTRAL_MEDIUM_3_5 = "mistral-medium-2604"
 MISTRAL_SMALL_4 = "mistral-small-2603"
 MINISTRAL_3_8B = "ministral-8b-2512"
+MINISTRAL_3_14B = "ministral-14b-2512"
 MISTRAL_EMBED = "mistral-embed-2312"
 
 
@@ -35,6 +36,11 @@ PRICES: dict[str, ModelPrice] = {
     MISTRAL_MEDIUM_3_5: ModelPrice(input_usd_per_mtok=1.50, output_usd_per_mtok=7.50),
     MISTRAL_SMALL_4: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.60),
     MINISTRAL_3_8B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
+    # The pricing page publishes one Ministral 3 line and does not break the 14B
+    # out separately (checked 2026-09-09), so it is recorded at the same rate. The
+    # token counts are recorded whatever the price, so a published number can be
+    # applied to a run that already happened.
+    MINISTRAL_3_14B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
     # Embeddings are billed on input only; the output price is zero rather than
     # absent so one arithmetic path covers every model.
     MISTRAL_EMBED: ModelPrice(input_usd_per_mtok=0.10, output_usd_per_mtok=0.0),
@@ -55,12 +61,29 @@ class AnswerConfig(BaseModel):
     top_k: Annotated[int, Field(ge=1, le=50)] = 8
 
     context_token_budget: int = 6000
-    """Ceiling on the assembled context. Roughly a third of a 20k-token page set,
-    which keeps a single_pass question near 8k prompt tokens."""
+    """Ceiling on the assembled context. A `single_pass` question at ``top_k`` 8
+    measured 1.9k-3.0k prompt tokens against this budget in the 2026-09-09 smoke,
+    so the budget binds only for `outline`, which reads whole pages."""
+
+    min_quote_chars: int = 8
+    """A quote shorter than this verifies against almost any chunk, so it is not
+    evidence that the model read the source."""
 
     round_cap: int = 4
     searches_per_round: int = 4
     tool_top_k: int = 4
+    max_tool_top_k: int = 10
+    """Ceiling on what one search call may return, whatever the model asks for."""
+
+    max_open_window: int = 5
+    """Ceiling on `open`'s window. Each step of it is another positional query."""
+
+    loop_max_tokens: int = 800
+    """The loop's turns are tool calls and a one-line stop, not prose."""
+
+    picker_max_tokens: int = 300
+    """The outline picker returns a handful of numbers and one sentence."""
+
     tool_result_chars: int = 600
     """Tool results are previews. The loop only has to decide what to look at
     next; the final generation re-reads the full chunks through context
@@ -104,6 +127,7 @@ class AnswerConfig(BaseModel):
 
 __all__ = [
     "DEFAULT_VARIANT",
+    "MINISTRAL_3_14B",
     "MINISTRAL_3_8B",
     "MISTRAL_EMBED",
     "MISTRAL_MEDIUM_3_5",

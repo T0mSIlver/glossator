@@ -4,6 +4,7 @@ from glossator.answer.context import assemble, count_mistral_tokens
 from tests.answer.conftest import chunked_hit, make_hit, word_tokens
 
 OTHER_PAGE = "https://docs.mistral.ai/capabilities/structured-output"
+THIRD_PAGE = "https://docs.mistral.ai/capabilities/streaming"
 
 
 def test_duplicate_chunks_appear_once() -> None:
@@ -113,10 +114,41 @@ def test_no_hits_gives_an_empty_context() -> None:
     assert context.tokens == 0
 
 
-def test_the_default_counter_is_the_chunker_tokenizer() -> None:
+def test_a_group_over_budget_does_not_block_a_cheaper_one_behind_it() -> None:
+    """The budget fills best-effort: a source that does not fit is skipped, not final."""
+    keep = chunked_hit("keep", "one two three", start=0, end=13, score=9.0)
+    fat = chunked_hit(
+        "fat",
+        " ".join(f"word{i}" for i in range(40)),
+        start=0,
+        end=300,
+        score=5.0,
+        source_id=OTHER_PAGE,
+        heading_path=("Structured output",),
+    )
+    cheap = chunked_hit(
+        "cheap",
+        "four five six",
+        start=0,
+        end=13,
+        score=1.0,
+        source_id=THIRD_PAGE,
+        heading_path=("Streaming",),
+    )
+
+    context = assemble([keep, fat, cheap], token_budget=60, count_tokens=word_tokens)
+
+    assert [source.chunk_ids[0] for source in context.sources] == ["keep", "cheap"]
+    assert context.dropped_chunk_ids == ("fat",)
+
+
+def test_the_default_counter_is_the_mistral_tokenizer_the_chunker_used() -> None:
+    """The budget and the chunk sizes it was built from have to agree on a token."""
     hit = chunked_hit("a", "Tools are declared as JSON objects.", start=0, end=34)
 
     context = assemble([hit], token_budget=500)
 
     assert context.tokens == count_mistral_tokens(context.text)
-    assert context.tokens > 0
+    # BPE on this text is nowhere near a word count, which is what makes reusing
+    # the chunker's tokenizer rather than an estimate worth the import.
+    assert context.tokens > len(context.text.split())

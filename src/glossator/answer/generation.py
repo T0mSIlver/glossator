@@ -122,8 +122,16 @@ class AnswerRun:
         *,
         llm: LLM,
         config: AnswerConfig,
+        no_sources_message: str | None = None,
     ) -> Answer:
-        """Assemble, generate, verify: the common tail of every strategy."""
+        """Assemble, generate, verify: the common tail of every strategy.
+
+        ``no_sources_message`` is what to say when nothing was gathered. A
+        strategy that failed before it reached the index passes its own reason:
+        "the documentation does not cover this" and "the step that picks pages
+        broke" are different answers, and reporting the second as the first
+        turns a bug into a refusal in the eval's refusal rate (D-016).
+        """
         context = assemble(hits, token_budget=config.context_token_budget)
         self.event(
             "assembly",
@@ -136,7 +144,8 @@ class AnswerRun:
                 question,
                 config,
                 context,
-                markdown="The documentation index returned nothing for this question.",
+                markdown=no_sources_message
+                or "The documentation index returned nothing for this question.",
                 verified=[],
                 rejected=[],
                 insufficient=True,
@@ -173,7 +182,9 @@ class AnswerRun:
             )
 
         verified, rejected = resolve(
-            [(citation.n, citation.quote) for citation in generated.citations], context
+            [(citation.n, citation.quote) for citation in generated.citations],
+            context,
+            min_quote_chars=config.min_quote_chars,
         )
         return self._answer(
             question,
@@ -209,10 +220,12 @@ class AnswerRun:
                     heading_path=list(source.heading_path),
                     chunk_ids=list(source.chunk_ids),
                     tokens=source.tokens,
+                    score=source.score,
                 )
                 for source in context.sources
             ],
             context_tokens=context.tokens,
+            context_text=context.text,
             dropped_chunk_ids=list(context.dropped_chunk_ids),
             unverified_citations=rejected,
             unmatched_markers=unmatched(markdown, verified + rejected),

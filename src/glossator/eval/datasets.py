@@ -7,6 +7,8 @@ of whatever wrote the row.
 
 from __future__ import annotations
 
+import hashlib
+import random
 from collections.abc import Iterable, Mapping, Sequence
 from enum import StrEnum
 from pathlib import Path
@@ -88,6 +90,48 @@ def write_jsonl(path: Path, questions: Iterable[EvalQuestion]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     rows = [question.model_dump_json() for question in questions]
     path.write_text("".join(row + "\n" for row in rows))
+
+
+def dataset_hash(path: Path) -> str:
+    """sha256 of the dataset file, so a run names the exact rows it read."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def stratified_subset(
+    questions: Sequence[EvalQuestion], n: int, seed: int = 0
+) -> list[EvalQuestion]:
+    """``n`` questions that keep every type in the input represented.
+
+    Types are drawn round-robin from independently shuffled pools, rarest type
+    first, so a subset smaller than the number of types still covers as many as
+    it has room for and a prefix of the result is itself stratified -- which is
+    what makes ``--limit`` on a run a sample rather than "whatever the file
+    happens to start with". The shuffle is seeded, so the same seed and the same
+    dataset always give the same subset.
+    """
+    if n <= 0:
+        return []
+    pools: dict[str, list[EvalQuestion]] = {}
+    for question in questions:
+        pools.setdefault(question.type.value, []).append(question)
+    rng = random.Random(seed)
+    for pool in pools.values():
+        rng.shuffle(pool)
+    # Rarest first: a type with two rows loses its only chance of appearing if a
+    # type with fifty is served first. Ties are broken by the seed rather than by
+    # name, because alphabetical tie-breaking would make every small subset in
+    # the project's history start with `api_reference`.
+    order = sorted(pools)
+    rng.shuffle(order)
+    order.sort(key=lambda name: len(pools[name]))
+    chosen: list[EvalQuestion] = []
+    while len(chosen) < n and any(pools[name] for name in order):
+        for name in order:
+            if len(chosen) == n:
+                break
+            if pools[name]:
+                chosen.append(pools[name].pop())
+    return chosen
 
 
 def validate_against_corpus(

@@ -1,0 +1,81 @@
+# The retrieval configurations one evaluation run compares.
+#
+# Rows are a cross product of an index variant and a set of ranking weights, plus
+# the reranked rows named at the bottom. Everything a row can vary is a field of
+# RetrievalConfig, so the grid is a list of those and nothing in the retrieval
+# path is reconfigured to run it.
+#
+# What each axis is asking:
+#   variant       does section chunking beat whole-page chunking, and does the
+#                 1024-dimension embedding beat the 128-dimension one (D-011)?
+#   weights       is phase-1 BM25 overweighted for paraphrased questions, and does
+#                 heading-path BM25 pull in question-shaped headings about other
+#                 subjects (D-012a's two observations)?
+#   rerank        does one model call fix what the weights cannot?
+
+name: retrieval-grid
+
+# Metrics are reported at 1, 3, 5 and 10, so every row retrieves ten hits.
+top_k: 10
+
+weight_sets:
+  # Empty means "use the weights the migration baked into the schema" (D-012a):
+  # bm25_content 0.5, closeness 5.0, page-title and heading-path BM25 0.3 each,
+  # match_content 0.5, cosine 5.0. This is the row every other row is measured
+  # against, and it is also the heading-path-at-0.3 arm of that comparison.
+  shipped: {}
+
+  # Vector-heavy: the brief's closeness 8 against bm25 0.3, testing D-012a's
+  # observation that a paraphrased question ranks its own section 2nd or 3rd
+  # under the shipped weights and 1st under vector-only ranking.
+  vector-heavy:
+    content_embedding_closeness: 8.0
+    bm25_content: 0.3
+
+  # Lexical-heavy: the mirror image. Exact identifiers, error codes and version
+  # numbers are where dense retrieval is weakest, and this row says how much is
+  # lost on everything else to serve them.
+  lexical-heavy:
+    bm25_content: 3.0
+    bm25_page_title: 1.0
+    bm25_heading_path_max: 1.0
+    content_embedding_closeness: 0.5
+    content_embedding_cosine_similarity_score: 1.0
+
+  # Heading path at 0, against the shipped 0.3. D-012a: "what is the rate limit
+  # for the embeddings endpoint" returns a vision FAQ first, because the FAQ's
+  # heading is question-shaped and BM25 does not care what the question is about.
+  heading-path-off:
+    bm25_heading_path_max: 0.0
+    bm25_heading_path_avg: 0.0
+
+axes:
+  variant: [page128, sec128, sec1024]
+  weights: [shipped, vector-heavy, lexical-heavy, heading-path-off]
+
+exclude:
+  # Page chunks carry one heading, the page title, so a heading-path weight has
+  # nothing to rank with and the row would repeat `page128-shipped` exactly.
+  - variant: page128
+    weights: heading-path-off
+
+rerank:
+  # Mistral Small 4 is the serving default (D-017). Every Mistral Small and Medium
+  # id returns a zero rate limit on this account (D-017a), so evaluation runs name
+  # the largest reachable model here and the report says which one produced the
+  # numbers.
+  model: ministral-14b-2512
+  temperature: 0.0
+  candidates: 20
+
+  # One call per question per reranked configuration, so this is the whole
+  # reranker spend of a run. 400 is about 0.35 USD of Mistral Small 4 at the
+  # measured 4.1k prompt and 0.4k completion tokens per call; 600 covers two
+  # reranked rows over a 300-question set without skipping any row.
+  max_calls: 600
+
+  # sec1024 only: the reranker reorders what retrieval found, so running it on a
+  # variant that found less measures the variant, not the reranker.
+  configurations:
+    - sec1024-shipped
+    - sec1024-vector-heavy

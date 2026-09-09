@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 148" width="720" height="148" role="img" aria-label="Groundedness and citation relevance">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Groundedness and citation relevance</text>
+<text x="240" y="51.0" text-anchor="end">single_pass</text>
+<rect x="248" y="39.0" width="321.4" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="381.8" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">0.75222 / 0.893697</text>
+<text x="240" y="77.0" text-anchor="end">search_loop</text>
+<rect x="248" y="65.0" width="347.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="73.0" width="388.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="77.0">0.812214 / 0.908185</text>
+<text x="240" y="103.0" text-anchor="end">outline</text>
+<rect x="248" y="91.0" width="276.3" height="7" fill="#3b6fd4"/>
+<rect x="248" y="99.0" width="362.3" height="7" fill="#c05621"/>
+<text class="v" x="646" y="103.0">0.646782 / 0.848129</text>
+<rect x="16" y="131" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="140">groundedness</text>
+<rect x="132" y="131" width="10" height="10" fill="#c05621"/>
+<text class="v" x="146" y="140">citation relevance</text>
+</svg>

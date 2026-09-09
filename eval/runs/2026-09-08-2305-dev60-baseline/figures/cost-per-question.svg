@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 148" width="720" height="148" role="img" aria-label="USD per question at mistral-medium-2604 prices">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">USD per question at mistral-medium-2604 prices</text>
+<text x="240" y="51.0" text-anchor="end">single_pass</text>
+<rect x="248" y="39.0" width="72.3" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="51.0">0.0052961</text>
+<text x="240" y="77.0" text-anchor="end">search_loop</text>
+<rect x="248" y="65.0" width="388.0" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="77.0">0.0284265</text>
+<text x="240" y="103.0" text-anchor="end">outline</text>
+<rect x="248" y="91.0" width="223.2" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="103.0">0.0163547</text>
+<rect x="16" y="131" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="140">USD</text>
+</svg>

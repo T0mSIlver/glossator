@@ -17,9 +17,10 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Protocol, cast
 
+import httpx
 import structlog
 from mistralai.client import Mistral
-from mistralai.client.errors import MistralError
+from mistralai.client.errors import MistralError, NoResponseError
 from mistralai.client.models import (
     ChatCompletionRequestMessageTypedDict,
     ChatCompletionRequestToolChoiceTypedDict,
@@ -45,6 +46,17 @@ straight to JSON and a replay reads back exactly what was sent.
 ToolSpec = dict[str, Any]
 
 RETRYABLE_STATUS = frozenset({408, 409, 425, 429, 500, 502, 503, 504})
+
+TRANSPORT_ERRORS = (httpx.TransportError, NoResponseError)
+"""A request that never got an answer. The SDK re-raises httpx's own exceptions
+for connection failures and timeouts, and `NoResponseError` is a plain
+``Exception``, so neither reaches a `MistralError` handler. Both are retryable:
+nothing was generated, so nothing is lost by asking again."""
+
+CALL_ERRORS = (MistralError, httpx.HTTPError, NoResponseError)
+"""Everything a request can fail with that is the request's fault rather than a
+bug here. All of them are recorded before the retry decision (D-023): a request
+that was sent and left no line in `calls.jsonl` is a hole in the record."""
 
 
 class TokenUsage(BaseModel):
@@ -259,9 +271,16 @@ class MistralLLM:
                     response_format=settings.response_format(),
                     timeout_ms=self.config.request_timeout_ms,
                 )
-            except MistralError as error:
+            except CALL_ERRORS as error:
+                # Recorded first, then judged: an attempt that is not retried is
+                # still an attempt that was paid for and has to be in the record.
                 latency_ms = (time.perf_counter() - started) * 1000
-                call = call.model_copy(update={"latency_ms": latency_ms, "error": str(error)})
+                call = call.model_copy(
+                    update={
+                        "latency_ms": latency_ms,
+                        "error": f"{type(error).__name__}: {error}",
+                    }
+                )
                 self._emit(call)
                 calls.append(call)
                 last_error = error
@@ -308,11 +327,12 @@ class MistralLLM:
             }
         )
 
-    def _backoff(self, attempt: int, error: MistralError) -> float:
+    def _backoff(self, attempt: int, error: Exception) -> float:
         """Exponential with jitter, unless the server named a delay itself."""
-        retry_after = error.headers.get("retry-after") if error.headers else None
-        if retry_after and retry_after.isdigit():
-            return float(retry_after)
+        if isinstance(error, MistralError) and error.headers:
+            retry_after = error.headers.get("retry-after")
+            if retry_after and retry_after.isdigit():
+                return float(retry_after)
         return self.config.retry_base_seconds * (2.0 ** (attempt - 1)) * (1 + random.random())
 
     def _emit(self, call: LLMCall) -> None:
@@ -415,12 +435,20 @@ def _tool_invocations(message: Any) -> list[ToolInvocation]:
     return invocations
 
 
-def _retryable(error: MistralError) -> bool:
-    return error.status_code in RETRYABLE_STATUS or error.status_code >= 500
+def _retryable(error: Exception) -> bool:
+    if isinstance(error, TRANSPORT_ERRORS):
+        return True
+    if isinstance(error, MistralError):
+        return error.status_code in RETRYABLE_STATUS or error.status_code >= 500
+    # An httpx error that is not a transport failure is a protocol violation on
+    # a response that did arrive; asking again is unlikely to change it.
+    return False
 
 
 __all__ = [
+    "CALL_ERRORS",
     "RETRYABLE_STATUS",
+    "TRANSPORT_ERRORS",
     "CallRecorder",
     "Completion",
     "JsonlCallRecorder",

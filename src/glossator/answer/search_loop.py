@@ -6,12 +6,18 @@ phrase in one. Two things keep the loop from running away: chunks it has already
 seen are excluded at query time, so a repeated search returns nothing and wastes
 only a round, and tool results are previews -- the loop decides where to look, the
 final generation reads the full chunks through context assembly.
+
+The tool surface follows D-029. Nothing fails silently: a clamp prints the note
+that says what it clamped, an empty result says which kind of empty it is, and an
+error names the next call to make rather than ending the run.
 """
 
 import json
+from dataclasses import dataclass, field
 from typing import Any
 
 import structlog
+from mistralai.search.toolkit.errors import SearchToolkitException
 from mistralai.search.toolkit.search import GrepMode
 
 from glossator.answer.citations import Answer
@@ -26,8 +32,10 @@ logger = structlog.get_logger(__name__)
 
 NAME = "search_loop"
 
-MAX_TOOL_TOP_K = 10
-"""Ceiling on what one tool call may return, whatever the model asks for."""
+CAPPED_TOOL = "search"
+"""Only searches are capped per round. `open`, `grep` and `read` are each bounded
+by their own arguments, and dropping one costs the model a page it had already
+found."""
 
 TOOLS: list[ToolSpec] = [
     {
@@ -44,7 +52,10 @@ TOOLS: list[ToolSpec] = [
                     "query": {"type": "string"},
                     "top_k": {
                         "type": "integer",
-                        "description": "Results to return; 4 by default, 10 at most.",
+                        "description": (
+                            "Results to return; 4 by default, 4 at the least and 10 at "
+                            "most. A smaller number is raised to 4 and the result says so."
+                        ),
                     },
                 },
                 "required": ["query"],
@@ -59,8 +70,14 @@ TOOLS: list[ToolSpec] = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "chunk_id": {"type": "string"},
-                    "window": {"type": "integer", "description": "Neighbours on each side."},
+                    "chunk_id": {
+                        "type": "string",
+                        "description": "A chunk_id exactly as an earlier result printed it.",
+                    },
+                    "window": {
+                        "type": "integer",
+                        "description": "Neighbours on each side; 2 by default, 5 at most.",
+                    },
                 },
                 "required": ["chunk_id"],
             },
@@ -74,7 +91,10 @@ TOOLS: list[ToolSpec] = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "source_id": {"type": "string"},
+                    "source_id": {
+                        "type": "string",
+                        "description": "A source_id exactly as an earlier result printed it.",
+                    },
                     "pattern": {"type": "string"},
                 },
                 "required": ["source_id", "pattern"],
@@ -89,7 +109,10 @@ TOOLS: list[ToolSpec] = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "source_id": {"type": "string"},
+                    "source_id": {
+                        "type": "string",
+                        "description": "A source_id exactly as an earlier result printed it.",
+                    },
                     "start": {"type": "integer"},
                     "end": {"type": "integer"},
                 },
@@ -98,6 +121,24 @@ TOOLS: list[ToolSpec] = [
         },
     },
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class ToolResult:
+    """What one tool call produced, plus everything the model has to be told.
+
+    ``message`` replaces the rendered hits (an error, or an empty result that
+    explains which kind of empty). ``notes`` are appended either way, because a
+    clamp still applies to a call that succeeded.
+    """
+
+    hits: list[Hit] = field(default_factory=list)
+    message: str | None = None
+    notes: tuple[str, ...] = ()
+
+    def content(self, fresh: list[Hit], returned: int, limit: int) -> str:
+        body = self.message or _render(fresh, returned, limit)
+        return "\n".join([body, *self.notes])
 
 
 async def answer(
@@ -131,7 +172,7 @@ async def answer(
             "role": "user",
             "content": SEARCH_LOOP_SEED_USER.format(
                 question=question,
-                seed=_render(seed, config.tool_result_chars),
+                seed=_render(seed, len(seed), config.tool_result_chars),
             ),
         },
     ]
@@ -142,7 +183,7 @@ async def answer(
             messages,
             tools=TOOLS,
             tool_choice="auto",
-            max_tokens=800,
+            max_tokens=config.loop_max_tokens,
             purpose=f"{NAME}:round_{round_number}",
         )
         run.spent(completion)
@@ -150,27 +191,36 @@ async def answer(
             run.event("loop", "stop", note=completion.text[:400] or completion.finish_reason)
             break
 
-        # Every tool call in the assistant message has to be answered, so the
-        # round cap on searches is applied before the message is appended.
-        invocations = completion.tool_calls[: config.searches_per_round]
-        messages.append(_assistant_message(completion.text, invocations))
-        for invocation in invocations:
-            hits, note = await _invoke(invocation, engine=engine, config=config, seen=collected)
-            fresh = _collect(collected, hits)
+        # Every tool call in the assistant message has to be answered, so calls
+        # over the per-round search cap are answered with a refusal rather than
+        # left hanging.
+        dropped = _over_round_cap(completion.tool_calls, config.searches_per_round)
+        messages.append(_assistant_message(completion.text, completion.tool_calls))
+
+        for invocation in completion.tool_calls:
+            if invocation.id in dropped:
+                note = (
+                    f"note: not run: this round already used its "
+                    f"{config.searches_per_round} searches. next: ask for it in the next round."
+                )
+                run.event("tool", invocation.name, arguments=dict(invocation.arguments), note=note)
+                messages.append(_tool_message(invocation, note))
+                continue
+
+            result = await _invoke(invocation, engine=engine, config=config, seen=collected)
+            fresh = _collect(collected, result.hits)
             run.event(
                 "tool",
                 invocation.name,
                 arguments=dict(invocation.arguments),
                 result_ids=[hit.chunk_id for hit in fresh],
-                note=note,
+                note="; ".join(filter(None, (result.message, *result.notes))) or None,
             )
             messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": invocation.id,
-                    "name": invocation.name,
-                    "content": note or _render(fresh, _result_chars(invocation.name, config)),
-                }
+                _tool_message(
+                    invocation,
+                    result.content(fresh, len(result.hits), _result_chars(invocation.name, config)),
+                )
             )
     else:
         run.event("loop", "round_cap", note=f"stopped after {config.round_cap} rounds")
@@ -185,48 +235,100 @@ async def _invoke(
     engine: DocsIndex,
     config: AnswerConfig,
     seen: dict[str, Hit],
-) -> tuple[list[Hit], str | None]:
+) -> ToolResult:
     """Run one tool call. A bad call comes back as a message, not an exception."""
     arguments = invocation.arguments
     try:
         if invocation.name == "search":
             query = _string(arguments, "query")
-            # A round trip costs the same whether it returns one chunk or eight, so
-            # the model's own top_k only ever widens the result, never narrows it.
-            top_k = min(
-                max(_integer(arguments, "top_k", config.tool_top_k), config.tool_top_k),
-                MAX_TOOL_TOP_K,
+            # A round trip costs the same whether it returns one chunk or eight,
+            # so the model's own top_k only ever widens the result.
+            top_k, notes = _clamp(arguments, "top_k", config.tool_top_k, config.max_tool_top_k)
+            hits = await engine.search(query, exclude_ids=set(seen), top_k=top_k)
+            return ToolResult(
+                hits=hits,
+                message=None if hits else f"No results for that query: {query!r}.",
+                notes=notes,
             )
-            return await engine.search(query, exclude_ids=set(seen), top_k=top_k), None
+
         if invocation.name == "open":
             chunk_id = _string(arguments, "chunk_id")
             hit = seen.get(chunk_id) or await engine.get_chunk(chunk_id)
             if hit is None or hit.start_offset is None or hit.end_offset is None:
-                return [], f"no chunk with id {chunk_id!r}"
+                return ToolResult(message=_unknown_id("chunk_id", chunk_id))
+            window, notes = _clamp(arguments, "window", 2, config.max_open_window, floor=1)
             reader = engine.navigation_at(hit.source_id, hit.start_offset, hit.end_offset)
-            window = _integer(arguments, "window", 2)
-            return await reader.around(window=window), None
+            return ToolResult(hits=await reader.around(window=window), notes=notes)
+
         if invocation.name == "grep":
-            reader = engine.navigation_at(_string(arguments, "source_id"))
-            hits = await reader.grep(
-                _string(arguments, "pattern"), mode=GrepMode.PHRASE, top_k=config.tool_top_k
+            source_id = _string(arguments, "source_id")
+            pattern = _string(arguments, "pattern")
+            hits = await engine.navigation_at(source_id).grep(
+                pattern, mode=GrepMode.PHRASE, top_k=config.tool_top_k
             )
-            return hits, None if hits else "no match on that page"
+            return ToolResult(
+                hits=hits,
+                message=None
+                if hits
+                else f"No line on that page contains {pattern!r}. next: read the page, "
+                "or search for the idea in one sentence instead of an exact phrase.",
+            )
+
         if invocation.name == "read":
-            reader = engine.navigation_at(_string(arguments, "source_id"))
-            hits = await reader.read(
-                _optional_integer(arguments, "start"),
-                _optional_integer(arguments, "end"),
-                top_k=config.page_read_top_k,
+            source_id = _string(arguments, "source_id")
+            start = _optional_integer(arguments, "start")
+            end = _optional_integer(arguments, "end")
+            hits = await engine.navigation_at(source_id).read(
+                start, end, top_k=config.page_read_top_k
             )
-            return hits, None if hits else "no chunks in that range"
+            return ToolResult(
+                hits=hits,
+                message=None
+                if hits
+                else f"No chunks between offsets {start} and {end} on that page. "
+                "next: call read with no start or end to get the whole page.",
+            )
+    except SearchToolkitException as error:
+        # The index raises this for a source_id it does not hold, which is the
+        # loop's most likely failure: a url the model half-remembered. It ends
+        # the tool call, not the answer.
+        return ToolResult(message=f"{invocation.name} failed: {error}. {_COPY_IDS}")
     except (KeyError, ValueError, TypeError) as error:
-        return [], f"{invocation.name} failed: {error}"
-    return [], f"no tool named {invocation.name!r}"
+        return ToolResult(message=f"{invocation.name} failed: {error}. {_COPY_IDS}")
+    return ToolResult(
+        message=f"No tool named {invocation.name!r}. next: use search, open, grep or read."
+    )
+
+
+_COPY_IDS = (
+    "next: use a chunk_id or source_id exactly as an earlier result printed it, "
+    "never one written from memory."
+)
+
+
+def _unknown_id(field_name: str, value: str) -> str:
+    return f"No chunk with {field_name}={value!r}. {_COPY_IDS}"
+
+
+def _over_round_cap(invocations: tuple[ToolInvocation, ...], searches_per_round: int) -> set[str]:
+    """Ids of the calls this round will not run.
+
+    Only searches count against the cap: they are the expensive, unbounded ones,
+    and dropping a follow-up `open` throws away work the model already did.
+    """
+    dropped: set[str] = set()
+    searches = 0
+    for invocation in invocations:
+        if invocation.name != CAPPED_TOOL:
+            continue
+        searches += 1
+        if searches > searches_per_round:
+            dropped.add(invocation.id)
+    return dropped
 
 
 def _result_chars(tool: str, config: AnswerConfig) -> int:
-    return config.tool_result_chars if tool == "search" else config.open_result_chars
+    return config.tool_result_chars if tool == CAPPED_TOOL else config.open_result_chars
 
 
 def _collect(collected: dict[str, Hit], hits: list[Hit]) -> list[Hit]:
@@ -237,21 +339,28 @@ def _collect(collected: dict[str, Hit], hits: list[Hit]) -> list[Hit]:
     return fresh
 
 
-def _render(hits: list[Hit], limit: int) -> str:
+def _render(hits: list[Hit], returned: int, limit: int) -> str:
     """A tool result: enough to judge relevance, not the whole chunk."""
     if not hits:
-        return "No new chunks."
-    blocks = []
-    for hit in hits:
-        body = " ".join(hit.content.split())
-        if len(body) > limit:
-            body = f"{body[:limit]}..."
-        blocks.append(
-            f"chunk_id={hit.chunk_id} source_id={hit.source_id} "
-            f"offsets={hit.start_offset}-{hit.end_offset}\n"
-            f"{hit.heading_line}\n{body}"
+        return (
+            f"No new chunks: all {returned} results were already collected. "
+            "next: search for something the collected chunks do not cover."
         )
-    return "\n\n".join(blocks)
+    return "\n\n".join(
+        f"chunk_id={hit.chunk_id} source_id={hit.source_id} "
+        f"offsets={hit.start_offset}-{hit.end_offset}\n"
+        f"{hit.heading_line}\n{hit.preview(limit)}"
+        for hit in hits
+    )
+
+
+def _tool_message(invocation: ToolInvocation, content: str) -> Message:
+    return {
+        "role": "tool",
+        "tool_call_id": invocation.id,
+        "name": invocation.name,
+        "content": content,
+    }
 
 
 def _assistant_message(text: str, invocations: tuple[ToolInvocation, ...]) -> Message:
@@ -279,9 +388,22 @@ def _string(arguments: dict[str, Any], key: str) -> str:
     return value
 
 
-def _integer(arguments: dict[str, Any], key: str, fallback: int) -> int:
+def _clamp(
+    arguments: dict[str, Any], key: str, default: int, ceiling: int, floor: int | None = None
+) -> tuple[int, tuple[str, ...]]:
+    """The value to use, and the note that says it was changed (D-029).
+
+    A clamp the model cannot see is a clamp it will keep hitting, so every one
+    of them comes back in the tool result.
+    """
+    lower = default if floor is None else floor
     value = arguments.get(key)
-    return value if isinstance(value, int) and value > 0 else fallback
+    if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+        return default, ()
+    clamped = min(max(value, lower), ceiling)
+    if clamped == value:
+        return clamped, ()
+    return clamped, (f"note: clamped server-side: {key}={value} → {clamped}",)
 
 
 def _optional_integer(arguments: dict[str, Any], key: str) -> int | None:
@@ -296,4 +418,4 @@ def _optional_integer(arguments: dict[str, Any], key: str) -> int | None:
     return None
 
 
-__all__ = ["MAX_TOOL_TOP_K", "NAME", "TOOLS", "answer"]
+__all__ = ["CAPPED_TOOL", "NAME", "TOOLS", "ToolResult", "answer"]

@@ -36,16 +36,32 @@ async def ask(
     *,
     strategy: str = "single_pass",
     variant: str = DEFAULT_VARIANT,
+    model: str | None = None,
     recorder: CallRecorder | None = None,
     config: AnswerConfig | None = None,
     engine: DocsIndex | None = None,
     llm: LLM | None = None,
 ) -> Answer:
     """Answer one question. ``engine`` and ``llm`` are injectable so a batch run
-    builds the index client once instead of once per question."""
+    builds the index client once instead of once per question.
+
+    ``model`` names the generation model, which an evaluation varies per run and
+    reports as a column of every table (D-017a). It is revalidated rather than
+    copied in, so a model with no price in the table is refused here instead of
+    silently costing zero.
+    """
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown strategy {strategy!r}; available: {sorted(STRATEGIES)}")
+    if llm is not None and recorder is not None:
+        # Silently dropping the recorder here would leave an eval run -- the one
+        # caller that injects a shared client -- with no record at all (D-023).
+        raise ValueError(
+            "pass either llm or recorder, not both: an injected llm already owns "
+            "its recorder, so this one would be ignored"
+        )
     settings = config or AnswerConfig()
+    if model is not None and model != settings.model:
+        settings = AnswerConfig.model_validate({**settings.model_dump(), "model": model})
     index = engine or SearchEngine(RetrievalConfig(variant=variant, top_k=settings.top_k))
     generator = llm or MistralLLM(settings, client=build_client(), recorder=recorder)
 
