@@ -34,9 +34,12 @@ The API listens on `127.0.0.1:8080`. The MCP HTTP transport listens on
 `127.0.0.1:8000/mcp`. Override either address with `host=` and `port=`. The MCP
 stdio transport is configured in `.mcp.json` and `.vibe/config.toml`.
 
-`.env` holds secrets and ports only. Supported settings are `MISTRAL_API_KEY`,
-`VESPA_QUERY_PORT`, and `VESPA_CONFIG_PORT`. The MCP server also reads
-`GLOSSATOR_VARIANT` and `GLOSSATOR_MODEL`. Do not put schema names in `.env`.
+`.env` holds secrets, ports, and service endpoints only. Recognized settings are
+`MISTRAL_API_KEY`, `VESPA_QUERY_PORT`, `VESPA_CONFIG_PORT`, `VESPA_ENDPOINT`,
+`VESPA_CONFIG_URL`, and `WORKSPACE_ROOT` (used by the Bruno API export). The
+API server also reads `GLOSSATOR_CORPUS_DIR`, and the MCP server reads
+`GLOSSATOR_VARIANT`, `GLOSSATOR_MODEL`, and `GLOSSATOR_CORPUS_DIR`. Do not put
+schema names in `.env`.
 
 Vespa blocks feeds when disk usage exceeds 80% by default. Ingestion tests a small
 write before processing the corpus and aborts without replacing any page if Vespa
@@ -56,13 +59,19 @@ schema.
 |---|---|---|
 | `POST /ask` | `question`; optional `strategy`, `variant`, `model` | answer Markdown, verified citations, trace, usage, cost, latency |
 | `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
-| `GET /pages/{path}` | documentation path and optional `variant` | page sections in reading order |
+| `GET /pages/{path}` | documentation path; optional `variant`, `start_offset`, `top_k` | up to 100 page sections in reading order; `truncated` says whether more exist |
 | `GET /health` | none | Vespa counts, corpus commit, and embedding-probe status |
 | `GET /version` | none | package version, variants, and allowed generation models |
 
-Every error uses `{"error":{"code","message","next"}}`. Clients can send
-`X-Request-Id`; the API echoes it in the response header and `/ask` body. When
-the header is absent, the API creates an ID.
+Every error uses `{"error":{"code","message","next"}}`. Unknown field names are
+rejected with a suggestion for the right one. Clients can send `X-Request-Id`;
+the API echoes it in the response header, the `/ask` body, and error bodies.
+When the header is absent, the API creates an ID. When `GET /pages` answers
+`truncated: true`, continue from the last returned section's `end_offset`:
+
+```bash
+curl -s "http://127.0.0.1:8080/pages/api/endpoint/chat?start_offset=2480&top_k=100"
+```
 
 ```bash
 curl -s http://127.0.0.1:8080/search \
@@ -94,7 +103,10 @@ uv run python -m entrypoints.mcp_server
 
 Every tool response ends with `next:`. The server announces clamps, rejects
 unknown parameters with `E_BAD_PARAM`, and prints a citation URL on each hit.
-It exposes exactly three resources:
+The MCP tools clamp out-of-range values to their published ranges (a `note:`
+line names the move, and `glossator://context` publishes the ranges), while the
+HTTP API validates and rejects out-of-range values with `E_BAD_PARAM` and
+documents them in `/openapi.json`. It exposes exactly three resources:
 
 - `glossator://guide` contains the tool flow and shared rules.
 - `glossator://index` lists every page as URL, title, and kind.
@@ -201,7 +213,7 @@ src/glossator/
   retrieval/             hybrid search, reranking, floors, and probe
   answer/                context, generation, and citation verification
   eval/                  datasets, metrics, run records, and reports
-src/entrypoints/          FastAPI, MCP, and CLI entrypoints
+src/entrypoints/          FastAPI and MCP servers (CLIs are python -m glossator.{corpus,ingest,retrieval,answer})
 corpus/                   vendored corpus, manifest, license, and notice
 eval/                     datasets, grids, and committed run directories
 tests/                    offline tests and optional backend integration tests
