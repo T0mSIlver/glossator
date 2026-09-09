@@ -1580,7 +1580,10 @@ def collect_defects(records: Sequence[ConsumerRecord]) -> list[dict[str, str]]:
                         ),
                     }
                 )
-            elif error.startswith("error:"):
+            # An error row names the tool before the line the tool printed, and
+            # only this server's tools are this server's defects: a consumer's
+            # own shell or fetch failing is not a surface defect.
+            elif is_server_tool(call.name) and "error:" in error:
                 defects.append(
                     {
                         "question_id": record.question_id,

@@ -405,6 +405,26 @@ def test_defects_list_typed_errors() -> None:
     assert collect_defects([_record()]) == []
 
 
+def test_defects_are_this_server_s_tools_only() -> None:
+    """A typed error is friction whatever the harness prefixed the name with; a
+    consumer's own shell failing is not this server's defect."""
+    typed = _record(
+        tool_calls=[
+            ToolCallRecord(
+                name="mcp__mistral-docs__mistral_docs_open_section",
+                output_chars=40,
+                error="mcp__mistral-docs__mistral_docs_open_section: error: E_NOT_FOUND",
+            )
+        ]
+    )
+    shell = _record(
+        tool_calls=[ToolCallRecord(name="Bash", output_chars=3, error="Bash: Exit code 1")]
+    )
+
+    assert collect_defects([typed])[0]["severity"] == "friction"
+    assert collect_defects([shell]) == []
+
+
 def test_samples_render_arms_side_by_side() -> None:
     records = [
         _record(question_id="mined-001", arm="A0", answer_text="From memory: 128."),
