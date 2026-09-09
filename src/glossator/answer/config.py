@@ -6,10 +6,12 @@ the alias moves, and D-023 wants every number traceable to the model that
 produced it.
 """
 
-from typing import Annotated, Self
+from typing import Annotated, Literal
 
 import structlog
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
+
+from glossator.clients import chat_server_url
 
 logger = structlog.get_logger(__name__)
 
@@ -102,13 +104,22 @@ class AnswerConfig(BaseModel):
     picker_max_tokens: int = 300
     """The outline picker returns a handful of numbers and one sentence."""
 
-    tool_result_chars: int = 600
+    tool_result_chars: int | None = 600
     """Tool results are previews. The loop only has to decide what to look at
     next; the final generation re-reads the full chunks through context
-    assembly, so paying for whole chunks twice buys nothing."""
+    assembly, so paying for whole chunks twice buys nothing. ``None`` is the
+    explicit "full" size (D-035c): no preview is cut at all, rather than a
+    number that has to track the longest chunk."""
 
     open_result_chars: int = 1600
     """`open` and `read` are deliberate drill-downs, so they show more."""
+
+    response_format: Literal["json_schema", "json_object"] = "json_schema"
+    """What structured requests send as ``response_format``. The API honours a
+    full JSON schema; a server that does not (llama.cpp behind some templates)
+    gets ``json_object`` plus the schema described in the prompt, with the same
+    validation and repair on the way back. Recorded with every run so a fallback
+    is a stated configuration, never a silent degrade (D-035c)."""
 
     page_cap: int = 4
     page_read_top_k: int = 40
@@ -119,28 +130,38 @@ class AnswerConfig(BaseModel):
 
     prices: dict[str, ModelPrice] = Field(default_factory=lambda: dict(PRICES))
 
-    @model_validator(mode="after")
-    def _validate(self) -> Self:
-        if self.model not in self.prices:
-            raise ValueError(
-                f"no price for model {self.model!r}; "
-                f"priced models: {sorted(self.prices)} (add it to PRICES, D-017)"
-            )
-        return self
-
     def cost_usd(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
-        """USD for one call. An unpriced model costs 0 and says so, loudly.
+        """USD for one call. An unpriced model costs 0 and says so once (D-035c).
 
-        Token counts are recorded either way, so a price added later can be
-        applied to a run that already happened.
+        A local server reports model ids the price list has never seen; the run
+        is allowed to proceed, the warning is logged once per model per process
+        rather than per call, and the token counts are recorded either way so a
+        price added later can be applied to a run that already happened.
         """
         price = self.prices.get(model)
         if price is None:
-            logger.warning("No price for model, cost recorded as zero", model=model)
+            if model not in _WARNED_UNPRICED:
+                _WARNED_UNPRICED.add(model)
+                logger.warning("No price for model, cost recorded as zero", model=model)
             return 0.0
         return (
             prompt_tokens * price.input_usd_per_mtok + completion_tokens * price.output_usd_per_mtok
         ) / 1_000_000
+
+
+_WARNED_UNPRICED: set[str] = set()
+
+
+def known_serving_model(model: str) -> bool:
+    """Whether a serving entrypoint should accept this model id.
+
+    The Mistral API path serves priced models only (D-017); a local chat server
+    (D-035c) reports ids the price list has never seen, and those are accepted,
+    costing 0 with one warning per model per process. The check lives at the
+    entrypoints rather than in ``AnswerConfig`` because it is a question about
+    what this deployment serves, not about what a run may record.
+    """
+    return model in PRICES or chat_server_url() is not None
 
 
 __all__ = [
@@ -153,4 +174,5 @@ __all__ = [
     "PRICES",
     "AnswerConfig",
     "ModelPrice",
+    "known_serving_model",
 ]

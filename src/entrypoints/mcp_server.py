@@ -26,6 +26,7 @@ from glossator.answer.config import (
     MISTRAL_MEDIUM_3_5,
     PRICES,
     AnswerConfig,
+    known_serving_model,
 )
 from glossator.index.variants import VARIANTS
 from glossator.retrieval.config import KINDS, RetrievalConfig
@@ -56,6 +57,14 @@ _model_env = os.environ.get("GLOSSATOR_MODEL", "")
 
 
 def _answer_config() -> AnswerConfig:
+    if _model_env and not known_serving_model(_model_env):
+        # Same refusal the API's /ask makes: a model this deployment cannot
+        # price is deterministic misconfiguration, unless a local chat server
+        # is configured (D-035c).
+        raise ValueError(
+            f"no price for model {_model_env!r}; priced models: {sorted(PRICES)} "
+            "(or set GLOSSATOR_CHAT_SERVER_URL to serve from a local server)"
+        )
     return AnswerConfig(model=_model_env) if _model_env else AnswerConfig()
 
 
@@ -683,12 +692,13 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
         )
     try:
         config = _answer_config()
-    except ValidationError as exc:
+    except (ValidationError, ValueError) as exc:
         # A bad GLOSSATOR_MODEL is deterministic misconfiguration: retrying the
         # identical call, as E_UPSTREAM tells a client to, can never fix it.
         raise _bad_param(
             f"the GLOSSATOR_MODEL setting is invalid: {exc}",
-            f"GLOSSATOR_MODEL must be one of {sorted(PRICES)}",
+            f"GLOSSATOR_MODEL must be one of {sorted(PRICES)} "
+            "(or set GLOSSATOR_CHAT_SERVER_URL for a local server)",
         ) from exc
     async with _admission_or_busy():
         try:

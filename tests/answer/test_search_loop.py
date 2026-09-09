@@ -260,3 +260,29 @@ def test_the_seed_hits_are_shown_in_the_first_user_message(config: AnswerConfig)
     assert "chunk_id=a" in seed_message
     assert f"source_id={PAGE}" in seed_message
     assert "Tools are declared as JSON objects" in seed_message
+
+
+def test_a_long_chunk_is_cut_at_the_configured_preview_size(config: AnswerConfig) -> None:
+    engine = FakeIndex([[make_hit("a", TOOLS_TEXT * 12)]])
+    llm = FakeLLM([completion(text="enough"), completion(parsed=grounded("enough said"))])
+
+    asyncio.run(search_loop.answer("How?", engine=engine, llm=llm, config=config))
+
+    seed_message = llm.requests[0]["messages"][1]["content"]
+    assert "..." in seed_message
+    assert TOOLS_TEXT * 12 not in seed_message
+
+
+def test_the_full_preview_configuration_cuts_nothing(config: AnswerConfig) -> None:
+    """`tool_result_chars=null` is the grid's explicit "full" size (D-035c): the
+    model sees the whole collapsed chunk, with no number to keep in step with
+    the longest chunk in the index."""
+    full = config.model_copy(update={"tool_result_chars": None})
+    engine = FakeIndex([[make_hit("a", TOOLS_TEXT * 12)]])
+    llm = FakeLLM([completion(text="enough"), completion(parsed=grounded("enough said"))])
+
+    asyncio.run(search_loop.answer("How?", engine=engine, llm=llm, config=full))
+
+    seed_message = llm.requests[0]["messages"][1]["content"]
+    assert "..." not in seed_message
+    assert TOOLS_TEXT * 12 in seed_message

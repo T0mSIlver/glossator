@@ -22,7 +22,7 @@ import structlog
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 from pydantic import BaseModel, ConfigDict, Field
 
-from glossator.answer.config import PRICES, AnswerConfig
+from glossator.answer.config import AnswerConfig
 from glossator.answer.llm import LLM, Completion, TokenUsage
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.engine import Hit
@@ -130,11 +130,6 @@ class ListwiseReranker:
     """Reorders one result set per model call."""
 
     def __init__(self, config: RetrievalConfig, llm: LLM) -> None:
-        if config.rerank_model not in PRICES:
-            raise ValueError(
-                f"no price for rerank model {config.rerank_model!r}; "
-                f"priced models: {sorted(PRICES)} (add it to glossator.answer.config, D-017)"
-            )
         self.config = config
         self.llm = llm
 

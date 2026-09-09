@@ -19,6 +19,7 @@ from glossator.retrieval.reranker import (
     Ranking,
     RerankResult,
     render_candidates,
+    rerank_llm_config,
     truncate_tokens,
 )
 from tests.answer.conftest import FakeLLM, completion, make_hit
@@ -64,13 +65,13 @@ def test_the_default_rerank_model_is_the_priced_mistral_small_4_id() -> None:
     assert RetrievalConfig().rerank_model == RERANK_MODEL
 
 
-def test_a_model_that_is_not_in_the_price_table_is_refused() -> None:
-    try:
-        ListwiseReranker(RetrievalConfig(rerank_model="not-a-model"), FakeLLM([]))
-    except ValueError as error:
-        assert "no price" in str(error)
-    else:
-        raise AssertionError("an unpriced rerank model should not build a reranker")
+def test_an_unpriced_rerank_model_builds_and_costs_zero() -> None:
+    """A local server's rerank model is unknown to the price list (D-035c): the
+    reranker builds, its calls are recorded, and the cost is zero with one
+    warning per process rather than a refusal."""
+    reranker = ListwiseReranker(RetrievalConfig(rerank_model="not-a-model"), FakeLLM([]))
+    assert reranker.config.rerank_model == "not-a-model"
+    assert rerank_llm_config(reranker.config).cost_usd("not-a-model", 1_000, 100) == 0.0
 
 
 def test_the_ranking_reorders_the_hits() -> None:

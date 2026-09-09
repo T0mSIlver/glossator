@@ -6,13 +6,11 @@ handle on the index's navigation operations -- reading around a hit within its
 own page is how the answer layer gets context without a second global search.
 """
 
-import os
 import time
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
 import structlog
-from mistralai.client import Mistral
 from mistralai.search.toolkit.context import RetrievalContext
 from mistralai.search.toolkit.embedding import Embedder, MistralEmbedder
 from mistralai.search.toolkit.plugins.vespa.search.index import VespaSearchIndex
@@ -23,6 +21,7 @@ from mistralai.search.toolkit.search import (
     SearchResult,
 )
 
+from glossator.clients import chat_client, embedding_client
 from glossator.index import get_index
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.context import restrict_to
@@ -152,9 +151,17 @@ class Hit:
     def heading_line(self) -> str:
         return " > ".join(self.heading_path)
 
-    def preview(self, chars: int = CONTENT_PREVIEW_CHARS) -> str:
+    def preview(self, chars: int | None = CONTENT_PREVIEW_CHARS) -> str:
+        """The collapsed content, cut to ``chars``; ``None`` cuts nothing.
+
+        ``None`` is the loop's "full" preview size (D-035c): a value large
+        enough that no preview is cut has to be maintained against the longest
+        chunk, while no cut at all is a statement about intent.
+        """
         collapsed = " ".join(self.content.split())
-        return collapsed if len(collapsed) <= chars else f"{collapsed[:chars]}..."
+        if chars is None or len(collapsed) <= chars:
+            return collapsed
+        return f"{collapsed[:chars]}..."
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,7 +220,7 @@ class SearchEngine:
         self.navigation_index = as_navigable(self.index)
         self.context = restrict_to(config.index_variant.schema_name)
         self.embedder = embedder or MistralEmbedder(
-            client=Mistral(api_key=_api_key()),
+            client=embedding_client(),
             model_name=config.index_variant.embedding_model_name,
             # The embedding API rate-limits on the free tier, and the toolkit's
             # three default retries are not enough for a batch of queries in a
@@ -377,17 +384,16 @@ class SearchEngine:
     def _reranker(self) -> "ListwiseReranker":
         """The reranker, built on first use.
 
-        Imported here rather than at module scope: the reranker reads the price
-        table and the chat client out of ``glossator.answer``, which imports this
-        module back through its service layer.
+        Imported here rather than at module scope: the reranker reads the chat
+        client out of ``glossator.clients`` through ``glossator.answer``, which
+        imports this module back through its service layer.
         """
         from glossator.answer.llm import MistralLLM
-        from glossator.answer.service import build_client
         from glossator.retrieval.reranker import ListwiseReranker, rerank_llm_config
 
         if self._llm is None:
             self._llm = MistralLLM(
-                rerank_llm_config(self.config), client=build_client(), recorder=self._recorder
+                rerank_llm_config(self.config), client=chat_client(), recorder=self._recorder
             )
         return ListwiseReranker(self.config, self._llm)
 
@@ -438,13 +444,6 @@ class SearchEngine:
 async def search(query: str, config: RetrievalConfig | None = None) -> list[Hit]:
     """Search one variant of the index. Builds a short-lived engine per call."""
     return await SearchEngine(config or RetrievalConfig()).search(query)
-
-
-def _api_key() -> str:
-    key = os.environ.get("MISTRAL_API_KEY", "")
-    if not key:
-        raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
-    return key
 
 
 def as_navigable(index: VespaSearchIndex) -> NavigableIndex:

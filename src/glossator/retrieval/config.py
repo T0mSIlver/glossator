@@ -31,8 +31,7 @@ SHIPPED_VARIANT = "sec1024"
 
 ``glossator.answer.config`` owns the price table this id is resolved through, and
 importing it here would close a cycle (answer imports the search engine, the
-engine imports this module). The reranker checks the id against that table when
-it is built, and a test pins the two spellings together."""
+engine imports this module). A test pins the two spellings together."""
 
 DEFAULT_CORPUS_DIR = Path("corpus/mistral-docs")
 """Where the lexical-footing vocabulary is read from. The vendored corpus is what

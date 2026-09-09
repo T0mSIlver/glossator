@@ -6,7 +6,6 @@ so a second run over an unchanged corpus leaves the index exactly as it was.
 """
 
 import asyncio
-import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +25,7 @@ from mistralai.search.toolkit.embedding import MistralEmbedder
 from mistralai.search.toolkit.ingestion.pipelines import Pipeline
 from mistralai.search.toolkit.search.errors import IndexingError
 
+from glossator.clients import embedding_client
 from glossator.index import get_index, get_variant
 from glossator.index.variants import IndexVariant
 from glossator.ingest.chunker import build_chunker
@@ -100,13 +100,8 @@ class IngestReport:
 
 
 def _mistral_client() -> Mistral:
-    api_key = os.environ.get("MISTRAL_API_KEY", "")
-    if not api_key:
-        raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
-    return Mistral(
-        api_key=api_key,
-        server_url=os.getenv("MISTRAL_API_URL", "https://api.mistral.ai"),
-    )
+    """The embedding client: the Mistral API, never the local chat server."""
+    return embedding_client()
 
 
 async def _run_batch(
