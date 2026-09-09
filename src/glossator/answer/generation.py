@@ -27,6 +27,12 @@ from glossator.answer.citations import (
 from glossator.answer.config import AnswerConfig
 from glossator.answer.context import AssembledContext, assemble
 from glossator.answer.docs_index import DocsIndex
+from glossator.answer.language import (
+    ENGLISH,
+    RETRIEVAL_QUERY_PURPOSE,
+    RetrievalQuery,
+    render_for_retrieval,
+)
 from glossator.answer.llm import LLM, Completion, TokenUsage
 from glossator.answer.prompts import (
     GROUNDED_ANSWER_SYSTEM,
@@ -80,6 +86,31 @@ class AnswerRun:
     events: list[TraceEvent] = field(default_factory=list)
     completions: list[Completion] = field(default_factory=list)
     rounds: int = 0
+    question_language: str = ENGLISH
+    retrieval_query: str = ""
+    """What every search this run makes is worded with; set by :meth:`prepare`."""
+
+    async def prepare(self, question: str, *, llm: LLM, config: AnswerConfig) -> RetrievalQuery:
+        """Settle the language question before anything is retrieved.
+
+        Every strategy calls this first and searches with the result, so the
+        English rendering reaches retrieval, reranking and the loop's own
+        searches, while the original question is what generation is given.
+        """
+        query = await render_for_retrieval(
+            question, llm=llm, config=config, purpose=f"{self.strategy}:{RETRIEVAL_QUERY_PURPOSE}"
+        )
+        self.question_language = query.language
+        self.retrieval_query = query.text
+        if query.completion is not None:
+            self.spent(query.completion)
+            self.event(
+                "query",
+                RETRIEVAL_QUERY_PURPOSE,
+                arguments={"language": query.language, "query": query.text},
+                note=query.note,
+            )
+        return query
 
     def event(
         self,
@@ -219,6 +250,8 @@ class AnswerRun:
             strategy=self.strategy,
             variant=self.variant,
             prompt_version=GROUNDED_ANSWER_VERSION,
+            question_language=self.question_language,
+            retrieval_query=self.retrieval_query or question,
             rounds=self.rounds,
             events=self.events,
             sources=[
@@ -252,4 +285,4 @@ class AnswerRun:
         )
 
 
-__all__ = ["AnswerRun", "GeneratedAnswer", "GeneratedCitation", "Strategy"]
+__all__ = ["AnswerRun", "GeneratedAnswer", "GeneratedCitation", "RetrievalQuery", "Strategy"]

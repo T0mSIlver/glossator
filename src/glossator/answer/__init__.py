@@ -4,6 +4,7 @@ from glossator.answer.citations import Answer, Citation, Trace
 from glossator.answer.config import AnswerConfig
 from glossator.answer.context import AssembledContext, Source, assemble
 from glossator.answer.generation import Strategy
+from glossator.answer.language import RetrievalQuery, detect_language, render_for_retrieval
 from glossator.answer.llm import (
     CallRecorder,
     JsonlCallRecorder,
@@ -23,10 +24,13 @@ __all__ = [
     "JsonlCallRecorder",
     "LLMCall",
     "MistralLLM",
+    "RetrievalQuery",
     "Source",
     "Strategy",
     "TokenUsage",
     "Trace",
     "ask",
     "assemble",
+    "detect_language",
+    "render_for_retrieval",
 ]

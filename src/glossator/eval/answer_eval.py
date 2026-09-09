@@ -1272,6 +1272,8 @@ wrote the answer, so it cannot prefer one.
 - Judge model: `{metrics.get("judge_model") or "none (--skip-judge)"}` ({JUDGE_VERSION})
 - Index variant: `{metrics["variant"]}`, top_k {config.get("top_k")}, rerank {config.get("rerank", "unknown")} ({config.get("rerank_model") or "off"}), context budget \
 {config.get("context_token_budget")} tokens
+- Non-English questions rendered in English for retrieval: \
+{config.get("translate_for_retrieval", "unknown")}
 - Dataset: `{metrics["dataset"]}`, sha256 `{metrics["dataset_sha256"]}`
 - Questions: {metrics["questions"]}; strategies: {len(metrics["strategies"])}; \
 records: {metrics["records"]}
@@ -1458,6 +1460,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--skip-judge", action="store_true")
     parser.add_argument("--top-k", type=int, default=AnswerConfig().top_k)
     parser.add_argument(
+        "--no-translate",
+        dest="translate_for_retrieval",
+        action="store_false",
+        help=(
+            "Retrieve a non-English question exactly as it was asked, instead of "
+            "rendering it in English first (the shipped default renders it)"
+        ),
+    )
+    parser.add_argument(
         "--no-rerank",
         dest="rerank",
         action="store_false",
@@ -1489,7 +1500,12 @@ async def _run(args: argparse.Namespace) -> None:
     questions = read_jsonl(args.dataset)
     if args.limit is not None:
         questions = stratified_subset(questions, args.limit, args.seed)
-    settings = AnswerConfig(model=args.model, top_k=args.top_k, prices=EVAL_PRICES)
+    settings = AnswerConfig(
+        model=args.model,
+        top_k=args.top_k,
+        translate_for_retrieval=args.translate_for_retrieval,
+        prices=EVAL_PRICES,
+    )
     judge_model = None if args.skip_judge else args.judge_model
 
     run_path = resolve_run_directory(args.name, root=args.runs_root)
@@ -1514,6 +1530,7 @@ async def _run(args: argparse.Namespace) -> None:
         "judge_provider": "zai",
         "top_k": settings.top_k,
         "rerank": args.rerank,
+        "translate_for_retrieval": settings.translate_for_retrieval,
         "rerank_model": RERANK_MODEL if args.rerank else None,
         "context_token_budget": settings.context_token_budget,
         "answer_config": settings.model_dump(mode="json"),

@@ -151,12 +151,13 @@ async def answer(
     run = AnswerRun(strategy=NAME, variant=engine.config.variant)
     collected: dict[str, Hit] = {}
 
-    seed = await engine.search(question, top_k=config.top_k)
+    query = await run.prepare(question, llm=llm, config=config)
+    seed = await engine.search(query.text, top_k=config.top_k)
     _collect(collected, seed)
     run.event(
         "retrieval",
         "search",
-        arguments={"query": question, "top_k": config.top_k},
+        arguments={"query": query.text, "top_k": config.top_k},
         result_ids=[hit.chunk_id for hit in seed],
         note="seed search on the question",
     )
@@ -170,8 +171,11 @@ async def answer(
         },
         {
             "role": "user",
+            # The loop searches the English index, so it is shown the English
+            # rendering of the question and writes its queries from that; the
+            # answer is generated from the original (D-008a).
             "content": SEARCH_LOOP_SEED_USER.format(
-                question=question,
+                question=query.text,
                 seed=_render(seed, len(seed), config.tool_result_chars),
             ),
         },
