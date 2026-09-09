@@ -1392,11 +1392,24 @@ _DESCRIPTIONS: dict[str, Any] = {
 """What each tool tells a model about itself. Built at registration, because a
 DO NOT USE clause must never name a tool the allowlist turned off (D-029)."""
 
+TOOL_ANNOTATIONS = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    "openWorldHint": False,
+}
+"""What every tool here is: a read of one pinned corpus.
+
+No tool writes anything (D-026), the same arguments return the same sections,
+and the index is a vendored snapshot rather than the open web. A host that sees
+no hints has to assume the worst and ask the user to approve every call; Mistral
+Work does, and sends `_confirmationReason` on the attempt that asks."""
+
 for _tool_name in _TOOL_ORDER:
     if _tool_name in _ENABLED_TOOLS:
         _impl = _TOOL_IMPLS[_tool_name]
         _impl.__doc__ = _DESCRIPTIONS[_tool_name]()
-        mcp.tool(title=_TOOL_TITLES[_tool_name])(_impl)
+        mcp.tool(title=_TOOL_TITLES[_tool_name], annotations=TOOL_ANNOTATIONS)(_impl)
 
 
 @mcp.resource(

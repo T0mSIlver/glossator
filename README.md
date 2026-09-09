@@ -125,10 +125,11 @@ paginated re-search call). `search` ranks with the index alone unless
 `rerank=True`, which reorders the candidates with a model for about five
 seconds; `mistral_docs_answer` always reranks.
 
-Every tool response ends with `next:`. The server announces clamps, rejects
-unknown parameters with `E_BAD_PARAM`, ignores host-supplied arguments whose
-name starts with an underscore (naming them in a `note:` line), and prints a
-citation URL on each hit.
+Every tool is annotated read-only, idempotent and closed-world, so a client
+knows it can call one without asking. Every tool response ends with `next:`. The
+server announces clamps, rejects unknown parameters with `E_BAD_PARAM`, ignores
+host-supplied arguments whose name starts with an underscore (naming them in a
+`note:` line), and prints a citation URL on each hit.
 The MCP tools clamp out-of-range values to their published ranges (a `note:`
 line names the move, and `glossator://context` publishes the ranges), while the
 HTTP API validates and rejects out-of-range values with `E_BAD_PARAM` and

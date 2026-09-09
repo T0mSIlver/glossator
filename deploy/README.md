@@ -148,7 +148,9 @@ Then pre-authorize the functions you use, again in the page's words:
 >
 > Pre-authorize read functions you use frequently to reduce approval prompts. Keep write functions on manual approval until you're confident in the Connector's behavior.
 
-Every glossator tool is a read function; the server exposes nothing that writes.
+Every glossator tool is a read function; the server exposes nothing that writes,
+and every tool declares it (`readOnlyHint`, `idempotentHint`, no open world), so
+a host does not have to assume the worst and confirm each call.
 `mistral_docs_search`, `mistral_docs_open_section`, `mistral_docs_read_page`,
 `mistral_docs_find_on_page`, `mistral_docs_verify_quotes` and
 `mistral_docs_answer` are the ones worth pre-authorizing. Name the Connector

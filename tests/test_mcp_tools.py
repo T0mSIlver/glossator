@@ -233,6 +233,19 @@ def test_descriptions_are_bounded_with_a_complete_first_line(mcp_server: Any) ->
         assert "start with" in lowered, tool.name
 
 
+def test_every_tool_is_annotated_read_only(mcp_server: Any) -> None:
+    """A host with no hints asks the user to approve every call."""
+    tools = asyncio.run(mcp_server.mcp.list_tools())
+
+    for tool in tools:
+        annotations = tool.annotations
+        assert annotations is not None, tool.name
+        assert annotations.readOnlyHint is True, tool.name
+        assert annotations.destructiveHint is False, tool.name
+        assert annotations.idempotentHint is True, tool.name
+        assert annotations.openWorldHint is False, tool.name
+
+
 def test_every_parameter_carries_a_description(mcp_server: Any) -> None:
     tools = asyncio.run(mcp_server.mcp.list_tools())
 
