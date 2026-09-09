@@ -8,6 +8,7 @@ to the types rather than in a strategy.
 """
 
 import re
+import urllib.parse
 from collections.abc import Collection
 
 import structlog
@@ -31,6 +32,15 @@ _MARKER_WITH_SPACE = re.compile(r" ?\[([1-9]\d{0,2})\]")
 DEFAULT_MIN_QUOTE_CHARS = 8
 """Fallback for callers with no `AnswerConfig` to hand; the live value is
 `AnswerConfig.min_quote_chars`."""
+
+FRAGMENT_MAX_CHARS = 120
+"""Above this the text directive switches from the whole quote to its first and
+last few words. The directive grammar's `start,end` form matches the same span
+while the URL stays short enough to copy."""
+
+FRAGMENT_EDGE_WORDS = 5
+"""Words taken from each end of a long quote for the `start,end` form. Fewer than
+twice this many words means the edges would overlap, so the whole quote is sent."""
 
 
 class RejectionReason:
@@ -68,6 +78,12 @@ class Citation(BaseModel):
     verified: bool
     reason: str | None = None
     """Why an unverified citation failed, for the trace."""
+
+    fragment_url: str | None = None
+    """A text-fragment deep link to the quoted span, set on verified citations
+    only. The plain `citation_url` stays the canonical link (D-003a: most
+    headings have no anchor, so the fragment is what lands the reader on the
+    sentence)."""
 
     @property
     def citation_url(self) -> str:
@@ -221,6 +237,39 @@ def normalize(text: str) -> str:
     return _WHITESPACE.sub(" ", text).strip()
 
 
+def _encode_fragment_text(value: str) -> str:
+    # Percent-encoding per RFC 3986 leaves the unreserved characters readable
+    # and encodes everything else -- including `-`, `,` and `&`, which the
+    # directive grammar reads as delimiters and which must not leak into the
+    # value unencoded.
+    return urllib.parse.quote(value, safe="").replace("-", "%2D")
+
+
+def fragment_link(url: str, anchor: str | None, quote: str) -> str:
+    """A URL Fragment Text Directives deep link to the quoted span.
+
+    Chromium, Safari 16+ and Firefox 131+ scroll to and highlight the span;
+    browsers without support fall back to the page and anchor. The match text is
+    the quote with emphasis markers stripped and whitespace collapsed -- the
+    rendered page carries neither, and that is the same form the verifier's
+    second chance accepts, so a quote that verified here is a span the directive
+    can find there.
+    """
+    text, _positions = _searchable(quote, drop_emphasis=True)
+    if not text:
+        return f"{url}#{anchor}" if anchor else url
+    directive = _encode_fragment_text(text)
+    if len(text) > FRAGMENT_MAX_CHARS:
+        words = text.split(" ")
+        if len(words) >= 2 * FRAGMENT_EDGE_WORDS:
+            directive = "{},{}".format(
+                _encode_fragment_text(" ".join(words[:FRAGMENT_EDGE_WORDS])),
+                _encode_fragment_text(" ".join(words[-FRAGMENT_EDGE_WORDS:])),
+            )
+    fragment = f"{url}#{anchor}:~:" if anchor else f"{url}#:~:"
+    return f"{fragment}text={directive}"
+
+
 def _searchable(text: str, *, drop_emphasis: bool = False) -> tuple[str, list[int]]:
     """The comparable form of a text, plus each character's index in the original.
 
@@ -316,6 +365,7 @@ def resolve(
             quote=quote,
             verified=ok,
             reason=reason,
+            fragment_url=fragment_link(source.url, source.anchor, quote) if ok else None,
         )
         (verified if ok else rejected).append(citation)
     if rejected:
@@ -341,6 +391,8 @@ def cosmetic(citations: list[Citation]) -> list[Citation]:
 
 __all__ = [
     "DEFAULT_MIN_QUOTE_CHARS",
+    "FRAGMENT_EDGE_WORDS",
+    "FRAGMENT_MAX_CHARS",
     "MARKER",
     "VERIFIED_AFTER_EMPHASIS",
     "Answer",
@@ -351,6 +403,7 @@ __all__ = [
     "TracedSource",
     "cosmetic",
     "fabricated",
+    "fragment_link",
     "markers",
     "mask_code",
     "normalize",

@@ -170,6 +170,9 @@ def fake_ask(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, Any]]:
                     chunk_id="c1",
                     quote="Server-sent events carry the response.",
                     verified=True,
+                    fragment_url=(
+                        f"{URL}#{ANCHOR}:~:text=Server%2Dsent%20events%20carry%20the%20response."
+                    ),
                 )
             ],
             trace=Trace(strategy=strategy, variant=variant, prompt_version="v1"),
@@ -196,6 +199,9 @@ def test_ask_returns_the_answer_contract_with_trace_summary(
     body = response.json()
     assert body["answer_markdown"].startswith("It streams")
     assert body["citations"][0]["citation_url"] == f"{URL}#{ANCHOR}"
+    assert body["citations"][0]["fragment_url"] == (
+        f"{URL}#{ANCHOR}:~:text=Server%2Dsent%20events%20carry%20the%20response."
+    )
     assert body["citations"][0]["verified"] is True
     assert body["trace"]["strategy"] == "search_loop"
     assert "search_loop on" in body["trace_summary"]
