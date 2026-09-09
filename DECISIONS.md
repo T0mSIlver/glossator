@@ -825,3 +825,24 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 | latency p50 | 12.0 s | 36.8 s | 7.2 s |
 
 Real questions are found as well as generated ones (URL match 0.86) but answered less precisely: a quarter of the answers are partial, because these questions ask for one exact parameter, format or limit and the answer stops short of it or adds an unsupported detail. The mined unanswerables are the hardest cell, as D-038 predicted: relevant context exists and the model over-reaches from it. The search loop buys 6 points here at three times the latency. These are the numbers the talk leads with, and the ones the next product changes are measured against.
+
+---
+
+## D-035b · Badly worded questions: the loop's lead doubles, the default stands
+
+**Status:** decided · 2026-09-09 · `eval/dev-noisy.jsonl` (105 degraded versions of a 120-question dev subset, five noise kinds: typos, keywords, vague, wrong term, chatty; run `2026-09-09-1222-dev-noisy`) and six paired runs, shipped retrieval, Ministral 14B, blind GLM judge
+
+| strategy | clean correctness | noisy correctness | clean URL match | noisy URL match | noisy p50 | noisy prompt tokens |
+|---|---|---|---|---|---|---|
+| single pass | 0.87 | 0.68 | 0.81 | 0.68 | 11.2 s | 2.3k |
+| single pass with query rewrite | 0.83 | 0.72 | 0.78 | 0.68 | 11.8 s | 2.2k |
+| search loop | 0.90 | 0.74 | 0.82 | 0.74 | 36.4 s | 16.8k |
+
+**Facts.**
+- Noise costs the single pass 19 points of correctness and the loop 16; the loop's lead over the single pass doubles from 3 points to 6, which is the reformulation advantage D-035 could not see on questions written from the page that answers them.
+- The damage is concentrated: vague wording (single pass 0.90 to 0.52) and a wrong product term (0.83 to 0.47) do the harm; typos cost 13 points, keyword-only 4, a chatty preamble 6. It is retrieval, not generation: on vague questions cited-URL match falls from 0.85 to 0.40 while quote verification stays at 0.95.
+- Badly worded questions break refusal in the false-refusal direction first: 19 of 88 answerable noisy questions were refused (10 of 100 clean), against 6 of 17 unanswerable ones wrongly answered (4 of 20 clean).
+- One query-rewrite call (275 prompt and 25 completion tokens, 0.66 s, 0.0006 USD at Medium prices) recovers about a fifth of the loss overall, is clearly positive on typos, vague and wrong-term questions, and clearly negative on keyword-only queries and on clean questions (minus 5 points), because a question already in the documentation's words can only lose specificity.
+- The loop is not uniformly better under noise: it loses typos and keyword-only questions to the plain single pass, because its own reformulations wander.
+
+**Decisions.** The default stays single pass: six points on badly worded questions do not pay for 3.3 times the latency and 4.6 times the cost, and the loop is the documented thorough mode. `rewrite_for_retrieval` stays off by default and available per request; the follow-up the split points at is rewriting only when the first retrieval comes back weak (a low top score or no lexical footing), which would take the gains on vague and wrong-term questions without the loss on clean ones. Refusal is now reported on noisy questions as well, since the generated set understates false refusals.
