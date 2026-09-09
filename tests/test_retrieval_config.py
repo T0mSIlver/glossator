@@ -75,6 +75,18 @@ def test_filters_become_a_conjunction_of_in_clauses() -> None:
     assert config.yql_filter() == 'kind in ("api", "doc") and locale in ("en")'
 
 
+def test_snapshot_filter_is_applied_on_the_snapshot_variant() -> None:
+    config = RetrievalConfig.shipped(variant="snap1024", snapshot="2026-07-01")
+
+    assert config.rerank is True
+    assert config.yql_filter() == 'snapshot in ("2026-07-01")'
+
+
+def test_snapshot_filter_is_rejected_on_an_undated_variant() -> None:
+    with pytest.raises(ValidationError, match="only valid with variant"):
+        RetrievalConfig(snapshot="2026-07-01")
+
+
 def test_the_config_is_frozen() -> None:
     config = RetrievalConfig()
     with pytest.raises(ValidationError):

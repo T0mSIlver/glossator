@@ -53,3 +53,5 @@ class ChunkMetadata(DocumentChunkMetadata):
     section_index: int
     anchor: str | None = None
     own_anchor: str | None = None
+    snapshot: str | None = None
+    content_sha256: str | None = None

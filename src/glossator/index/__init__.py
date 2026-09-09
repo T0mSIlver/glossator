@@ -6,7 +6,13 @@ from pathlib import Path
 from mistralai.search.toolkit.plugins.vespa import VespaApp, VespaClientConfig
 from mistralai.search.toolkit.plugins.vespa.search.index import VespaSearchIndex
 
-from glossator.index.variants import VARIANTS, ChunkStrategy, IndexVariant, get_variant
+from glossator.index.variants import (
+    ALL_VARIANTS,
+    VARIANTS,
+    ChunkStrategy,
+    IndexVariant,
+    get_variant,
+)
 
 app = VespaApp(Path(__file__).parent)
 
@@ -38,6 +44,7 @@ def get_index(variant: IndexVariant | str) -> VespaSearchIndex:
 
 __all__ = [
     "VARIANTS",
+    "ALL_VARIANTS",
     "ChunkStrategy",
     "IndexVariant",
     "app",

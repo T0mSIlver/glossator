@@ -6,23 +6,25 @@ so a second run over an unchanged corpus leaves the index exactly as it was.
 """
 
 import asyncio
+import hashlib
+import json
 import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, cast
 from uuid import uuid4
 
 import structlog
 from mistralai.client import Mistral
-from mistralai.search.toolkit.context import IngestContext
+from mistralai.search.toolkit.context import IngestContext, RetrievalContext
 from mistralai.search.toolkit.document import (
     Document,
     DocumentChunk,
     compute_char_locator,
     compute_id,
 )
-from mistralai.search.toolkit.embedding import MistralEmbedder
+from mistralai.search.toolkit.embedding import Embedder, EmbeddingResult, MistralEmbedder
 from mistralai.search.toolkit.ingestion.pipelines import Pipeline
 from mistralai.search.toolkit.search.errors import IndexingError
 
@@ -40,6 +42,7 @@ from glossator.ingest.pages import (
 logger = structlog.get_logger(__name__)
 
 DEFAULT_CONCURRENCY = 4
+DEFAULT_EMBEDDING_CACHE = Path.home() / ".cache" / "glossator" / "embeddings"
 
 # The embedding API rate-limits a full-corpus run. The toolkit's embedder retries a
 # 429 with exponential backoff, but only three times by default, which a handful of
@@ -93,6 +96,8 @@ class IngestReport:
     chunks: int
     embedding_tokens: int
     failures: tuple[str, ...]
+    embedded_chunks: int = 0
+    cached_chunks: int = 0
 
     @property
     def estimated_usd(self) -> float:
@@ -107,6 +112,88 @@ def _mistral_client() -> Mistral:
         api_key=api_key,
         server_url=os.getenv("MISTRAL_API_URL", "https://api.mistral.ai"),
     )
+
+
+class CachedEmbedder(Embedder):
+    """Cache embeddings by model, dimensions, and exact chunk content."""
+
+    def __init__(self, inner: Embedder, dimensions: int, cache_dir: Path) -> None:
+        super().__init__(inner.model_name)
+        self.inner = inner
+        self.dimensions = dimensions
+        self.cache_dir = cache_dir
+        self.embedded_chunks = 0
+        self.cached_chunks = 0
+
+    def _path(self, text: str) -> Path:
+        content_sha256 = hashlib.sha256(text.encode()).hexdigest()
+        material = f"{self.model_name}\0{self.dimensions}\0{content_sha256}".encode()
+        key = hashlib.sha256(material).hexdigest()
+        return self.cache_dir / self.model_name.replace("/", "_") / f"{key}.json"
+
+    async def embed(
+        self,
+        texts: list[str],
+        context: RetrievalContext = RetrievalContext(),
+    ) -> EmbeddingResult:
+        embeddings: list[list[float] | None] = [None] * len(texts)
+        missing_positions: list[int] = []
+        missing_texts: list[str] = []
+        for position, text in enumerate(texts):
+            path = self._path(text)
+            try:
+                cached = json.loads(path.read_text())
+                if not isinstance(cached, list) or len(cached) != self.dimensions:
+                    raise ValueError("wrong embedding dimensions")
+                embeddings[position] = [float(value) for value in cached]
+                self.cached_chunks += 1
+            except (FileNotFoundError, OSError, TypeError, ValueError, json.JSONDecodeError):
+                missing_positions.append(position)
+                missing_texts.append(text)
+
+        total_tokens = 0
+        if missing_texts:
+            result = await self.inner.embed(missing_texts, context=context)
+            total_tokens = result.total_tokens
+            for position, embedding in zip(missing_positions, result.embeddings, strict=True):
+                if len(embedding) != self.dimensions:
+                    raise ValueError(
+                        f"{self.model_name} returned {len(embedding)} dimensions, "
+                        f"expected {self.dimensions}"
+                    )
+                embeddings[position] = embedding
+                path = self._path(texts[position])
+                path.parent.mkdir(parents=True, exist_ok=True)
+                temporary = path.with_suffix(f".{uuid4().hex}.tmp")
+                temporary.write_text(json.dumps(embedding, separators=(",", ":")))
+                temporary.replace(path)
+                self.embedded_chunks += 1
+
+        if any(embedding is None for embedding in embeddings):
+            raise RuntimeError("embedding cache left a chunk without an embedding")
+        return EmbeddingResult(
+            embeddings=cast(list[list[float]], embeddings), total_tokens=total_tokens
+        )
+
+
+class SnapshotStamp:
+    """Attach the date and content digest after chunking and before embedding."""
+
+    def __init__(self, snapshot: str) -> None:
+        self.snapshot = snapshot
+
+    async def process(
+        self, document: Document, context: IngestContext = IngestContext()
+    ) -> Document:
+        del context
+        chunks = []
+        for chunk in document.chunks:
+            digest = hashlib.sha256(chunk.content.encode()).hexdigest()
+            metadata = chunk.metadata.model_copy(
+                update={"snapshot": self.snapshot, "content_sha256": digest}
+            )
+            chunks.append(chunk.model_copy(update={"metadata": metadata}))
+        return document.model_copy(update={"chunks": chunks})
 
 
 async def _run_batch(
@@ -218,22 +305,32 @@ async def _verify_index_writable(index: WritableIndex, variant: IndexVariant) ->
         ) from exc
 
 
-def build_pipeline(variant: IndexVariant, client: Mistral | None = None) -> Pipeline:
+def build_pipeline(
+    variant: IndexVariant,
+    client: Mistral | None = None,
+    *,
+    snapshot: str | None = None,
+    embedding_cache: Path = DEFAULT_EMBEDDING_CACHE,
+) -> Pipeline:
     """The ingestion pipeline for one variant.
 
     ``loader=None`` because pages are fed as in-memory ``File``s through
     ``run_file``: the corpus is already on disk in the shape we want, so there is
     nothing for a loader to decide.
     """
+    embedder: Embedder = MistralEmbedder(
+        client=client or _mistral_client(),
+        model_name=variant.embedding_model_name,
+        max_retry=_EMBEDDER_MAX_RETRY,
+    )
+    if snapshot is not None:
+        embedder = CachedEmbedder(embedder, variant.embedding_dimensions, embedding_cache)
     return Pipeline(
         loader=None,
         extractor=CorpusPageExtractor(),
         text_splitter=build_chunker(variant.chunking),
-        embedder=MistralEmbedder(
-            client=client or _mistral_client(),
-            model_name=variant.embedding_model_name,
-            max_retry=_EMBEDDER_MAX_RETRY,
-        ),
+        embedder=embedder,
+        processors=[SnapshotStamp(snapshot)] if snapshot is not None else None,
         stores=get_index(variant),
     )
 
@@ -244,18 +341,29 @@ async def ingest_corpus(
     concurrency: int = DEFAULT_CONCURRENCY,
     client: Mistral | None = None,
     allow_partial: bool = False,
+    snapshot: str | None = None,
+    embedding_cache: Path = DEFAULT_EMBEDDING_CACHE,
 ) -> IngestReport:
     """Index every page of ``corpus_dir`` into ``variant``'s schema.
 
     Raises ``PartialIngestError`` if any page fails, unless ``allow_partial`` is set.
     """
     resolved = get_variant(variant) if isinstance(variant, str) else variant
+    if resolved.name == "snap1024" and snapshot is None:
+        raise ValueError("snapshot is required for the snap1024 variant")
+    if snapshot is not None and resolved.name != "snap1024":
+        raise ValueError("snapshot may only be used with the snap1024 variant")
     paths = list(iter_page_paths(corpus_dir))
     if not paths:
         raise CorpusError(f"{corpus_dir}: no markdown pages found")
     verified = verify_manifest(corpus_dir)
 
-    pipeline = build_pipeline(resolved, client=client)
+    pipeline = build_pipeline(
+        resolved,
+        client=client,
+        snapshot=snapshot,
+        embedding_cache=embedding_cache,
+    )
     await _verify_index_writable(pipeline.stores[0], resolved)
     semaphore = asyncio.Semaphore(concurrency)
     log = logger.bind(variant=resolved.name, schema=resolved.schema_name, pages=len(paths))
@@ -273,7 +381,8 @@ async def ingest_corpus(
             # No checkpoint key: extraction here is a frontmatter split, so caching
             # it would cost more than it saves and would hide corpus edits.
             try:
-                document = await pipeline.run_file(page_file(page))
+                source_id = f"{page.url}::__snapshot__:{snapshot}" if snapshot is not None else None
+                document = await pipeline.run_file(page_file(page, source_id=source_id))
             except IndexingError:
                 index_failures.add(path)
                 raise
@@ -300,18 +409,23 @@ async def ingest_corpus(
             stop_on_index_failure=not allow_partial,
         )
     failures = [str(path) for path in failed]
+    embedder = getattr(pipeline, "embedder", None)
 
     report = IngestReport(
         variant=resolved.name,
         pages=len(indexed_pages),
         chunks=chunks,
         embedding_tokens=tokens,
+        embedded_chunks=int(getattr(embedder, "embedded_chunks", 0)),
+        cached_chunks=int(getattr(embedder, "cached_chunks", 0)),
         failures=tuple(failures),
     )
     log.info(
         "Ingest complete",
         chunks=report.chunks,
         embedding_tokens=report.embedding_tokens,
+        embedded_chunks=report.embedded_chunks,
+        cached_chunks=report.cached_chunks,
         estimated_usd=round(report.estimated_usd, 6),
         failures=len(report.failures),
     )

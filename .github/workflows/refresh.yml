@@ -1,0 +1,69 @@
+name: Refresh documentation snapshot
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "17 3 * * 1"
+  # The weekly schedule stays off until the embedding and generation budget is approved.
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+      ZAI_BASE_URL: https://api.z.ai/api/coding/paas/v4
+      GLOSSATOR_CHAT_SERVER_URL: ${{ vars.GLOSSATOR_CHAT_SERVER_URL }}
+      VESPA_QUERY_PORT: "18080"
+      VESPA_CONFIG_PORT: "19072"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Start Vespa and deploy schemas
+        run: make setup-vespa
+
+      - name: Fetch docs and build stored snapshots
+        run: uv run python -m glossator.corpus.snapshots build
+
+      - name: Ingest the newest snapshot
+        run: |
+          snapshot=$(jq -r '.snapshots | map(select(.status == "built")) | last | .date' eval/snapshots/manifest.json)
+          uv run python -m glossator.ingest \
+            --variant snap1024 \
+            --snapshot "$snapshot" \
+            --corpus "$HOME/.cache/glossator/snapshots/$snapshot"
+
+      - name: Label the fixed question sets
+        run: |
+          uv run python -m glossator.eval.snapshots label \
+            --dataset eval/dev-fresh60.jsonl \
+            --dataset eval/mined.jsonl \
+            --name snapshot-labels
+
+      - name: Evaluate the fixed question set
+        if: env.GLOSSATOR_CHAT_SERVER_URL != ''
+        run: |
+          labels=$(find eval/runs -maxdepth 2 -path '*-snapshot-labels/labels.jsonl' | sort | tail -1)
+          uv run python -m glossator.eval.snapshots run \
+            --dataset eval/dev-fresh60.jsonl \
+            --labels "$labels" \
+            --name snapshot-eval
+
+      - name: Upload run records
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-refresh-${{ github.run_id }}
+          path: |
+            eval/snapshots/manifest.json
+            eval/runs/*-snapshot-labels/
+            eval/runs/*-snapshot-eval/
+          if-no-files-found: error

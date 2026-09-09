@@ -131,6 +131,8 @@ class Hit:
     start_offset: int | None
     end_offset: int | None
     navigation: Navigation | None = field(default=None, repr=False)
+    snapshot: str | None = None
+    content_sha256: str | None = None
 
     rerank_score: float | None = None
     """Set by the reranker: the hit's position in the model's ordering, read as a
@@ -503,6 +505,8 @@ def _hit(
         kind=str(metadata.get("kind", "")),
         locale=str(metadata.get("locale", "")),
         section_index=metadata.get("section_index"),
+        snapshot=metadata.get("snapshot"),
+        content_sha256=metadata.get("content_sha256"),
         content=chunk.content,
         source_id=chunk.source_id,
         start_offset=start,

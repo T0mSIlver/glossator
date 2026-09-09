@@ -70,6 +70,11 @@ async def ask(
 
 
 def build_client() -> Mistral:
+    server_url = os.environ.get("GLOSSATOR_CHAT_SERVER_URL")
+    if server_url:
+        return Mistral(
+            api_key=os.environ.get("GLOSSATOR_CHAT_API_KEY", "local"), server_url=server_url
+        )
     key = os.environ.get("MISTRAL_API_KEY", "")
     if not key:
         raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
