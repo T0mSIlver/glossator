@@ -21,15 +21,15 @@ instead measure whether the answer refuses to invent a current-looking answer.
 
 | snapshot | present | rephrased | changed | absent | deterministic share |
 |---|---:|---:|---:|---:|---:|
-| 2026-06-01 | 108 | 0 | 0 | 0 | 0.745 |
-| 2026-06-15 | 112 | 0 | 0 | 0 | 0.772 |
-| 2026-07-01 | 119 | 0 | 0 | 0 | 0.821 |
-| 2026-07-15 | 121 | 0 | 0 | 0 | 0.834 |
-| 2026-08-01 | 121 | 0 | 0 | 0 | 0.834 |
-| 2026-08-15 | 126 | 0 | 0 | 0 | 0.869 |
-| 2026-09-01 | 130 | 0 | 0 | 0 | 0.897 |
-| 2026-09-07 | 135 | 0 | 0 | 0 | 0.931 |
+| 2026-06-01 | 108 | 12 | 3 | 22 | 0.745 |
+| 2026-06-15 | 112 | 10 | 4 | 19 | 0.772 |
+| 2026-07-01 | 119 | 8 | 4 | 14 | 0.821 |
+| 2026-07-15 | 121 | 8 | 4 | 12 | 0.834 |
+| 2026-08-01 | 121 | 10 | 2 | 12 | 0.834 |
+| 2026-08-15 | 126 | 6 | 3 | 10 | 0.869 |
+| 2026-09-01 | 130 | 5 | 2 | 8 | 0.897 |
+| 2026-09-07 | 135 | 5 | 1 | 4 | 0.931 |
 
-The two judges agreed exactly on no judged cells;
-quadratic-weighted kappa was not defined.
+The two judges agreed exactly on 0.925531914893617;
+quadratic-weighted kappa was 0.8895528400698268.
 The figure at `figures/availability.svg` combines exact and rephrased cells as present.

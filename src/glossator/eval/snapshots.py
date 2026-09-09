@@ -764,6 +764,35 @@ def write_snapshot_outputs(
     return metrics
 
 
+def rescore_snapshot_eval(
+    run_path: Path, *, manifest_path: Path = DEFAULT_MANIFEST, labels_path: Path | None = None
+) -> dict[str, Any]:
+    """Re-stamp every row's availability label from the labels file named in the
+    run's config and rewrite the outputs. Needed after the judged label step has
+    decided cells that were still pending when the answers were recorded."""
+    config = json.loads((run_path / "config.json").read_text())
+    if labels_path is not None:
+        config["labels"] = str(labels_path)
+        (run_path / "config.json").write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
+    labels = _labels_by_key(Path(config["labels"]))
+    rows = [
+        json.loads(line) for line in (run_path / "records.jsonl").read_text().splitlines() if line
+    ]
+    for row in rows:
+        row["availability_label"] = labels.get((str(row["question_id"]), row["snapshot"]))
+    (run_path / "records.jsonl").write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
+    )
+    return write_snapshot_outputs(
+        run_path,
+        rows,
+        _built_snapshots(manifest_path),
+        Path(config["dataset"]),
+        Path(config["labels"]),
+        judge_skipped=bool(config.get("judge_skipped")),
+    )
+
+
 async def rejudge_snapshot_eval(
     run_path: Path,
     judge_models: Sequence[JudgeModel],
@@ -834,6 +863,12 @@ def _parser() -> argparse.ArgumentParser:
         help="Run only the exact-span step; cells needing a judge are stored as "
         "pending_judges for a later judged pass.",
     )
+    rescore_parser = subparsers.add_parser("rescore")
+    rescore_parser.add_argument("--run", type=Path, required=True)
+    rescore_parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    rescore_parser.add_argument(
+        "--labels", type=Path, help="Labels file, when the run predates the config key"
+    )
     rejudge_parser = subparsers.add_parser("rejudge")
     rejudge_parser.add_argument("--run", type=Path, required=True)
     rejudge_parser.add_argument("--judge-models", required=True)
@@ -863,6 +898,11 @@ async def _main(args: argparse.Namespace) -> None:
             seed=args.seed,
             deterministic_only=args.deterministic_only,
         )
+    elif args.command == "rescore":
+        metrics = rescore_snapshot_eval(
+            args.run, manifest_path=args.manifest, labels_path=args.labels
+        )
+        path = args.run
     elif args.command == "rejudge":
         metrics = await rejudge_snapshot_eval(
             args.run, parse_judge_models(args.judge_models), manifest_path=args.manifest

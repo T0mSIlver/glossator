@@ -3,60 +3,60 @@
   "judge_skipped": false,
   "per_snapshot": {
     "2026-06-01": {
-      "absent_cells": 0,
-      "correctness_present": 0.7560975609756098,
-      "present_cells": 41,
-      "refusal_rate_absent": null,
-      "unscored_cells": 19
+      "absent_cells": 12,
+      "correctness_present": 0.7604166666666666,
+      "present_cells": 48,
+      "refusal_rate_absent": 0.5833333333333334,
+      "unscored_cells": 0
     },
     "2026-06-15": {
-      "absent_cells": 0,
-      "correctness_present": 0.7790697674418605,
-      "present_cells": 43,
-      "refusal_rate_absent": null,
-      "unscored_cells": 17
-    },
-    "2026-07-01": {
-      "absent_cells": 0,
-      "correctness_present": 0.75,
-      "present_cells": 48,
-      "refusal_rate_absent": null,
-      "unscored_cells": 12
-    },
-    "2026-07-15": {
-      "absent_cells": 0,
-      "correctness_present": 0.7551020408163265,
-      "present_cells": 49,
-      "refusal_rate_absent": null,
-      "unscored_cells": 11
-    },
-    "2026-08-01": {
-      "absent_cells": 0,
+      "absent_cells": 10,
       "correctness_present": 0.7959183673469388,
       "present_cells": 49,
-      "refusal_rate_absent": null,
-      "unscored_cells": 11
+      "refusal_rate_absent": 0.6,
+      "unscored_cells": 1
+    },
+    "2026-07-01": {
+      "absent_cells": 7,
+      "correctness_present": 0.7596153846153846,
+      "present_cells": 52,
+      "refusal_rate_absent": 0.7142857142857143,
+      "unscored_cells": 1
+    },
+    "2026-07-15": {
+      "absent_cells": 5,
+      "correctness_present": 0.7777777777777778,
+      "present_cells": 54,
+      "refusal_rate_absent": 0.8,
+      "unscored_cells": 1
+    },
+    "2026-08-01": {
+      "absent_cells": 5,
+      "correctness_present": 0.8055555555555556,
+      "present_cells": 54,
+      "refusal_rate_absent": 0.6,
+      "unscored_cells": 1
     },
     "2026-08-15": {
-      "absent_cells": 0,
-      "correctness_present": 0.7924528301886793,
-      "present_cells": 53,
-      "refusal_rate_absent": null,
-      "unscored_cells": 7
-    },
-    "2026-09-01": {
-      "absent_cells": 0,
-      "correctness_present": 0.8148148148148148,
-      "present_cells": 54,
-      "refusal_rate_absent": null,
-      "unscored_cells": 6
-    },
-    "2026-09-07": {
-      "absent_cells": 0,
+      "absent_cells": 5,
       "correctness_present": 0.8,
       "present_cells": 55,
-      "refusal_rate_absent": null,
-      "unscored_cells": 5
+      "refusal_rate_absent": 0.6,
+      "unscored_cells": 0
+    },
+    "2026-09-01": {
+      "absent_cells": 4,
+      "correctness_present": 0.8214285714285714,
+      "present_cells": 56,
+      "refusal_rate_absent": 0.5,
+      "unscored_cells": 0
+    },
+    "2026-09-07": {
+      "absent_cells": 3,
+      "correctness_present": 0.8070175438596491,
+      "present_cells": 57,
+      "refusal_rate_absent": 0.3333333333333333,
+      "unscored_cells": 0
     }
   },
   "records": 480

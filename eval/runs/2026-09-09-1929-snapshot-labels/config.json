@@ -9,7 +9,7 @@
       "sha256": "a276e09f853024f2647dad9d7f7c4c8c34e1754dafdf6a6dc4fbb994dfd5b2a2"
     }
   ],
-  "deterministic_only": true,
+  "deterministic_only": false,
   "judges": [
     "glm-5.3",
     "glm-5.3-flash"

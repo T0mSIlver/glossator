@@ -1,26 +1,26 @@
 {
   "agreement": {
-    "krippendorff_alpha_ordinal": null,
+    "krippendorff_alpha_ordinal": 0.8894081478199524,
     "pairwise": [
       {
         "first": "glm-5.3",
-        "items": 0,
-        "percentage_agreement": null,
-        "quadratic_weighted_kappa": null,
+        "items": 188,
+        "percentage_agreement": 0.925531914893617,
+        "quadratic_weighted_kappa": 0.8895528400698268,
         "second": "glm-5.3-flash"
       }
     ],
     "per_judge": {
       "glm-5.3": {
-        "items": 0,
-        "mean_correctness": null
+        "items": 188,
+        "mean_correctness": 0.4015957446808511
       },
       "glm-5.3-flash": {
-        "items": 0,
-        "mean_correctness": null
+        "items": 188,
+        "mean_correctness": 0.3776595744680851
       }
     },
-    "percentage_agreement": null
+    "percentage_agreement": 0.925531914893617
   },
   "cells": 1160,
   "deterministic_share": 0.8379310344827586,
@@ -28,8 +28,10 @@
     "2026-06-01": {
       "cells": 145,
       "counts": {
+        "absent": 22,
+        "changed": 3,
         "present": 108,
-        "unknown": 37
+        "present_rephrased": 12
       },
       "deterministic": 108,
       "deterministic_share": 0.7448275862068966
@@ -37,8 +39,10 @@
     "2026-06-15": {
       "cells": 145,
       "counts": {
+        "absent": 19,
+        "changed": 4,
         "present": 112,
-        "unknown": 33
+        "present_rephrased": 10
       },
       "deterministic": 112,
       "deterministic_share": 0.7724137931034483
@@ -46,8 +50,10 @@
     "2026-07-01": {
       "cells": 145,
       "counts": {
+        "absent": 14,
+        "changed": 4,
         "present": 119,
-        "unknown": 26
+        "present_rephrased": 8
       },
       "deterministic": 119,
       "deterministic_share": 0.8206896551724138
@@ -55,8 +61,10 @@
     "2026-07-15": {
       "cells": 145,
       "counts": {
+        "absent": 12,
+        "changed": 4,
         "present": 121,
-        "unknown": 24
+        "present_rephrased": 8
       },
       "deterministic": 121,
       "deterministic_share": 0.8344827586206897
@@ -64,8 +72,10 @@
     "2026-08-01": {
       "cells": 145,
       "counts": {
+        "absent": 12,
+        "changed": 2,
         "present": 121,
-        "unknown": 24
+        "present_rephrased": 10
       },
       "deterministic": 121,
       "deterministic_share": 0.8344827586206897
@@ -73,8 +83,10 @@
     "2026-08-15": {
       "cells": 145,
       "counts": {
+        "absent": 10,
+        "changed": 3,
         "present": 126,
-        "unknown": 19
+        "present_rephrased": 6
       },
       "deterministic": 126,
       "deterministic_share": 0.8689655172413793
@@ -82,8 +94,10 @@
     "2026-09-01": {
       "cells": 145,
       "counts": {
+        "absent": 8,
+        "changed": 2,
         "present": 130,
-        "unknown": 15
+        "present_rephrased": 5
       },
       "deterministic": 130,
       "deterministic_share": 0.896551724137931
@@ -91,8 +105,10 @@
     "2026-09-07": {
       "cells": 145,
       "counts": {
+        "absent": 4,
+        "changed": 1,
         "present": 135,
-        "unknown": 10
+        "present_rephrased": 5
       },
       "deterministic": 135,
       "deterministic_share": 0.9310344827586207
