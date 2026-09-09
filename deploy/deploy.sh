@@ -83,11 +83,19 @@ Options:
 USAGE
 }
 
+# A value that starts with a dash is the next flag, not the value that was
+# meant: taking it would silently deploy with the wrong mode or directory.
+require_value() {
+  case "${2-}" in
+    '' | -*) die "$1" ;;
+  esac
+}
+
 parse_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --mode)
-        [ $# -ge 2 ] || die "--mode needs a value: remote-index or full"
+        require_value "--mode needs a value: remote-index or full" "${2-}"
         MODE="$2"
         shift 2
         ;;
@@ -96,7 +104,7 @@ parse_args() {
         shift
         ;;
       --remote-dir)
-        [ $# -ge 2 ] || die "--remote-dir needs a path"
+        require_value "--remote-dir needs a path" "${2-}"
         REMOTE_DIR="$2"
         shift 2
         ;;
@@ -229,7 +237,8 @@ check_remote_disk() {
   local report percent path
   report="$(remote_bash <<'REMOTE'
 root="$(docker info --format '{{.DockerRootDir}}' 2>/dev/null || true)"
-[ -n "$root" ] || root=/var/lib/docker
+[ -d "$root" ] || root=/var/lib/docker
+[ -d "$root" ] || root=/
 df -P "$root" | awk 'NR==2 { gsub(/%/, "", $5); print $5, $6 }'
 REMOTE
   )"
@@ -474,4 +483,8 @@ main() {
   print_client_commands
 }
 
-main "$@"
+# Sourcing the script gets the functions without deploying anything, which is
+# how the tests reach the ssh-facing half without an ssh host.
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi
