@@ -332,6 +332,53 @@ def test_outline_picks_pages_and_reads_them(tmp_path: Path, config: AnswerConfig
     assert answer.trace.events[0].note == "it is the tools page"
 
 
+@pytest.mark.parametrize(
+    "question",
+    [
+        "What does POST /v1/chat/completions return?",
+        "Which parameter belongs in the request body?",
+        "How do I call chat_completion_v1_chat_completions_post?",
+    ],
+)
+def test_outline_offers_api_pages_for_api_questions(
+    tmp_path: Path, config: AnswerConfig, question: str
+) -> None:
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            [
+                {
+                    "url": PAGE,
+                    "path": "capabilities/function-calling.md",
+                    "title": "Tools",
+                    "kind": "doc",
+                },
+                {
+                    "url": "https://docs.mistral.ai/api/endpoint/chat",
+                    "path": "api/endpoint/chat.md",
+                    "title": "Chat API",
+                    "kind": "api",
+                },
+            ]
+        )
+    )
+    engine = FakeIndex(pages={PAGE: []})
+    llm = FakeLLM([completion(parsed=PagePick(page_numbers=[], reason=""))])
+
+    asyncio.run(
+        outline.answer(
+            question,
+            engine=engine,
+            llm=llm,
+            config=config,
+            manifest_path=manifest,
+        )
+    )
+
+    picker_prompt = llm.requests[0]["messages"][1]["content"]
+    assert "Chat API [endpoint: chat]" in picker_prompt
+
+
 def test_outline_ignores_page_numbers_that_do_not_exist(
     tmp_path: Path, config: AnswerConfig
 ) -> None:
