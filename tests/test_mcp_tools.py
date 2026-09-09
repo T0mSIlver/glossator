@@ -624,6 +624,7 @@ def _fake_answer(insufficient: bool = False) -> Answer:
                     chunk_id="c1",
                     quote="alpha content",
                     verified=True,
+                    fragment_url=("https://docs.mistral.ai/page#a-section:~:text=alpha%20content"),
                 )
             ]
         ),
@@ -649,7 +650,10 @@ def test_ask_prints_sources_verification_and_next(mcp_server: Any, monkeypatch: 
 
     assert "Use server-sent events [1]" in out
     assert "Sources (1 verified):" in out
-    assert "[1] https://docs.mistral.ai/page#a-section | Page > A section" in out
+    # The source line prints the fragment link: it carries the anchor inside it
+    # and scrolls a supporting browser to the quoted span.
+    assert "[1] https://docs.mistral.ai/page#a-section:~:text=alpha%20content" in out
+    assert " | Page > A section" in out
     assert "citations verified: 1/2" in out
     assert 'next: open(chunk_id="c1")' in out
     # The rejected citation is a plain drop, never a link.

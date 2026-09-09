@@ -2,10 +2,13 @@
 
 from glossator.answer.citations import (
     DEFAULT_MIN_QUOTE_CHARS,
+    FRAGMENT_EDGE_WORDS,
+    FRAGMENT_MAX_CHARS,
     VERIFIED_AFTER_EMPHASIS,
     RejectionReason,
     cosmetic,
     fabricated,
+    fragment_link,
     markers,
     mask_code,
     normalize,
@@ -244,3 +247,70 @@ def test_rejections_split_into_fabricated_and_cosmetic() -> None:
 
     assert [c.quote for c in fabricated(rejected)] == ["declared as YAML documents"]
     assert [c.quote for c in cosmetic(rejected)] == ["JSON"]
+
+
+PAGE = "https://docs.mistral.ai/capabilities/function-calling"
+
+
+def test_fragment_link_encodes_punctuation_commas_ampersands_and_accents() -> None:
+    link = fragment_link(PAGE, "tools", "Café, thé & chocolat: oui!")
+
+    assert link == f"{PAGE}#tools:~:text=Caf%C3%A9%2C%20th%C3%A9%20%26%20chocolat%3A%20oui%21"
+
+
+def test_fragment_link_encodes_the_hyphen_directive_delimiter() -> None:
+    assert fragment_link(PAGE, "tools", "well-known limits").endswith("text=well%2Dknown%20limits")
+
+
+def test_fragment_link_without_an_anchor_puts_the_directive_right_after_the_hash() -> None:
+    assert fragment_link(PAGE, None, "Tools are declared as JSON objects.") == (
+        f"{PAGE}#:~:text=Tools%20are%20declared%20as%20JSON%20objects."
+    )
+
+
+def test_fragment_link_strips_emphasis_and_collapses_whitespace_like_the_verifier() -> None:
+    link = fragment_link(PAGE, None, "  **Maximum**\nnumber of tools: `128` per request.\n")
+
+    assert link.endswith("text=Maximum%20number%20of%20tools%3A%20128%20per%20request.")
+
+
+def test_a_long_quote_uses_the_start_end_form_with_its_edges() -> None:
+    quote = " ".join(f"word{i}" for i in range(1, 31))
+
+    link = fragment_link(PAGE, "tools", quote)
+
+    head = " ".join(f"word{i}" for i in range(1, FRAGMENT_EDGE_WORDS + 1))
+    tail = " ".join(f"word{i}" for i in range(31 - FRAGMENT_EDGE_WORDS, 31))
+    # Only the separator comma is literal; the ones inside the value would be %2C.
+    assert link == f"{PAGE}#tools:~:text={head.replace(' ', '%20')},{tail.replace(' ', '%20')}"
+    assert len(quote) > FRAGMENT_MAX_CHARS
+
+
+def test_a_long_quote_with_too_few_words_is_sent_whole() -> None:
+    # 8 words of 20 characters: over the length cut, under twice the edge words,
+    # so shortening it would overlap the edges and the full quote is the directive.
+    quote = " ".join(f"token{i:0>15}" for i in range(8))
+
+    link = fragment_link(PAGE, None, quote)
+
+    assert link == f"{PAGE}#:~:text=" + quote.replace(" ", "%20")
+
+
+def test_an_empty_quote_degrades_to_the_plain_link() -> None:
+    assert fragment_link(PAGE, "tools", "  *`_`*  ") == f"{PAGE}#tools"
+    assert fragment_link(PAGE, None, " \n ") == PAGE
+
+
+def test_resolve_sets_a_fragment_link_on_verified_citations_only() -> None:
+    context = assemble(
+        [make_hit("a", "Tools are declared as JSON objects, in JSON.")],
+        token_budget=500,
+        count_tokens=word_tokens,
+    )
+    verified, rejected = resolve(
+        [(1, "declared as JSON objects"), (1, "declared as YAML objects")], context
+    )
+
+    assert verified[0].fragment_url == (f"{PAGE}#tools:~:text=declared%20as%20JSON%20objects")
+    assert verified[0].citation_url == f"{PAGE}#tools"
+    assert rejected[0].fragment_url is None

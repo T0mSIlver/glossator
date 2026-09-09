@@ -720,9 +720,11 @@ def _answer_text(question: str, answer: Answer) -> str:
     lines.append(f"Sources ({len(verified)} verified):")
     for citation in verified:
         heading = headings.get(citation.n, "")
-        lines.append(
-            f"[{citation.n}] {citation.citation_url}" + (f" | {heading}" if heading else "")
-        )
+        # The fragment link scrolls a supporting browser to the quoted span and
+        # still carries the anchor inside it, so it is the link worth printing;
+        # the citation_url remains the canonical form in the API's JSON.
+        link = citation.fragment_url or citation.citation_url
+        lines.append(f"[{citation.n}] {link}" + (f" | {heading}" if heading else ""))
     if not verified:
         lines.append("(none)")
     lines.append("")
