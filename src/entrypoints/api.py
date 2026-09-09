@@ -39,6 +39,7 @@ from glossator.answer.config import (
     known_serving_model,
 )
 from glossator.answer.llm import CALL_ERRORS
+from glossator.corpus.snapshots import configured_manifest
 from glossator.index.variants import VARIANTS, get_variant
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
@@ -610,7 +611,7 @@ async def history(
     name, value = selected[0]
     if value is None or not value.strip():
         raise ApiError(400, "E_BAD_PARAM", f"{name} is empty", f"send text in {name}")
-    manifest = Path(os.environ.get("GLOSSATOR_SNAPSHOT_MANIFEST", "eval/snapshots/manifest.json"))
+    manifest = configured_manifest()
     try:
         if name == "text":
             return await asyncio.to_thread(history_service.phrase_history, value, manifest)

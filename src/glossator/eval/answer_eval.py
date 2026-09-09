@@ -2125,6 +2125,12 @@ async def _run(args: argparse.Namespace) -> None:
         overrides = parse_answer_config(args.answer_config)
     except ValueError as error:
         raise SystemExit(str(error)) from error
+    if "model" in overrides and overrides["model"] != args.model:
+        # The model is a column of every table; letting --answer-config model=...
+        # disagree with --model would record two different truths. Refused before
+        # the model validates the overrides, so the answer is this sentence and
+        # not a validation error about a field the operator may set legitimately.
+        raise SystemExit("set the model with --model, not --answer-config")
     settings = apply_answer_config(
         AnswerConfig(
             model=args.model,
@@ -2135,10 +2141,6 @@ async def _run(args: argparse.Namespace) -> None:
         ),
         overrides,
     )
-    if overrides and "model" in overrides and overrides["model"] != args.model:
-        # The model is a column of every table; letting --answer-config model=...
-        # disagree with --model would record two different truths.
-        raise SystemExit("set the model with --model, not --answer-config")
     try:
         judge_models = (
             []

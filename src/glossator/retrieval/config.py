@@ -33,6 +33,10 @@ SHIPPED_VARIANT = "sec1024"
 importing it here would close a cycle (answer imports the search engine, the
 engine imports this module). A test pins the two spellings together."""
 
+SNAPSHOT_VARIANT_NAME = "snap1024"
+"""The one variant whose schema holds several dates at once (D-041a), so it is
+the one variant a query has to name a date for."""
+
 DEFAULT_CORPUS_DIR = Path("corpus/mistral-docs")
 """Where the lexical-footing vocabulary is read from. The vendored corpus is what
 the index was built from (D-009), so its words are exactly the words a query can
@@ -135,10 +139,18 @@ class RetrievalConfig(BaseModel):
                 f"malformed locale(s) {bad_locales}; expected forms like 'en' or 'pt-BR'"
             )
         if self.snapshot is not None:
-            if self.variant != "snap1024":
-                raise ValueError("snapshot is only valid with variant 'snap1024'")
+            if self.variant != SNAPSHOT_VARIANT_NAME:
+                raise ValueError(f"snapshot is only valid with variant {SNAPSHOT_VARIANT_NAME!r}")
             if not _SNAPSHOT.fullmatch(self.snapshot):
                 raise ValueError("malformed snapshot; expected YYYY-MM-DD")
+        elif self.variant == SNAPSHOT_VARIANT_NAME:
+            # One schema holds every date (D-041a), so an unfiltered query there
+            # returns eight dates merged into one ranking and nothing says so.
+            # Ingest refuses the mirror image of this; so does retrieval.
+            raise ValueError(
+                f"variant {SNAPSHOT_VARIANT_NAME!r} needs a snapshot date: the schema "
+                "holds every date, so a query without one searches all of them at once"
+            )
         return self
 
     @classmethod
@@ -231,6 +243,7 @@ __all__ = [
     "RANK2_FEATURES",
     "RANKING_FEATURES",
     "RERANK_MODEL",
+    "SNAPSHOT_VARIANT_NAME",
     "ALL_VARIANTS",
     "RetrievalConfig",
     "cosine_only_weights",

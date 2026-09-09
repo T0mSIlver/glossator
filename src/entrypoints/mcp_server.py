@@ -40,6 +40,7 @@ from glossator.answer.config import (
     AnswerConfig,
     known_serving_model,
 )
+from glossator.corpus.snapshots import configured_manifest
 from glossator.index.variants import VARIANTS
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import Hit, SearchEngine
@@ -61,9 +62,7 @@ if _variant_name not in VARIANTS:
     )
 
 CORPUS_DIR = Path(os.environ.get("GLOSSATOR_CORPUS_DIR", "corpus/mistral-docs"))
-SNAPSHOT_MANIFEST = Path(
-    os.environ.get("GLOSSATOR_SNAPSHOT_MANIFEST", "eval/snapshots/manifest.json")
-)
+SNAPSHOT_MANIFEST = configured_manifest()
 
 # Bearer token for the HTTP transport (D-037). When set, every MCP HTTP
 # request except GET /health must carry `Authorization: Bearer <token>`.

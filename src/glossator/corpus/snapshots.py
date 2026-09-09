@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -35,6 +36,7 @@ SNAPSHOT_DATES = (
     "2026-09-01",
 )
 DEFAULT_MANIFEST = Path("eval/snapshots/manifest.json")
+MANIFEST_VAR = "GLOSSATOR_SNAPSHOT_MANIFEST"
 DEFAULT_SNAPSHOT_ROOT = Path.home() / ".cache" / "glossator" / "snapshots"
 OPENAPI_CANDIDATES = (
     "openapi-public-doc.yaml",
@@ -55,6 +57,15 @@ class SnapshotRecord:
     openapi_source: str | None
     openapi_snapshot_exact: bool
     models_snapshot_exact: bool
+
+
+def configured_manifest() -> Path:
+    """Where a serving entrypoint reads the snapshot manifest from.
+
+    Read at call time, and in one place: the API and the MCP server both expose
+    the `history` forms and must agree about which manifest they answer from.
+    """
+    return Path(os.environ.get(MANIFEST_VAR, "").strip() or DEFAULT_MANIFEST)
 
 
 def _git(repo: Path, *args: str) -> str:

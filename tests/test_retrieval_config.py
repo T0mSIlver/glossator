@@ -123,3 +123,13 @@ def test_a_caller_that_pinned_the_restriction_keeps_it() -> None:
     caller = DocsRetrievalContext(query_params={RESTRICT_PARAM: "docs_page_lowdim"})
 
     assert with_restrict(caller, "docs_section_lowdim") is caller
+
+
+def test_the_snapshot_variant_refuses_a_query_with_no_date() -> None:
+    """One schema holds every date (D-041a), so a query without one merges eight
+    snapshots into a single ranking and prints nothing to say so. Ingest refuses
+    the mirror image of this."""
+    with pytest.raises(ValidationError, match="needs a snapshot date"):
+        RetrievalConfig(variant="snap1024")
+    with pytest.raises(ValidationError, match="needs a snapshot date"):
+        RetrievalConfig.shipped(variant="snap1024")

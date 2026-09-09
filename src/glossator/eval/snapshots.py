@@ -555,6 +555,10 @@ def score_snapshot_records(
         per_snapshot[snapshot.date] = {
             "present_cells": len(present),
             "absent_cells": len(absent),
+            # Cells whose availability label is missing or still `unknown` score
+            # in neither column. Counted rather than dropped: a table whose rows
+            # do not add up to the cells that ran hides how much is unread.
+            "unscored_cells": len(cells) - len(present) - len(absent),
             "correctness_present": statistics.fmean(correctness) if correctness else None,
             "refusal_rate_absent": statistics.fmean(refusal) if refusal else None,
         }
@@ -599,7 +603,7 @@ def _eval_readme(metrics: Mapping[str, Any], dataset: Path, labels_path: Path) -
         refusal_text = f"{refusal:.3f}" if refusal is not None else "--"
         rows.append(
             f"| {date} | {cell['present_cells']} | {correctness_text} | "
-            f"{cell['absent_cells']} | {refusal_text} |"
+            f"{cell['absent_cells']} | {refusal_text} | {cell.get('unscored_cells', 0)} |"
         )
     skipped = (
         "\nJudges were skipped for this run (`--skip-judge`): correctness and refusal "
@@ -612,13 +616,15 @@ def _eval_readme(metrics: Mapping[str, Any], dataset: Path, labels_path: Path) -
 Each question ran once against each dated `snap1024` partition with the shipped
 reranker. Generation used the recorded local server, never the Mistral API.
 Correctness includes only cells labeled present or present with different
-wording. Refusal includes only cells labeled absent.
+wording. Refusal includes only cells labeled absent. The `unscored` column counts
+the cells whose availability label is missing or still pending the judged step;
+they score in neither column.
 
 - Dataset: `{dataset}`, sha256 `{dataset_hash(dataset)}`
 - Availability labels: `{labels_path}`
 {skipped}
-| snapshot | present cells | correctness | absent cells | refusal rate |
-|---|---:|---:|---:|---:|
+| snapshot | present cells | correctness | absent cells | refusal rate | unscored |
+|---|---:|---:|---:|---:|---:|
 {chr(10).join(rows)}
 
 `changelog.jsonl` lists questions whose answer text changed between consecutive
