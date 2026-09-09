@@ -690,3 +690,23 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 - Refusal on unanswerable questions is the one metric where single pass leads, because the loop keeps searching (8.7 tool calls on unanswerable questions in D-033) and finds something to cite.
 
 **Decision.** `ask` defaults to `single_pass` on the shipped retrieval. `search_loop` stays available through the `strategy` parameter of the API and the MCP `ask` tool as the thorough mode, with its cost stated in the tool description; `outline` stays as an experiment row only (D-033). The numbers above are Ministral 14B's; the same three run directories are re-run on Mistral Medium 3.5 by one command when the account is provisioned (D-017a).
+
+---
+
+## D-008a · French questions over the English index, measured
+
+**Status:** decided · 2026-09-09 · run `eval/runs/*-devfr-shipped` (36 French translations of dev questions, shipped retrieval, single pass, Ministral 14B, GLM judge) against the same strategy on English questions (`dev60-rerank`)
+
+| metric | French questions | English questions |
+|---|---|---|
+| cited URL matches gold | 0.47 | 0.82 |
+| cited anchor matches gold | 0.40 | 0.62 |
+| correctness (judge) | 0.75 | 0.93 |
+| groundedness (judge) | 0.65 | 0.82 |
+| fabricated quotes per answer | 0.67 | 0.40 |
+| refusal correct | 0.83 | 0.92 |
+| prompt tokens per answer | 3.8k | 2.0k |
+
+**Facts.** Option (a) of D-008 (English index, the model answers in the question's language) loses a third of its retrieval precision: `mistral-embed` is multilingual but the hybrid ranking's BM25 half sees no French term in English pages, and the reranker reads French against English. The model does answer in French and cites English sources, and citation relevance stays at 0.95, so the failure is in finding the right page, not in writing the answer.
+
+**Decision.** The engine translates a non-English question into English for retrieval and reranking, and generates the answer in the question's language from the English sources. This costs one short model call per non-English question and no index change. Indexing the French mirror (option b) stays the follow-up if the translated-query result is still short of the English numbers, since French pages would let citations land on French URLs.
