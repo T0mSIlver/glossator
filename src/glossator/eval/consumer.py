@@ -1186,7 +1186,9 @@ def render_readme(
         "- `defects.md`: every wrong turn with transcript path and severity.",
         "- `samples.md`: ten questions with the three arms side by side.",
         "- `figures/`: regenerated SVG charts.",
-        "- `calls.jsonl`: judge calls, verbatim.",
+        "- `calls.jsonl`: the judge's calls, verbatim. The consumers' own model",
+        "  calls are their harnesses', not this server's: each record names the",
+        "  transcript the harness wrote, under `transcript`.",
     ]
     return "\n".join(lines) + "\n"
 
@@ -1342,6 +1344,7 @@ async def _run(args: argparse.Namespace) -> None:
     }
     (run_dir / "config.json").write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
     (run_dir / "questions.jsonl").write_text("".join(q.model_dump_json() + "\n" for q in questions))
+    _start_run_directory(run_dir)
     await run_collection(
         questions,
         specs,
@@ -1389,6 +1392,29 @@ def _score(args: argparse.Namespace) -> None:
     (run_dir / "samples.md").write_text(render_samples(records, consumer=args.sample_consumer))
     figures = render_figures(metrics, run_dir / "figures")
     print(json.dumps({"records": len(records), "figures": figures}, indent=2))
+
+
+def _start_run_directory(run_dir: Path) -> None:
+    """Give a collection run the shape D-023 asks for before it collects anything.
+
+    Collection, judging and scoring are three commands, and a run interrupted
+    between them used to sit in the repository as a bare `records.jsonl`: no
+    ledger, no figures directory, and no README saying what it was or which of
+    the three steps still owed it numbers. The placeholder is overwritten by
+    `score`.
+    """
+    (run_dir / "figures").mkdir(parents=True, exist_ok=True)
+    (run_dir / "calls.jsonl").touch()
+    (run_dir / "records.jsonl").touch()
+    readme = run_dir / "README.md"
+    if not readme.is_file():
+        readme.write_text(
+            "# Blind consumer evaluation (collecting)\n\n"
+            "Answers are being collected; no judge has run and no metrics exist yet.\n"
+            "`config.json` holds the consumers, arms and question set. Run\n"
+            "`python -m glossator.eval.consumer judge --run <dir>` and then `score`\n"
+            "to fill in `metrics.json`, `figures/` and this file.\n"
+        )
 
 
 def _cost_per_correct(records: Sequence[ConsumerRecord]) -> dict[str, float | None]:

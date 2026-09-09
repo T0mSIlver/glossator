@@ -377,3 +377,24 @@ def test_run_collection_skips_recorded_cells(tmp_path: Path) -> None:
         )
 
     assert asyncio.run(go()) == []
+
+
+def test_a_collection_run_directory_is_self_describing_from_the_start(
+    tmp_path: Path,
+) -> None:
+    """Collecting, judging and scoring are three commands, so a run interrupted
+    between them has to say what it is and what it still owes (D-023)."""
+    from glossator.eval.consumer import _start_run_directory
+
+    _start_run_directory(tmp_path)
+
+    assert (tmp_path / "figures").is_dir()
+    assert (tmp_path / "calls.jsonl").is_file()
+    assert (tmp_path / "records.jsonl").is_file()
+    readme = (tmp_path / "README.md").read_text()
+    assert "no judge has run" in readme
+
+    # A README a scoring pass already wrote is never overwritten by a resume.
+    (tmp_path / "README.md").write_text("# scored\n")
+    _start_run_directory(tmp_path)
+    assert (tmp_path / "README.md").read_text() == "# scored\n"
