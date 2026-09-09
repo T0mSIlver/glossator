@@ -293,8 +293,7 @@ async def search(
     """Search the indexed Mistral documentation by meaning or keywords.
     Every hit carries its own url#anchor and a chunk id for open().
 
-    USE WHEN: you need where the docs state a parameter, a limit, a
-    concept, a code pattern.
+    USE WHEN: you need a documented parameter, limit, concept, or code pattern.
 
     DO NOT USE: to answer a question end to end (ask does that with verified
     citations); to read inside a page you already have a hit in (open, grep,
@@ -435,8 +434,8 @@ async def open(chunk_id: str, window: int = 2) -> str:
     """Read a chunk and its neighbours in reading order, on its own page.
     The hit you pass is marked *; window chunks each side, offsets shown.
 
-    USE WHEN: a search hit looks promising and you need the context around it,
-    the definition before the sentence, the rows cut off a table.
+    USE WHEN: a search hit looks promising and you need its context, such as a
+    definition before a sentence or rows cut off from a table.
 
     DO NOT USE: to fetch a known offset range verbatim (read); to step one
     chunk at a time (navigate); to find hits (search).
@@ -628,7 +627,7 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
     It matches words, not meaning.
 
     USE WHEN: you have a page and need an exact error string, parameter name, or
-    error string, a parameter name, a heading.
+    heading.
 
     DO NOT USE: corpus-wide search (search); semantic matching (search).
 
@@ -797,7 +796,7 @@ def _guide_text() -> str:
 
 Mistral's documentation, indexed as citable sections. Every hit prints its
 citation target as `url#anchor`. Cite that exact string, never a URL or anchor
-from memory: many sections have no anchor, and a made-up one points a reader
+from memory. Many sections have no anchor, and a made-up one points a reader
 nowhere.
 
 | Step | Tool | When |
@@ -811,9 +810,9 @@ Prefer `ask` for questions and the navigation tools for exploration.
 
 ## Resources
 
-There are exactly three, and this is the list:
+There are exactly three:
 
-- `glossator://guide`: this document.
+- `glossator://guide`: shared rules and tool flow.
 - `glossator://index`: every page, with url, title, and kind on one line.
 - `glossator://context`: limits, id formats, corpus commit, document counts, and model ids.
 
@@ -829,9 +828,8 @@ value the server moved:
 |---|---|---|
 {limits_rows}
 
-The expensive paths are bounded independently of these: `ask` runs at most 4
-retrieval rounds and an 8-hit retrieval depth whatever you send, so no
-parameter you can name changes how hard a question is worked.
+The expensive paths use independent caps. `ask` runs at most 4 retrieval rounds
+with a retrieval depth of 8. Tool parameters cannot raise these caps.
 
 ## Rules
 
@@ -839,8 +837,7 @@ parameter you can name changes how hard a question is worked.
   exactly as a tool printed it; quote only text that appears in a hit's
   content.
 - Pass ids exactly as printed: chunk ids to `open`, `source_id` and offsets to
-  `read`, `navigate` and `grep`. A remembered id is the fabrication the
-  instructions forbid.
+  `read`, `navigate` and `grep`. Do not construct or recall ids.
 - Read the last line of every response: `next:` names the call that fits what
   you just got. A full `search` page also prints a copy-pasteable call that
   excludes what you have seen.
