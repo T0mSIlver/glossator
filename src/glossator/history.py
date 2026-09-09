@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-from glossator.answer.citations import _searchable, fragment_link
+from glossator.answer.citations import find_span, fragment_link
 from glossator.corpus.snapshots import (
     DEFAULT_MANIFEST,
     SnapshotRecord,
@@ -64,24 +64,13 @@ def _pages(snapshot: SnapshotRecord) -> list[CorpusPage]:
     return [load_page(path) for path in iter_page_paths(corpus_dir)]
 
 
-def _find(text: str, phrase: str) -> tuple[int, int] | None:
-    haystack, positions = _searchable(text)
-    needle, _ = _searchable(phrase)
-    if not needle:
-        return None
-    found = haystack.find(needle)
-    if found < 0:
-        return None
-    return positions[found], positions[found + len(needle) - 1] + 1
-
-
 def phrase_history(text: str, manifest_path: Path = DEFAULT_MANIFEST) -> dict[str, Any]:
     if not text.strip():
         raise ValueError("text must contain a non-whitespace phrase")
     occurrences: list[PhraseOccurrence] = []
     for snapshot in available_snapshots(manifest_path):
         for page in _pages(snapshot):
-            match = _find(page.body, text)
+            match = find_span(page.body, text)
             if match is None:
                 continue
             quote = page.body[match[0] : match[1]]
@@ -130,7 +119,7 @@ def _locate(
             return page, selected[0], selected[1]
     if previous_text:
         for candidate in pages:
-            match = _find(candidate.body, previous_text)
+            match = find_span(candidate.body, previous_text)
             if match is not None:
                 return candidate, candidate.body[match[0] : match[1]], None
     return None

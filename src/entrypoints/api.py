@@ -24,10 +24,12 @@ from entrypoints.param_suggestions import suggest_fields
 from glossator import history as history_service
 from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
+from glossator.answer.citations import Answer
 from glossator.answer.cite import (
     CiteInputError,
     CiteQuote,
     CiteResult,
+    SourceEntry,
     entries_with_headings,
 )
 from glossator.answer.config import (
@@ -413,7 +415,7 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
     return payload
 
 
-def _deduped_sources(answer: Any) -> list[Any]:
+def _deduped_sources(answer: Answer) -> list[SourceEntry]:
     """One source entry per distinct (url, anchor) over the verified citations.
 
     Markers keep their numbers; each entry lists the numbers that point at it

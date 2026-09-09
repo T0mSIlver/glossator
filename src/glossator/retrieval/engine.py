@@ -495,8 +495,9 @@ def _hit(
     return Hit(
         chunk_id=chunk.id,
         score=result.score,
-        # source_id is the page URL for every chunk this project writes, so a hit
-        # always has somewhere to point even if the url metadata went missing.
+        # The url metadata is the page a hit points at. source_id is the page URL
+        # for the served variants but carries the date for snapshot chunks, so it
+        # is only a last resort for a hit whose metadata went missing.
         url=str(metadata.get("url") or chunk.source_id),
         anchor=metadata.get("anchor"),
         heading_path=tuple(str(part) for part in heading_path),

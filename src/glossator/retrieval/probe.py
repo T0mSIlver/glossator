@@ -153,7 +153,7 @@ async def probe_embedding(
     """Run the probe and raise ``EmbeddingProbeError`` if the model fails it."""
     resolved = get_variant(variant) if isinstance(variant, str) else variant
     model = resolved.embedding_model_name
-    embedder = embedder or MistralEmbedder(client=client or _client(), model_name=model)
+    embedder = embedder or MistralEmbedder(client=client or embedding_client(), model_name=model)
 
     questions = [question for question, _passage in PROBE_PAIRS]
     passages = [passage for _question, passage in PROBE_PAIRS] + list(UNRELATED_PASSAGES)
@@ -277,10 +277,6 @@ async def check_embedding_once(variant: str) -> ProbeResult:
 
 
 _PROBED: dict[str, ProbeResult] = {}
-
-
-def _client() -> Mistral:
-    return embedding_client()
 
 
 def cosine(left: list[float], right: list[float]) -> float:

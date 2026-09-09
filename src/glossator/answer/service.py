@@ -7,7 +7,6 @@ question, and an evaluation varies exactly the arguments a user could vary.
 """
 
 import structlog
-from mistralai.client import Mistral
 
 from glossator.answer.citations import Answer
 from glossator.answer.config import DEFAULT_VARIANT, AnswerConfig
@@ -69,9 +68,4 @@ async def ask(
     return await STRATEGIES[strategy](question, engine=index, llm=generator, config=settings)
 
 
-def build_client() -> Mistral:
-    """The chat client, under the name the earlier run scripts import."""
-    return chat_client()
-
-
-__all__ = ["STRATEGIES", "ask", "build_client"]
+__all__ = ["STRATEGIES", "ask"]

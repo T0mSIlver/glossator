@@ -104,11 +104,6 @@ class IngestReport:
         return self.embedding_tokens / 1_000_000 * _EMBEDDING_USD_PER_MTOK
 
 
-def _mistral_client() -> Mistral:
-    """The embedding client: the Mistral API, never the local chat server."""
-    return embedding_client()
-
-
 class CachedEmbedder(Embedder):
     """Cache embeddings by model, dimensions, and exact chunk content."""
 
@@ -319,7 +314,7 @@ def build_pipeline(
     operator's cache pays for nothing it already holds.
     """
     inner: Embedder = MistralEmbedder(
-        client=client or _mistral_client(),
+        client=client or embedding_client(),
         model_name=variant.embedding_model_name,
         max_retry=_EMBEDDER_MAX_RETRY,
     )

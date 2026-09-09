@@ -241,7 +241,12 @@ def strip_markers(text: str, numbers: Collection[int]) -> str:
 
 
 def normalize(text: str) -> str:
-    """Collapse whitespace, so a re-wrapped quote still matches its source."""
+    """Collapse whitespace, so a re-wrapped quote still matches its source.
+
+    The same form `_searchable` produces without its position map, reached by a
+    regex because most callers only need the text; a test pins the two together
+    so they cannot drift.
+    """
     return _WHITESPACE.sub(" ", text).strip()
 
 
@@ -320,6 +325,29 @@ def _word_character(char: str) -> bool:
     return bool(char) and (char.isalnum() or char == "_")
 
 
+def find_span(text: str, phrase: str) -> tuple[int, int] | None:
+    """Where a whitespace-normalized phrase sits in ``text``, as `[start, end)`.
+
+    The project's one span search. The verifier, the `history` tool and the
+    snapshot availability labels all have to mean the same thing by "the same
+    sentence is here" (D-041), and three private copies of the normalizer would
+    eventually disagree about one of them.
+    """
+    haystack, positions = _searchable(text)
+    needle, _positions = _searchable(phrase)
+    if not needle:
+        return None
+    found = haystack.find(needle)
+    if found < 0:
+        return None
+    return positions[found], positions[found + len(needle) - 1] + 1
+
+
+def contains_span(text: str, phrase: str) -> bool:
+    """Whether the phrase occurs in the text, ignoring how it was wrapped."""
+    return find_span(text, phrase) is not None
+
+
 def _located_span(
     quote: str, source_text: str, *, min_quote_chars: int
 ) -> tuple[int, int, str | None] | None:
@@ -343,6 +371,24 @@ def _located_span(
         bare_positions[found + len(bare_needle) - 1] + 1,
         VERIFIED_AFTER_EMPHASIS,
     )
+
+
+def _verdict(
+    quote: str, source_text: str, *, min_quote_chars: int
+) -> tuple[tuple[int, int] | None, str | None]:
+    """One quote against one passage: the span it occupies, or why it failed.
+
+    Both `verify` and `resolve` decide the same three cases, and a rejection
+    reason that only one of them knew about would show up in the trace of one
+    surface and not the other.
+    """
+    if len(normalize(quote)) < min_quote_chars:
+        return None, RejectionReason.TOO_SHORT
+    located = _located_span(quote, source_text, min_quote_chars=min_quote_chars)
+    if located is None:
+        return None, RejectionReason.FABRICATED
+    start, end, reason = located
+    return (start, end), reason
 
 
 def matched_source_quote(
@@ -372,13 +418,10 @@ def verify(
     correctly. That match is still a pass, but it says so in the reason, so an
     eval can separate a clean quote from a re-typed one.
     """
-    if len(normalize(quote)) < min_quote_chars:
-        return False, None, RejectionReason.TOO_SHORT
-    located = _located_span(quote, source.content, min_quote_chars=min_quote_chars)
-    if located is None:
-        return False, None, RejectionReason.FABRICATED
-    start, _end, reason = located
-    return True, source.chunk_id_at(start), reason
+    span, reason = _verdict(quote, source.content, min_quote_chars=min_quote_chars)
+    if span is None:
+        return False, None, reason
+    return True, source.chunk_id_at(span[0]), reason
 
 
 def resolve(
@@ -408,25 +451,14 @@ def resolve(
                 )
             )
             continue
-        located = _located_span(quote, source.content, min_quote_chars=min_quote_chars)
-        chunk_id: str | None
-        reason: str | None
-        source_quote: str | None
-        if len(normalize(quote)) < min_quote_chars:
-            ok, chunk_id, reason = False, None, RejectionReason.TOO_SHORT
-            source_quote = None
-        elif located is None:
-            ok, chunk_id, reason = False, None, RejectionReason.FABRICATED
-            source_quote = None
-        else:
-            start, end, reason = located
-            ok = True
-            chunk_id = source.chunk_id_at(start)
-            source_quote = source.content[start:end]
+        span, reason = _verdict(quote, source.content, min_quote_chars=min_quote_chars)
+        ok = span is not None
+        # A rejected quote was never located, so naming a chunk for it would put
+        # a chunk id in the trace that the quote is not in.
+        chunk_id = source.chunk_id_at(span[0]) if span is not None else None
+        source_quote = source.content[span[0] : span[1]] if span is not None else None
         citation = Citation(
             n=n,
-            # A rejected quote was never located, so naming a chunk for it would
-            # put a chunk id in the trace that the quote is not in.
             chunk_id=chunk_id,
             url=source.url,
             anchor=source.anchor,
@@ -473,8 +505,10 @@ __all__ = [
     "Trace",
     "TraceEvent",
     "TracedSource",
+    "contains_span",
     "cosmetic",
     "fabricated",
+    "find_span",
     "fragment_link",
     "markers",
     "mask_code",

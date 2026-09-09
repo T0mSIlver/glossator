@@ -19,9 +19,10 @@ import httpx
 from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 
+from glossator.answer.citations import contains_span
 from glossator.answer.config import LOCAL_MINISTRAL_3_14B, AnswerConfig
 from glossator.answer.llm import MistralLLM
-from glossator.clients import chat_client
+from glossator.clients import chat_client, chat_reasoning_effort
 from glossator.corpus.snapshots import DEFAULT_MANIFEST, SnapshotRecord, read_snapshot_manifest
 from glossator.eval.agreement import agreement_report
 from glossator.eval.answer_eval import (
@@ -156,14 +157,6 @@ def _fallback_spans(
     return spans
 
 
-def _search(text: str, span: str) -> bool:
-    from glossator.answer.citations import _searchable
-
-    haystack, _ = _searchable(text)
-    needle, _ = _searchable(span)
-    return bool(needle) and needle in haystack
-
-
 def _exact_cell(
     question: EvalQuestion,
     spans: Sequence[Span],
@@ -175,7 +168,7 @@ def _exact_cell(
     by_url = {document.url: document for document in documents}
     for span in spans:
         home = by_url.get(span.page)
-        if home is not None and _search(home.page.body, span.text):
+        if home is not None and contains_span(home.page.body, span.text):
             return {
                 "label": "present",
                 "moved": False,
@@ -185,7 +178,7 @@ def _exact_cell(
             }
     for span in spans:
         for document in documents:
-            if document.url != span.page and _search(document.page.body, span.text):
+            if document.url != span.page and contains_span(document.page.body, span.text):
                 return {
                     "label": "present",
                     "moved": True,
@@ -669,6 +662,7 @@ async def run_snapshot_eval(
         "strategies": ["single_pass"],
         "model": generation_model,
         "generation_server": server_url,
+        "reasoning_effort": chat_reasoning_effort(),
         "judge_models": [] if skip_judge else ["zai:glm-5.3"],
         "judge_skipped": skip_judge,
     }

@@ -403,3 +403,41 @@ def test_resolve_sets_a_fragment_link_on_verified_citations_only() -> None:
     assert verified[0].fragment_url == (f"{PAGE}#tools:~:text=declared%20as%20JSON%20objects")
     assert verified[0].citation_url == f"{PAGE}#tools"
     assert rejected[0].fragment_url is None
+
+
+def test_the_two_normalizers_agree_on_every_shape_of_whitespace() -> None:
+    """`normalize` reaches the form `_searchable` builds by a different route,
+    so a drift between them would silently split "the same sentence" in two."""
+    from glossator.answer.citations import _searchable, normalize
+
+    for text in (
+        "",
+        "   ",
+        "one two",
+        "  leading and trailing  ",
+        "tabs\tand\nnewlines\r\nmixed",
+        "non\u00a0breaking\u00a0space",
+        "form\ffeed and vertical\vtab",
+        "a\u2028line\u2029separator",
+    ):
+        assert normalize(text) == _searchable(text)[0], text
+
+
+def test_find_span_returns_the_source_characters_not_the_normalized_ones() -> None:
+    """The span is offsets into the original, so a caller slicing with them gets
+    the page's own wrapping back rather than the collapsed form."""
+    from glossator.answer.citations import contains_span, find_span
+
+    body = "Intro.\n\nThe limit is\n  **128** tools\nper request."
+    span = find_span(body, "The limit is **128** tools per request.")
+
+    assert span is not None
+    assert body[span[0] : span[1]] == "The limit is\n  **128** tools\nper request."
+    assert contains_span(body, "the limit is") is False  # matching is case sensitive
+    assert contains_span(body, "no such sentence") is False
+
+
+def test_find_span_ignores_an_empty_phrase() -> None:
+    from glossator.answer.citations import find_span
+
+    assert find_span("some text", "   ") is None

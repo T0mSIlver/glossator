@@ -47,13 +47,11 @@ def chat_reasoning_effort() -> str | None:
 def chat_client() -> Mistral:
     """The client chat completions run through: the local server, or the API."""
     server = chat_server_url()
-    key = os.environ.get(CHAT_API_KEY_VAR, "").strip() if server else ""
-    key = key or os.environ.get(_API_KEY_VAR, "")
-    if not key:
-        raise RuntimeError(f"{_API_KEY_VAR} is not set. Check your .env file.")
-    if server:
-        return Mistral(api_key=key, server_url=server)
-    return Mistral(api_key=key)
+    if server is None:
+        return Mistral(api_key=_api_key())
+    return Mistral(
+        api_key=os.environ.get(CHAT_API_KEY_VAR, "").strip() or _api_key(), server_url=server
+    )
 
 
 def embedding_client() -> Mistral:
