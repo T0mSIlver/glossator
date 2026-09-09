@@ -752,3 +752,17 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 **Facts** (docs corpus, 2026-09-07 commit). Work's Connectors page has a "Custom MCP Connector" tab taking a server URL; auth is auto-detected (none, HTTP bearer or basic, OAuth 2.1); users can pre-authorize read functions per Connector so `search` and `ask` run without approval prompts (`vibe/work/connectors/mcp-connectors`). The Vibe Code CLI configures MCP servers in `config.toml` over `stdio`, `http` or `streamable-http` with a static header and does not support OAuth yet (`vibe/code/cli/mcp-servers`). The Agents API registers a Connector by URL with private, workspace or organization visibility, and a Connectors Debugger validates connectivity (`studio/connectors/management`). Tom confirmed his plan can add a custom Connector.
 
 **Consequences for the code.** A bearer-token check on the HTTP transport (`GLOSSATOR_MCP_TOKEN`; the Connector and Vibe both send a static `Authorization` header); `/health` reachable for the Connectors Debugger; the tunnel and LXC setup documented outside the repository, with only a `make mcp` bind option in the README. The blind consumer evaluation (D-032) runs against the same HTTP transport the Connector will use.
+
+---
+
+## D-038 · A second question set mined from real failures
+
+**Status:** decided · 2026-09-09 · `eval/mined.jsonl` (85 questions, sha256 `a276e09f…`), provenance in `eval/mined.README.md`
+
+**Facts.**
+- Sources: 54 questions from public GitHub issues (client-python 38, platform-docs-public 10, cookbook 4, mistral-common 2; client-js has issues disabled) and 31 from agent sessions on this machine, every row traceable to an excerpt. Types: single_page 60, api_reference 11, unanswerable 9, cross_page 4, capability 1. All gold links validate against the corpus, and the test suite now validates every dataset under `eval/` so a gold link that stops resolving fails the build.
+- Real failures have a different shape from generated questions: one fact on one page (cross-page is 4 of 85), a quarter of the answers on two long FAQ-shaped pages (`resources/known-limitations`, `basic_ocr#faq`), and nine questions the documentation genuinely does not answer (no status page, no local token counting, no server-side timeout), which is a stricter refusal test than invented unanswerables because relevant context exists to over-reach from.
+- The commonest stumble classes: a parameter present on the endpoint but absent from the caller's SDK build (14), formats and limits nobody could find (13), constraints discovered only by hitting them (11), a quickstart that does not run (8), rate limits and error bodies (5), deprecation drift (5).
+- Search Toolkit and Vespa questions (29 of 85) exist only in transcripts, because the toolkit has no public issue tracker (D-018). Other Claude Code projects on this machine (159 directories, five mentioning Mistral) held no usable stumble.
+
+**Decision.** `eval/mined.jsonl` is the second reporting set beside the generated dev set: never used for tuning, run with every answer evaluation from now on, and the set the talk leads with, since these are the questions users actually had. Tom validates the rows from `.local/runs/t4/mined-validation.md` before the numbers are quoted.
