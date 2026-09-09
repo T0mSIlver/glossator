@@ -206,7 +206,9 @@ def _from_tab(check: CitationCheck) -> bool:
     return _TAB_LABEL.search(prefix) is not None
 
 
-def _metrics(rows: Sequence[Mapping[str, Any]], *, sample: int, seed: int) -> dict[str, Any]:
+def _metrics(
+    rows: Sequence[Mapping[str, Any]], *, sample: int, seed: int, fragment_field: str
+) -> dict[str, Any]:
     failures = Counter(str(row["failure"]) for row in rows if row.get("failure"))
     tab_excluded = sum(bool(row.get("tab_panel")) and not bool(row["found"]) for row in rows)
     found = sum(bool(row["found"]) for row in rows)
@@ -230,6 +232,10 @@ def _metrics(rows: Sequence[Mapping[str, Any]], *, sample: int, seed: int) -> di
         "kind": "fragment_resolvability",
         "sample_requested": sample,
         "seed": seed,
+        # Which generation of link was measured. D-036b reports a before and an
+        # after row for the same run; without this the two numbers are
+        # indistinguishable once the run directory is read back.
+        "fragment_field": fragment_field,
         "checked": len(rows),
         "found": found,
         "share_found": found / len(rows) if rows else None,
@@ -254,9 +260,10 @@ def render_readme(metrics: Mapping[str, Any]) -> str:
     return f"""# Citation fragment resolvability
 
 The check sampled {metrics["checked"]} verified citations from `records.jsonl` with
-seed {metrics["seed"]}. It fetched each cited documentation page once, reduced the
-HTML to visible text, and searched for the decoded text fragment without regard to
-case or whitespace runs. Range directives pass only when both ends occur in order.
+seed {metrics["seed"]}, reading the links stored under `{metrics["fragment_field"]}`.
+It fetched each cited documentation page once, reduced the HTML to visible text, and
+searched for the decoded text fragment without regard to case or whitespace runs.
+Range directives pass only when both ends occur in order.
 
 {metrics["found"]} of {metrics["checked"]} sampled fragments were present
 ({_percent(metrics["share_found"])}). {metrics["tab_panel_excluded"]} absent fragment(s)
@@ -338,7 +345,7 @@ def check_run(
                 "tab_panel": tab_panel,
             }
         )
-    metrics = _metrics(rows, sample=sample, seed=seed)
+    metrics = _metrics(rows, sample=sample, seed=seed, fragment_field=fragment_field)
     (output_dir / "results.jsonl").write_text(
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
     )
@@ -381,6 +388,14 @@ def _parse_check_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--sample", type=int, default=DEFAULT_SAMPLE)
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument(
+        "--fragment-field",
+        default="fragment_url",
+        help=(
+            "Which stored link to check: fragment_url (current) or fragment_url_v1 "
+            "(the links a run carried before it was refragmented)"
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -396,7 +411,17 @@ def main() -> None:
         print(json.dumps(refragment(args.run), indent=2))
         return
     args = _parse_check_args(sys.argv[1:])
-    print(json.dumps(check_run(args.run, sample=args.sample, seed=args.seed), indent=2))
+    print(
+        json.dumps(
+            check_run(
+                args.run,
+                sample=args.sample,
+                seed=args.seed,
+                fragment_field=args.fragment_field,
+            ),
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

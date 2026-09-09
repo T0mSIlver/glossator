@@ -160,6 +160,57 @@ def test_tool_error_extraction() -> None:
     assert calls[0].error == "glossator_search: error: E_BAD_PARAM"
 
 
+def test_an_announced_clamp_is_counted_as_a_clamp_not_an_error() -> None:
+    """The server announces a clamp on a `note:` line, never on an `error:` one
+    (D-029), so reading clamps out of the error field counted none of them."""
+    lines = [
+        json.dumps(
+            {
+                "type": "tool_use",
+                "part": {
+                    "type": "tool",
+                    "tool": "glossator_search",
+                    "state": {
+                        "status": "completed",
+                        "input": {"query": "x"},
+                        "output": (
+                            'query: "x"\n'
+                            "note: clamped server-side: top_k=500 → 50\n"
+                            "hits: 5/40 kept/considered"
+                        ),
+                    },
+                },
+            }
+        )
+    ]
+
+    _answer, calls = parse_opencode_events(lines)
+
+    assert calls[0].error is None
+    assert calls[0].notes == ["note: clamped server-side: top_k=500 → 50"]
+    metrics = record_metrics(_record(tool_calls=calls), set())
+    assert metrics["clamps"] == 1.0
+
+
+def test_the_judge_ledger_keeps_usage_as_numbers(tmp_path: Path) -> None:
+    """Token counts written as a Python repr cannot be summed, which is the
+    whole point of the ledger (D-023b)."""
+    from glossator.answer.llm import TokenUsage
+    from glossator.eval.consumer import _CallsRecorder
+
+    recorder = _CallsRecorder(tmp_path)
+    recorder.record_call(
+        model="glm-5.3",
+        messages=[{"role": "user", "content": "hi"}],
+        usage=TokenUsage(prompt_tokens=12, completion_tokens=3),
+    )
+
+    row = json.loads((tmp_path / "calls.jsonl").read_text().splitlines()[0])
+    assert row["usage"] == {"prompt_tokens": 12, "completion_tokens": 3}
+    assert row["messages"] == [{"role": "user", "content": "hi"}]
+    assert row["timestamp"]
+
+
 def test_judged_citations_keep_verified_quotes_only() -> None:
     quotes = json.dumps(
         [

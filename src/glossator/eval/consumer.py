@@ -122,7 +122,6 @@ _CITE_VERIFIED = re.compile(r"^\[(\d+)\] verified:", re.MULTILINE)
 _CITE_REJECTED = re.compile(r"^\[(\d+)\] NOT verified:", re.MULTILINE)
 _BAD_PARAM = "error: E_BAD_PARAM"
 _CLAMP = "clamped server-side"
-_EMPTY_RESULT = "Results: 0"
 
 
 # --------------------------------------------------------------------------- #
@@ -205,6 +204,9 @@ class ToolCallRecord(BaseModel):
     arguments: dict[str, str] = {}
     output_chars: int = 0
     error: str | None = None
+    notes: list[str] = []
+    """The `note:` lines the tool printed. A clamp is announced there and never
+    as an error (D-029), so counting clamps out of `error` counted none."""
 
 
 class ConsumerRecord(BaseModel):
@@ -237,14 +239,26 @@ class ConsumerRecord(BaseModel):
 
 
 class _CallsRecorder:
-    """The provider's CallRecorder, writing judge calls into the run."""
+    """The provider's CallRecorder, writing judge calls into the run.
+
+    The provider hands over pydantic models (`usage`, `parsed`) and message
+    sequences. Falling back to ``str`` for those wrote their Python repr into
+    the ledger, so the token counts D-023b exists to make countable were not
+    machine-readable; they are dumped as JSON instead.
+    """
 
     def __init__(self, run_dir: Path) -> None:
         self.path = run_dir / "calls.jsonl"
 
     def record_call(self, **row: Any) -> None:
-        serializable = json.loads(json.dumps(row, sort_keys=True, default=str))
-        serializable["timestamp"] = datetime.now(UTC).isoformat()
+        serializable: dict[str, Any] = {"timestamp": datetime.now(UTC).isoformat()}
+        for key, value in row.items():
+            if isinstance(value, BaseModel):
+                serializable[key] = value.model_dump(mode="json")
+            elif key == "messages":
+                serializable[key] = [dict(message) for message in value]
+            else:
+                serializable[key] = json.loads(json.dumps(value, sort_keys=True, default=str))
         with self.path.open("a") as handle:
             handle.write(json.dumps(serializable, sort_keys=True) + "\n")
 
@@ -327,6 +341,7 @@ def _parse_tool_part(part: Mapping[str, Any]) -> ToolCallRecord:
         if isinstance(output, str):
             output_chars = len(output)
             error = _tool_error(name, output)
+            notes = _tool_notes(output)
             if name.endswith("cite"):
                 # Which quotes the server verified, so the judge and the
                 # metrics can count them without re-reading the transcript.
@@ -337,7 +352,13 @@ def _parse_tool_part(part: Mapping[str, Any]) -> ToolCallRecord:
                 arguments["__verdicts"] = json.dumps(verdicts, sort_keys=True)
         elif state.get("status") not in (None, "completed"):
             error = f"tool status: {state.get('status')}"
-    return ToolCallRecord(name=name, arguments=arguments, output_chars=output_chars, error=error)
+    return ToolCallRecord(
+        name=name,
+        arguments=arguments,
+        output_chars=output_chars,
+        error=error,
+        notes=notes,
+    )
 
 
 def _short(value: Any) -> str:
@@ -350,6 +371,11 @@ def _tool_error(name: str, output: str) -> str | None:
         if line.startswith("error:"):
             return f"{name}: {line.strip()}"
     return None
+
+
+def _tool_notes(output: str) -> list[str]:
+    """The `note:` lines a tool printed, clamps among them (D-029)."""
+    return [line.strip() for line in output.splitlines() if line.startswith("note:")]
 
 
 def parse_opencode_tokens(lines: Sequence[str]) -> tuple[HarnessTokens, float]:
@@ -868,7 +894,7 @@ def record_metrics(record: ConsumerRecord, corpus_urls: set[str]) -> dict[str, f
     resolved = [url for url in page_links if url in corpus_urls]
     gold = [url for url in page_links if url in set(record.gold_urls)]
     bad_param = sum(1 for call in record.tool_calls if _BAD_PARAM in (call.error or ""))
-    clamps = sum(1 for call in record.tool_calls if _CLAMP in (call.error or ""))
+    clamps = sum(1 for call in record.tool_calls for note in call.notes if _CLAMP in note)
     verified, rejected = cite_verdicts(record.tool_calls)
     verdict = record.judge.verdict if record.judge else None
     return {
