@@ -14,6 +14,7 @@
       "mcp_called": 0.0,
       "n": 30,
       "refusal_correct": 0.7,
+      "rerank_asked": 0.0,
       "tokens_total": 135042.16666666666,
       "tool_calls": 3.933333333333333
     },
@@ -31,13 +32,33 @@
       "mcp_called": 1.0,
       "n": 30,
       "refusal_correct": 0.8,
+      "rerank_asked": 0.23333333333333334,
       "tokens_total": 188328.56666666668,
       "tool_calls": 5.233333333333333
+    },
+    "claude-sonnet-low / A2": {
+      "bad_param_errors": 0.0,
+      "cite_called": 0.0,
+      "cite_rejected": 0.0,
+      "cite_verified": 0.0,
+      "clamps": 0.0,
+      "correctness": null,
+      "errors": 0,
+      "latency_p50": 51.7879172929097,
+      "links_on_gold": 0.5,
+      "links_resolve": 0.775,
+      "mcp_called": 1.0,
+      "n": 2,
+      "refusal_correct": 1.0,
+      "rerank_asked": 0.0,
+      "tokens_total": 87882.5,
+      "tool_calls": 2.0
     }
   },
   "correctness_cost": {
     "claude-sonnet-low / A0": null,
-    "claude-sonnet-low / A1": null
+    "claude-sonnet-low / A1": null,
+    "claude-sonnet-low / A2": null
   },
   "fragments": {
     "fragment_links": 1,
@@ -47,5 +68,5 @@
     "share_found": 0.0
   },
   "judged": 0,
-  "records": 60
+  "records": 62
 }

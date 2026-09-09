@@ -378,6 +378,30 @@ def test_record_metrics_against_corpus() -> None:
     assert metrics["links_resolve"] == 0.0
 
 
+def test_a_search_that_asks_for_the_reranker_is_counted() -> None:
+    """The retrieval arm spends generation only on the calls that ask for the
+    reranker, so the share of cells that asked is a number the run reports."""
+    plain = _record(
+        tool_calls=[
+            ToolCallRecord(name="mcp__mistral-docs__mistral_docs_search", arguments={"query": "x"})
+        ]
+    )
+    reranked = _record(
+        tool_calls=[
+            ToolCallRecord(
+                name="mcp__mistral-docs__mistral_docs_search",
+                arguments={"query": "x", "rerank": "true"},
+            )
+        ]
+    )
+
+    assert record_metrics(plain, set())["rerank_asked"] == 0.0
+    assert record_metrics(reranked, set())["rerank_asked"] == 1.0
+    # A consumer's own tool named `rerank` is not this server's reranker.
+    other = _record(tool_calls=[ToolCallRecord(name="Bash", arguments={"rerank": "true"})])
+    assert record_metrics(other, set())["rerank_asked"] == 0.0
+
+
 def test_aggregate_cells() -> None:
     records = [
         _record(question_id="mined-001", arm="A0"),

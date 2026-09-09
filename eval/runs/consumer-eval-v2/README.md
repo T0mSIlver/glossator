@@ -17,12 +17,16 @@ arm, so the comparison is between whole agents.
 
 ## Cells
 
-| cell | n | correctness | refusal | links resolve | on gold | mcp called | cite verified | tool calls | bad params | p50 s |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-sonnet-low / A0 | 30 | -- | 0.70 | 0.35 | 0.48 | 0.00 | 0.00 | 3.93 | 0.00 | 22.14 |
-| claude-sonnet-low / A1 | 30 | -- | 0.80 | 0.92 | 0.83 | 1.00 | 0.93 | 5.23 | 0.00 | 21.49 |
+| cell | n | correctness | refusal | links resolve | on gold | mcp called | rerank asked | cite verified | tool calls | bad params | p50 s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-sonnet-low / A0 | 30 | -- | 0.70 | 0.35 | 0.48 | 0.00 | 0.00 | 0.00 | 3.93 | 0.00 | 22.14 |
+| claude-sonnet-low / A1 | 30 | -- | 0.80 | 0.92 | 0.83 | 1.00 | 0.23 | 0.93 | 5.23 | 0.00 | 21.49 |
+| claude-sonnet-low / A2 | 2 | -- | 1.00 | 0.78 | 0.50 | 1.00 | 0.00 | 0.00 | 2.00 | 0.00 | 51.79 |
 
 Correctness is the blind judge's 1 / 0.5 / 0 mean where judged, else `--`.
+`rerank asked` is the share of cells where the consumer asked search to
+rerank: search ranks with the index alone otherwise, so the retrieval arm
+spends no generation except on those cells.
 `links resolve` is the share of answer URLs landing on a corpus page;
 `on gold` the share of answerable answers naming a gold page. Refusal is a
 heuristic over the answer text (declines for lack of documentation).

@@ -39,7 +39,35 @@ Sources:
 [1] [CLI reference > `generate-migration`](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli#generate-migration) — "Create a timestamped migration stub."
 [2] [CLI reference > `migrate`](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli#migrate) — "Build the application from migrations and deploy it. Supports both single-node (localhost) and Kubernetes deployments."
 
-### A2: not run
+### A2 (judge: not judged)
+
+Here's the workflow using the `mistral-vespa` CLI to create and deploy a migration:
+
+**1. Generate a migration stub**
+```bash
+uv run mistral-vespa generate-migration --app-dir ./vespa_app initial_schema
+```
+This creates a timestamped Python file in `vespa_app/migrations/` with a `VespaMigration` subclass stub, which you then edit to define schemas/fields via `create_schema`, `FieldDefinition`, etc.
+
+**2. Deploy the migration**
+```bash
+uv run mistral-vespa migrate \
+  --app-dir ./vespa_app \
+  --config-server http://localhost:19071 \
+  --query-port 8080
+```
+This builds the application package (in memory) and deploys it, running any pending migrations in timestamp order.
+
+- For Kubernetes deployments, use `--k8s-namespace` and `--k8s-instance` instead of `--config-server`.
+- Add `--dry-run` to preview changes before applying.
+
+Migrations are append-only, idempotent, and version-controlled — you add new migration files for changes rather than editing existing ones.
+
+**Sources:**
+- [CLI reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli)
+- [Local development — Step 1: Create your first migration](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development#step-1-create-your-first-migration)
+- [Manage schema — Create and evolve schemas](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations#creating-and-evolving-schemas)
+- [Anatomy of a Vespa application — Migrations](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy#migrations-building-the-application-package)
 
 ## mined-011 (unanswerable)
 

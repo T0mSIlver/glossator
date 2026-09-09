@@ -138,6 +138,16 @@ def is_verify_tool(name: str) -> bool:
     return any(name.endswith(suffix) for suffix in VERIFY_SUFFIXES)
 
 
+def asked_for_rerank(call: ToolCallRecord) -> bool:
+    """Whether one search call asked for the listwise reranker.
+
+    Search ranks with the index alone unless the consumer asks otherwise, so
+    the retrieval arm costs no generation except on the calls where it did
+    (D-015b); the share of cells that asked is what says how often that
+    happened."""
+    return is_server_tool(call.name) and call.arguments.get("rerank", "").casefold() == "true"
+
+
 MAX_PARALLEL = 2
 """At most two headless harness processes at once: opencode hangs at a third."""
 
@@ -1445,6 +1455,7 @@ def record_metrics(record: ConsumerRecord, corpus_urls: set[str]) -> dict[str, f
         "links_resolve": float(len(resolved) / len(page_links)) if page_links else None,
         "links_on_gold": float(bool(gold)) if answerable else None,
         "mcp_called": float(record.mcp_called),
+        "rerank_asked": float(any(asked_for_rerank(call) for call in record.tool_calls)),
         "cite_called": float(record.cite_called),
         "cite_verified": float(verified),
         "cite_rejected": float(rejected),
@@ -1478,6 +1489,7 @@ CELL_METRICS = (
     "links_resolve",
     "links_on_gold",
     "mcp_called",
+    "rerank_asked",
     "cite_called",
     "cite_verified",
     "cite_rejected",
@@ -1706,8 +1718,8 @@ def render_readme(
         "## Cells",
         "",
         "| cell | n | correctness | refusal | links resolve | on gold | mcp called "
-        "| cite verified | tool calls | bad params | p50 s |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| rerank asked | cite verified | tool calls | bad params | p50 s |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name in sorted(metrics["cells"]):
         cell = metrics["cells"][name]
@@ -1715,13 +1727,16 @@ def render_readme(
             f"| {name} | {cell['n']} | {_fmt(cell.get('correctness'))} | "
             f"{_fmt(cell.get('refusal_correct'))} | {_fmt(cell.get('links_resolve'))} | "
             f"{_fmt(cell.get('links_on_gold'))} | {_fmt(cell.get('mcp_called'))} | "
-            f"{_fmt(cell.get('cite_verified'))} | "
+            f"{_fmt(cell.get('rerank_asked'))} | {_fmt(cell.get('cite_verified'))} | "
             f"{_fmt(cell.get('tool_calls'))} | {_fmt(cell.get('bad_param_errors'))} | "
             f"{_fmt(cell.get('latency_p50'))} |"
         )
     lines += [
         "",
         "Correctness is the blind judge's 1 / 0.5 / 0 mean where judged, else `--`.",
+        "`rerank asked` is the share of cells where the consumer asked search to",
+        "rerank: search ranks with the index alone otherwise, so the retrieval arm",
+        "spends no generation except on those cells.",
         "`links resolve` is the share of answer URLs landing on a corpus page;",
         "`on gold` the share of answerable answers naming a gold page. Refusal is a",
         "heuristic over the answer text (declines for lack of documentation).",
