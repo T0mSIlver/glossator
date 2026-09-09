@@ -560,6 +560,26 @@ def test_codex_command_names_the_verified_mcp_keys() -> None:
     assert not any("mcp_servers" in part for part in without)
 
 
+def test_a_harness_reads_the_prompt_and_never_the_terminal(tmp_path: Path) -> None:
+    """The prompt reaches a stdin-fed harness and its stream is kept in the
+    cell; a harness that outlives its budget is killed instead of hanging."""
+    cell = tmp_path / "cell"
+    cell.mkdir()
+    prompt = cell / "prompt.md"
+    prompt.write_text("the question\n")
+
+    run = consumer_module._run_harness(
+        ["/bin/sh", "-c", "cat; echo late >&2"], cell, timeout_s=30.0, stdin_path=prompt
+    )
+    assert run.lines == ["the question"]
+    assert "late" in run.stderr
+    assert run.timed_out is False
+    assert run.events_path == cell / "events.jsonl"
+
+    slow = consumer_module._run_harness(["/bin/sh", "-c", "sleep 30"], cell, timeout_s=0.5)
+    assert slow.timed_out is True
+
+
 def test_the_transcript_travels_with_the_run(tmp_path: Path) -> None:
     """A reviewer opens the conversation behind a row from the run directory
     itself, not from the consumer's scratch directory (D-023c)."""
