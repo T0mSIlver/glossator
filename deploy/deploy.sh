@@ -342,6 +342,24 @@ wait_for_vespa() {
   die "Vespa did not come up within ${HEALTH_TIMEOUT_SECONDS}s; check 'docker compose -f deploy/compose.yaml logs vespa' on $HOST"
 }
 
+# After a migration the config server answers at once, but the query container
+# takes a while to activate the new application; feeding or searching before
+# then fails with a connection error. Wait for the query port to report the
+# application as up before the first ingest.
+wait_for_vespa_queries() {
+  step "Waiting for Vespa to serve queries"
+  local waited=0
+  while [ "$waited" -lt "$HEALTH_TIMEOUT_SECONDS" ]; do
+    if compose exec -T vespa curl -sf http://localhost:8080/ApplicationStatus >/dev/null 2>&1; then
+      echo "the Vespa query container is up."
+      return 0
+    fi
+    sleep "$HEALTH_POLL_SECONDS"
+    waited=$((waited + HEALTH_POLL_SECONDS))
+  done
+  die "Vespa did not start serving queries within ${HEALTH_TIMEOUT_SECONDS}s; check 'docker compose -f deploy/compose.yaml logs vespa' on $HOST"
+}
+
 # Streams deploy/probe.py into the container's python: prints the health JSON,
 # then checks that an unauthenticated MCP call is refused and an authenticated
 # one is accepted.
@@ -468,6 +486,7 @@ main() {
     wait_for_vespa
     step "Applying schema migrations"
     compose_job migrate
+    wait_for_vespa_queries
     if [ "$SKIP_INGEST" = "0" ]; then
       step "Ingesting the vendored corpus"
       compose_job ingest
