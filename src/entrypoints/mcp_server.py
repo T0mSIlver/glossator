@@ -665,11 +665,14 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
     DO NOT USE: to browse or explore (search and the navigation tools); when
     you must quote the docs yourself (open the cited chunks and read them).
 
-    START WITH strategy="single_pass".
+    START WITH strategy="single_pass" (one reranked retrieval, about 7 s);
+    "search_loop" reads around its hits over up to four rounds for a few points
+    more accuracy at three times the latency and five times the cost.
 
     Args:
         question: The question, in any phrasing; it is embedded, not matched verbatim.
-        strategy: How evidence is gathered: "single_pass", "search_loop", or "outline".
+        strategy: How evidence is gathered: "single_pass" (default), "search_loop"
+            (thorough), or "outline" (experimental: picks pages from the site outline).
     """
     if not question.strip():
         raise _empty_query("question", question)
@@ -744,7 +747,7 @@ def _answer_text(question: str, answer: Answer) -> str:
         else f'next: search(query="{question}") to look for sources yourself'
     )
     if answer.insufficient_evidence:
-        nxt += ', or ask with strategy="outline" to read whole pages before answering'
+        nxt += ', or ask with strategy="search_loop" to search in several rounds before answering'
     lines.append(nxt)
     return "\n".join(lines)
 

@@ -673,7 +673,7 @@ def test_ask_insufficient_evidence_points_at_the_next_strategy(
 
     assert "insufficient evidence" in out
     assert "(none)" in out
-    assert 'strategy="outline"' in out
+    assert 'strategy="search_loop"' in out
     assert "no citations were proposed" in out
 
 
