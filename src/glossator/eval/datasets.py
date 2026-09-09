@@ -33,6 +33,8 @@ class QuestionSource(StrEnum):
     GENERATED = "generated"
     GITHUB_ISSUE = "github_issue"
     HANDWRITTEN = "handwritten"
+    TRANSCRIPT = "transcript"
+    """Mined from a coding-agent session that stumbled while using a Mistral product."""
 
 
 class GoldSource(BaseModel):

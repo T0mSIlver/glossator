@@ -14,7 +14,7 @@ from glossator.eval.datasets import (
     validate_against_corpus,
     write_jsonl,
 )
-from glossator.ingest.pages import CorpusPage, read_manifest
+from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page, read_manifest
 
 FIXTURE_CORPUS = Path("tests/fixtures/corpus")
 
@@ -125,3 +125,22 @@ def test_an_anchorless_gold_source_on_a_page_with_no_anchors_validates(
     questions = [question(url="https://docs.mistral.ai/agents/conversations", anchor=None)]
 
     assert validate_against_corpus(questions, manifest, corpus_pages) == []
+
+
+VENDORED_CORPUS = Path("corpus/mistral-docs")
+
+
+@pytest.mark.parametrize(
+    "dataset", sorted(Path("eval").glob("*.jsonl")), ids=lambda path: path.name
+)
+def test_every_shipped_dataset_still_resolves_against_the_vendored_corpus(dataset: Path) -> None:
+    """A dataset whose gold no longer exists scores every configuration wrongly.
+
+    The corpus is vendored and the datasets are committed beside it, so the two can
+    only drift through a change in this repository, which is what this catches.
+    """
+    pages = [load_page(path) for path in iter_page_paths(VENDORED_CORPUS)]
+
+    issues = validate_against_corpus(read_jsonl(dataset), read_manifest(VENDORED_CORPUS), pages)
+
+    assert issues == []
