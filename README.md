@@ -165,6 +165,37 @@ answer from memory, and say when the documentation does not answer. Its
 `custom-instructions.md` holds three sentences a workspace admin can paste into
 `Context` > `Instructions`.
 
+Custom MCP Connectors do not support MCP resources yet, so the three
+`glossator://` resources are unreadable from Work; the shared rules reach the
+model through the tool descriptions and the workspace Skill. Clients that do
+support resources, such as Claude Code, read them normally.
+
+## Deployment
+
+`deploy/` puts the MCP server on a Linux host over SSH in one command, behind a
+Cloudflare tunnel that gives it the HTTPS hostname a Connector needs. The host
+needs docker with the compose plugin and nothing else.
+
+```bash
+cp deploy/.env.deploy.example deploy/.env.deploy   # fill in the key and the token
+make deploy HOST=lxc-glossator                     # MCP server against an existing index
+make deploy HOST=lxc-glossator MODE=full           # Vespa, migrations and ingestion too
+make deploy-check HOST=lxc-glossator               # health and bearer-token checks only
+```
+
+`remote-index` mode points the server at a Vespa that already serves the shipped
+schemas, so it embeds and ingests nothing. `full` mode syncs
+`~/.cache/glossator/embeddings` to the host and mounts it into the ingestion job,
+so a redeploy pays only for chunks whose text changed; it refuses to run when the
+host's docker filesystem is 80% full or more, because Vespa blocks feeds above
+that mark and re-indexing deletes a page's chunks before writing the
+replacements.
+
+A deploy ends by printing the health JSON, the result of one MCP call without
+the token and one with it, and the `curl` and `claude mcp add` commands for the
+tunnel hostname. `deploy/README.md` has the Cloudflare steps to do by hand and
+the Connector registration in the documentation's own words.
+
 ## Search and index variants
 
 | Variant | Vespa schema | Chunking | Embedding model |
@@ -313,8 +344,10 @@ src/glossator/
   eval/                  datasets, metrics, run records, and reports
 src/entrypoints/          FastAPI and MCP servers (CLIs are python -m glossator.{corpus,ingest,retrieval,answer})
 corpus/                   vendored corpus, manifest, license, and notice
+deploy/                   compose file, deploy script, and Cloudflare tunnel templates
 eval/                     datasets, grids, and committed run directories
 tests/                    offline tests and optional backend integration tests
+Dockerfile                the application image: MCP server, API, and ingestion CLI
 ```
 
 `DECISIONS.md` records the facts behind product behavior. Append a new entry when
