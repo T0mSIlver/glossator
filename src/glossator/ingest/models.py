@@ -40,9 +40,9 @@ class CorpusPageMetadata(DocumentMetadata):
 class ChunkMetadata(DocumentChunkMetadata):
     """What a chunk needs to be cited and filtered.
 
-    ``anchor`` is absent (not empty) when the chunk's heading has no deep link:
-    the toolkit's metadata models treat ``None`` as absent and drop the key, so
-    nothing is written for it.
+    ``anchor`` points to the closest linkable heading at or above the chunk's
+    heading. ``own_anchor`` records whether the chunk's heading itself has a deep
+    link. The toolkit drops either key when its value is ``None``.
     """
 
     url: str
@@ -52,3 +52,4 @@ class ChunkMetadata(DocumentChunkMetadata):
     heading_path: list[str]
     section_index: int
     anchor: str | None = None
+    own_anchor: str | None = None
