@@ -92,7 +92,11 @@ services:
     image: vespaengine/vespa:${VESPA_IMAGE_TAG:-latest}
     # No container_name: the development stack in docker-compose.yaml already
     # owns `glossator-vespa`, and the two must be able to coexist on one host.
-    hostname: glossator-vespa
+    # The hostname must equal the service name: the migration job reaches the
+    # config server as `vespa`, the toolkit writes that name into hosts.xml,
+    # and a node that calls itself anything else gets no services scheduled
+    # (the sentinel logs "got 0 service elements" and the query port never opens).
+    hostname: vespa
     profiles: ["full"]
     restart: unless-stopped
     ports:
@@ -101,8 +105,8 @@ services:
     volumes:
       - vespa-data:/opt/vespa/var
     environment:
-      VESPA_CONFIGSERVERS: glossator-vespa
-      VESPA_HOSTNAME: glossator-vespa
+      VESPA_CONFIGSERVERS: vespa
+      VESPA_HOSTNAME: vespa
     deploy:
       resources:
         limits:
