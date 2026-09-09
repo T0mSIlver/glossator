@@ -19,8 +19,11 @@ answer and the cited passages verbatim. It sees no URL, page identifier, or stra
 ## Configuration
 
 - Generation model: `ministral-14b-2512`
-- Judge models: `glm-5.3`; primary first (answer-judge/v2)
+- Generation server: the Mistral API (`https://api.mistral.ai`)
+- Answer-config overrides: none (the shipped configuration)
+- Judge models: `zai:glm-5.3`, `zai:glm-5.3-flash`; primary first (answer-judge/v2)
 - Index variant: `page128`, top_k 8, rerank True (ministral-14b-2512), context budget 6000 tokens
+- Search loop caps: round_cap 4, searches_per_round 4, tool_result_chars 600, response_format unknown
 - Non-English questions rendered in English for retrieval: True
 - Question reworded into the documentation's vocabulary for retrieval: unknown
 - Dataset: `eval/dev-fresh60.jsonl`, sha256 `c663126d79ebf3c0c8cc6000a73be2fd9281c0ae672ae4d42532f1fae8fa7fc0`
@@ -36,7 +39,7 @@ columns were computed with.
 
 ## Results
 
-44 of 60 answers were judged by the primary judge `glm-5.3`. 1 answer(s) ended in an error and are recorded with it.
+60 of 60 answers were judged by the primary judge `zai:glm-5.3`. 1 answer(s) ended in an error and are recorded with it.
 
 ### Citations against the gold sources
 
@@ -118,19 +121,19 @@ The primary judge's verdicts (D-021), reported beside the deterministic numbers 
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.57 | 1.00 | 0.89 | 0.93 | 0.75 | 0.72 | **0.81** |
+| `single_pass` | `ministral-14b-2512` | 0.65 | 1.00 | 0.75 | 0.95 | 0.80 | 0.75 | **0.82** |
 
 **groundedness** -- claims supported by the cited passages
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.91 | 0.90 | 0.72 | 0.76 | 0.71 | 0.86 | **0.81** |
+| `single_pass` | `ministral-14b-2512` | 0.92 | 0.91 | 0.63 | 0.76 | 0.72 | 0.83 | **0.79** |
 
 **citation_relevance** -- citations that support their sentence
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.95 | 1.00 | 1.00 | 1.00 | 0.83 | 1.00 | **0.97** |
+| `single_pass` | `ministral-14b-2512` | 0.99 | 0.97 | 1.00 | 1.00 | 0.83 | 0.98 | **0.96** |
 
 ### Effort
 
@@ -184,6 +187,12 @@ What each strategy spent to get there.
 |---|---|---|---|---|---|---|---|---|
 | `single_pass` | `ministral-14b-2512` | 0.90 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | **0.98** |
 
+**round_cap_hit** -- share of answers that ran out of rounds
+
+| strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
+|---|---|---|---|---|---|---|---|---|
+| `single_pass` | `ministral-14b-2512` | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | **0.00** |
+
 ## Agreement
 
 Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses quadratic weights. Exact agreement requires the same label.
@@ -192,19 +201,20 @@ Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses
 
 | first judge | second judge | answers | quadratic-weighted kappa | exact agreement |
 |---|---|---:|---:|---:|
-| -- | -- | 0 | -- | -- |
+| `zai:glm-5.3` | `zai:glm-5.3-flash` | 60 | 0.92 | 0.92 |
 
 ### Krippendorff's alpha
 
 | raters | ordinal alpha | pairwise exact agreement |
 |---|---:|---:|
-| configured judges | -- | -- |
+| configured judges | 0.89 | 0.92 |
 
 ### Judge means
 
 | judge | answers | mean correctness | human-labeled answers |
 |---|---:|---:|---:|
-| `zai:glm-5.3` | 44 | 0.81 | -- |
+| `zai:glm-5.3` | 60 | 0.82 | -- |
+| `zai:glm-5.3-flash` | 60 | 0.82 | -- |
 
 ## Cost and latency
 
@@ -215,7 +225,7 @@ The run made 60 answers over 60 questions:
 answer latency was 10.9 s, 95th
 percentile 27.6 s.
 
-Judging spent 180866 prompt and 11667 completion tokens over 59 call(s) (3280 of them reasoning tokens, with thinking disabled), at a mean of 7.5 s per judgement and 15 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.3588 USD.
+Judging spent 479686 prompt and 31278 completion tokens over 120 call(s) (8385 of them reasoning tokens, with thinking disabled), at a mean of 7.7 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.9541 USD.
 
 ## Winner per metric
 

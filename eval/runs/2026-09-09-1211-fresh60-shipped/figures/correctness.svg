@@ -3,9 +3,9 @@
 <text class="t" x="16" y="22">Judged correctness</text>
 <text x="240" y="51.0" text-anchor="end">single_pass</text>
 <rect x="248" y="39.5" width="388.0" height="4" fill="#3b6fd4"/>
-<rect x="248" y="44.5" width="75.9" height="4" fill="#c05621"/>
-<rect x="248" y="49.5" width="42.2" height="4" fill="#2f855a"/>
-<text class="v" x="646" y="51.0">0.766667 / 0.15 / 0.0833333</text>
+<rect x="248" y="44.5" width="94.8" height="4" fill="#c05621"/>
+<rect x="248" y="49.5" width="34.5" height="4" fill="#2f855a"/>
+<text class="v" x="646" y="51.0">0.75 / 0.183333 / 0.0666667</text>
 <rect x="16" y="79" width="10" height="10" fill="#3b6fd4"/>
 <text class="v" x="30" y="88">correct</text>
 <rect x="92" y="79" width="10" height="10" fill="#c05621"/>

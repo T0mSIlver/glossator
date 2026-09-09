@@ -1,0 +1,1886 @@
+{
+  "by_run": {
+    "2026-09-09-0312-dev60-rerank": {
+      "answers": 120,
+      "by_class": {
+        "context_miss": 0,
+        "generation_failure": 8,
+        "refusal_failure": 12,
+        "retrieval_miss": 1
+      },
+      "by_class_share": {
+        "context_miss": 0.0,
+        "generation_failure": 0.0667,
+        "refusal_failure": 0.1,
+        "retrieval_miss": 0.0083
+      },
+      "by_question_type": {
+        "api_reference": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 2,
+            "refusal_failure": 1,
+            "retrieval_miss": 1
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1,
+            "refusal_failure": 0.05,
+            "retrieval_miss": 0.05
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 1,
+            "judge_names_the_reference": 2
+          },
+          "failure_share": 0.2,
+          "failures": 4,
+          "reference_defect_flagged": 3,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 2
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 1,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "capability": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 3,
+            "refusal_failure": 1,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.15,
+            "refusal_failure": 0.05,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 1,
+            "judge_names_the_reference": 3
+          },
+          "failure_share": 0.2,
+          "failures": 4,
+          "reference_defect_flagged": 3,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 1,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 2
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "cross_page": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 3,
+            "refusal_failure": 1,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.15,
+            "refusal_failure": 0.05,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 2
+          },
+          "failure_share": 0.2,
+          "failures": 4,
+          "reference_defect_flagged": 2,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 1,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "post_cutoff": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 1,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.05,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 1
+          },
+          "failure_share": 0.05,
+          "failures": 1,
+          "reference_defect_flagged": 1,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_page": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 2,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.1,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 2
+          },
+          "failure_share": 0.1,
+          "failures": 2,
+          "reference_defect_flagged": 2,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 2,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "unanswerable": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 6,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.3,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 2,
+            "judge_names_the_reference": 4
+          },
+          "failure_share": 0.3,
+          "failures": 6,
+          "reference_defect_flagged": 4,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 6
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "by_strategy": {
+        "search_loop": {
+          "answers": 60,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 3,
+            "refusal_failure": 6,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.05,
+            "refusal_failure": 0.1,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 2,
+            "judge_names_the_reference": 6
+          },
+          "failure_share": 0.15,
+          "failures": 9,
+          "reference_defect_flagged": 6,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 1,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 2
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 3
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_pass": {
+          "answers": 60,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 5,
+            "refusal_failure": 6,
+            "retrieval_miss": 1
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0833,
+            "refusal_failure": 0.1,
+            "retrieval_miss": 0.0167
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 2,
+            "judge_names_the_reference": 8
+          },
+          "failure_share": 0.2,
+          "failures": 12,
+          "reference_defect_flagged": 9,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 1,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 3
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 3
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 1,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "chunk_ids_recorded": 1632,
+      "chunk_ids_resolved": 1632,
+      "dataset": "eval/dev.jsonl",
+      "defect_signals": {
+        "human_is_more_lenient": 4,
+        "judge_names_the_reference": 14
+      },
+      "errors": 0,
+      "failure_share": 0.175,
+      "failures": 21,
+      "judged": 120,
+      "model": "ministral-14b-2512",
+      "passed_judged": 99,
+      "passed_naming_the_reference": 95,
+      "reference_defect_flagged": 15,
+      "rerank": true,
+      "run_dir": "eval/runs/2026-09-09-0312-dev60-rerank",
+      "strategies": [
+        "single_pass",
+        "search_loop"
+      ],
+      "sub_labels": {
+        "context_miss": {
+          "dropped_from_context": 0,
+          "outranked_in_assembly": 0
+        },
+        "generation_failure": {
+          "no_citation_to_gold": 2,
+          "unverified_quote_from_gold": 1,
+          "verified_quote_from_gold": 5
+        },
+        "refusal_failure": {
+          "false_refusal": 6,
+          "missed_refusal": 6
+        },
+        "retrieval_miss": {
+          "candidates_not_recorded": 1,
+          "reranker_drop": 0,
+          "search_miss": 0
+        }
+      },
+      "unjudged": 0,
+      "variant": "sec1024"
+    },
+    "2026-09-09-1211-fresh60-shipped": {
+      "answers": 60,
+      "by_class": {
+        "context_miss": 0,
+        "generation_failure": 8,
+        "refusal_failure": 8,
+        "retrieval_miss": 2
+      },
+      "by_class_share": {
+        "context_miss": 0.0,
+        "generation_failure": 0.1333,
+        "refusal_failure": 0.1333,
+        "retrieval_miss": 0.0333
+      },
+      "by_question_type": {
+        "api_reference": {
+          "answers": 10,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 2,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1,
+            "refusal_failure": 0.2,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 1
+          },
+          "failure_share": 0.3,
+          "failures": 3,
+          "reference_defect_flagged": 1,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 2,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "capability": {
+          "answers": 10,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 2,
+            "retrieval_miss": 2
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1,
+            "refusal_failure": 0.2,
+            "retrieval_miss": 0.2
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 5
+          },
+          "failure_share": 0.5,
+          "failures": 5,
+          "reference_defect_flagged": 5,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 2,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 2,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "cross_page": {
+          "answers": 10,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 5,
+            "refusal_failure": 0,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.5,
+            "refusal_failure": 0.0,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 5
+          },
+          "failure_share": 0.5,
+          "failures": 5,
+          "reference_defect_flagged": 5,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 5
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "post_cutoff": {
+          "answers": 10,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 1,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1,
+            "refusal_failure": 0.1,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 1
+          },
+          "failure_share": 0.2,
+          "failures": 2,
+          "reference_defect_flagged": 1,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_page": {
+          "answers": 10,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 0,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.0,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 0
+          },
+          "failure_share": 0.0,
+          "failures": 0,
+          "reference_defect_flagged": 0,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "unanswerable": {
+          "answers": 10,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 3,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.3,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 3
+          },
+          "failure_share": 0.3,
+          "failures": 3,
+          "reference_defect_flagged": 3,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 3
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "by_strategy": {
+        "single_pass": {
+          "answers": 60,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 8,
+            "refusal_failure": 8,
+            "retrieval_miss": 2
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1333,
+            "refusal_failure": 0.1333,
+            "retrieval_miss": 0.0333
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 15
+          },
+          "failure_share": 0.3,
+          "failures": 18,
+          "reference_defect_flagged": 15,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 2,
+              "verified_quote_from_gold": 6
+            },
+            "refusal_failure": {
+              "false_refusal": 5,
+              "missed_refusal": 3
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 2,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "chunk_ids_recorded": 480,
+      "chunk_ids_resolved": 480,
+      "dataset": "eval/dev-fresh60.jsonl",
+      "defect_signals": {
+        "human_is_more_lenient": 0,
+        "judge_names_the_reference": 15
+      },
+      "errors": 0,
+      "failure_share": 0.3,
+      "failures": 18,
+      "judged": 60,
+      "model": "ministral-14b-2512",
+      "passed_judged": 42,
+      "passed_naming_the_reference": 38,
+      "reference_defect_flagged": 15,
+      "rerank": true,
+      "run_dir": "eval/runs/2026-09-09-1211-fresh60-shipped",
+      "strategies": [
+        "single_pass"
+      ],
+      "sub_labels": {
+        "context_miss": {
+          "dropped_from_context": 0,
+          "outranked_in_assembly": 0
+        },
+        "generation_failure": {
+          "no_citation_to_gold": 0,
+          "unverified_quote_from_gold": 2,
+          "verified_quote_from_gold": 6
+        },
+        "refusal_failure": {
+          "false_refusal": 5,
+          "missed_refusal": 3
+        },
+        "retrieval_miss": {
+          "candidates_not_recorded": 2,
+          "reranker_drop": 0,
+          "search_miss": 0
+        }
+      },
+      "unjudged": 0,
+      "variant": "sec1024"
+    },
+    "2026-09-09-1228-noisy-single": {
+      "answers": 105,
+      "by_class": {
+        "context_miss": 0,
+        "generation_failure": 12,
+        "refusal_failure": 19,
+        "retrieval_miss": 13
+      },
+      "by_class_share": {
+        "context_miss": 0.0,
+        "generation_failure": 0.1143,
+        "refusal_failure": 0.181,
+        "retrieval_miss": 0.1238
+      },
+      "by_question_type": {
+        "api_reference": {
+          "answers": 18,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 2,
+            "refusal_failure": 2,
+            "retrieval_miss": 4
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1111,
+            "refusal_failure": 0.1111,
+            "retrieval_miss": 0.2222
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 4
+          },
+          "failure_share": 0.4444,
+          "failures": 8,
+          "reference_defect_flagged": 4,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 2
+            },
+            "refusal_failure": {
+              "false_refusal": 2,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 4,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "capability": {
+          "answers": 17,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 3,
+            "retrieval_miss": 3
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0588,
+            "refusal_failure": 0.1765,
+            "retrieval_miss": 0.1765
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 3
+          },
+          "failure_share": 0.4118,
+          "failures": 7,
+          "reference_defect_flagged": 3,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 1,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 3,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "cross_page": {
+          "answers": 17,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 6,
+            "refusal_failure": 3,
+            "retrieval_miss": 3
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.3529,
+            "refusal_failure": 0.1765,
+            "retrieval_miss": 0.1765
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 9
+          },
+          "failure_share": 0.7059,
+          "failures": 12,
+          "reference_defect_flagged": 9,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 6
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 3,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "post_cutoff": {
+          "answers": 19,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 3,
+            "refusal_failure": 3,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1579,
+            "refusal_failure": 0.1579,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 5
+          },
+          "failure_share": 0.3158,
+          "failures": 6,
+          "reference_defect_flagged": 5,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 1,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 2
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_page": {
+          "answers": 17,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 1,
+            "retrieval_miss": 3
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.0588,
+            "retrieval_miss": 0.1765
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 2
+          },
+          "failure_share": 0.2353,
+          "failures": 4,
+          "reference_defect_flagged": 2,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 3,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "unanswerable": {
+          "answers": 17,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 7,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.4118,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 5
+          },
+          "failure_share": 0.4118,
+          "failures": 7,
+          "reference_defect_flagged": 5,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 7
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "by_strategy": {
+        "single_pass": {
+          "answers": 105,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 12,
+            "refusal_failure": 19,
+            "retrieval_miss": 13
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.1143,
+            "refusal_failure": 0.181,
+            "retrieval_miss": 0.1238
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 28
+          },
+          "failure_share": 0.419,
+          "failures": 44,
+          "reference_defect_flagged": 28,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 2,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 10
+            },
+            "refusal_failure": {
+              "false_refusal": 12,
+              "missed_refusal": 7
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 13,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "chunk_ids_recorded": 840,
+      "chunk_ids_resolved": 840,
+      "dataset": "eval/dev-noisy.jsonl",
+      "defect_signals": {
+        "human_is_more_lenient": 0,
+        "judge_names_the_reference": 28
+      },
+      "errors": 0,
+      "failure_share": 0.419,
+      "failures": 44,
+      "judged": 105,
+      "model": "ministral-14b-2512",
+      "passed_judged": 61,
+      "passed_naming_the_reference": 59,
+      "reference_defect_flagged": 28,
+      "rerank": true,
+      "run_dir": "eval/runs/2026-09-09-1228-noisy-single",
+      "strategies": [
+        "single_pass"
+      ],
+      "sub_labels": {
+        "context_miss": {
+          "dropped_from_context": 0,
+          "outranked_in_assembly": 0
+        },
+        "generation_failure": {
+          "no_citation_to_gold": 2,
+          "unverified_quote_from_gold": 0,
+          "verified_quote_from_gold": 10
+        },
+        "refusal_failure": {
+          "false_refusal": 12,
+          "missed_refusal": 7
+        },
+        "retrieval_miss": {
+          "candidates_not_recorded": 13,
+          "reranker_drop": 0,
+          "search_miss": 0
+        }
+      },
+      "unjudged": 0,
+      "variant": "sec1024"
+    },
+    "2026-09-09-1230-clean-single": {
+      "answers": 120,
+      "by_class": {
+        "context_miss": 0,
+        "generation_failure": 11,
+        "refusal_failure": 16,
+        "retrieval_miss": 3
+      },
+      "by_class_share": {
+        "context_miss": 0.0,
+        "generation_failure": 0.0917,
+        "refusal_failure": 0.1333,
+        "retrieval_miss": 0.025
+      },
+      "by_question_type": {
+        "api_reference": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 3,
+            "retrieval_miss": 1
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.05,
+            "refusal_failure": 0.15,
+            "retrieval_miss": 0.05
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 3
+          },
+          "failure_share": 0.25,
+          "failures": 5,
+          "reference_defect_flagged": 3,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 1,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "capability": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 4,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.05,
+            "refusal_failure": 0.2,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 4
+          },
+          "failure_share": 0.25,
+          "failures": 5,
+          "reference_defect_flagged": 4,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 4,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "cross_page": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 7,
+            "refusal_failure": 0,
+            "retrieval_miss": 1
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.35,
+            "refusal_failure": 0.0,
+            "retrieval_miss": 0.05
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 7
+          },
+          "failure_share": 0.4,
+          "failures": 8,
+          "reference_defect_flagged": 7,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 7
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 1,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "post_cutoff": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 1,
+            "retrieval_miss": 1
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.05,
+            "refusal_failure": 0.05,
+            "retrieval_miss": 0.05
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 2
+          },
+          "failure_share": 0.15,
+          "failures": 3,
+          "reference_defect_flagged": 2,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 1,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_page": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 1,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.05,
+            "refusal_failure": 0.05,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 1
+          },
+          "failure_share": 0.1,
+          "failures": 2,
+          "reference_defect_flagged": 1,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "unanswerable": {
+          "answers": 20,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 7,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.35,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 4
+          },
+          "failure_share": 0.35,
+          "failures": 7,
+          "reference_defect_flagged": 4,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 7
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "by_strategy": {
+        "single_pass": {
+          "answers": 120,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 11,
+            "refusal_failure": 16,
+            "retrieval_miss": 3
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0917,
+            "refusal_failure": 0.1333,
+            "retrieval_miss": 0.025
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 21
+          },
+          "failure_share": 0.25,
+          "failures": 30,
+          "reference_defect_flagged": 21,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 10
+            },
+            "refusal_failure": {
+              "false_refusal": 9,
+              "missed_refusal": 7
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 3,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "chunk_ids_recorded": 960,
+      "chunk_ids_resolved": 960,
+      "dataset": "eval/dev.jsonl",
+      "defect_signals": {
+        "human_is_more_lenient": 0,
+        "judge_names_the_reference": 21
+      },
+      "errors": 0,
+      "failure_share": 0.25,
+      "failures": 30,
+      "judged": 120,
+      "model": "ministral-14b-2512",
+      "passed_judged": 90,
+      "passed_naming_the_reference": 83,
+      "reference_defect_flagged": 21,
+      "rerank": true,
+      "run_dir": "eval/runs/2026-09-09-1230-clean-single",
+      "strategies": [
+        "single_pass"
+      ],
+      "sub_labels": {
+        "context_miss": {
+          "dropped_from_context": 0,
+          "outranked_in_assembly": 0
+        },
+        "generation_failure": {
+          "no_citation_to_gold": 0,
+          "unverified_quote_from_gold": 1,
+          "verified_quote_from_gold": 10
+        },
+        "refusal_failure": {
+          "false_refusal": 9,
+          "missed_refusal": 7
+        },
+        "retrieval_miss": {
+          "candidates_not_recorded": 3,
+          "reranker_drop": 0,
+          "search_miss": 0
+        }
+      },
+      "unjudged": 0,
+      "variant": "sec1024"
+    },
+    "2026-09-09-1253-mined-shipped": {
+      "answers": 170,
+      "by_class": {
+        "context_miss": 0,
+        "generation_failure": 43,
+        "refusal_failure": 14,
+        "retrieval_miss": 7
+      },
+      "by_class_share": {
+        "context_miss": 0.0,
+        "generation_failure": 0.2529,
+        "refusal_failure": 0.0824,
+        "retrieval_miss": 0.0412
+      },
+      "by_question_type": {
+        "api_reference": {
+          "answers": 22,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 5,
+            "refusal_failure": 0,
+            "retrieval_miss": 2
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.2273,
+            "refusal_failure": 0.0,
+            "retrieval_miss": 0.0909
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 4
+          },
+          "failure_share": 0.3182,
+          "failures": 7,
+          "reference_defect_flagged": 4,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 2,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 3
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 2,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "capability": {
+          "answers": 2,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 1,
+            "refusal_failure": 1,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.5,
+            "refusal_failure": 0.5,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 2
+          },
+          "failure_share": 1.0,
+          "failures": 2,
+          "reference_defect_flagged": 2,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "cross_page": {
+          "answers": 8,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 2,
+            "refusal_failure": 1,
+            "retrieval_miss": 1
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.25,
+            "refusal_failure": 0.125,
+            "retrieval_miss": 0.125
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 3
+          },
+          "failure_share": 0.5,
+          "failures": 4,
+          "reference_defect_flagged": 3,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 1,
+              "verified_quote_from_gold": 1
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 1,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_page": {
+          "answers": 120,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 35,
+            "refusal_failure": 1,
+            "retrieval_miss": 4
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.2917,
+            "refusal_failure": 0.0083,
+            "retrieval_miss": 0.0333
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 29
+          },
+          "failure_share": 0.3333,
+          "failures": 40,
+          "reference_defect_flagged": 29,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 13,
+              "unverified_quote_from_gold": 3,
+              "verified_quote_from_gold": 19
+            },
+            "refusal_failure": {
+              "false_refusal": 1,
+              "missed_refusal": 0
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 4,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "unanswerable": {
+          "answers": 18,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 0,
+            "refusal_failure": 11,
+            "retrieval_miss": 0
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.0,
+            "refusal_failure": 0.6111,
+            "retrieval_miss": 0.0
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 9
+          },
+          "failure_share": 0.6111,
+          "failures": 11,
+          "reference_defect_flagged": 9,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 0,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 0
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 11
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 0,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "by_strategy": {
+        "search_loop": {
+          "answers": 85,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 22,
+            "refusal_failure": 7,
+            "retrieval_miss": 5
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.2588,
+            "refusal_failure": 0.0824,
+            "retrieval_miss": 0.0588
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 25
+          },
+          "failure_share": 0.4,
+          "failures": 34,
+          "reference_defect_flagged": 25,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 8,
+              "unverified_quote_from_gold": 4,
+              "verified_quote_from_gold": 10
+            },
+            "refusal_failure": {
+              "false_refusal": 0,
+              "missed_refusal": 7
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 5,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        },
+        "single_pass": {
+          "answers": 85,
+          "by_class": {
+            "context_miss": 0,
+            "generation_failure": 21,
+            "refusal_failure": 7,
+            "retrieval_miss": 2
+          },
+          "by_class_share": {
+            "context_miss": 0.0,
+            "generation_failure": 0.2471,
+            "refusal_failure": 0.0824,
+            "retrieval_miss": 0.0235
+          },
+          "defect_signals": {
+            "human_is_more_lenient": 0,
+            "judge_names_the_reference": 22
+          },
+          "failure_share": 0.3529,
+          "failures": 30,
+          "reference_defect_flagged": 22,
+          "sub_labels": {
+            "context_miss": {
+              "dropped_from_context": 0,
+              "outranked_in_assembly": 0
+            },
+            "generation_failure": {
+              "no_citation_to_gold": 7,
+              "unverified_quote_from_gold": 0,
+              "verified_quote_from_gold": 14
+            },
+            "refusal_failure": {
+              "false_refusal": 3,
+              "missed_refusal": 4
+            },
+            "retrieval_miss": {
+              "candidates_not_recorded": 2,
+              "reranker_drop": 0,
+              "search_miss": 0
+            }
+          }
+        }
+      },
+      "chunk_ids_recorded": 2485,
+      "chunk_ids_resolved": 2485,
+      "dataset": "eval/mined.jsonl",
+      "defect_signals": {
+        "human_is_more_lenient": 0,
+        "judge_names_the_reference": 47
+      },
+      "errors": 7,
+      "failure_share": 0.3765,
+      "failures": 64,
+      "judged": 170,
+      "model": "ministral-14b-2512",
+      "passed_judged": 106,
+      "passed_naming_the_reference": 92,
+      "reference_defect_flagged": 47,
+      "rerank": true,
+      "run_dir": "eval/runs/2026-09-09-1253-mined-shipped",
+      "strategies": [
+        "single_pass",
+        "search_loop"
+      ],
+      "sub_labels": {
+        "context_miss": {
+          "dropped_from_context": 0,
+          "outranked_in_assembly": 0
+        },
+        "generation_failure": {
+          "no_citation_to_gold": 15,
+          "unverified_quote_from_gold": 4,
+          "verified_quote_from_gold": 24
+        },
+        "refusal_failure": {
+          "false_refusal": 3,
+          "missed_refusal": 11
+        },
+        "retrieval_miss": {
+          "candidates_not_recorded": 7,
+          "reranker_drop": 0,
+          "search_miss": 0
+        }
+      },
+      "unjudged": 0,
+      "variant": "sec1024"
+    }
+  },
+  "chunk_index": {
+    "sec1024": 4440
+  },
+  "corpus": "corpus/mistral-docs",
+  "generated_at": "2026-09-09T23:50:43.176949+00:00",
+  "judge_model": null,
+  "kind": "failure_analysis",
+  "runs": [
+    "2026-09-09-1253-mined-shipped",
+    "2026-09-09-1211-fresh60-shipped",
+    "2026-09-09-0312-dev60-rerank",
+    "2026-09-09-1228-noisy-single",
+    "2026-09-09-1230-clean-single"
+  ],
+  "skipped_runs": [],
+  "totals": {
+    "answers": 575,
+    "by_class": {
+      "context_miss": 0,
+      "generation_failure": 82,
+      "refusal_failure": 69,
+      "retrieval_miss": 26
+    },
+    "by_class_share": {
+      "context_miss": 0.0,
+      "generation_failure": 0.1426,
+      "refusal_failure": 0.12,
+      "retrieval_miss": 0.0452
+    },
+    "chunk_ids_recorded": 6397,
+    "chunk_ids_resolved": 6397,
+    "defect_judgements": 0,
+    "defect_signals": {
+      "human_is_more_lenient": 4,
+      "judge_names_the_reference": 125
+    },
+    "failure_share": 0.3078,
+    "failures": 177,
+    "passed_judged": 398,
+    "passed_naming_the_reference": 367,
+    "reference_defect_flagged": 126,
+    "runs": 5,
+    "sub_labels": {
+      "context_miss": {
+        "dropped_from_context": 0,
+        "outranked_in_assembly": 0
+      },
+      "generation_failure": {
+        "no_citation_to_gold": 19,
+        "unverified_quote_from_gold": 8,
+        "verified_quote_from_gold": 55
+      },
+      "refusal_failure": {
+        "false_refusal": 35,
+        "missed_refusal": 34
+      },
+      "retrieval_miss": {
+        "candidates_not_recorded": 26,
+        "reranker_drop": 0,
+        "search_miss": 0
+      }
+    }
+  }
+}
