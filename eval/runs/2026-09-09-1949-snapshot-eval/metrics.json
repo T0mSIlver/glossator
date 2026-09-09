@@ -1,0 +1,55 @@
+{
+  "changed_answers": 417,
+  "judge_skipped": true,
+  "per_snapshot": {
+    "2026-06-01": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 41,
+      "refusal_rate_absent": null
+    },
+    "2026-06-15": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 43,
+      "refusal_rate_absent": null
+    },
+    "2026-07-01": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 48,
+      "refusal_rate_absent": null
+    },
+    "2026-07-15": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 49,
+      "refusal_rate_absent": null
+    },
+    "2026-08-01": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 49,
+      "refusal_rate_absent": null
+    },
+    "2026-08-15": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 53,
+      "refusal_rate_absent": null
+    },
+    "2026-09-01": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 54,
+      "refusal_rate_absent": null
+    },
+    "2026-09-07": {
+      "absent_cells": 0,
+      "correctness_present": null,
+      "present_cells": 55,
+      "refusal_rate_absent": null
+    }
+  },
+  "records": 480
+}
