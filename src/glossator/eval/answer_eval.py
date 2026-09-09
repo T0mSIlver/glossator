@@ -48,7 +48,7 @@ from glossator.answer.citations import (
     RejectionReason,
     Trace,
 )
-from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig, ModelPrice
+from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig
 from glossator.answer.llm import LLMCall, MistralLLM
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.answer.service import STRATEGIES, ask, build_client
@@ -98,15 +98,8 @@ REFERENCE_PRICING_MODEL = MISTRAL_MEDIUM_3_5
 """Prices the recorded tokens a second time, at the shipped model's rates (D-017),
 so the day the account is provisioned the budget question is already answered."""
 
-UNPRICED_MODELS = frozenset({DEFAULT_GENERATION_MODEL})
-"""Models with no published price on 2026-09-09. Their tokens are recorded and
-their USD is reported as zero, which is a statement about the price list rather
-than about the work; the reference column prices the same tokens at D-017 rates."""
-
-EVAL_PRICES: dict[str, ModelPrice] = {
-    **PRICES,
-    DEFAULT_GENERATION_MODEL: ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0),
-}
+UNPRICED_MODELS: frozenset[str] = frozenset()
+"""Generation models known to lack a published price in the current price table."""
 
 ZAI_QUOTA_URL = "https://api.z.ai/api/monitor/usage/quota/limit"
 QUOTA_CEILING_PERCENT = 80
@@ -326,6 +319,8 @@ class QuestionRecord(BaseModel):
     usage: AnswerTokenUsage = AnswerTokenUsage()
     latency_ms: float = 0.0
     cost_usd: float = 0.0
+    cost_usd_v1: float | None = Field(default=None, exclude_if=lambda value: value is None)
+    """The recorded cost before an existing run was repriced."""
     error: str | None = None
     judge: JudgeRecord | None = None
     judges: dict[str, JudgeRecord] = Field(default_factory=dict)
@@ -1433,7 +1428,7 @@ def _agreement_section(metrics: Mapping[str, Any]) -> str:
 def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     """The run README (D-023). Every sentence in it is computed from the records."""
     totals = metrics["totals"]
-    unpriced = metrics["model"] in UNPRICED_MODELS
+    unpriced = metrics["model"] not in PRICES
     price_note = (
         f"\n\n`{metrics['model']}` has no published price, so the USD column of this "
         f"run is zero by construction. The row beside it prices the same recorded "
@@ -1667,6 +1662,79 @@ def regenerate(run_dir: Path) -> dict[str, Any]:
     )
 
 
+def _cost_from_row(row: Mapping[str, Any]) -> float:
+    price = PRICES.get(str(row.get("model") or ""))
+    usage = row.get("usage")
+    if price is None or not isinstance(usage, Mapping):
+        return 0.0
+    prompt_tokens = int(usage.get("prompt_tokens") or 0)
+    completion_tokens = int(usage.get("completion_tokens") or 0)
+    return (
+        prompt_tokens * price.input_usd_per_mtok + completion_tokens * price.output_usd_per_mtok
+    ) / 1_000_000
+
+
+def _write_jsonl(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
+    temporary = path.with_suffix(f".{os.getpid()}.tmp")
+    temporary.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows))
+    temporary.replace(path)
+
+
+def recost(run_dir: Path) -> dict[str, Any]:
+    """Apply current prices to every call and answer record in an existing run."""
+    records_path = run_dir / "records.jsonl"
+    calls_path = run_dir / "calls.jsonl"
+    config_path = run_dir / "config.json"
+    if not records_path.is_file() or not calls_path.is_file() or not config_path.is_file():
+        raise ValueError(f"run lacks answer-evaluation files: {run_dir}")
+
+    call_rows = [json.loads(line) for line in calls_path.read_text().splitlines() if line.strip()]
+    scoped_costs: dict[tuple[str, str], float] = {}
+    for row in call_rows:
+        if "cost_usd" in row and row.get("cost_usd_v1") is None:
+            row["cost_usd_v1"] = row["cost_usd"]
+        row["cost_usd"] = _cost_from_row(row)
+        question_id = row.get("question_id")
+        strategy = row.get("strategy")
+        if row.get("source") == "answer" and question_id and strategy:
+            key = (str(question_id), str(strategy))
+            scoped_costs[key] = scoped_costs.get(key, 0.0) + float(row["cost_usd"])
+
+    record_rows = [
+        json.loads(line) for line in records_path.read_text().splitlines() if line.strip()
+    ]
+    for row in record_rows:
+        if row.get("cost_usd_v1") is None:
+            row["cost_usd_v1"] = row.get("cost_usd", 0.0)
+        key = (str(row.get("question_id") or ""), str(row.get("strategy") or ""))
+        row["cost_usd"] = scoped_costs.get(key, _cost_from_row(row))
+
+    config = json.loads(config_path.read_text())
+    answer_config = dict(config.get("answer_config") or {})
+    answer_config["prices"] = {
+        model: price.model_dump(mode="json") for model, price in PRICES.items()
+    }
+    config["answer_config"] = answer_config
+    config["unpriced_models"] = sorted(
+        {
+            str(row.get("model"))
+            for row in [*call_rows, *record_rows]
+            if row.get("model") and str(row.get("model")) not in PRICES
+        }
+    )
+
+    _write_jsonl(calls_path, call_rows)
+    _write_jsonl(records_path, record_rows)
+    config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
+    metrics = regenerate(run_dir)
+    return {
+        "run_dir": str(run_dir),
+        "calls": len(call_rows),
+        "records": len(record_rows),
+        "usd_total": metrics["totals"]["usd_total"],
+    }
+
+
 def _archive_old_judges(record: QuestionRecord, config: Mapping[str, Any]) -> QuestionRecord:
     archived = dict(record.judges_v1)
     for identifier, judgement in record.judges.items():
@@ -1855,7 +1923,7 @@ async def _run(args: argparse.Namespace) -> None:
         top_k=args.top_k,
         translate_for_retrieval=args.translate_for_retrieval,
         rewrite_for_retrieval=args.rewrite_for_retrieval,
-        prices=EVAL_PRICES,
+        prices=PRICES,
     )
     try:
         judge_models = (
@@ -1941,6 +2009,12 @@ async def _run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     load_dotenv()
+    if len(sys.argv) > 1 and sys.argv[1] == "recost":
+        parser = argparse.ArgumentParser(description="Reprice a stored answer evaluation")
+        parser.add_argument("--run", type=Path, required=True)
+        args = parser.parse_args(sys.argv[2:])
+        print(json.dumps(recost(args.run), indent=2))
+        return
     if len(sys.argv) > 1 and sys.argv[1] == "rejudge":
         args = _parse_rejudge_args(sys.argv[2:])
         try:
@@ -1989,6 +2063,7 @@ __all__ = [
     "cell",
     "judge_input",
     "question_metrics",
+    "recost",
     "regenerate",
     "render_figures",
     "render_readme",

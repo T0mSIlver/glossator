@@ -12,7 +12,7 @@ import urllib.parse
 from collections.abc import Collection
 
 import structlog
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from glossator.answer.context import AssembledContext, Source
 from glossator.answer.llm import TokenUsage
@@ -25,7 +25,7 @@ API are full of `choices[0]`."""
 
 _CODE = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.DOTALL)
 _FENCES = (re.compile(r"(?m)^[ \t]*```"), re.compile(r"(?m)^[ \t]*~~~"))
-_EMPHASIS = frozenset("*_`")
+_EMPHASIS = frozenset("*_")
 _WHITESPACE = re.compile(r"\s+")
 _MARKER_WITH_SPACE = re.compile(r" ?\[([1-9]\d{0,2})\]")
 
@@ -84,6 +84,9 @@ class Citation(BaseModel):
     only. The plain `citation_url` stays the canonical link (D-003a: most
     headings have no anchor, so the fragment is what lands the reader on the
     sentence)."""
+
+    fragment_url_v1: str | None = Field(default=None, exclude_if=lambda value: value is None)
+    """The previous fragment URL when an evaluation run has been refragmented."""
 
     @property
     def citation_url(self) -> str:
@@ -284,19 +287,73 @@ def _searchable(text: str, *, drop_emphasis: bool = False) -> tuple[str, list[in
     out: list[str] = []
     positions: list[int] = []
     pending_space = False
-    for index, char in enumerate(text):
+    index = 0
+    while index < len(text):
+        char = text[index]
         if char.isspace():
             pending_space = bool(out)
+            index += 1
+            continue
+        if drop_emphasis and char == "`":
+            index += 1
             continue
         if drop_emphasis and char in _EMPHASIS:
-            continue
+            run_end = index + 1
+            while run_end < len(text) and text[run_end] == char:
+                run_end += 1
+            left = text[index - 1] if index else ""
+            right = text[run_end] if run_end < len(text) else ""
+            if not (_word_character(left) and _word_character(right)):
+                index = run_end
+                continue
         if pending_space:
             out.append(" ")
             positions.append(index)
             pending_space = False
         out.append(char)
         positions.append(index)
+        index += 1
     return "".join(out), positions
+
+
+def _word_character(char: str) -> bool:
+    return bool(char) and (char.isalnum() or char == "_")
+
+
+def _located_span(
+    quote: str, source_text: str, *, min_quote_chars: int
+) -> tuple[int, int, str | None] | None:
+    needle = normalize(quote)
+    if len(needle) < min_quote_chars:
+        return None
+    haystack, positions = _searchable(source_text)
+    found = haystack.find(needle)
+    if found >= 0:
+        return positions[found], positions[found + len(needle) - 1] + 1, None
+
+    bare_needle, _ = _searchable(quote, drop_emphasis=True)
+    if len(bare_needle) < min_quote_chars:
+        return None
+    bare_haystack, bare_positions = _searchable(source_text, drop_emphasis=True)
+    found = bare_haystack.find(bare_needle)
+    if found < 0:
+        return None
+    return (
+        bare_positions[found],
+        bare_positions[found + len(bare_needle) - 1] + 1,
+        VERIFIED_AFTER_EMPHASIS,
+    )
+
+
+def matched_source_quote(
+    quote: str, source_text: str, *, min_quote_chars: int = DEFAULT_MIN_QUOTE_CHARS
+) -> str | None:
+    """Return the source's own characters for a quote that passes verification."""
+    located = _located_span(quote, source_text, min_quote_chars=min_quote_chars)
+    if located is None:
+        return None
+    start, end, _reason = located
+    return source_text[start:end]
 
 
 def verify(
@@ -315,21 +372,13 @@ def verify(
     correctly. That match is still a pass, but it says so in the reason, so an
     eval can separate a clean quote from a re-typed one.
     """
-    needle = normalize(quote)
-    if len(needle) < min_quote_chars:
+    if len(normalize(quote)) < min_quote_chars:
         return False, None, RejectionReason.TOO_SHORT
-    haystack, positions = _searchable(source.content)
-    found = haystack.find(needle)
-    if found >= 0:
-        return True, source.chunk_id_at(positions[found]), None
-
-    bare_needle, _ = _searchable(quote, drop_emphasis=True)
-    if len(bare_needle) >= min_quote_chars:
-        bare_haystack, bare_positions = _searchable(source.content, drop_emphasis=True)
-        found = bare_haystack.find(bare_needle)
-        if found >= 0:
-            return True, source.chunk_id_at(bare_positions[found]), VERIFIED_AFTER_EMPHASIS
-    return False, None, RejectionReason.FABRICATED
+    located = _located_span(quote, source.content, min_quote_chars=min_quote_chars)
+    if located is None:
+        return False, None, RejectionReason.FABRICATED
+    start, _end, reason = located
+    return True, source.chunk_id_at(start), reason
 
 
 def resolve(
@@ -359,7 +408,21 @@ def resolve(
                 )
             )
             continue
-        ok, chunk_id, reason = verify(quote, source, min_quote_chars=min_quote_chars)
+        located = _located_span(quote, source.content, min_quote_chars=min_quote_chars)
+        chunk_id: str | None
+        reason: str | None
+        source_quote: str | None
+        if len(normalize(quote)) < min_quote_chars:
+            ok, chunk_id, reason = False, None, RejectionReason.TOO_SHORT
+            source_quote = None
+        elif located is None:
+            ok, chunk_id, reason = False, None, RejectionReason.FABRICATED
+            source_quote = None
+        else:
+            start, end, reason = located
+            ok = True
+            chunk_id = source.chunk_id_at(start)
+            source_quote = source.content[start:end]
         citation = Citation(
             n=n,
             # A rejected quote was never located, so naming a chunk for it would
@@ -370,7 +433,11 @@ def resolve(
             quote=quote,
             verified=ok,
             reason=reason,
-            fragment_url=fragment_link(source.url, source.anchor, quote) if ok else None,
+            fragment_url=(
+                fragment_link(source.url, source.anchor, source_quote)
+                if source_quote is not None
+                else None
+            ),
         )
         (verified if ok else rejected).append(citation)
     if rejected:
@@ -411,6 +478,7 @@ __all__ = [
     "fragment_link",
     "markers",
     "mask_code",
+    "matched_source_quote",
     "normalize",
     "resolve",
     "strip_markers",

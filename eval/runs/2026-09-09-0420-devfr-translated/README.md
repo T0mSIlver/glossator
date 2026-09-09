@@ -22,6 +22,7 @@ answer and the cited passages verbatim. It sees no URL, page identifier, or stra
 - Judge models: `zai:glm-5.3`, `zai:glm-5.3-flash`, `mistral:ministral-14b-2512`; primary first (answer-judge/v2)
 - Index variant: `sec1024`, top_k 8, rerank True (ministral-14b-2512), context budget 6000 tokens
 - Non-English questions rendered in English for retrieval: True
+- Question reworded into the documentation's vocabulary for retrieval: unknown
 - Dataset: `eval/dev-fr.jsonl`, sha256 `f5241bb42ec5cf23b23408fb7b71342f6368ab09f8f23bbd8da80d670f81c73e`
 - Questions: 36; strategies: 1; records: 36
 - Judge prompt hashes: {"judge_citation": "d1565f592953cb68", "judge_system": "3b300bf0bcd8ea7f", "judge_user": "4e976b80283c7257"}
@@ -163,7 +164,7 @@ What each strategy spent to get there.
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | **0.00000** |
+| `single_pass` | `ministral-14b-2512` | 0.00038 | 0.00046 | 0.00063 | 0.00040 | 0.00046 | 0.00035 | **0.00045** |
 
 **reference_usd** -- USD per question at mistral-medium-2604 prices
 
@@ -213,12 +214,10 @@ Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses
 
 The run made 36 answers over 36 questions:
 89824 prompt and 17914 completion tokens,
-0.0000 USD at this run's price table and
+0.0162 USD at this run's price table and
 0.2691 USD at mistral-medium-2604 prices. Median
 answer latency was 12.6 s, 95th
 percentile 23.9 s.
-
-`ministral-14b-2512` has no published price, so the USD column of this run is zero by construction. The row beside it prices the same recorded tokens at mistral-medium-2604 rates (D-017), which is what the shipped configuration would have cost.
 
 Judging spent 264419 prompt and 26994 completion tokens over 108 call(s) (3344 of them reasoning tokens, with thinking disabled), at a mean of 10.8 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.5991 USD.
 

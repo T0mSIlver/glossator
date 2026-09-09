@@ -19,6 +19,7 @@ from glossator.answer.citations import (
     TracedSource,
     TraceEvent,
 )
+from glossator.answer.config import MINISTRAL_3_14B
 from glossator.answer.llm import TokenUsage
 from glossator.eval.answer_eval import (
     JUDGE_VERSION,
@@ -32,6 +33,7 @@ from glossator.eval.answer_eval import (
     judge_input,
     parse_judge_models,
     question_metrics,
+    recost,
     regenerate,
     rejudge,
     render_readme,
@@ -700,6 +702,51 @@ def test_a_run_directory_is_rebuilt_from_its_rows_alone(tmp_path: Path) -> None:
     assert metrics["records"] == 2
     assert "Answer evaluation" in (path / "README.md").read_text()
     assert metrics["by_strategy"]["single_pass"]["all"]["correctness"] == 1.0
+
+
+def test_recost_prices_calls_and_records_and_keeps_the_old_values(tmp_path: Path) -> None:
+    path = tmp_path / "run"
+    run = RunDirectory.open(path, config_for(path))
+    run.record(record(prompt_tokens=1_000, completion_tokens=100, cost_usd=0.0))
+    run.append_call(
+        "answer",
+        {
+            "question_id": "q1",
+            "strategy": "single_pass",
+            "model": MINISTRAL_3_14B,
+            "usage": {"prompt_tokens": 1_000, "completion_tokens": 100},
+            "cost_usd": 0.0,
+        },
+    )
+    run.append_call(
+        "judge",
+        {
+            "question_id": "q1",
+            "strategy": "single_pass",
+            "model": "glm-5.3",
+            "usage": {"prompt_tokens": 500, "completion_tokens": 50},
+        },
+    )
+    run.finalize(status="complete", error=None)
+
+    result = recost(path)
+    stored_record = json.loads(run.records_path.read_text())
+    calls = [json.loads(line) for line in run.calls_path.read_text().splitlines()]
+    config = json.loads((path / "config.json").read_text())
+
+    expected = (1_000 + 100) * 0.15 / 1_000_000
+    assert result["usd_total"] == pytest.approx(expected)
+    assert stored_record["cost_usd"] == pytest.approx(expected)
+    assert stored_record["cost_usd_v1"] == 0.0
+    assert calls[0]["cost_usd"] == pytest.approx(expected)
+    assert calls[0]["cost_usd_v1"] == 0.0
+    assert calls[1]["cost_usd"] == 0.0
+    assert "cost_usd_v1" not in calls[1]
+    assert config["answer_config"]["prices"][MINISTRAL_3_14B] == {
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.15,
+    }
+    assert "has no published price" not in (path / "README.md").read_text()
 
 
 @pytest.mark.asyncio
