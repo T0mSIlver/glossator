@@ -1,9 +1,9 @@
 """Metadata the pipeline attaches to documents and chunks.
 
 Declared as toolkit metadata subclasses rather than loose dict keys so the field
-names are typed once. Every chunk key here has a same-named root field in the
-Vespa schema, which is what makes the store promote it out of the opaque
-metadata blob into an indexed, filterable field.
+names are typed once. Citation and retrieval fields have same-named root fields
+in Vespa. Provenance fields that do not need filtering remain in the opaque
+metadata blob.
 """
 
 from mistralai.search.toolkit.document import (
@@ -40,9 +40,9 @@ class CorpusPageMetadata(DocumentMetadata):
 class ChunkMetadata(DocumentChunkMetadata):
     """What a chunk needs to be cited and filtered.
 
-    ``anchor`` is absent (not empty) when the chunk's heading has no deep link:
-    the toolkit's metadata models treat ``None`` as absent and drop the key, so
-    nothing is written for it.
+    ``anchor`` points to the closest linkable heading at or above the chunk's
+    heading. ``own_anchor`` records whether the chunk's heading itself has a deep
+    link. The toolkit drops either key when its value is ``None``.
     """
 
     url: str
@@ -52,3 +52,4 @@ class ChunkMetadata(DocumentChunkMetadata):
     heading_path: list[str]
     section_index: int
     anchor: str | None = None
+    own_anchor: str | None = None

@@ -78,8 +78,44 @@ def test_an_unverifiable_quote_makes_the_answer_insufficient(config: AnswerConfi
     assert answer.citations == []
     assert answer.insufficient_evidence
     assert len(answer.trace.unverified_citations) == 1
-    # The marker stays in the text; the trace is where the rejection is visible.
-    assert "[1]" in answer.answer_markdown
+    assert "[1]" not in answer.answer_markdown
+    assert answer.trace.unverified_citations[0].n == 1
+
+
+def test_a_stray_prose_marker_is_removed_and_kept_in_the_trace(config: AnswerConfig) -> None:
+    generated = GeneratedAnswer(
+        answer_markdown="Use `messages[3]` as shown [1]. Stray [3].",
+        citations=[GeneratedCitation(n=1, quote="declared as JSON objects")],
+    )
+    answer = asyncio.run(
+        single_pass.answer(
+            "How?",
+            engine=FakeIndex([[make_hit("a", TOOLS_TEXT)]]),
+            llm=FakeLLM([completion(parsed=generated)]),
+            config=config,
+        )
+    )
+
+    assert answer.answer_markdown == "Use `messages[3]` as shown [1]. Stray."
+    assert answer.trace.unmatched_markers == [3]
+
+
+def test_refusal_markers_without_citations_are_removed(config: AnswerConfig) -> None:
+    generated = GeneratedAnswer(
+        answer_markdown="The documentation does not say [1][2][3].",
+        insufficient_evidence=True,
+    )
+    answer = asyncio.run(
+        single_pass.answer(
+            "Unknown?",
+            engine=FakeIndex([[make_hit("a", TOOLS_TEXT)]]),
+            llm=FakeLLM([completion(parsed=generated)]),
+            config=config,
+        )
+    )
+
+    assert answer.answer_markdown == "The documentation does not say."
+    assert answer.trace.unmatched_markers == [1, 2, 3]
 
 
 def test_a_model_that_declares_insufficient_evidence_is_believed(config: AnswerConfig) -> None:
@@ -294,6 +330,53 @@ def test_outline_picks_pages_and_reads_them(tmp_path: Path, config: AnswerConfig
     assert ("read", (None, None)) in engine.page(PAGE).calls
     assert answer.citations[0].verified
     assert answer.trace.events[0].note == "it is the tools page"
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "What does POST /v1/chat/completions return?",
+        "Which parameter belongs in the request body?",
+        "How do I call chat_completion_v1_chat_completions_post?",
+    ],
+)
+def test_outline_offers_api_pages_for_api_questions(
+    tmp_path: Path, config: AnswerConfig, question: str
+) -> None:
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            [
+                {
+                    "url": PAGE,
+                    "path": "capabilities/function-calling.md",
+                    "title": "Tools",
+                    "kind": "doc",
+                },
+                {
+                    "url": "https://docs.mistral.ai/api/endpoint/chat",
+                    "path": "api/endpoint/chat.md",
+                    "title": "Chat API",
+                    "kind": "api",
+                },
+            ]
+        )
+    )
+    engine = FakeIndex(pages={PAGE: []})
+    llm = FakeLLM([completion(parsed=PagePick(page_numbers=[], reason=""))])
+
+    asyncio.run(
+        outline.answer(
+            question,
+            engine=engine,
+            llm=llm,
+            config=config,
+            manifest_path=manifest,
+        )
+    )
+
+    picker_prompt = llm.requests[0]["messages"][1]["content"]
+    assert "Chat API [endpoint: chat]" in picker_prompt
 
 
 def test_outline_ignores_page_numbers_that_do_not_exist(

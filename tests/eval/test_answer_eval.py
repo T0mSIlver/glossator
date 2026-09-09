@@ -104,6 +104,7 @@ def rejected(n: int, reason: str) -> Citation:
 def record(
     *,
     question_id: str = "q1",
+    question: str = "How do I define a tool?",
     question_type: str = "single_page",
     strategy: str = "single_pass",
     gold_urls: list[str] | None = None,
@@ -120,7 +121,7 @@ def record(
 ) -> QuestionRecord:
     return QuestionRecord(
         question_id=question_id,
-        question="How do I define a tool?",
+        question=question,
         question_type=question_type,
         language="en",
         gold_urls=[PAGE] if gold_urls is None else gold_urls,
@@ -207,6 +208,41 @@ def test_a_citation_to_another_page_matches_nothing() -> None:
     assert metrics["cited_anchor_match"] == 0.0
 
 
+@pytest.mark.parametrize("name", ["Ministral 3 14B", "ministral-14b-2512"])
+def test_a_named_model_card_matches_capability_gold_through_the_documented_relaxation(
+    name: str,
+) -> None:
+    metrics = question_metrics(
+        record(
+            question=f"Does {name} support function calling?",
+            question_type="capability",
+            gold_urls=["https://docs.mistral.ai/models"],
+            gold_anchors=[None],
+            citations=[citation(1, "https://docs.mistral.ai/models/ministral-3-14b-25-12")],
+        )
+    )
+
+    assert metrics["cited_url_match"] == 1.0
+    assert metrics["cited_anchor_match"] == 1.0
+    assert metrics["gold_relaxed_matches"] == 1.0
+
+
+def test_a_model_card_does_not_match_when_the_question_names_no_model() -> None:
+    metrics = question_metrics(
+        record(
+            question="Which models support function calling?",
+            question_type="capability",
+            gold_urls=["https://docs.mistral.ai/models"],
+            gold_anchors=[None],
+            citations=[citation(1, "https://docs.mistral.ai/models/ministral-3-14b-25-12")],
+        )
+    )
+
+    assert metrics["cited_url_match"] == 0.0
+    assert metrics["cited_anchor_match"] == 0.0
+    assert metrics["gold_relaxed_matches"] == 0.0
+
+
 def test_an_unanswerable_question_has_no_gold_match_to_report() -> None:
     metrics = question_metrics(
         record(question_type="unanswerable", gold_urls=[], gold_anchors=[], insufficient=True)
@@ -265,6 +301,7 @@ def test_the_verification_rate_is_verified_over_emitted_across_the_cell() -> Non
     assert summary["citations_verified"] == 3
     assert summary["citation_verification_rate"] == pytest.approx(0.75)
     assert summary["unverified_citations_per_answer"] == pytest.approx(0.5)
+    assert summary["gold_relaxed_matches"] == 0
 
 
 def test_latency_percentiles_and_token_totals_come_from_the_records() -> None:

@@ -455,6 +455,7 @@ class SectionChunker(CorpusChunker):
                 heading_path=list(section.heading_path),
                 section_index=section.index,
                 anchor=section.anchor,
+                own_anchor=section.own_anchor,
             ),
         )
 
@@ -470,6 +471,7 @@ def _page_section(page: PageFacts) -> Section:
         level=0,
         heading=page.title,
         anchor=None,
+        own_anchor=None,
         heading_path=(page.title,),
         body="",
         start_offset=0,

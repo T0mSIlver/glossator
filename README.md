@@ -60,6 +60,11 @@ make ingest corpus=tests/fixtures/corpus variant=sec128   # the sample corpus
 The run prints chunks indexed, embedding tokens spent and the estimated cost, and
 exits non-zero if any page failed.
 
+Vespa blocks feeds when disk usage exceeds 80% by default. Ingestion tests a small
+write before processing the corpus and aborts without replacing any page if Vespa
+rejects it. A package redeploy restores Vespa's default resource limit, including
+when the running deployment had a hand-patched limit.
+
 ### Search
 
 Hybrid BM25 + vector, both inside Vespa: the YQL is `userInput OR nearestNeighbor`

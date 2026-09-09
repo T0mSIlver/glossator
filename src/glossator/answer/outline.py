@@ -1,19 +1,19 @@
 """The model picks pages from the site map, then reads them whole.
 
 Search finds passages that look like the question; a table of contents finds the
-page that is *about* it. That is the difference this strategy exists to measure --
+page that is *about* it. That is the difference this strategy exists to measure:
 for a question whose answer is spread over a page ("how do I set up X"), reading
 the page beats reading its five best-matching paragraphs.
 
 The outline is built from the corpus manifest, which is the same hash-checked file
 the index was ingested from, so a page in the outline is a page in the index. API
-reference pages are left out: there are 49 of them, one per endpoint, and their
-titles carry no signal a picker can use. Pages are read back through the index by
-their url, which is the chunks' ``source_id``, so no corpus file is opened at
-answer time.
+reference pages are included only for API-shaped questions, with their endpoint
+slug beside the title. Pages are read back through the index by their url, which
+is the chunks' ``source_id``, so no corpus file is opened at answer time.
 """
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,6 +34,13 @@ NAME = "outline"
 
 DEFAULT_MANIFEST = Path("corpus/mistral-docs/manifest.json")
 OUTLINE_KINDS = frozenset({"doc", "model"})
+_HTTP_METHOD = re.compile(r"\b(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b")
+_V1_PATH = re.compile(r"(?<!\w)/v1(?:/[A-Za-z0-9_.~!$&'()*+,;=:@%{}-]+)+")
+_API_TERM = re.compile(r"\b(?:endpoint|request body|response|parameter)s?\b", re.IGNORECASE)
+_OPERATION_NAME = re.compile(
+    r"\b[a-z][a-z0-9_]*_v1_[a-z0-9_]+_(?:get|post|put|patch|delete|head|options)\b",
+    re.IGNORECASE,
+)
 
 
 class PagePick(BaseModel):
@@ -53,22 +60,32 @@ class OutlineEntry:
     title: str
     breadcrumbs: tuple[str, ...]
     url: str
+    endpoint_slug: str | None = None
 
     def render(self) -> str:
         trail = " > ".join(self.breadcrumbs)
-        return f"{self.number}. {trail} > {self.title}" if trail else f"{self.number}. {self.title}"
+        title = (
+            f"{self.title} [endpoint: {self.endpoint_slug}]" if self.endpoint_slug else self.title
+        )
+        return f"{self.number}. {trail} > {title}" if trail else f"{self.number}. {title}"
 
 
-def load_outline(manifest_path: Path = DEFAULT_MANIFEST) -> tuple[OutlineEntry, ...]:
+def load_outline(
+    manifest_path: Path = DEFAULT_MANIFEST, *, include_api: bool = False
+) -> tuple[OutlineEntry, ...]:
     """The site map, numbered, in manifest (url) order so the tree reads top-down."""
     entries = json.loads(manifest_path.read_text(encoding="utf-8"))
-    pages = [entry for entry in entries if entry.get("kind") in OUTLINE_KINDS]
+    kinds = OUTLINE_KINDS | ({"api"} if include_api else set())
+    pages = [entry for entry in entries if entry.get("kind") in kinds]
     return tuple(
         OutlineEntry(
             number=number,
             title=str(entry["title"]),
             breadcrumbs=_breadcrumbs(str(entry["path"])),
             url=str(entry["url"]),
+            endpoint_slug=(
+                _endpoint_slug(str(entry["path"])) if entry.get("kind") == "api" else None
+            ),
         )
         for number, entry in enumerate(sorted(pages, key=lambda page: page["url"]), start=1)
     )
@@ -88,7 +105,7 @@ async def answer(
 ) -> Answer:
     run = AnswerRun(strategy=NAME, variant=engine.config.variant)
     run.rounds = 1
-    entries = load_outline(manifest_path)
+    entries = load_outline(manifest_path, include_api=_looks_like_api_question(question))
 
     completion = await llm.complete(
         [
@@ -173,6 +190,19 @@ def _breadcrumbs(path: str) -> tuple[str, ...]:
     """
     parts = Path(path).parts[:-1]
     return tuple(part.replace("-", " ") for part in parts)
+
+
+def _endpoint_slug(path: str) -> str:
+    prefix = "api/endpoint/"
+    endpoint = path.removeprefix(prefix)
+    return str(Path(endpoint).with_suffix(""))
+
+
+def _looks_like_api_question(question: str) -> bool:
+    """Whether a question names API syntax or an OpenAPI operation."""
+    return any(
+        pattern.search(question) for pattern in (_HTTP_METHOD, _V1_PATH, _API_TERM, _OPERATION_NAME)
+    )
 
 
 __all__ = [

@@ -23,7 +23,10 @@ class Section:
 
     heading: str
     anchor: str | None
-    """The heading's deep-link fragment, when it has one."""
+    """The nearest deep-link fragment on this heading or one of its ancestors."""
+
+    own_anchor: str | None
+    """The heading's own deep-link fragment, when it has one."""
 
     heading_path: tuple[str, ...]
     """Ancestor headings from the page title down to this one, inclusive."""
@@ -80,7 +83,7 @@ def parse_sections(body: str, *, page_title: str) -> list[Section]:
             starts.append((line.start, heading.level, heading.text, heading.anchor))
 
     sections: list[Section] = []
-    stack: list[tuple[int, str]] = []
+    stack: list[tuple[int, str, str | None]] = []
 
     # Text before the first heading has no heading of its own; it is attributed to
     # the page. Pages whose H1 opens the body (the normal case) have none.
@@ -92,6 +95,7 @@ def parse_sections(body: str, *, page_title: str) -> list[Section]:
                 level=0,
                 heading=page_title,
                 anchor=None,
+                own_anchor=None,
                 heading_path=(page_title,),
                 body=body[:preamble_end],
                 start_offset=0,
@@ -103,16 +107,25 @@ def parse_sections(body: str, *, page_title: str) -> list[Section]:
         end = starts[position + 1][0] if position + 1 < len(starts) else len(body)
         while stack and stack[-1][0] >= level:
             stack.pop()
-        path = tuple(heading for _level, heading in stack) + (text,)
+        path = tuple(heading for _level, heading, _anchor in stack) + (text,)
         if path[0] != page_title:
             path = (page_title, *path)
-        stack.append((level, text))
+        citation_anchor = anchor or next(
+            (
+                ancestor_anchor
+                for _level, _heading, ancestor_anchor in reversed(stack)
+                if ancestor_anchor
+            ),
+            None,
+        )
+        stack.append((level, text, anchor))
         sections.append(
             Section(
                 index=len(sections),
                 level=level,
                 heading=text,
-                anchor=anchor,
+                anchor=citation_anchor,
+                own_anchor=anchor,
                 heading_path=path,
                 body=body[start:end],
                 start_offset=start,

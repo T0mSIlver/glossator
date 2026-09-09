@@ -8,6 +8,7 @@ to the types rather than in a strategy.
 """
 
 import re
+from collections.abc import Collection
 
 import structlog
 from pydantic import BaseModel, ConfigDict
@@ -25,6 +26,7 @@ _CODE = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.DOTALL)
 _FENCES = (re.compile(r"(?m)^[ \t]*```"), re.compile(r"(?m)^[ \t]*~~~"))
 _EMPHASIS = frozenset("*_`")
 _WHITESPACE = re.compile(r"\s+")
+_MARKER_WITH_SPACE = re.compile(r" ?\[([1-9]\d{0,2})\]")
 
 DEFAULT_MIN_QUOTE_CHARS = 8
 """Fallback for callers with no `AnswerConfig` to hand; the live value is
@@ -183,6 +185,26 @@ def markers(text: str) -> list[int]:
     return seen
 
 
+def strip_markers(text: str, numbers: Collection[int]) -> str:
+    """Remove selected prose markers while leaving code spans unchanged."""
+    if not numbers:
+        return text
+    cut = len(text)
+    for fence in _FENCES:
+        markers_found = list(fence.finditer(text))
+        if len(markers_found) % 2:
+            cut = min(cut, markers_found[-1].start())
+    code_ranges = [(match.start(), match.end()) for match in _CODE.finditer(text[:cut])]
+    if cut < len(text):
+        code_ranges.append((cut, len(text)))
+
+    def replace(match: re.Match[str]) -> str:
+        in_code = any(start <= match.start() < end for start, end in code_ranges)
+        return match.group(0) if in_code or int(match.group(1)) not in numbers else ""
+
+    return _MARKER_WITH_SPACE.sub(replace, text)
+
+
 def normalize(text: str) -> str:
     """Collapse whitespace, so a re-wrapped quote still matches its source."""
     return _WHITESPACE.sub(" ", text).strip()
@@ -253,10 +275,9 @@ def resolve(
 ) -> tuple[list[Citation], list[Citation]]:
     """Map the model's `(n, quote)` pairs onto sources and verify each one.
 
-    Returns the verified citations and the rejected ones. Markers stay in the
-    answer text either way: renumbering would invalidate the quotes the model
-    wrote them for, and a marker whose citation was dropped is visible in the
-    trace as a rejection.
+    Returns the verified citations and the rejected ones. The generation layer
+    removes prose markers that have no verified citation behind them without
+    renumbering the markers that remain.
     """
     verified: list[Citation] = []
     rejected: list[Citation] = []
@@ -323,6 +344,7 @@ __all__ = [
     "mask_code",
     "normalize",
     "resolve",
+    "strip_markers",
     "unmatched",
     "verify",
 ]

@@ -109,7 +109,30 @@ def test_the_page_strategy_records_no_anchor(corpus_pages: list[CorpusPage]) -> 
     for page in corpus_pages:
         for spec in page_chunker.plan(page.body, _facts(page)):
             assert spec.metadata.anchor is None
+            assert spec.metadata.own_anchor is None
             assert spec.metadata.heading_path == [page.title]
+
+
+def test_an_anchorless_h3_uses_its_h2_anchor(chunker: SectionChunker) -> None:
+    body = """# Page title
+
+## Linkable section {#linkable}
+
+Parent prose.
+
+### Anchorless detail
+
+Nested prose.
+"""
+
+    detail = next(
+        spec
+        for spec in chunker.plan(body, FACTS)
+        if spec.metadata.heading_path[-1] == "Anchorless detail"
+    )
+
+    assert detail.metadata.anchor == "linkable"
+    assert detail.metadata.own_anchor is None
 
 
 # --- token budgets ---------------------------------------------------------

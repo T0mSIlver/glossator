@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from glossator.index.variants import VARIANTS
 from glossator.ingest.pipeline import (
     DEFAULT_CONCURRENCY,
+    IndexWritePreflightError,
     IngestReport,
     PartialIngestError,
     ingest_corpus,
@@ -67,10 +68,11 @@ async def main() -> None:
             raise SystemExit(str(exc)) from None
     try:
         report = await ingest_corpus(args.corpus, args.variant, concurrency=args.concurrency)
-    except PartialIngestError as exc:
+    except (IndexWritePreflightError, PartialIngestError) as exc:
         # Report what did land before failing: a partial index is still worth
         # knowing the size of, and the exit code is what a script reads.
-        print(_summary(exc.report))
+        if isinstance(exc, PartialIngestError):
+            print(_summary(exc.report))
         raise SystemExit(str(exc)) from None
     print(_summary(report))
 

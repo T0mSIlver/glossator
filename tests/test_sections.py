@@ -79,6 +79,8 @@ def test_explicit_anchors_are_read_and_absent_ones_stay_none() -> None:
     by_heading = {section.heading: section for section in sections}
     assert by_heading["First section"].anchor == "first"
     assert by_heading["Second section"].anchor is None
+    assert by_heading["First section"].own_anchor == "first"
+    assert by_heading["Second section"].own_anchor is None
     # The anchor marker is not part of the heading text.
     assert "{#" not in by_heading["First section"].heading
 
@@ -116,4 +118,5 @@ def test_pages_without_anchors_still_parse(corpus_pages: list[CorpusPage]) -> No
     for page in anchorless:
         for section in parse_sections(page.body, page_title=page.title):
             assert section.anchor is None
+            assert section.own_anchor is None
             assert section.heading_path
