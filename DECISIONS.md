@@ -710,3 +710,23 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 **Facts.** Option (a) of D-008 (English index, the model answers in the question's language) loses a third of its retrieval precision: `mistral-embed` is multilingual but the hybrid ranking's BM25 half sees no French term in English pages, and the reranker reads French against English. The model does answer in French and cites English sources, and citation relevance stays at 0.95, so the failure is in finding the right page, not in writing the answer.
 
 **Decision.** The engine translates a non-English question into English for retrieval and reranking, and generates the answer in the question's language from the English sources. This costs one short model call per non-English question and no index change. Indexing the French mirror (option b) stays the follow-up if the translated-query result is still short of the English numbers, since French pages would let citations land on French URLs.
+
+---
+
+## D-008b · Rendering the question in English for retrieval closes the French gap
+
+**Status:** decided · 2026-09-09 · run `eval/runs/2026-09-09-0420-devfr-translated` (same 36 French questions as D-008a, shipped configuration)
+
+| metric | French as asked | French rendered in English for retrieval | English |
+|---|---|---|---|
+| cited URL matches gold | 0.47 | **0.80** | 0.82 |
+| cited anchor matches gold | 0.40 | **0.57** | 0.62 |
+| correctness (judge) | 0.75 | **0.94** | 0.93 |
+| groundedness (judge) | 0.65 | **0.80** | 0.82 |
+| judged wrong | 0.14 | **0.00** | 0.02 |
+| fabricated quotes per answer | 0.67 | 0.67 | 0.40 |
+| latency p50 | 8.3 s | 12.6 s | 7.2 s |
+
+**Facts.** Language detection is deterministic (stopword scores with diacritics folded, `und` for non-Latin scripts) and was right on 294 of 294 English and 36 of 36 French questions, so English questions pay nothing. The rendering is one structured call (about 215 tokens, 0.7 s median, 0 failures in 36) recorded like every other call; the model still sees the original question and answers in its language. The extra latency is mostly a longer generation now that the sources are usable (two cited sources per answer instead of 1.3). Fabricated quotes did not move: French prose around English sources still costs two thirds of a mistranslated quote per answer, the one French-specific failure that remains; a French index (D-008 option b) would address it by letting citations land on French pages.
+
+**Decision.** `translate_for_retrieval` is on by default in the answer layer. The MCP `search` tool and the retrieval CLI still search the raw query; rendering there is a follow-up. D-008 is closed for v1 with option (a) plus rendering.
