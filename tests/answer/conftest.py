@@ -182,6 +182,8 @@ class FakeLLM:
                 "tools": tools,
                 "response_schema": response_schema,
                 "purpose": purpose,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
             }
         )
         if not self.script:

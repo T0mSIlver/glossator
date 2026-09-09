@@ -22,13 +22,16 @@ async def answer(
 ) -> Answer:
     run = AnswerRun(strategy=NAME, variant=engine.config.variant)
     run.rounds = 1
-    hits = await engine.search(question, top_k=config.top_k)
+    query = await run.prepare(question, llm=llm, config=config)
+    hits = await engine.search(query.text, top_k=config.top_k)
     run.event(
         "retrieval",
         "search",
-        arguments={"query": question, "top_k": config.top_k},
+        arguments={"query": query.text, "top_k": config.top_k},
         result_ids=[hit.chunk_id for hit in hits],
     )
+    # The original question, not the rendering: the answer is written in the
+    # language it was asked in, from English sources (D-008a).
     return await run.finish(question, hits, llm=llm, config=config)
 
 

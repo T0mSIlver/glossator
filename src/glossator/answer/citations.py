@@ -112,6 +112,13 @@ class Trace(BaseModel):
     strategy: str
     variant: str
     prompt_version: str
+    question_language: str = "en"
+    """The language the question was detected to be in (D-008a)."""
+
+    retrieval_query: str = ""
+    """The wording every retrieval in this run used: the question itself when it
+    was already English, its English rendering when it was not."""
+
     rounds: int = 0
     events: list[TraceEvent] = []
     sources: list[TracedSource] = []
@@ -130,6 +137,10 @@ class Trace(BaseModel):
             f"{len(self.events)} steps in {self.rounds} round(s)",
             f"{len(self.sources)} sources, {self.context_tokens} context tokens",
         ]
+        if self.question_language != "en":
+            parts.append(
+                f"asked in {self.question_language}, retrieved as {self.retrieval_query!r}"
+            )
         if self.dropped_chunk_ids:
             parts.append(f"{len(self.dropped_chunk_ids)} chunks over budget")
         if self.unverified_citations:

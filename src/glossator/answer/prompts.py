@@ -38,6 +38,31 @@ Sources:
 {context}
 """
 
+RETRIEVAL_QUERY_VERSION = "retrieval-query/v1"
+
+# The rendering is a search query, not a translation for a reader: what matters
+# is that the English words a page uses appear in it and that nothing the index
+# stores verbatim gets translated into something it does not.
+RETRIEVAL_QUERY_SYSTEM = """\
+You rewrite a question about Mistral's documentation in English so it can be searched \
+against English documentation pages.
+
+Rules:
+- Write one English question with the same meaning. Do not answer it.
+- Keep identifiers, API names, parameters, model names, code, urls, file names and \
+numbers exactly as written, character for character. Never translate them.
+- Add nothing the question does not ask for and drop nothing it does.
+- Use the wording English documentation would use for the same idea.
+- Write plain text: no markdown, no emphasis, no quotation marks around terms. The \
+result is sent to a search index, not to a reader.
+
+Return JSON with english_question.
+"""
+
+RETRIEVAL_QUERY_USER = """\
+Question: {question}
+"""
+
 SEARCH_LOOP_VERSION = "search-loop/v2"
 
 # Mixedbread's search-agent work found that models retrieve better when they
@@ -118,6 +143,9 @@ __all__ = [
     "OUTLINE_USER",
     "OUTLINE_VERSION",
     "REPAIR_INSTRUCTION",
+    "RETRIEVAL_QUERY_SYSTEM",
+    "RETRIEVAL_QUERY_USER",
+    "RETRIEVAL_QUERY_VERSION",
     "SEARCH_LOOP_SEED_USER",
     "SEARCH_LOOP_SYSTEM",
     "SEARCH_LOOP_VERSION",

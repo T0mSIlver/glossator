@@ -69,6 +69,14 @@ class AnswerConfig(BaseModel):
     """A quote shorter than this verifies against almost any chunk, so it is not
     evidence that the model read the source."""
 
+    translate_for_retrieval: bool = True
+    """Whether a non-English question is rendered in English before retrieval and
+    reranking (D-008a). Off, the question is retrieved exactly as it was asked,
+    which is what the French baseline measured."""
+
+    render_max_tokens: int = 200
+    """The rendering is one restated question, not prose."""
+
     round_cap: int = 4
     searches_per_round: int = 4
     tool_top_k: int = 4

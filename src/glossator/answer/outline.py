@@ -105,14 +105,20 @@ async def answer(
 ) -> Answer:
     run = AnswerRun(strategy=NAME, variant=engine.config.variant)
     run.rounds = 1
-    entries = load_outline(manifest_path, include_api=_looks_like_api_question(question))
+    # Picking pages off an English site map is this strategy's retrieval step, so
+    # it reads the English rendering; the answer is generated from the original
+    # question (D-008a). The API test is written against English terms too.
+    query = await run.prepare(question, llm=llm, config=config)
+    entries = load_outline(manifest_path, include_api=_looks_like_api_question(query.text))
 
     completion = await llm.complete(
         [
             {"role": "system", "content": OUTLINE_SYSTEM.format(page_cap=config.page_cap)},
             {
                 "role": "user",
-                "content": OUTLINE_USER.format(question=question, outline=render_outline(entries)),
+                "content": OUTLINE_USER.format(
+                    question=query.text, outline=render_outline(entries)
+                ),
             },
         ],
         response_schema=PagePick,
