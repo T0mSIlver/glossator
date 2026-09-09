@@ -31,7 +31,7 @@ import structlog
 from dotenv import load_dotenv
 
 from glossator.answer.config import PRICES, AnswerConfig, ModelPrice, aliased_price
-from glossator.clients import chat_server_url
+from glossator.clients import chat_reasoning_effort, chat_server_url
 from glossator.eval.answer_eval import (
     DEFAULT_GENERATION_MODEL,
     DEFAULT_JUDGE_MODEL,
@@ -117,21 +117,19 @@ def resolve_judge_models(value: str) -> list[JudgeModel]:
 
 
 def eval_prices(model: str) -> dict[str, ModelPrice]:
-    """The eval price table, with the local-server alias priced, not zeroed.
+    """The eval price table, with the local-server alias spelled out.
 
     The request names ``llamacpp/ministral3-14b`` while the response reports
     ``ministral3-14b``; both price as Ministral 3 14B at the published API rate
     applied to a local run (D-035c). A model with no published price and no
-    alias still proceeds with cost 0 and one warning, tokens recorded.
+    alias is left out of the table on purpose: it then costs 0 with the one
+    warning per model that says so, rather than carrying a fabricated zero rate
+    that reads like a measured price.
     """
     prices = dict(PRICES)
-    if model not in prices:
-        alias = aliased_price(model)
-        prices[model] = (
-            alias
-            if alias is not None
-            else ModelPrice(input_usd_per_mtok=0.0, output_usd_per_mtok=0.0)
-        )
+    alias = aliased_price(model)
+    if model not in prices and alias is not None:
+        prices[model] = alias
     return prices
 
 
@@ -219,6 +217,7 @@ async def run_one(
         "strategies": ["search_loop"],
         "model": args.model,
         "generation_server": server,
+        "reasoning_effort": chat_reasoning_effort(),
         "judge_model": judges[0].identifier if judges else None,
         "judge_models": [judge.identifier for judge in judges],
         "judge_prompt_version": JUDGE_VERSION,
@@ -296,6 +295,7 @@ def grid_config(
         "questions": [question.id for question in questions],
         "model": args.model,
         "generation_server": chat_server_url(),
+        "reasoning_effort": chat_reasoning_effort(),
         "judge_model": judges[0].identifier if judges else None,
         "judge_models": [judge.identifier for judge in judges],
         "variant": args.variant,
@@ -324,6 +324,7 @@ def summarize(
         "questions": len(config.get("questions") or []),
         "model": config["model"],
         "generation_server": config.get("generation_server"),
+        "reasoning_effort": config.get("reasoning_effort"),
         "judge_model": config.get("judge_model"),
         "judge_models": config.get("judge_models") or [],
         "variant": config["variant"],
@@ -492,12 +493,12 @@ def render_figures(metrics: dict[str, Any], figures_dir: Path) -> list[Path]:
             ("correctness", "correctness", "Judged correctness"),
             ("tokens", "tokens_in", "Prompt tokens per answer"),
         ):
+            # A row with no number is left out rather than drawn at zero: a
+            # missing judged column and a genuine 0.0 must not look the same.
+            measured = [row for row in rows if row.get(key) is not None]
             chart = bar_chart(
                 f"{title} by {axis}",
-                [
-                    (str(row.get("value") or "shipped"), (float(row.get(key) or 0.0),))
-                    for row in rows
-                ],
+                [(str(row.get("value") or "shipped"), (float(row[key]),)) for row in measured],
                 (title,),
             )
             path = figures_dir / figure_name(axis, what)

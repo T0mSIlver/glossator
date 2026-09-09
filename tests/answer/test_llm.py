@@ -163,6 +163,52 @@ def test_a_fenced_json_object_response_parses_without_repair() -> None:
     assert len(completion.calls) == 1
 
 
+def test_a_one_line_fenced_response_keeps_its_body() -> None:
+    """A server that puts the whole object on the fence's own line still gets
+    parsed: dropping the opening line wholesale threw the body away and turned
+    a paid response into "response is not JSON"."""
+    llm, _client = build(
+        [response(content='```json {"answer": "42"} ```')],
+        config=AnswerConfig(retry_base_seconds=0.0, response_format="json_object"),
+    )
+
+    completion = complete(llm, response_schema=Shape)
+
+    assert isinstance(completion.parsed, Shape)
+    assert completion.parsed.answer == "42"
+    assert len(completion.calls) == 1
+    # The raw text stays exactly as it arrived; only the parsed copy is unwrapped.
+    assert completion.calls[0].text == '```json {"answer": "42"} ```'
+
+
+def test_the_thinking_setting_is_recorded_on_every_call(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """D-023 wants the thinking setting in the ledger, not only in the run's
+    config.json: the operator exports it per run, so only the call knows."""
+    monkeypatch.setenv("GLOSSATOR_CHAT_REASONING_EFFORT", "none")
+    recorder = Collector()
+    llm, client = build([response()], recorder)
+
+    complete(llm)
+
+    assert client.chat.requests[0]["reasoning_effort"] == "none"
+    assert recorder.calls[0].reasoning_effort == "none"
+
+
+def test_no_thinking_setting_sends_no_parameter_and_records_none(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GLOSSATOR_CHAT_REASONING_EFFORT", raising=False)
+    recorder = Collector()
+    llm, client = build([response()], recorder)
+
+    complete(llm)
+
+    assert "reasoning_effort" not in client.chat.requests[0]
+    assert recorder.calls[0].reasoning_effort is None
+
+
 def test_the_mode_a_structured_call_ran_under_is_recorded() -> None:
     recorder = Collector()
     llm, _client = build([response(content='{"answer": "42"}')], recorder)

@@ -1,0 +1,157 @@
+# Deployment of the MCP server, and optionally the API and Vespa, on one host.
+#
+# Two modes, selected by profile:
+#   remote-index  no profile; `mcp` alone, pointed at a VESPA_ENDPOINT elsewhere.
+#   full          profiles `full`, `api` and `jobs`; Vespa, the schema
+#                 migrations, ingestion, the MCP server and the API on this host.
+#
+# Every setting comes from .env.deploy next to this file. No secret is baked
+# into the image; the API key and the bearer token are read at run time.
+
+name: glossator
+
+x-app: &app
+  image: glossator:${GLOSSATOR_IMAGE_TAG:-local}
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  environment:
+    MISTRAL_API_KEY: ${MISTRAL_API_KEY:?MISTRAL_API_KEY is not set; copy deploy/.env.deploy.example to deploy/.env.deploy}
+    VESPA_ENDPOINT: ${VESPA_ENDPOINT:-http://vespa:8080}
+    GLOSSATOR_VARIANT: ${GLOSSATOR_VARIANT:-sec1024}
+    GLOSSATOR_MODEL: ${GLOSSATOR_MODEL:-}
+    GLOSSATOR_CHAT_SERVER_URL: ${GLOSSATOR_CHAT_SERVER_URL:-}
+    GLOSSATOR_CHAT_API_KEY: ${GLOSSATOR_CHAT_API_KEY:-}
+
+services:
+  mcp:
+    <<: *app
+    container_name: glossator-mcp
+    restart: unless-stopped
+    command:
+      - python
+      - -m
+      - entrypoints.mcp_server
+      - --http
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    environment:
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:?MISTRAL_API_KEY is not set; copy deploy/.env.deploy.example to deploy/.env.deploy}
+      VESPA_ENDPOINT: ${VESPA_ENDPOINT:-http://vespa:8080}
+      GLOSSATOR_VARIANT: ${GLOSSATOR_VARIANT:-sec1024}
+      GLOSSATOR_MODEL: ${GLOSSATOR_MODEL:-}
+      GLOSSATOR_CHAT_SERVER_URL: ${GLOSSATOR_CHAT_SERVER_URL:-}
+      GLOSSATOR_CHAT_API_KEY: ${GLOSSATOR_CHAT_API_KEY:-}
+      # Unset leaves the transport open to any client, so the compose file
+      # insists on it rather than letting a tunnel publish an open server.
+      GLOSSATOR_MCP_TOKEN: ${GLOSSATOR_MCP_TOKEN:?GLOSSATOR_MCP_TOKEN is not set; generate one with `openssl rand -hex 32`}
+      GLOSSATOR_MCP_TOOLS: ${GLOSSATOR_MCP_TOOLS:-}
+    ports:
+      # The tunnel runs on this host and reaches the server over the loopback
+      # address, so the published port stays off the LAN by default.
+      - "${MCP_BIND_ADDRESS:-127.0.0.1}:${MCP_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request,sys; sys.exit(0 if urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=10).status == 200 else 1)
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+
+  api:
+    <<: *app
+    container_name: glossator-api
+    profiles: ["api"]
+    restart: unless-stopped
+    command:
+      - uvicorn
+      - entrypoints.api:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+    ports:
+      - "${API_BIND_ADDRESS:-127.0.0.1}:${API_PORT:-8080}:8080"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request,sys; sys.exit(0 if urllib.request.urlopen("http://127.0.0.1:8080/health", timeout=10).status == 200 else 1)
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+
+  vespa:
+    image: vespaengine/vespa:${VESPA_IMAGE_TAG:-latest}
+    container_name: glossator-vespa
+    hostname: glossator-vespa
+    profiles: ["full"]
+    restart: unless-stopped
+    ports:
+      - "${VESPA_BIND_ADDRESS:-127.0.0.1}:${VESPA_QUERY_PORT:-18080}:8080"
+      - "${VESPA_BIND_ADDRESS:-127.0.0.1}:${VESPA_CONFIG_PORT:-19072}:19071"
+    volumes:
+      - vespa-data:/opt/vespa/var
+    environment:
+      VESPA_CONFIGSERVERS: glossator-vespa
+      VESPA_HOSTNAME: glossator-vespa
+    deploy:
+      resources:
+        limits:
+          memory: ${VESPA_MEMORY_LIMIT:-4G}
+        reservations:
+          memory: ${VESPA_MEMORY_RESERVATION:-2G}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:19071/state/v1/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+  # One-off jobs, run by deploy.sh in full mode. `restart: no` because a job
+  # that has finished must not come back on the next boot.
+  migrate:
+    <<: *app
+    container_name: glossator-migrate
+    profiles: ["jobs"]
+    restart: "no"
+    command:
+      - mistral-vespa
+      - migrate
+      - --app-dir
+      - src/glossator/index
+      - --config-server
+      - ${VESPA_CONFIG_URL:-http://vespa:19071}
+      - --query-port
+      - "8080"
+
+  ingest:
+    <<: *app
+    container_name: glossator-ingest
+    profiles: ["jobs"]
+    restart: "no"
+    # Runs as the host account that owns the synced cache directory, so newly
+    # embedded chunks are written back into it rather than failing on the mount.
+    user: "${DEPLOY_UID:-10001}:${DEPLOY_GID:-10001}"
+    command:
+      - python
+      - -m
+      - glossator.ingest
+      - --corpus
+      - /app/corpus/mistral-docs
+      - --variant
+      - ${GLOSSATOR_VARIANT:-sec1024}
+    volumes:
+      # The operator's embedding cache, synced by deploy.sh. Every chunk found
+      # here costs nothing to index; only new text reaches the embedding API.
+      - ${EMBEDDING_CACHE_DIR:-./embedding-cache}:/home/glossator/.cache/glossator/embeddings
+
+volumes:
+  vespa-data:

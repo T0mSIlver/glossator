@@ -10,6 +10,14 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
+from glossator.answer.config import (
+    LOCAL_MINISTRAL_3_14B,
+    MINISTRAL_3_14B,
+    PRICES,
+    AnswerConfig,
+)
 from glossator.eval.loop_grid import (
     AXIS_VALUES,
     FULL_PREVIEWS,
@@ -47,11 +55,25 @@ def test_full_previews_is_null_rather_than_a_magic_number() -> None:
     assert labels["600"] == 600 and labels["1500"] == 1500
 
 
-def test_a_local_model_id_gets_a_zero_price_entry_not_a_refusal() -> None:
-    prices = eval_prices("ministral-3b-local")
-    assert prices["ministral-3b-local"].input_usd_per_mtok == 0.0
-    # A model the eval table already prices keeps its price.
-    assert eval_prices("ministral-14b-2512") is not eval_prices("ministral-3b-local")
+def test_an_unpriced_model_is_left_out_rather_than_given_a_fabricated_zero() -> None:
+    # A zero entry would silence the "no price for model" warning and make the
+    # run read as if it had been priced at nothing (D-035c).
+    assert "ministral-3b-local" not in eval_prices("ministral-3b-local")
+    assert (
+        AnswerConfig(prices=eval_prices("ministral-3b-local")).cost_usd(
+            "ministral-3b-local", 1_000_000, 1_000_000
+        )
+        == 0.0
+    )
+
+
+def test_the_local_server_alias_is_priced_at_the_published_ministral_rate() -> None:
+    prices = eval_prices(LOCAL_MINISTRAL_3_14B)
+    assert prices[LOCAL_MINISTRAL_3_14B] == PRICES[MINISTRAL_3_14B]
+    # And the id the server reports back prices the same way, through the marker.
+    assert AnswerConfig(prices=prices).cost_usd("ministral3-14b", 1_000_000, 0) == pytest.approx(
+        PRICES[MINISTRAL_3_14B].input_usd_per_mtok
+    )
 
 
 def _row_metrics(

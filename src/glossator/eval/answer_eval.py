@@ -48,7 +48,13 @@ from glossator.answer.citations import (
     RejectionReason,
     Trace,
 )
-from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig, aliased_price
+from glossator.answer.config import (
+    MISTRAL_MEDIUM_3_5,
+    PRICES,
+    AnswerConfig,
+    aliased_price,
+    price_of,
+)
 from glossator.answer.llm import LLMCall, MistralLLM
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.answer.service import STRATEGIES, ask
@@ -1810,16 +1816,22 @@ def regenerate(run_dir: Path) -> dict[str, Any]:
 
 
 def _cost_from_row(row: Mapping[str, Any]) -> float:
-    model = str(row.get("model") or "")
-    price = PRICES.get(model) or aliased_price(model)
+    """The current price of one recorded call or record; 0 for an unpriced model.
+
+    Unpriced models are not silently absorbed: ``recost`` lists every one it met
+    in the run's ``config.json`` under ``unpriced_models``.
+    """
     usage = row.get("usage")
-    if price is None or not isinstance(usage, Mapping):
+    if not isinstance(usage, Mapping):
         return 0.0
-    prompt_tokens = int(usage.get("prompt_tokens") or 0)
-    completion_tokens = int(usage.get("completion_tokens") or 0)
     return (
-        prompt_tokens * price.input_usd_per_mtok + completion_tokens * price.output_usd_per_mtok
-    ) / 1_000_000
+        price_of(
+            str(row.get("model") or ""),
+            int(usage.get("prompt_tokens") or 0),
+            int(usage.get("completion_tokens") or 0),
+        )
+        or 0.0
+    )
 
 
 def _write_jsonl(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:

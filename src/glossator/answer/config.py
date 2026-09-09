@@ -6,6 +6,7 @@ the alias moves, and D-023 wants every number traceable to the model that
 produced it.
 """
 
+from collections.abc import Mapping
 from typing import Annotated, Literal
 
 import structlog
@@ -44,7 +45,6 @@ PRICES: dict[str, ModelPrice] = {
     # token counts are recorded whatever the price, so a published number can be
     # applied to a run that already happened.
     MINISTRAL_3_14B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
-    LOCAL_MINISTRAL_3_14B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
     # Embeddings are billed on input only; the output price is zero rather than
     # absent so one arithmetic path covers every model.
     MISTRAL_EMBED: ModelPrice(input_usd_per_mtok=0.10, output_usd_per_mtok=0.0),
@@ -63,19 +63,42 @@ a local run rather than to API tokens.
 """
 
 
-def aliased_price(model: str) -> ModelPrice | None:
+def aliased_price(model: str, prices: Mapping[str, ModelPrice] | None = None) -> ModelPrice | None:
     """The published price for a model id, following the local-server alias.
 
     Exact ids come straight from the price table; an id containing the local
     Ministral 3 14B marker prices as ``MINISTRAL_3_14B``. Anything else has no
-    published price.
+    published price. ``prices`` lets a run apply its own table -- the one it
+    recorded -- through the same alias rule, so a price is never resolved two
+    ways in two places.
     """
-    price = PRICES.get(model)
+    table = PRICES if prices is None else prices
+    price = table.get(model)
     if price is not None:
         return price
-    if LOCAL_MINISTRAL_3_14B_MARKER in model:
-        return PRICES[MINISTRAL_3_14B]
+    if LOCAL_MINISTRAL_3_14B_MARKER in model.casefold():
+        return table.get(MINISTRAL_3_14B) or PRICES[MINISTRAL_3_14B]
     return None
+
+
+def price_of(
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    prices: Mapping[str, ModelPrice] | None = None,
+) -> float | None:
+    """USD for one call, or ``None`` when the model has no published price.
+
+    The one place the arithmetic lives: the serving path, the eval's repricing
+    pass and the grid all resolve a price the same way and multiply it the same
+    way, so a rate applied in one of them is applied in all of them.
+    """
+    price = aliased_price(model, prices)
+    if price is None:
+        return None
+    return (
+        prompt_tokens * price.input_usd_per_mtok + completion_tokens * price.output_usd_per_mtok
+    ) / 1_000_000
 
 
 class AnswerConfig(BaseModel):
@@ -166,17 +189,13 @@ class AnswerConfig(BaseModel):
         that already happened. A genuinely unpriced model logs once per model
         per process rather than per call.
         """
-        price = self.prices.get(model)
-        if price is None and LOCAL_MINISTRAL_3_14B_MARKER in model.casefold():
-            price = self.prices.get(MINISTRAL_3_14B) or PRICES[MINISTRAL_3_14B]
-        if price is None:
+        cost = price_of(model, prompt_tokens, completion_tokens, self.prices)
+        if cost is None:
             if model not in _WARNED_UNPRICED:
                 _WARNED_UNPRICED.add(model)
                 logger.warning("No price for model, cost recorded as zero", model=model)
             return 0.0
-        return (
-            prompt_tokens * price.input_usd_per_mtok + completion_tokens * price.output_usd_per_mtok
-        ) / 1_000_000
+        return cost
 
 
 _WARNED_UNPRICED: set[str] = set()
@@ -209,4 +228,5 @@ __all__ = [
     "ModelPrice",
     "aliased_price",
     "known_serving_model",
+    "price_of",
 ]

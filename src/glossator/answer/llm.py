@@ -10,6 +10,7 @@ fail, and the record carries usage, latency and the USD the call cost.
 import asyncio
 import json
 import random
+import re
 import time
 import uuid
 from datetime import UTC, datetime
@@ -111,6 +112,11 @@ class LLMCall(BaseModel):
     """How a structured request was sent: `json_schema` or `json_object`. Part
     of the record so a run on a server that ignores schemas says which mode its
     numbers were produced under (D-035c)."""
+    reasoning_effort: str | None = None
+    """The thinking setting sent with the request, or `None` when the parameter
+    was not sent at all. D-023 wants it per call, not only per run: the operator
+    exports it next to the run, so a run that changed it halfway would otherwise
+    have one number in `config.json` and two behaviours in the ledger."""
     response: dict[str, Any] | None = None
     text: str = ""
     parsed: dict[str, Any] | None = None
@@ -192,12 +198,6 @@ class LLM(Protocol):
     ) -> Completion: ...
 
 
-def _reasoning_kwargs() -> dict[str, Any]:
-    """``reasoning_effort`` for the SDK when the operator set it, else nothing."""
-    effort = chat_reasoning_effort()
-    return {"reasoning_effort": effort} if effort else {}
-
-
 class MistralLLM:
     """Mistral chat completions for the serving path."""
 
@@ -233,6 +233,7 @@ class MistralLLM:
             tool_choice=tool_choice,
             response_schema=response_schema,
             response_format=self.config.response_format,
+            reasoning_effort=chat_reasoning_effort(),
             purpose=purpose,
         )
         calls: list[LLMCall] = []
@@ -282,7 +283,7 @@ class MistralLLM:
                     ),
                     response_format=settings.response_format_payload(),
                     timeout_ms=self.config.request_timeout_ms,
-                    **_reasoning_kwargs(),
+                    **settings.reasoning_kwargs(),
                 )
             except CALL_ERRORS as error:
                 # Recorded first, then judged: an attempt that is not retried is
@@ -376,7 +377,12 @@ class _Settings(BaseModel):
     tool_choice: str | None
     response_schema: type[BaseModel] | None
     response_format: Literal["json_schema", "json_object"]
+    reasoning_effort: str | None
     purpose: str
+
+    def reasoning_kwargs(self) -> dict[str, Any]:
+        """``reasoning_effort`` for the SDK when the operator set it, else nothing."""
+        return {"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}
 
     def response_format_payload(self) -> ResponseFormatTypedDict | None:
         if self.response_schema is None:
@@ -408,7 +414,12 @@ def _blank_call(messages: list[Message], settings: _Settings, attempt: int) -> L
         response_format=(
             settings.response_format if settings.response_schema is not None else None
         ),
+        reasoning_effort=settings.reasoning_effort,
     )
+
+
+_OPEN_FENCE = re.compile(r"^`{3,}[A-Za-z0-9_.+-]*[ \t]*\n?")
+_CLOSE_FENCE = re.compile(r"[ \t\n]*`{3,}[ \t]*$")
 
 
 def _strip_fences(text: str) -> str:
@@ -418,15 +429,17 @@ def _strip_fences(text: str) -> str:
     returns the bare body. The raw text stays in the record; only the parsed
     copy is unwrapped, so the fallback is stated configuration, not silent
     degrade.
+
+    Both the opening fence with its info string and the closing fence are
+    matched on their own, because a server that puts the whole object on one
+    line (```` ```json {"a": 1} ```` ) has a body between them just the same:
+    dropping the first line wholesale threw that body away and turned a paid
+    response into "response is not JSON".
     """
     stripped = text.strip()
-    if stripped.startswith("```"):
-        lines = stripped.splitlines()
-        lines = lines[1:]
-        if lines and lines[-1].strip().startswith("```"):
-            lines = lines[:-1]
-        stripped = "\n".join(lines).strip()
-    return stripped
+    if not stripped.startswith("```"):
+        return stripped
+    return _CLOSE_FENCE.sub("", _OPEN_FENCE.sub("", stripped, count=1)).strip()
 
 
 def _parse(text: str, schema: type[BaseModel] | None) -> tuple[dict[str, Any] | None, str | None]:
