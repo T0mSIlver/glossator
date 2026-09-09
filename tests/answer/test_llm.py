@@ -148,6 +148,21 @@ def test_json_object_mode_sends_the_bare_type_and_still_validates() -> None:
     assert completion.calls[0].response_format == "json_object"
 
 
+def test_a_fenced_json_object_response_parses_without_repair() -> None:
+    """llama.cpp serves ``json_object`` inside a ```json fence (D-035c): the
+    fence is stripped before parsing, so the fallback needs no repair call."""
+    llm, client = build(
+        [response(content='```json\n{"answer": "42"}\n```')],
+        config=AnswerConfig(retry_base_seconds=0.0, response_format="json_object"),
+    )
+
+    completion = complete(llm, response_schema=Shape)
+
+    assert isinstance(completion.parsed, Shape)
+    assert completion.parsed.answer == "42"
+    assert len(completion.calls) == 1
+
+
 def test_the_mode_a_structured_call_ran_under_is_recorded() -> None:
     recorder = Collector()
     llm, _client = build([response(content='{"answer": "42"}')], recorder)

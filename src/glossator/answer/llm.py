@@ -403,12 +403,30 @@ def _blank_call(messages: list[Message], settings: _Settings, attempt: int) -> L
     )
 
 
+def _strip_fences(text: str) -> str:
+    """Unwrap a ```json fence around a structured response (D-035c).
+
+    The local server returns ``json_object`` responses inside a fence; the API
+    returns the bare body. The raw text stays in the record; only the parsed
+    copy is unwrapped, so the fallback is stated configuration, not silent
+    degrade.
+    """
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+        lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        stripped = "\n".join(lines).strip()
+    return stripped
+
+
 def _parse(text: str, schema: type[BaseModel] | None) -> tuple[dict[str, Any] | None, str | None]:
     """Validate the JSON body against the schema, reporting why it failed."""
     if schema is None:
         return None, None
     try:
-        payload = json.loads(text)
+        payload = json.loads(_strip_fences(text))
     except json.JSONDecodeError as error:
         return None, f"response is not JSON: {error}"
     try:
