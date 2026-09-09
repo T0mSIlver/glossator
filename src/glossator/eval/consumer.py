@@ -30,6 +30,7 @@ import math
 import os
 import random
 import re
+import shutil
 import statistics
 import subprocess
 import time
@@ -182,8 +183,9 @@ class ConsumerSpec:
     harness: Literal["opencode", "codex", "claude"]
     model: str
     variant: str | None = None
-    """opencode --variant (provider-specific reasoning effort). None means the
-    harness default; weak consumers always name the lowest variant."""
+    """The reasoning effort, named the way the harness names it: opencode's
+    ``--variant``, claude's ``--effort``, codex's ``model_reasoning_effort``.
+    None means the harness default; weak consumers always name the lowest."""
 
 
 CONSUMERS: tuple[ConsumerSpec, ...] = (
@@ -203,11 +205,13 @@ CONSUMERS: tuple[ConsumerSpec, ...] = (
         name="codex-gpt-luna-low",
         harness="codex",
         model="gpt-5.6-luna",
+        variant="low",
     ),
     ConsumerSpec(
         name="claude-sonnet-low",
         harness="claude",
         model="sonnet",
+        variant="low",
     ),
 )
 """Every weak consumer. The muse consumer is first: it is the contributor-free
@@ -313,15 +317,28 @@ class _CallsRecorder:
 # --------------------------------------------------------------------------- #
 
 
+MINED_COUNT = 40
+FRESH_COUNT = 20
+
+
 def build_question_set(
-    mined_path: Path = MINED_DATASET, fresh_path: Path = FRESH_DATASET
+    mined_count: int = MINED_COUNT,
+    fresh_count: int = FRESH_COUNT,
+    mined_path: Path = MINED_DATASET,
+    fresh_path: Path = FRESH_DATASET,
 ) -> list[EvalQuestion]:
-    """The fixed 60: 40 stratified from mined (seed 0, all 9 unanswerables kept)
-    and 20 stratified from the fresh slice (seed 0). Same rows every run."""
-    mined = stratified_subset(read_jsonl(mined_path), 40, seed=0)
-    fresh = stratified_subset(read_jsonl(fresh_path), 20, seed=0)
+    """The fixed question set: ``mined_count`` stratified from mined (seed 0)
+    and ``fresh_count`` from the fresh slice (seed 0). Same rows every run, and
+    a smaller count is a prefix of a larger one, so a consumer run on thirty
+    questions is comparable with one on sixty.
+
+    The full forty keeps all nine mined unanswerables; a smaller draw keeps as
+    many as round-robin stratification gives it, and the run's config records
+    how many it got."""
+    mined = stratified_subset(read_jsonl(mined_path), mined_count, seed=0)
+    fresh = stratified_subset(read_jsonl(fresh_path), fresh_count, seed=0)
     unanswerable = [q for q in mined if q.type.value == "unanswerable"]
-    if len(unanswerable) != 9:
+    if mined_count >= MINED_COUNT and len(unanswerable) != 9:
         raise ValueError(f"expected all 9 mined unanswerables in the 40, found {len(unanswerable)}")
     return mined + fresh
 
@@ -333,6 +350,26 @@ def prompt_for(question: EvalQuestion) -> str:
 # --------------------------------------------------------------------------- #
 # Harness event parsing
 # --------------------------------------------------------------------------- #
+
+
+def _json_events(lines: Sequence[str]) -> list[dict[str, Any]]:
+    """The JSON objects of an event stream, skipping anything unparsable.
+
+    Every harness writes one JSON object per line and every harness also writes
+    the occasional banner or warning to the same stream, so a line that does
+    not parse is dropped rather than failing the cell.
+    """
+    events: list[dict[str, Any]] = []
+    for line in lines:
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(event, dict):
+            events.append(event)
+    return events
 
 
 def parse_opencode_events(lines: Sequence[str]) -> tuple[str, list[ToolCallRecord]]:
@@ -459,6 +496,255 @@ def parse_opencode_tokens(lines: Sequence[str]) -> tuple[HarnessTokens, float]:
     ), cost
 
 
+def _content_blocks(event: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """The content blocks of one claude ``assistant`` or ``user`` event."""
+    message = event.get("message")
+    if not isinstance(message, dict):
+        return []
+    content = message.get("content")
+    if not isinstance(content, list):
+        return []
+    return [block for block in content if isinstance(block, dict)]
+
+
+def _tool_output_text(content: Any) -> str:
+    """What the tool printed, out of a harness's wrapping of the result.
+
+    An MCP result arrives as the JSON object ``{"result": "<printed output>"}``;
+    a built-in tool's result arrives as plain text or as a list of blocks. The
+    printed output is what carries this server's ``error:`` and ``note:`` lines,
+    so it is unwrapped before either is looked for.
+    """
+    if isinstance(content, str):
+        text = content
+    elif isinstance(content, list):
+        parts = [
+            str(block.get("text"))
+            if isinstance(block, dict) and isinstance(block.get("text"), str)
+            else json.dumps(block, sort_keys=True)
+            for block in content
+        ]
+        text = "\n".join(parts)
+    else:
+        text = json.dumps(content, sort_keys=True)
+    try:
+        payload = json.loads(text)
+    except ValueError:
+        return text
+    if isinstance(payload, dict) and isinstance(payload.get("result"), str):
+        return str(payload["result"])
+    return text
+
+
+def _tool_call_record(name: str, arguments: Any, output: str, failed: bool) -> ToolCallRecord:
+    """One tool call, however the harness spelled the call and its result."""
+    recorded: dict[str, str] = {}
+    if isinstance(arguments, Mapping):
+        for key, value in arguments.items():
+            if is_verify_tool(name) and key == "quotes":
+                recorded[key] = value if isinstance(value, str) else json.dumps(value)
+            else:
+                recorded[key] = _short(value)
+    elif arguments not in (None, ""):
+        recorded["input"] = _short(arguments)
+    error = _tool_error(name, output)
+    if error is None and failed:
+        error = f"{name}: {output.strip().splitlines()[0] if output.strip() else 'failed'}"
+    if is_verify_tool(name) and output:
+        recorded["__verdicts"] = json.dumps(_verdicts(output), sort_keys=True)
+    return ToolCallRecord(
+        name=name,
+        arguments=recorded,
+        output_chars=len(output),
+        error=error,
+        notes=_tool_notes(output),
+    )
+
+
+def parse_claude_events(lines: Sequence[str]) -> tuple[str, list[ToolCallRecord]]:
+    """Answer text and tool calls from a ``claude -p --output-format stream-json``
+    stream.
+
+    Assistant messages carry ``tool_use`` blocks; each tool's output comes back
+    later as a ``tool_result`` block inside a user message, keyed by
+    ``tool_use_id``, so the two halves are joined on that id. The answer is the
+    ``result`` event's text, with the last assistant text as the fallback for a
+    run that ended without one.
+    """
+    calls: list[dict[str, Any]] = []
+    at_id: dict[str, int] = {}
+    last_text = ""
+    answer = ""
+    for event in _json_events(lines):
+        kind = event.get("type")
+        if kind == "assistant":
+            texts = []
+            for block in _content_blocks(event):
+                if block.get("type") == "tool_use":
+                    at_id[str(block.get("id", ""))] = len(calls)
+                    calls.append(
+                        {
+                            "name": str(block.get("name", "unknown")),
+                            "input": block.get("input"),
+                            "output": "",
+                            "failed": False,
+                        }
+                    )
+                elif block.get("type") == "text" and str(block.get("text", "")).strip():
+                    texts.append(str(block["text"]))
+            if texts:
+                last_text = "\n".join(texts).strip()
+        elif kind == "user":
+            for block in _content_blocks(event):
+                if block.get("type") != "tool_result":
+                    continue
+                index = at_id.get(str(block.get("tool_use_id", "")))
+                if index is None:
+                    continue
+                calls[index]["output"] = _tool_output_text(block.get("content"))
+                calls[index]["failed"] = bool(block.get("is_error"))
+        elif kind == "result" and isinstance(event.get("result"), str):
+            answer = event["result"].strip()
+    records = [
+        _tool_call_record(
+            str(call["name"]), call["input"], str(call["output"]), bool(call["failed"])
+        )
+        for call in calls
+    ]
+    return answer or last_text, records
+
+
+def parse_claude_tokens(lines: Sequence[str]) -> tuple[HarnessTokens, float]:
+    """Billed tokens and cost from the run's ``result`` event.
+
+    Cached prompt tokens are prompt tokens: the input count is the sum of fresh,
+    cache-write and cache-read input, so a cell's total is comparable with a
+    harness that caches nothing.
+    """
+    tokens = HarnessTokens()
+    cost = 0.0
+    for event in _json_events(lines):
+        if event.get("type") != "result":
+            continue
+        usage = event.get("usage")
+        if isinstance(usage, dict):
+            details = usage.get("output_tokens_details")
+            tokens = HarnessTokens(
+                input_tokens=sum(
+                    int(usage.get(field, 0) or 0)
+                    for field in (
+                        "input_tokens",
+                        "cache_creation_input_tokens",
+                        "cache_read_input_tokens",
+                    )
+                ),
+                output_tokens=int(usage.get("output_tokens", 0) or 0),
+                reasoning_tokens=int(
+                    (details.get("thinking_tokens", 0) or 0) if isinstance(details, dict) else 0
+                ),
+            )
+        with contextlib.suppress(TypeError, ValueError):
+            cost = float(event.get("total_cost_usd", 0.0) or 0.0)
+    return tokens, cost
+
+
+def claude_failure(lines: Sequence[str]) -> str | None:
+    """The failure a claude stream reports, or None when the turn succeeded."""
+    for event in _json_events(lines):
+        if event.get("type") != "result":
+            continue
+        if event.get("subtype") == "success" and not event.get("is_error"):
+            return None
+        detail = event.get("result") if isinstance(event.get("result"), str) else ""
+        return f"{event.get('subtype', 'error')}: {detail}"[:400]
+    return "the harness wrote no result event"
+
+
+def _codex_item(event: Mapping[str, Any]) -> tuple[str, dict[str, Any]] | None:
+    """One codex thread item and its kind, out of an ``item.*`` event."""
+    item = event.get("item")
+    if not isinstance(item, dict):
+        return None
+    kind = item.get("item_type") or item.get("type") or ""
+    return str(kind), item
+
+
+def parse_codex_events(lines: Sequence[str]) -> tuple[str, list[ToolCallRecord]]:
+    """Answer text and tool calls from a ``codex exec --json`` stream.
+
+    The stream is a sequence of thread items: ``mcp_tool_call`` items carry the
+    server, the tool, its arguments and its result; the last ``agent_message``
+    item is the answer. Items are announced when they start and again when they
+    complete, so each is kept once, under its id, and overwritten by its
+    completion.
+    """
+    texts: list[str] = []
+    calls: dict[str, ToolCallRecord] = {}
+    for event in _json_events(lines):
+        if not str(event.get("type", "")).startswith("item."):
+            continue
+        parsed = _codex_item(event)
+        if parsed is None:
+            continue
+        kind, item = parsed
+        item_id = str(item.get("id", len(calls)))
+        if kind == "agent_message":
+            text = item.get("text")
+            if isinstance(text, str) and text.strip():
+                texts = [text.strip()]
+        elif kind == "mcp_tool_call":
+            calls[item_id] = _codex_tool_call(item)
+    return "\n".join(texts).strip(), list(calls.values())
+
+
+def _codex_tool_call(item: Mapping[str, Any]) -> ToolCallRecord:
+    """One ``mcp_tool_call`` item. The name a consumer sees is the server's own
+    name and the tool's, which is how codex prefixes them."""
+    tool = str(item.get("tool") or item.get("name") or "unknown")
+    server = str(item.get("server") or "")
+    name = f"{server}__{tool}" if server and not tool.startswith(server) else tool
+    arguments = item.get("arguments")
+    if isinstance(arguments, str):
+        with contextlib.suppress(ValueError):
+            arguments = json.loads(arguments)
+    output = _tool_output_text(item.get("result") if item.get("result") is not None else "")
+    status = str(item.get("status", ""))
+    failed = status in ("failed", "errored", "error") or bool(item.get("error"))
+    return _tool_call_record(name, arguments, output, failed)
+
+
+def parse_codex_tokens(lines: Sequence[str]) -> tuple[HarnessTokens, float]:
+    """Billed tokens from the ``turn.completed`` usage. Codex reports no price,
+    so the cost stays zero and the token counts carry the comparison."""
+    tokens = HarnessTokens()
+    for event in _json_events(lines):
+        usage = event.get("usage")
+        if not isinstance(usage, dict):
+            continue
+        tokens = HarnessTokens(
+            input_tokens=int(usage.get("input_tokens", 0) or 0)
+            + int(usage.get("cached_input_tokens", 0) or 0)
+            + int(usage.get("cache_write_input_tokens", 0) or 0),
+            output_tokens=int(usage.get("output_tokens", 0) or 0),
+            reasoning_tokens=int(usage.get("reasoning_output_tokens", 0) or 0),
+        )
+    return tokens, 0.0
+
+
+def codex_failure(lines: Sequence[str]) -> str | None:
+    """The failure a codex stream reports, or None when the turn completed."""
+    failure: str | None = None
+    for event in _json_events(lines):
+        kind = event.get("type")
+        if kind == "turn.completed":
+            return None
+        if kind in ("error", "turn.failed"):
+            error = event.get("error")
+            message = error.get("message") if isinstance(error, dict) else event.get("message")
+            failure = str(message or kind)[:400]
+    return failure
+
+
 def extract_links(answer: str) -> list[str]:
     """Documentation URLs in the answer, in order, deduplicated."""
     seen: list[str] = []
@@ -514,42 +800,63 @@ def opencode_command(spec: ConsumerSpec, prompt: str, workdir: Path) -> list[str
     return command
 
 
+MCP_SERVER_NAME = "mistral-docs"
+"""What the consumer's client calls this server. Harnesses prefix tool names
+with it, and the name a consumer reads is the server's own."""
+
+TOKEN_ENV_VAR = "GLOSSATOR_MCP_TOKEN"
+
+
 def codex_command(
-    spec: ConsumerSpec, prompt_path: Path, answer_path: Path, mcp_url: str
+    spec: ConsumerSpec, answer_path: Path, mcp_url: str | None, *, token_env: str = TOKEN_ENV_VAR
 ) -> list[str]:
-    """Headless codex over HTTP MCP. Key names follow ``codex exec --help``."""
-    token_var = "GLOSSATOR_MCP_TOKEN"
-    return [
-        "codex",
-        "exec",
-        "--skip-git-repo-check",
-        "-m",
-        spec.model,
-        "-c",
-        "model_reasoning_effort='\"low\"'",
-        "-c",
-        f"mcp_servers.glossator.url={mcp_url}",
-        "-c",
-        f"mcp_servers.glossator.bearer_token_env_var={token_var}",
-        "--json",
-        "-o",
-        str(answer_path),
-        "-",
-    ]
+    """Headless codex, prompt on stdin. The MCP keys are the ones
+    ``codex mcp add --url ... --bearer-token-env-var ...`` writes into
+    ``config.toml``: ``mcp_servers.<name>.url`` and
+    ``mcp_servers.<name>.bearer_token_env_var``. The token itself never reaches
+    the command line; codex reads it from the environment."""
+    command = ["codex", "exec", "--skip-git-repo-check", "-m", spec.model]
+    if spec.variant is not None:
+        command += ["-c", f"model_reasoning_effort='\"{spec.variant}\"'"]
+    if mcp_url is not None:
+        command += [
+            "-c",
+            f"mcp_servers.{MCP_SERVER_NAME}.url={mcp_url}",
+            "-c",
+            f"mcp_servers.{MCP_SERVER_NAME}.bearer_token_env_var={token_env}",
+        ]
+    return command + ["--json", "-o", str(answer_path), "-"]
 
 
-def claude_command(spec: ConsumerSpec, mcp_config: Path) -> list[str]:
-    return [
+def claude_command(spec: ConsumerSpec, prompt: str, mcp_config: Path) -> list[str]:
+    """Headless claude, prompt as an argument and stdin closed.
+
+    ``--setting-sources ""`` keeps the machine's own settings, hooks and skills
+    out of the consumer, so the agent under test is the stock harness on the
+    named model. ``--permission-mode bypassPermissions`` is what makes the run
+    headless at all: with the default mode nobody answers a permission prompt
+    in print mode and every call that would ask is denied.
+    """
+    command = [
         "claude",
         "-p",
+        prompt,
         "--model",
         spec.model,
-        "--effort",
-        "low",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--setting-sources",
+        "",
+        "--permission-mode",
+        "bypassPermissions",
         "--mcp-config",
         str(mcp_config),
         "--strict-mcp-config",
     ]
+    if spec.variant is not None:
+        command += ["--effort", spec.variant]
+    return command
 
 
 def write_opencode_config(workdir: Path, mcp_url: str, token: str) -> None:
@@ -557,7 +864,7 @@ def write_opencode_config(workdir: Path, mcp_url: str, token: str) -> None:
     client from starting an OAuth flow against a bearer-token server."""
     config = {
         "mcp": {
-            "glossator": {
+            MCP_SERVER_NAME: {
                 "type": "remote",
                 "url": mcp_url,
                 "headers": {"Authorization": f"Bearer {token}"},
@@ -566,6 +873,24 @@ def write_opencode_config(workdir: Path, mcp_url: str, token: str) -> None:
         }
     }
     (workdir / "opencode.json").write_text(json.dumps(config, indent=2) + "\n")
+
+
+def write_claude_mcp_config(workdir: Path, mcp_url: str | None, token: str) -> Path:
+    """The cell's MCP config file, empty in the arm that has no server.
+
+    An empty ``mcpServers`` object with ``--strict-mcp-config`` is how A0 is
+    guaranteed no MCP server at all: no file on the machine can add one back.
+    """
+    servers: dict[str, Any] = {}
+    if mcp_url is not None:
+        servers[MCP_SERVER_NAME] = {
+            "type": "http",
+            "url": mcp_url,
+            "headers": {"Authorization": f"Bearer {token}"},
+        }
+    path = workdir / "mcp.json"
+    path.write_text(json.dumps({"mcpServers": servers}, indent=2) + "\n")
+    return path
 
 
 # --------------------------------------------------------------------------- #
@@ -584,6 +909,104 @@ class CollectedAnswer:
     error: str | None
 
 
+@dataclass(slots=True)
+class _HarnessRun:
+    """What one headless harness process left behind."""
+
+    lines: list[str]
+    stderr: str
+    wall_seconds: float
+    timed_out: bool
+    events_path: Path
+
+
+def _run_harness(
+    command: Sequence[str],
+    cell_dir: Path,
+    *,
+    timeout_s: float,
+    cwd: Path | None = None,
+    stdin_path: Path | None = None,
+    env: Mapping[str, str] | None = None,
+) -> _HarnessRun:
+    """One harness process, its event stream and stderr kept in the cell.
+
+    Nothing is ever read from the terminal: stdin is either the prompt file or
+    ``/dev/null``, so a harness that would otherwise wait for input exits.
+    """
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    events_path = cell_dir / "events.jsonl"
+    stderr_path = cell_dir / "stderr.txt"
+    started = time.perf_counter()
+    timed_out = False
+    with contextlib.ExitStack() as stack:
+        events_file = stack.enter_context(events_path.open("w"))
+        stderr_file = stack.enter_context(stderr_path.open("w"))
+        stdin: Any = subprocess.DEVNULL
+        if stdin_path is not None:
+            stdin = stack.enter_context(stdin_path.open("rb"))
+        try:
+            subprocess.run(
+                list(command),
+                cwd=str(cwd) if cwd is not None else None,
+                stdin=stdin,
+                stdout=events_file,
+                stderr=stderr_file,
+                timeout=timeout_s,
+                check=False,
+                env=dict(env) if env is not None else None,
+            )
+        except subprocess.TimeoutExpired:
+            timed_out = True
+    return _HarnessRun(
+        lines=events_path.read_text().splitlines() if events_path.is_file() else [],
+        stderr=stderr_path.read_text() if stderr_path.is_file() else "",
+        wall_seconds=time.perf_counter() - started,
+        timed_out=timed_out,
+        events_path=events_path,
+    )
+
+
+def _harness_environment(token: str, token_env: str = TOKEN_ENV_VAR) -> dict[str, str]:
+    """The consumer's environment: this process's, plus the server token for a
+    harness that reads it from a named variable."""
+    environment = dict(os.environ)
+    if token:
+        environment[token_env] = token
+    return environment
+
+
+def _collected(
+    run: _HarnessRun,
+    answer: str,
+    calls: Sequence[ToolCallRecord],
+    tokens: HarnessTokens,
+    cost: float,
+    *,
+    timeout_s: float,
+    failure: str | None = None,
+) -> CollectedAnswer:
+    """One cell's answer, with the failure a silent harness leaves in stderr."""
+    error = failure
+    if run.timed_out:
+        error = f"harness timeout after {timeout_s:.0f}s"
+    elif not answer and not calls:
+        if is_quota_error(run.stderr) or (failure and is_quota_error(failure)):
+            detail = (run.stderr.strip() or (failure or ""))[-300:]
+            error = f"provider quota exhausted: {detail}"
+        elif error is None:
+            error = "harness produced no answer text and no tool calls"
+    return CollectedAnswer(
+        answer_text=answer,
+        tool_calls=list(calls),
+        tokens=tokens,
+        cost_usd=cost,
+        wall_seconds=run.wall_seconds,
+        transcript=str(run.events_path),
+        error=error,
+    )
+
+
 def collect_opencode(
     spec: ConsumerSpec,
     prompt: str,
@@ -599,50 +1022,79 @@ def collect_opencode(
     (cell_dir / "prompt.txt").write_text(prompt + "\n")
     if mcp_url is not None:
         write_opencode_config(cell_dir, mcp_url, token)
-    command = opencode_command(spec, prompt, cell_dir)
-    events_path = cell_dir / "events.jsonl"
-    stderr_path = cell_dir / "stderr.txt"
-    started = time.perf_counter()
-    try:
-        with events_path.open("w") as events_file, stderr_path.open("w") as stderr_file:
-            subprocess.run(
-                command,
-                stdin=subprocess.DEVNULL,
-                stdout=events_file,
-                stderr=stderr_file,
-                timeout=timeout_s,
-                check=False,
-            )
-    except subprocess.TimeoutExpired:
-        return CollectedAnswer(
-            answer_text="",
-            tool_calls=[],
-            tokens=HarnessTokens(),
-            cost_usd=0.0,
-            wall_seconds=time.perf_counter() - started,
-            transcript=str(events_path),
-            error=f"harness timeout after {timeout_s:.0f}s",
-        )
-    wall = time.perf_counter() - started
-    lines = events_path.read_text().splitlines() if events_path.is_file() else []
-    answer, calls = parse_opencode_events(lines)
-    tokens, cost = parse_opencode_tokens(lines)
-    error: str | None = None
-    if not answer and not calls:
-        stderr_text = stderr_path.read_text() if stderr_path.is_file() else ""
-        if is_quota_error(stderr_text):
-            error = f"provider quota exhausted: {stderr_text.strip()[-300:]}"
-        else:
-            error = "harness produced no answer text and no tool calls"
-    return CollectedAnswer(
-        answer_text=answer,
-        tool_calls=calls,
-        tokens=tokens,
-        cost_usd=cost,
-        wall_seconds=wall,
-        transcript=str(events_path),
-        error=error,
+    run = _run_harness(opencode_command(spec, prompt, cell_dir), cell_dir, timeout_s=timeout_s)
+    answer, calls = parse_opencode_events(run.lines)
+    tokens, cost = parse_opencode_tokens(run.lines)
+    return _collected(run, answer, calls, tokens, cost, timeout_s=timeout_s)
+
+
+def collect_claude(
+    spec: ConsumerSpec,
+    prompt: str,
+    cell_dir: Path,
+    *,
+    mcp_url: str | None,
+    token: str,
+    timeout_s: float,
+) -> CollectedAnswer:
+    """One question through headless claude, from the cell's own directory.
+
+    The MCP server is declared in the cell's ``mcp.json`` and nowhere else, so
+    the arm decides what the consumer can call.
+    """
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    (cell_dir / "prompt.txt").write_text(prompt + "\n")
+    config_path = write_claude_mcp_config(cell_dir, mcp_url, token)
+    run = _run_harness(
+        claude_command(spec, prompt, config_path),
+        cell_dir,
+        timeout_s=timeout_s,
+        cwd=cell_dir,
+        env=_harness_environment(token),
     )
+    answer, calls = parse_claude_events(run.lines)
+    tokens, cost = parse_claude_tokens(run.lines)
+    return _collected(
+        run, answer, calls, tokens, cost, timeout_s=timeout_s, failure=claude_failure(run.lines)
+    )
+
+
+def collect_codex(
+    spec: ConsumerSpec,
+    prompt: str,
+    cell_dir: Path,
+    *,
+    mcp_url: str | None,
+    token: str,
+    timeout_s: float,
+) -> CollectedAnswer:
+    """One question through headless codex, prompt piped in on stdin."""
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    prompt_path = cell_dir / "prompt.md"
+    prompt_path.write_text(prompt + "\n")
+    answer_path = cell_dir / "answer.md"
+    run = _run_harness(
+        codex_command(spec, answer_path, mcp_url),
+        cell_dir,
+        timeout_s=timeout_s,
+        cwd=cell_dir,
+        stdin_path=prompt_path,
+        env=_harness_environment(token),
+    )
+    answer, calls = parse_codex_events(run.lines)
+    tokens, cost = parse_codex_tokens(run.lines)
+    if not answer and answer_path.is_file():
+        answer = answer_path.read_text().strip()
+    return _collected(
+        run, answer, calls, tokens, cost, timeout_s=timeout_s, failure=codex_failure(run.lines)
+    )
+
+
+COLLECTORS = {
+    "opencode": collect_opencode,
+    "claude": collect_claude,
+    "codex": collect_codex,
+}
 
 
 def is_quota_error(text: str) -> bool:
@@ -669,6 +1121,23 @@ def cell_dir_for(scratch_root: Path, run_name: str, record: ConsumerRecord) -> P
     return scratch_root / run_name / record.consumer / record.arm / record.question_id
 
 
+def copy_transcript(
+    run_dir: Path, source: Path, *, consumer: str, arm: str, question_id: str
+) -> str:
+    """The cell's event stream, copied into the run directory (D-023c).
+
+    The scratch directory is the consumer's working directory and nothing else,
+    so the conversation behind a row travels with the run and a reviewer can
+    open it from the record's ``transcript`` path.
+    """
+    target = run_dir / "transcripts" / consumer / arm / f"{question_id}.jsonl"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not source.is_file():
+        return ""
+    shutil.copyfile(source, target)
+    return str(target.relative_to(run_dir))
+
+
 async def _collect_cell(
     spec: ConsumerSpec,
     question: EvalQuestion,
@@ -687,9 +1156,10 @@ async def _collect_cell(
     cell_dir = scratch_root / run_name / spec.name / arm / question.id
     prompt = prompt_for(question)
     mcp_url = mcp_urls.get(arm)
+    collect = COLLECTORS[spec.harness]
     async with semaphore:
         collected = await asyncio.to_thread(
-            collect_opencode,
+            collect,
             spec,
             prompt,
             cell_dir,
@@ -697,8 +1167,13 @@ async def _collect_cell(
             token=token,
             timeout_s=timeout_s,
         )
-    if spec.harness != "opencode":
-        raise SystemExit(f"harness {spec.harness!r} is not runnable in this command")
+    transcript = copy_transcript(
+        run_dir,
+        Path(collected.transcript),
+        consumer=spec.name,
+        arm=arm,
+        question_id=question.id,
+    )
     links = extract_links(collected.answer_text)
     calls = collected.tool_calls
     record = ConsumerRecord(
@@ -717,7 +1192,7 @@ async def _collect_cell(
         mcp_called=any(is_server_tool(call.name) for call in calls),
         cite_called=any(is_verify_tool(call.name) for call in calls),
         links=links,
-        transcript=collected.transcript,
+        transcript=transcript or collected.transcript,
         error=collected.error,
     )
     async with append_lock:
@@ -1241,9 +1716,12 @@ def render_readme(
         "- `defects.md`: every wrong turn with transcript path and severity.",
         "- `samples.md`: ten questions with the three arms side by side.",
         "- `figures/`: regenerated SVG charts.",
+        "- `transcripts/<consumer>/<arm>/<question>.jsonl`: the harness event",
+        "  stream behind every row, copied out of the consumer's scratch",
+        "  directory at collection time; each record names its own under",
+        "  `transcript`.",
         "- `calls.jsonl`: the judge's calls, verbatim. The consumers' own model",
-        "  calls are their harnesses', not this server's: each record names the",
-        "  transcript the harness wrote, under `transcript`.",
+        "  calls are their harnesses', not this server's.",
     ]
     return "\n".join(lines) + "\n"
 
@@ -1343,8 +1821,14 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     run_parser.add_argument("--token-env", default="GLOSSATOR_MCP_TOKEN")
     run_parser.add_argument("--timeout-s", type=float, default=QUESTION_TIMEOUT_S)
     run_parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
-    run_parser.add_argument("--mined", type=Path, default=MINED_DATASET)
-    run_parser.add_argument("--fresh", type=Path, default=FRESH_DATASET)
+    run_parser.add_argument(
+        "--mined", type=int, default=MINED_COUNT, help="How many mined questions (seed 0)"
+    )
+    run_parser.add_argument(
+        "--fresh", type=int, default=FRESH_COUNT, help="How many fresh questions (seed 0)"
+    )
+    run_parser.add_argument("--mined-path", type=Path, default=MINED_DATASET)
+    run_parser.add_argument("--fresh-path", type=Path, default=FRESH_DATASET)
 
     judge_parser = sub.add_parser("judge", help="Grade stored answers (resumable)")
     judge_parser.add_argument("--run", type=Path, required=True)
@@ -1365,15 +1849,9 @@ async def _run(args: argparse.Namespace) -> None:
     unknown_arms = sorted(set(arms) - set(ARMS))
     if unknown_arms:
         raise SystemExit(f"unknown arms {unknown_arms}; available: {list(ARMS)}")
-    for spec in specs:
-        if spec.harness != "opencode":
-            raise SystemExit(
-                f"consumer {spec.name!r} needs harness {spec.harness!r}, "
-                "which this command does not drive yet"
-            )
     name = args.name or (datetime.now(UTC).strftime("%Y-%m-%d-%H%M") + "-consumer-eval")
     run_dir = resolve_run_directory(name, root=args.runs_root)
-    questions = build_question_set(args.mined, args.fresh)
+    questions = build_question_set(args.mined, args.fresh, args.mined_path, args.fresh_path)
     token = os.environ.get(args.token_env, "")
     if any(arm in ("A1", "A2") for arm in arms) and not token:
         raise SystemExit(f"{args.token_env} is not set; the MCP arms need it")
@@ -1384,13 +1862,17 @@ async def _run(args: argparse.Namespace) -> None:
         "run_dir": str(run_dir),
         "consumers": [spec.name for spec in specs],
         "consumer_models": {spec.name: spec.model for spec in specs},
+        "consumer_harnesses": {spec.name: spec.harness for spec in specs},
         "consumer_variants": {spec.name: spec.variant for spec in specs},
         "arms": arms,
         "arm_tools": {arm: ARM_TOOLS[arm] for arm in arms},
         "mcp_urls": {arm: mcp_urls[arm] for arm in arms if arm in mcp_urls},
+        "mcp_server_name": MCP_SERVER_NAME,
+        "scratch_root": str(args.scratch_root),
         "question_count": len(questions),
-        "mined_count": 40,
-        "fresh_count": 20,
+        "mined_count": args.mined,
+        "fresh_count": args.fresh,
+        "unanswerable_count": sum(1 for q in questions if q.type.value == "unanswerable"),
         "questions": [question.id for question in questions],
         "prompt_lead": PROMPT_LEAD,
         "judge_model": None,
@@ -1509,10 +1991,12 @@ if __name__ == "__main__":
 __all__ = [
     "ARMS",
     "ARM_TOOLS",
+    "COLLECTORS",
     "TOOL_SUFFIXES",
     "CONSUMERS",
     "CONSUMER_NAMES",
     "MAX_PARALLEL",
+    "MCP_SERVER_NAME",
     "PROMPT_LEAD",
     "ConsumerRecord",
     "ConsumerSpec",
@@ -1523,10 +2007,15 @@ __all__ = [
     "check_fragments",
     "cite_verdicts",
     "claude_command",
+    "claude_failure",
     "codex_command",
+    "codex_failure",
+    "collect_claude",
+    "collect_codex",
     "collect_defects",
     "collect_opencode",
     "consumer_spec",
+    "copy_transcript",
     "corpus_page_urls",
     "extract_links",
     "is_quota_error",
@@ -1536,9 +2025,14 @@ __all__ = [
     "judge_record",
     "load_records",
     "opencode_command",
+    "parse_claude_events",
+    "parse_claude_tokens",
+    "parse_codex_events",
+    "parse_codex_tokens",
     "parse_opencode_events",
     "parse_opencode_tokens",
     "prompt_for",
+    "write_claude_mcp_config",
     "record_metrics",
     "refused",
     "render_defects",

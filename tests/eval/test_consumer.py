@@ -15,7 +15,11 @@ from glossator.eval.consumer import (
     aggregate,
     build_question_set,
     cite_verdicts,
+    claude_command,
+    claude_failure,
+    codex_command,
     collect_defects,
+    copy_transcript,
     corpus_page_urls,
     extract_links,
     is_quota_error,
@@ -24,14 +28,24 @@ from glossator.eval.consumer import (
     judged_citations,
     load_records,
     opencode_command,
+    parse_claude_events,
+    parse_claude_tokens,
     parse_opencode_events,
     parse_opencode_tokens,
     prompt_for,
     record_metrics,
     refused,
     render_samples,
+    write_claude_mcp_config,
 )
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, QuestionType
+
+STREAMS = Path(__file__).parent.parent / "fixtures" / "consumer-streams"
+"""Event streams recorded from real headless runs of each harness, trimmed."""
+
+
+def _stream(name: str) -> list[str]:
+    return (STREAMS / name).read_text().splitlines()
 
 
 def _question(question_id: str, type_: QuestionType = QuestionType.SINGLE_PAGE) -> EvalQuestion:
@@ -76,6 +90,19 @@ def test_question_set_is_fixed_and_keeps_unanswerables() -> None:
         q for q in first if q.id.startswith("mined-") and q.type == QuestionType.UNANSWERABLE
     ]
     assert len(mined_unanswerable) == 9
+
+
+def test_a_smaller_question_set_is_a_prefix_of_the_larger_one() -> None:
+    """A run on thirty questions is comparable with one on sixty: the smaller
+    draw is the larger one's first rows, stratified all the way down."""
+    thirty = build_question_set(20, 10)
+    sixty = build_question_set()
+
+    assert len(thirty) == 30
+    mined = [q.id for q in sixty if q.id.startswith("mined-")]
+    fresh = [q.id for q in sixty if not q.id.startswith("mined-")]
+    assert [q.id for q in thirty if q.id.startswith("mined-")] == mined[:20]
+    assert [q.id for q in thirty if not q.id.startswith("mined-")] == fresh[:10]
 
 
 def test_prompt_hides_the_evaluation() -> None:
@@ -373,6 +400,113 @@ def test_opencode_command_names_lowest_variant() -> None:
     command = opencode_command(spec, "prompt", Path("/tmp/scratch/q"))
     assert "--variant" in command and "minimal" in command
     assert "--dir" in command and "--format" in command and "json" in command
+
+
+def test_parse_claude_events() -> None:
+    """A recorded claude run: the answer, the tool calls under the names claude
+    gives MCP tools, and the quotes the server verified."""
+    lines = _stream("claude-a1.jsonl")
+
+    answer, calls = parse_claude_events(lines)
+
+    assert answer == "Done."
+    assert [call.name for call in calls] == [
+        "ToolSearch",
+        "mcp__mistral-docs__mistral_docs_search",
+        "mcp__mistral-docs__mistral_docs_verify_quotes",
+    ]
+    assert calls[1].arguments["query"] == "Codestral 25.08 context length"
+    # The tool's printed output is unwrapped from the {"result": ...} envelope,
+    # so the note line and the verdict line are readable.
+    assert calls[1].notes == [
+        "note: index ranking only; rerank=true reorders with a model (about 5 s)"
+    ]
+    assert calls[1].output_chars > 0
+    assert cite_verdicts(calls) == (1, 0)
+    assert claude_failure(lines) is None
+    record = _record(consumer="claude-sonnet-low", tool_calls=calls, answer_text=answer)
+    assert record.mcp_called is False  # set by the runner, not by the parser
+    assert any(is_server_tool(call.name) for call in calls)
+    assert any(is_verify_tool(call.name) for call in calls)
+
+
+def test_claude_tokens_count_cached_prompt_tokens() -> None:
+    tokens, cost = parse_claude_tokens(_stream("claude-a1.jsonl"))
+
+    assert tokens.input_tokens == 36 + 10349 + 80623
+    assert tokens.output_tokens == 672
+    assert tokens.reasoning_tokens == 310
+    assert cost == 0.0332223
+
+
+def test_a_rejected_claude_tool_call_is_an_error_row() -> None:
+    """The server's typed error reaches the record through claude's own
+    `is_error` result, so the defect list and the metrics see it."""
+    _answer, calls = parse_claude_events(_stream("claude-bad-param.jsonl"))
+
+    assert [call.name for call in calls] == ["mcp__mistral-docs__mistral_docs_search"]
+    assert calls[0].error == "mcp__mistral-docs__mistral_docs_search: error: E_BAD_PARAM"
+    metrics = record_metrics(_record(tool_calls=calls), set())
+    assert metrics["bad_param_errors"] == 1.0
+    assert collect_defects([_record(tool_calls=calls)])[0]["severity"] == "extra-calls"
+
+
+def test_claude_command_and_config_declare_one_arm() -> None:
+    spec = ConsumerSpec(name="claude-sonnet-low", harness="claude", model="sonnet", variant="low")
+    command = claude_command(spec, "the prompt", Path("/tmp/scratch/q/mcp.json"))
+
+    assert command[:3] == ["claude", "-p", "the prompt"]
+    for flag in ("--effort", "low", "--strict-mcp-config", "--verbose"):
+        assert flag in command
+    assert command[command.index("--output-format") + 1] == "stream-json"
+    assert command[command.index("--permission-mode") + 1] == "bypassPermissions"
+
+
+def test_claude_mcp_config_is_written_per_arm(tmp_path: Path) -> None:
+    with_server = json.loads(
+        write_claude_mcp_config(tmp_path, "http://127.0.0.1:8111/mcp", "s3cret").read_text()
+    )
+    assert with_server["mcpServers"]["mistral-docs"]["type"] == "http"
+    assert with_server["mcpServers"]["mistral-docs"]["headers"]["Authorization"] == "Bearer s3cret"
+
+    without = json.loads(write_claude_mcp_config(tmp_path, None, "s3cret").read_text())
+    assert without == {"mcpServers": {}}
+
+
+def test_codex_command_names_the_verified_mcp_keys() -> None:
+    spec = ConsumerSpec(
+        name="codex-gpt-luna-low", harness="codex", model="gpt-5.6-luna", variant="low"
+    )
+    command = codex_command(spec, Path("/tmp/scratch/q/answer.md"), "http://127.0.0.1:8111/mcp")
+
+    assert command[:4] == ["codex", "exec", "--skip-git-repo-check", "-m"]
+    assert command[-1] == "-", "the prompt arrives on stdin"
+    assert "mcp_servers.mistral-docs.url=http://127.0.0.1:8111/mcp" in command
+    assert "mcp_servers.mistral-docs.bearer_token_env_var=GLOSSATOR_MCP_TOKEN" in command
+    assert "model_reasoning_effort='\"low\"'" in command
+    # No server at all in A0, and the token never travels on the command line.
+    without = codex_command(spec, Path("/tmp/a.md"), None)
+    assert not any("mcp_servers" in part for part in without)
+
+
+def test_the_transcript_travels_with_the_run(tmp_path: Path) -> None:
+    """A reviewer opens the conversation behind a row from the run directory
+    itself, not from the consumer's scratch directory (D-023c)."""
+    scratch = tmp_path / "scratch" / "events.jsonl"
+    scratch.parent.mkdir(parents=True)
+    scratch.write_text('{"type": "result"}\n')
+    run_dir = tmp_path / "run"
+
+    relative = copy_transcript(
+        run_dir, scratch, consumer="claude-sonnet-low", arm="A1", question_id="mined-001"
+    )
+
+    assert relative == "transcripts/claude-sonnet-low/A1/mined-001.jsonl"
+    assert (run_dir / relative).read_text() == '{"type": "result"}\n'
+    assert (
+        copy_transcript(run_dir, tmp_path / "gone.jsonl", consumer="c", arm="A0", question_id="q")
+        == ""
+    )
 
 
 def test_corpus_page_urls_empty_without_manifest(tmp_path: Path) -> None:
