@@ -28,10 +28,12 @@ from glossator.eval.agreement import agreement_report
 from glossator.eval.answer_eval import (
     AnswerCallRecorder,
     JudgeModel,
+    QuestionRecord,
     RunDirectory,
     answer_one,
     judge_with_models,
     make_judge_providers,
+    parse_judge_models,
     resolve_run_directory,
 )
 from glossator.eval.corpus import CorpusDocument, block_text, load_documents
@@ -664,6 +666,7 @@ async def run_snapshot_eval(
         "run_dir": str(run_path),
         "dataset": str(dataset),
         "dataset_sha256": dataset_hash(dataset),
+        "labels": str(labels_path),
         "variant": "snap1024",
         "strategies": ["single_pass"],
         "model": generation_model,
@@ -709,13 +712,30 @@ async def run_snapshot_eval(
                 _append(directory.records_path, row)
     finally:
         await asyncio.gather(*(provider.aclose() for provider in providers.values()))
-    per_snapshot = score_snapshot_records(records, snapshots)
-    metrics = {
+    metrics = write_snapshot_outputs(
+        run_path, records, snapshots, dataset, labels_path, judge_skipped=skip_judge
+    )
+    return run_path, metrics
+
+
+def write_snapshot_outputs(
+    run_path: Path,
+    records: Sequence[Mapping[str, Any]],
+    snapshots: Sequence[SnapshotRecord],
+    dataset: Path,
+    labels_path: Path,
+    *,
+    judge_skipped: bool,
+) -> dict[str, Any]:
+    """Metrics, README, figure and changelog, computed from the rows alone so a
+    later judging pass rewrites them without touching the answers."""
+    per_snapshot = score_snapshot_records(list(records), snapshots)
+    metrics: dict[str, Any] = {
         "records": len(records),
         "per_snapshot": per_snapshot,
-        "judge_skipped": skip_judge,
+        "judge_skipped": judge_skipped,
     }
-    by_question: dict[str, list[dict[str, Any]]] = {}
+    by_question: dict[str, list[Mapping[str, Any]]] = {}
     for row in records:
         by_question.setdefault(str(row["question_id"]), []).append(row)
     changelog: list[dict[str, Any]] = []
@@ -734,13 +754,69 @@ async def run_snapshot_eval(
                 }
             )
     metrics["changed_answers"] = len(changelog)
+    (run_path / "figures").mkdir(parents=True, exist_ok=True)
     (run_path / "metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
     (run_path / "changelog.jsonl").write_text(
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in changelog)
     )
     (run_path / "README.md").write_text(_eval_readme(metrics, dataset, labels_path))
     (run_path / "figures" / "correctness.svg").write_text(_eval_svg(metrics))
-    return run_path, metrics
+    return metrics
+
+
+async def rejudge_snapshot_eval(
+    run_path: Path,
+    judge_models: Sequence[JudgeModel],
+    *,
+    manifest_path: Path = DEFAULT_MANIFEST,
+) -> dict[str, Any]:
+    """Judge every recorded answer that has no verdict yet, keeping the snapshot
+    and availability fields of each row, and rewrite the run's outputs.
+
+    Rows already carrying a verdict from the primary judge are left as they
+    are, so an interrupted pass resumes where it stopped.
+    """
+    config = json.loads((run_path / "config.json").read_text())
+    rows = [
+        json.loads(line) for line in (run_path / "records.jsonl").read_text().splitlines() if line
+    ]
+    snapshots = _built_snapshots(manifest_path)
+    directory = RunDirectory.open(run_path, config)
+    providers = make_judge_providers(judge_models, directory)
+    primary = judge_models[0].identifier
+    records_path = run_path / "records.jsonl"
+    try:
+        for start in range(0, len(rows), 4):
+            batch = rows[start : start + 4]
+
+            async def judge_row(row: dict[str, Any]) -> dict[str, Any]:
+                if row.get("error") is not None or (row.get("judges") or {}).get(primary):
+                    return row
+                record = QuestionRecord.model_validate(row)
+                verdicts = await judge_with_models(record, judge_models, providers)
+                judged = record.model_copy(
+                    update={"judge": verdicts[judge_models[0].identifier], "judges": verdicts}
+                ).model_dump(mode="json")
+                judged["snapshot"] = row["snapshot"]
+                judged["availability_label"] = row.get("availability_label")
+                return judged
+
+            rows[start : start + 4] = await asyncio.gather(*(judge_row(row) for row in batch))
+            records_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows))
+            print(f"re-judged {start + len(batch)} of {len(rows)} rows", flush=True)
+    finally:
+        await asyncio.gather(*(provider.aclose() for provider in providers.values()))
+    config["judge_models"] = [judge.identifier for judge in judge_models]
+    config["judge_skipped"] = False
+    (run_path / "config.json").write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
+    return write_snapshot_outputs(
+        run_path,
+        rows,
+        snapshots,
+        Path(config["dataset"]),
+        Path(config.get("labels", "")),
+        judge_skipped=False,
+    )
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -758,6 +834,10 @@ def _parser() -> argparse.ArgumentParser:
         help="Run only the exact-span step; cells needing a judge are stored as "
         "pending_judges for a later judged pass.",
     )
+    rejudge_parser = subparsers.add_parser("rejudge")
+    rejudge_parser.add_argument("--run", type=Path, required=True)
+    rejudge_parser.add_argument("--judge-models", required=True)
+    rejudge_parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--dataset", type=Path, required=True)
     run_parser.add_argument("--name", required=True)
@@ -783,6 +863,11 @@ async def _main(args: argparse.Namespace) -> None:
             seed=args.seed,
             deterministic_only=args.deterministic_only,
         )
+    elif args.command == "rejudge":
+        metrics = await rejudge_snapshot_eval(
+            args.run, parse_judge_models(args.judge_models), manifest_path=args.manifest
+        )
+        path = args.run
     else:
         path, metrics = await run_snapshot_eval(
             args.dataset,
