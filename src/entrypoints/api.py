@@ -46,7 +46,7 @@ from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
 from glossator.retrieval.probe import check_embedding_once
 
-load_dotenv(override=True)
+load_dotenv()
 
 logger = structlog.get_logger(__name__)
 

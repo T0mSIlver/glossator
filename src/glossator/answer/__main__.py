@@ -78,7 +78,7 @@ def _print(answer: Answer) -> None:
 
 
 async def main() -> None:
-    load_dotenv(override=True)
+    load_dotenv()
     args = _parse_args()
     recorder = JsonlCallRecorder(args.record) if args.record else None
     try:

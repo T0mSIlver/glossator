@@ -67,7 +67,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 async def main() -> None:
-    load_dotenv(override=True)
+    load_dotenv()
     args = _parse_args()
     config = RetrievalConfig(
         variant=args.variant,

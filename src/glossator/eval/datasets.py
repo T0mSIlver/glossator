@@ -35,6 +35,10 @@ class QuestionSource(StrEnum):
     HANDWRITTEN = "handwritten"
     TRANSCRIPT = "transcript"
     """Mined from a coding-agent session that stumbled while using a Mistral product."""
+    STACK_OVERFLOW = "stack_overflow"
+    """Mined from a Stack Overflow question about a Mistral product."""
+    HACKER_NEWS = "hacker_news"
+    """Mined from a Hacker News comment or thread asking about Mistral's platform."""
 
 
 class GoldSource(BaseModel):

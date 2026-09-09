@@ -1669,8 +1669,17 @@ def render_figures(metrics: Mapping[str, Any], figures_dir: Path) -> list[str]:
     return written
 
 
+QUARANTINE_FILE = "records-a2-upstream-outage.jsonl"
+"""Rows collected while the answer server could not reach its model. They are
+kept out of the metrics and kept on disk, so the arm can be collected again
+without pretending the outage never happened."""
+
+
 def render_readme(
-    config: Mapping[str, Any], metrics: Mapping[str, Any], fragments: Mapping[str, Any]
+    config: Mapping[str, Any],
+    metrics: Mapping[str, Any],
+    fragments: Mapping[str, Any],
+    extra_files: Sequence[str] = (),
 ) -> str:
     lines = [
         "# Blind consumer evaluation",
@@ -1737,6 +1746,7 @@ def render_readme(
         "  `transcript`.",
         "- `calls.jsonl`: the judge's calls, verbatim. The consumers' own model",
         "  calls are their harnesses', not this server's.",
+        *extra_files,
     ]
     return "\n".join(lines) + "\n"
 
@@ -1997,7 +2007,16 @@ def _score(args: argparse.Namespace) -> None:
     config = json.loads((run_dir / "config.json").read_text())
     metrics["correctness_cost"] = _cost_per_correct(records)
     (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
-    (run_dir / "README.md").write_text(render_readme(config, metrics, fragments))
+    extra_files = (
+        [
+            f"- `{QUARANTINE_FILE}`: rows collected while the answer server",
+            "  could not reach its model. They are out of the metrics, and the",
+            "  cells behind them are collected again once it can.",
+        ]
+        if (run_dir / QUARANTINE_FILE).is_file()
+        else []
+    )
+    (run_dir / "README.md").write_text(render_readme(config, metrics, fragments, extra_files))
     (run_dir / "defects.md").write_text(render_defects(collect_defects(records)))
     (run_dir / "samples.md").write_text(render_samples(records, consumer=args.sample_consumer))
     figures = render_figures(metrics, run_dir / "figures")
@@ -2045,7 +2064,7 @@ def _cost_per_correct(records: Sequence[ConsumerRecord]) -> dict[str, float | No
 
 
 def main() -> None:
-    load_dotenv(override=True)
+    load_dotenv()
     args = _parse_args()
     if args.command == "run":
         asyncio.run(_run(args))

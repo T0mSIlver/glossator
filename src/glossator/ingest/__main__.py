@@ -61,7 +61,7 @@ def _summary(report: IngestReport) -> str:
 
 
 async def main() -> None:
-    load_dotenv(override=True)
+    load_dotenv()
     args = _parse_args()
     if not args.skip_probe:
         # Before anything is embedded, not after: a corpus indexed with a broken
