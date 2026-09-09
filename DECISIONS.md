@@ -999,3 +999,37 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - On the one answer the reader called wrong (dev-052, search loop) the primary judge said partial and flash said correct; on the reader's partial (dev-052, single pass) all three judges said wrong. The two strategies disagree on that question in both directions, which is the kind of item the consumer evaluation should include.
 
 **Decisions.** GLM 5.3 stays the primary judge, and every correctness number it produces is read as a floor. The answer prompt gains two rules from the notes: answer a factual question in prose and add code only when the question asks how to do something in code; cite each list item that comes from its own source. Both go into the precision-and-refusal stream and are measured before they ship. The reference-answer defect rate is estimated on the same 40 items (1 in 40 here) and reported beside the judge study.
+
+---
+
+## D-037a · Deployment: one image, two modes, a tunnel, and the rules travel in tool descriptions
+
+**Status:** decided · 2026-09-09 · `Dockerfile`, `deploy/compose.yaml`, `deploy/deploy.sh`, `deploy/cloudflared/`, `deploy/README.md`, `make deploy`, `make deploy-check`, `tests/test_deploy.py` (28 tests without a host)
+
+**Facts.**
+- The image is a two-stage uv build on Debian slim, non-root, with the corpus vendored, so the only network access at build time is package installation. No secret is baked in; compose refuses to start without `MISTRAL_API_KEY` and `GLOSSATOR_MCP_TOKEN`.
+- Two modes. `remote-index` runs only the MCP server (and optionally the API) on the host and points it at an existing Vespa over the network; verified here against the development index: health ok with 4,440 chunks and a passing embedding probe, 401 without the bearer token and 200 with it, a real `search` over the HTTP transport. `full` adds Vespa, the migrations and an ingestion that reads the embedding cache synced from the operator's machine; the cache now wraps the embedder for every variant, so a full deploy re-embeds nothing that was embedded before and spends no credits. Ingestion refuses to run above 80% disk with the feed-block message (D-025b).
+- The public path is a named Cloudflare tunnel with a DNS route to `glossator.tomvaucourt.com`; the free random hostnames change on every restart, which a Connector registration cannot follow. The manual steps (login, create, route, credentials, unit) are listed in order in `deploy/README.md`.
+- The Work documentation states that custom MCP Connectors "don't yet support" dynamic tool discovery, resources, or prompt templates (`vibe/work/connectors/mcp-connectors`, "Current limitations"). The `glossator://guide` resource therefore never reaches Work; the shared rules must live in the tool descriptions (they do: USE WHEN, DO NOT USE, START WITH on every tool) and in the workspace Skill (D-040a).
+
+**Decision.** Deploy with `make deploy HOST=<ssh host> MODE=remote-index` first so the Connector can be tried tonight, then `MODE=full` with the Vespa data volume copied from this machine once the local evaluation runs finish, which moves all four schemas including the eight snapshots without one embedding call. The bearer token is compared in constant time, and lifespan is the only non-HTTP scope that bypasses it.
+
+---
+
+## D-035d · The reranker follows the generation client to the local server
+
+**Status:** decided · 2026-09-09 · supersedes the routing in commit 11df2d7
+
+**Facts.** Two changes landed in one evening with opposite rules: one kept the reranker on the Mistral API when generation went local, so "shipped reranking never depends on which server answers are generated on"; the other routed every chat call, reranker included, through one client factory that reads `GLOSSATOR_CHAT_SERVER_URL`. The merge kept the factory. The credit constraint decides it: a local run of 480 snapshot questions with the reranker on the API would spend about 2.4 million Ministral tokens, and the point of the local server is that these runs spend nothing.
+
+**Decision.** Every chat call, reranker included, goes where the factory points, and every run records the server and the reasoning setting in its config, README and call ledger, so a local run can never pass for an API run (D-035c). Shipped numbers keep coming from runs with the variable unset.
+
+---
+
+## D-023c · Consumer transcripts belong in the run directory
+
+**Status:** decided · 2026-09-09
+
+**Facts.** The consumer evaluation (D-040a) writes the harness event streams of every consumer conversation under a scratch directory outside the repository, and only the extracted answer, tool calls and links into the run's records. About one hundred conversations so far take 5.7 MB. A reviewer of the run cannot open the conversation behind a row. The review pass also found that `--rejudge` could not change a verdict because the provider replayed its disk cache without a nonce, that the consumer runner had no `--retry-errors`, and that the run directory lacked its README, metrics, figures and call ledger; those three are fixed.
+
+**Decision.** Consumer runs copy each conversation's event stream into `<run>/transcripts/<consumer>/<arm>/<question_id>.jsonl` at collection time, so the run directory is complete on its own (D-023). The scratch directory stays the consumer's working directory and nothing else.
