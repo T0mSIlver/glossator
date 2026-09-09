@@ -49,6 +49,7 @@ class CitationCheck:
     anchor: str | None
     fragment_url: str
     fragment: FragmentText
+    quote: str
     source_text: str
 
 
@@ -82,7 +83,7 @@ def visible_text(html: str) -> str:
     parser = _VisibleText()
     parser.feed(html)
     parser.close()
-    return _WHITESPACE.sub(" ", " ".join(parser.parts)).strip()
+    return _WHITESPACE.sub(" ", "".join(parser.parts)).strip()
 
 
 def parse_fragment_url(url: str) -> tuple[str | None, FragmentText]:
@@ -172,6 +173,7 @@ def collect(run_dir: Path, *, fragment_field: str = "fragment_url") -> list[Cita
                     anchor=anchor,
                     fragment_url=str(fragment_url),
                     fragment=fragment,
+                    quote=citation.quote,
                     source_text=passages.get(citation.n, ""),
                 )
             )
@@ -195,7 +197,7 @@ def _contains(page_text: str, fragment: FragmentText) -> tuple[bool, str | None]
 
 
 def _from_tab(check: CitationCheck) -> bool:
-    source_match = matched_source_quote(check.fragment.start, check.source_text, min_quote_chars=1)
+    source_match = matched_source_quote(check.quote, check.source_text, min_quote_chars=1)
     if source_match is None:
         prefix = check.source_text
     else:
