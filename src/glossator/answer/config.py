@@ -77,6 +77,16 @@ class AnswerConfig(BaseModel):
     render_max_tokens: int = 200
     """The rendering is one restated question, not prose."""
 
+    rewrite_for_retrieval: bool = False
+    """Whether the question is reworded into the documentation's vocabulary before
+    retrieval. Off until measured: every generated dev question was written from
+    the section that answers it, so on that distribution there is nothing to
+    reword, and the shipped single pass already matched the search loop there
+    (D-035). It composes with the rendering, which runs first."""
+
+    rewrite_max_tokens: int = 120
+    """The rewrite is a search query, shorter than the question it came from."""
+
     round_cap: int = 4
     searches_per_round: int = 4
     tool_top_k: int = 4

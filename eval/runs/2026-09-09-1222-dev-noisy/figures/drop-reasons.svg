@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 174" width="720" height="174" role="img" aria-label="Why variants were dropped">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Why variants were dropped</text>
+<text x="240" y="51.0" text-anchor="end">provider_error: ProviderCallError: HTTP 429 from zai: {"erro</text>
+<rect x="248" y="39.0" width="55.4" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="51.0">1</text>
+<text x="240" y="77.0" text-anchor="end">the variant adds a fact the question did not carry</text>
+<rect x="248" y="65.0" width="277.1" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="77.0">5</text>
+<text x="240" y="103.0" text-anchor="end">the variant asks something else</text>
+<rect x="248" y="91.0" width="388.0" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="103.0">7</text>
+<text x="240" y="129.0" text-anchor="end">the variant is the question it came from</text>
+<rect x="248" y="117.0" width="110.9" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="129.0">2</text>
+<rect x="16" y="157" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="166">variants</text>
+</svg>

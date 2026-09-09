@@ -175,6 +175,26 @@ def extract_json_object(text: str) -> str:
     return text
 
 
+class ChatProvider(Protocol):
+    """What an offline tool needs of a provider: one completion call.
+
+    Named here rather than in each tool because it is the seam a test double
+    stands in for, and two tools describing the same seam in two files drift.
+    """
+
+    async def complete(
+        self,
+        messages: Sequence[Message],
+        *,
+        model: str,
+        temperature: float,
+        max_tokens: int,
+        response_schema: type[BaseModel] | None,
+        thinking: ThinkingMode | None,
+        cache_nonce: str | None,
+    ) -> Completion: ...
+
+
 class OpenAICompatibleProvider:
     def __init__(
         self,

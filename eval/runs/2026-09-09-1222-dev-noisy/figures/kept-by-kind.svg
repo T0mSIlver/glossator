@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200" role="img" aria-label="Variants kept and dropped, per noise kind">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Variants kept and dropped, per noise kind</text>
+<text x="240" y="51.0" text-anchor="end">chatty</text>
+<rect x="248" y="39.0" width="291.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="97.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">18 / 6</text>
+<text x="240" y="77.0" text-anchor="end">keywords</text>
+<rect x="248" y="65.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="73.0" width="0.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="77.0">24 / 0</text>
+<text x="240" y="103.0" text-anchor="end">typos</text>
+<rect x="248" y="91.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="99.0" width="0.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="103.0">24 / 0</text>
+<text x="240" y="129.0" text-anchor="end">vague</text>
+<rect x="248" y="117.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="125.0" width="0.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="129.0">24 / 0</text>
+<text x="240" y="155.0" text-anchor="end">wrong_term</text>
+<rect x="248" y="143.0" width="242.5" height="7" fill="#3b6fd4"/>
+<rect x="248" y="151.0" width="145.5" height="7" fill="#c05621"/>
+<text class="v" x="646" y="155.0">15 / 9</text>
+<rect x="16" y="183" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="192">kept</text>
+<rect x="68" y="183" width="10" height="10" fill="#c05621"/>
+<text class="v" x="82" y="192">dropped</text>
+</svg>

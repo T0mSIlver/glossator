@@ -358,7 +358,7 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
 
 
 def _render_generic_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
-    """A run of another kind (a translation, a probe): the same records, plainer prose."""
+    """A run of another kind (a translation, a perturbation, a probe): plainer prose."""
     usage = metrics["usage"]
     uncached = metrics["uncached_usage"]
     kind_lines = [
@@ -366,7 +366,7 @@ def _render_generic_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]
         f"+ {metrics['usage_by_kind'][kind]['completion_tokens']} completion tokens"
         for kind, count in metrics["calls_by_kind"].items()
     ] or ["- No calls were made"]
-    config_lines = [f"- {key}: {value}" for key, value in sorted(config.items())]
+    config_lines = [f"- {key}: {_short(value)}" for key, value in sorted(config.items())]
     dataset = metrics["dataset"] or "No dataset was written"
     return (
         f"# {config.get('kind', 'run').capitalize()} run\n\n"
@@ -376,15 +376,74 @@ def _render_generic_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]
         "## Configuration\n\n" + "\n".join(config_lines) + "\n\n"
         "## Records\n\n"
         f"- rows: {metrics['candidates']}, kept: {metrics['kept']}\n"
-        f"- dataset: {dataset}\n\n"
-        "## Calls\n\n" + "\n".join(kind_lines) + "\n\n"
+        f"- dataset: {dataset}\n"
+        + _breakdown_lines(metrics)
+        + "\n## Calls\n\n"
+        + "\n".join(kind_lines)
+        + "\n\n"
         f"- total: {metrics['calls']} calls ({metrics['cached_calls']} cached), "
         f"{usage['prompt_tokens']} prompt + {usage['completion_tokens']} completion tokens "
         f"({usage['reasoning_tokens']} reasoning); uncached {uncached['prompt_tokens']} + "
-        f"{uncached['completion_tokens']}; estimated {metrics['estimated_usd']:.4f} USD "
-        "against the Mistral budget\n\n"
-        "Every call is in `calls.jsonl` and every row in `records.jsonl`.\n"
+        f"{uncached['completion_tokens']}; {_estimated(metrics)}\n\n"
+        + _figure_lines(config)
+        + "Every call is in `calls.jsonl` and every row in `records.jsonl`.\n"
     )
+
+
+CONFIG_LIST_PREVIEW = 6
+"""How many entries of a long list a README shows before it says how many more.
+
+The whole list stays in `config.json`, which is the record; a README that opens
+with a hundred and twenty ids is not readable, and that is the README's only job.
+"""
+
+
+def _short(value: Any) -> str:
+    if isinstance(value, list) and len(value) > CONFIG_LIST_PREVIEW:
+        shown = ", ".join(str(item) for item in value[:CONFIG_LIST_PREVIEW])
+        return f"[{shown}, ... {len(value) - CONFIG_LIST_PREVIEW} more, see config.json]"
+    return str(value)
+
+
+def _breakdown_lines(metrics: Mapping[str, Any]) -> str:
+    """Kept and dropped per row type, and why, when the rows carry a type.
+
+    A run whose rows are all the same thing has nothing to break down, and
+    `summarize` labels those rows `row`; that case renders nothing.
+    """
+    candidates = metrics["candidates_by_type"]
+    if not candidates or set(candidates) == {"row"}:
+        return ""
+    kept = metrics["kept_by_type"]
+    lines = [
+        f"- {name}: {count} candidates, {kept.get(name, 0)} kept, "
+        f"{count - kept.get(name, 0)} dropped"
+        for name, count in candidates.items()
+    ]
+    reasons = [f"- {reason}: {count}" for reason, count in metrics["dropped_by_reason"].items()]
+    if reasons:
+        lines.append("")
+        lines.append("Dropped by reason:")
+        lines.append("")
+        lines.extend(reasons)
+    return "\n" + "\n".join(lines) + "\n"
+
+
+def _estimated(metrics: Mapping[str, Any]) -> str:
+    """What the run cost, or that its model has no published price."""
+    cost = metrics["estimated_usd"]
+    if cost is None:
+        return f"no price is recorded for {metrics['model']}, so the cost is unknown"
+    return f"estimated {cost:.4f} USD against the Mistral budget"
+
+
+def _figure_lines(config: Mapping[str, Any]) -> str:
+    """The charts the run rendered, named by the run itself (D-023)."""
+    figures = list(config.get("figures") or [])
+    if not figures:
+        return ""
+    listed = "\n".join(f"- `figures/{name}`" for name in figures)
+    return f"## Figures\n\n{listed}\n\n"
 
 
 def _as_sentence(text: str | None) -> str:

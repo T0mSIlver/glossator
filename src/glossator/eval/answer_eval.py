@@ -1505,6 +1505,8 @@ answer and the cited passages verbatim. It sees no URL, page identifier, or stra
 {config.get("context_token_budget")} tokens
 - Non-English questions rendered in English for retrieval: \
 {config.get("translate_for_retrieval", "unknown")}
+- Question reworded into the documentation's vocabulary for retrieval: \
+{config.get("rewrite_for_retrieval", "unknown")}
 - Dataset: `{metrics["dataset"]}`, sha256 `{metrics["dataset_sha256"]}`
 - Questions: {metrics["questions"]}; strategies: {len(metrics["strategies"])}; \
 records: {metrics["records"]}
@@ -1794,6 +1796,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--rewrite",
+        dest="rewrite_for_retrieval",
+        action="store_true",
+        help=(
+            "Reword the question into the documentation's vocabulary before "
+            "retrieval (off by default, as it is in the answer layer)"
+        ),
+    )
+    parser.add_argument(
         "--no-rerank",
         dest="rerank",
         action="store_false",
@@ -1843,6 +1854,7 @@ async def _run(args: argparse.Namespace) -> None:
         model=args.model,
         top_k=args.top_k,
         translate_for_retrieval=args.translate_for_retrieval,
+        rewrite_for_retrieval=args.rewrite_for_retrieval,
         prices=EVAL_PRICES,
     )
     try:
@@ -1885,6 +1897,7 @@ async def _run(args: argparse.Namespace) -> None:
         "top_k": settings.top_k,
         "rerank": args.rerank,
         "translate_for_retrieval": settings.translate_for_retrieval,
+        "rewrite_for_retrieval": settings.rewrite_for_retrieval,
         "rerank_model": RERANK_MODEL if args.rerank else None,
         "context_token_budget": settings.context_token_budget,
         "answer_config": settings.model_dump(mode="json"),

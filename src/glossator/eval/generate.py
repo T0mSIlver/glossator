@@ -19,7 +19,7 @@ from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Protocol, TypeVar, cast
+from typing import Literal, TypeVar, cast
 
 import structlog
 from dotenv import load_dotenv
@@ -55,8 +55,8 @@ from glossator.eval.prompts import (
     UNANSWERABLE_INSTRUCTIONS,
 )
 from glossator.eval.providers import (
+    ChatProvider,
     Completion,
-    Message,
     OpenAICompatibleProvider,
     ProviderCallError,
     ProviderName,
@@ -118,20 +118,6 @@ T = TypeVar("T")
 def _language(locale: str) -> Language:
     """The dataset language for a page locale. Only the two mirrors exist (D-008)."""
     return "fr" if locale == "fr" else "en"
-
-
-class ChatProvider(Protocol):
-    async def complete(
-        self,
-        messages: Sequence[Message],
-        *,
-        model: str,
-        temperature: float,
-        max_tokens: int,
-        response_schema: type[BaseModel] | None,
-        thinking: ThinkingMode | None,
-        cache_nonce: str | None,
-    ) -> Completion: ...
 
 
 class CandidateOutput(BaseModel):

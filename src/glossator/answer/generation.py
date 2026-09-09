@@ -29,9 +29,12 @@ from glossator.answer.context import AssembledContext, assemble
 from glossator.answer.docs_index import DocsIndex
 from glossator.answer.language import (
     ENGLISH,
+    ORIGINAL,
     RETRIEVAL_QUERY_PURPOSE,
+    RETRIEVAL_REWRITE_PURPOSE,
     RetrievalQuery,
     render_for_retrieval,
+    rewrite_for_retrieval,
 )
 from glossator.answer.llm import LLM, Completion, TokenUsage
 from glossator.answer.prompts import (
@@ -90,27 +93,45 @@ class AnswerRun:
     retrieval_query: str = ""
     """What every search this run makes is worded with; set by :meth:`prepare`."""
 
+    retrieval_query_source: str = ORIGINAL
+    """Which step produced it: `original`, `rendering` or `rewrite`."""
+
     async def prepare(self, question: str, *, llm: LLM, config: AnswerConfig) -> RetrievalQuery:
-        """Settle the language question before anything is retrieved.
+        """Settle what retrieval is worded with before anything is retrieved.
 
         Every strategy calls this first and searches with the result, so the
-        English rendering reaches retrieval, reranking and the loop's own
-        searches, while the original question is what generation is given.
+        query reaches retrieval, reranking and the loop's own searches, while the
+        original question is what generation is given. The rendering runs first
+        and the rewrite over its result: rewording into the documentation's
+        vocabulary is a job for English text.
         """
-        query = await render_for_retrieval(
+        rendered = await render_for_retrieval(
             question, llm=llm, config=config, purpose=f"{self.strategy}:{RETRIEVAL_QUERY_PURPOSE}"
         )
+        self._charge_query_step(rendered, RETRIEVAL_QUERY_PURPOSE)
+        query = await rewrite_for_retrieval(
+            rendered, llm=llm, config=config, purpose=f"{self.strategy}:{RETRIEVAL_REWRITE_PURPOSE}"
+        )
+        # Identity, not a flag: the rewrite returns the query it was given when it
+        # is switched off, and a copy whenever it made a call, failed one included.
+        if query is not rendered:
+            self._charge_query_step(query, RETRIEVAL_REWRITE_PURPOSE)
         self.question_language = query.language
         self.retrieval_query = query.text
-        if query.completion is not None:
-            self.spent(query.completion)
-            self.event(
-                "query",
-                RETRIEVAL_QUERY_PURPOSE,
-                arguments={"language": query.language, "query": query.text},
-                note=query.note,
-            )
+        self.retrieval_query_source = query.source
         return query
+
+    def _charge_query_step(self, query: RetrievalQuery, purpose: str) -> None:
+        """Bill one query step's call to the run and put it in the trace."""
+        if query.completion is None:
+            return
+        self.spent(query.completion)
+        self.event(
+            "query",
+            purpose,
+            arguments={"language": query.language, "query": query.text},
+            note=query.note,
+        )
 
     def event(
         self,
@@ -252,6 +273,7 @@ class AnswerRun:
             prompt_version=GROUNDED_ANSWER_VERSION,
             question_language=self.question_language,
             retrieval_query=self.retrieval_query or question,
+            retrieval_query_source=self.retrieval_query_source,
             rounds=self.rounds,
             events=self.events,
             sources=[

@@ -1,0 +1,85 @@
+{
+  "cached_calls": 9,
+  "call_ms_total": 810961.377,
+  "calls": 218,
+  "calls_by_kind": {
+    "filter": 122,
+    "perturb:chatty": 24,
+    "perturb:keywords": 24,
+    "perturb:vague": 24,
+    "perturb:wrong_term": 24
+  },
+  "candidates": 120,
+  "candidates_by_type": {
+    "chatty": 24,
+    "keywords": 24,
+    "typos": 24,
+    "vague": 24,
+    "wrong_term": 24
+  },
+  "dataset": "eval/dev-noisy.jsonl",
+  "dropped": 15,
+  "dropped_by_reason": {
+    "provider_error: ProviderCallError: HTTP 429 from zai: {\"error\":{\"code\":\"1302\",\"message\":\"Rate limit reached for requests\"}}": 1,
+    "the variant adds a fact the question did not carry": 5,
+    "the variant asks something else": 7,
+    "the variant is the question it came from": 2
+  },
+  "error": null,
+  "estimated_usd": 0.0,
+  "failed_calls": 5,
+  "finish_reasons": {
+    "stop": 213
+  },
+  "kept": 105,
+  "kept_by_type": {
+    "chatty": 18,
+    "keywords": 24,
+    "typos": 24,
+    "vague": 24,
+    "wrong_term": 15
+  },
+  "model": "glm-5.3",
+  "requested": 120,
+  "requested_by_type": {},
+  "shortfall": 0,
+  "shortfall_by_type": {},
+  "status": "complete",
+  "uncached_usage": {
+    "completion_tokens": 13065,
+    "prompt_tokens": 88765,
+    "reasoning_tokens": 1318
+  },
+  "usage": {
+    "completion_tokens": 13575,
+    "prompt_tokens": 92617,
+    "reasoning_tokens": 1356
+  },
+  "usage_by_kind": {
+    "filter": {
+      "completion_tokens": 8239,
+      "prompt_tokens": 60912,
+      "reasoning_tokens": 940
+    },
+    "perturb:chatty": {
+      "completion_tokens": 1855,
+      "prompt_tokens": 7620,
+      "reasoning_tokens": 0
+    },
+    "perturb:keywords": {
+      "completion_tokens": 517,
+      "prompt_tokens": 7257,
+      "reasoning_tokens": 0
+    },
+    "perturb:vague": {
+      "completion_tokens": 1250,
+      "prompt_tokens": 7575,
+      "reasoning_tokens": 0
+    },
+    "perturb:wrong_term": {
+      "completion_tokens": 1714,
+      "prompt_tokens": 9253,
+      "reasoning_tokens": 416
+    }
+  }
+}
