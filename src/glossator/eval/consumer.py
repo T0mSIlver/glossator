@@ -661,7 +661,8 @@ def parse_codex_events(lines: Sequence[str]) -> tuple[str, list[ToolCallRecord]]
     server, the tool, its arguments and its result; the last ``agent_message``
     item is the answer. Items are announced when they start and again when they
     complete, so each is kept once, under its id, and overwritten by its
-    completion.
+    completion. The consumer's own shell and web items are kept too, so a tool
+    call counts the same here as it does under the other harnesses.
     """
     texts: list[str] = []
     calls: dict[str, ToolCallRecord] = {}
@@ -679,7 +680,26 @@ def parse_codex_events(lines: Sequence[str]) -> tuple[str, list[ToolCallRecord]]
                 texts = [text.strip()]
         elif kind == "mcp_tool_call":
             calls[item_id] = _codex_tool_call(item)
+        elif kind in CODEX_TOOL_ITEMS:
+            calls[item_id] = _codex_own_tool(kind, item)
     return "\n".join(texts).strip(), list(calls.values())
+
+
+CODEX_TOOL_ITEMS = ("command_execution", "web_search", "file_change")
+"""Codex items that are the consumer's own tools rather than this server's."""
+
+_CODEX_OUTPUT_KEYS = ("aggregated_output", "output", "result", "text")
+_CODEX_META_KEYS = ("id", "item_type", "type", "status", "error", *_CODEX_OUTPUT_KEYS)
+
+
+def _codex_own_tool(kind: str, item: Mapping[str, Any]) -> ToolCallRecord:
+    """One of the consumer's own tools: a shell command, a web search, an edit."""
+    output = next(
+        (str(item[key]) for key in _CODEX_OUTPUT_KEYS if isinstance(item.get(key), str)), ""
+    )
+    arguments = {key: value for key, value in item.items() if key not in _CODEX_META_KEYS}
+    failed = str(item.get("status", "")) in ("failed", "errored") or bool(item.get("error"))
+    return _tool_call_record(kind, arguments, output, failed)
 
 
 def _codex_tool_call(item: Mapping[str, Any]) -> ToolCallRecord:
@@ -1580,10 +1600,12 @@ def collect_defects(records: Sequence[ConsumerRecord]) -> list[dict[str, str]]:
                         ),
                     }
                 )
-            # An error row names the tool before the line the tool printed, and
-            # only this server's tools are this server's defects: a consumer's
-            # own shell or fetch failing is not a surface defect.
-            elif is_server_tool(call.name) and "error:" in error:
+            # Any refusal by one of this server's tools is friction, typed or
+            # not: the error row names the tool before the line the tool
+            # printed, so matching the line's start missed both the typed
+            # errors and the schema rejections. A consumer's own shell or fetch
+            # failing is not a defect of the surface under test.
+            elif is_server_tool(call.name) and error:
                 defects.append(
                     {
                         "question_id": record.question_id,

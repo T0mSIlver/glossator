@@ -406,7 +406,7 @@ def test_defects_list_typed_errors() -> None:
 
 
 def test_defects_are_this_server_s_tools_only() -> None:
-    """A typed error is friction whatever the harness prefixed the name with; a
+    """Any refusal by one of this server's tools is friction, typed or not; a
     consumer's own shell failing is not this server's defect."""
     typed = _record(
         tool_calls=[
@@ -417,11 +417,24 @@ def test_defects_are_this_server_s_tools_only() -> None:
             )
         ]
     )
+    schema = _record(
+        tool_calls=[
+            ToolCallRecord(
+                name="mcp__mistral-docs__mistral_docs_verify_quotes",
+                output_chars=40,
+                error=(
+                    "mcp__mistral-docs__mistral_docs_verify_quotes: 1 validation error for "
+                    "call[mistral_docs_verify_quotes]"
+                ),
+            )
+        ]
+    )
     shell = _record(
         tool_calls=[ToolCallRecord(name="Bash", output_chars=3, error="Bash: Exit code 1")]
     )
 
     assert collect_defects([typed])[0]["severity"] == "friction"
+    assert collect_defects([schema])[0]["severity"] == "friction"
     assert collect_defects([shell]) == []
 
 
