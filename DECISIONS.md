@@ -664,3 +664,29 @@ Section-level numbers cover the 142 questions whose gold names an anchor; page-l
 | refusal correct | 0.82 → 0.87 | 0.88 → 0.88 |
 
 Every chunk now carries the anchor of the nearest anchored heading above it, so citations deep-link to the closest linkable section instead of the page top; markers that name no verified citation are stripped from the answer text and kept in the trace. The fabricated-quote drop is partly the emphasis-normalized verification counting cosmetic matches as verified (D-027a). One capability question per strategy matched gold only through the model-card relaxation (D-033, decision 4), reported as `gold_relaxed_matches`.
+
+---
+
+## D-035 · Shipped strategy: single pass over reranked retrieval; the search loop is the thorough mode
+
+**Status:** decided · 2026-09-09 · run `eval/runs/*-dev60-rerank` (same 60 questions as D-033, shipped retrieval per D-034, Ministral 14B generating and reranking, GLM 5.3 judging)
+
+| metric | single_pass, no rerank (D-033) | single_pass, shipped | search_loop, shipped |
+|---|---|---|---|
+| correctness (judge) | 0.81 | **0.93** | 0.95 |
+| groundedness (judge) | 0.75 | 0.82 | 0.85 |
+| citation relevance (judge) | 0.89 | 0.94 | 0.98 |
+| refusal correct | 0.82 | **0.92** | 0.90 |
+| cited URL matches gold | 0.70 | 0.82 | 0.82 |
+| cited anchor matches gold | 0.50 | **0.62** | 0.54 |
+| quote verification rate | 0.86 | 0.86 | 0.86 |
+| latency p50 / p95 | 3.0 / 7.7 s | **7.2 / 12.0 s** | 20.7 / 46.0 s |
+| prompt tokens per answer | 1.9k | **2.0k** | 14.8k |
+| USD per question at Medium 3.5 prices | 0.005 | **0.005** | 0.026 |
+
+**Facts.**
+- Reranking closed most of the gap between the two strategies: single pass gained 12 points of correctness, while the search loop, which already read around its hits, gained one. What the loop still buys is 2 to 4 points of judged quality at three times the latency and five times the cost.
+- The loop's latency tripled under the shipped retrieval because every tool search now reranks; a loop whose intermediate searches skip the reranker and only the final assembly reranks would recover most of that, and is the natural follow-up if the thorough mode is used.
+- Refusal on unanswerable questions is the one metric where single pass leads, because the loop keeps searching (8.7 tool calls on unanswerable questions in D-033) and finds something to cite.
+
+**Decision.** `ask` defaults to `single_pass` on the shipped retrieval. `search_loop` stays available through the `strategy` parameter of the API and the MCP `ask` tool as the thorough mode, with its cost stated in the tool description; `outline` stays as an experiment row only (D-033). The numbers above are Ministral 14B's; the same three run directories are re-run on Mistral Medium 3.5 by one command when the account is provisioned (D-017a).
