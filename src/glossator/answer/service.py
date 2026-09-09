@@ -63,22 +63,34 @@ async def ask(
     if model is not None and model != settings.model:
         settings = AnswerConfig.model_validate({**settings.model_dump(), "model": model})
     index = engine or SearchEngine(RetrievalConfig.shipped(variant=variant, top_k=settings.top_k))
-    generator = llm or MistralLLM(settings, client=build_client(), recorder=recorder)
+    generator = llm or MistralLLM(settings, client=build_generation_client(), recorder=recorder)
 
     logger.info("Ask", strategy=strategy, variant=variant, question=question)
     return await STRATEGIES[strategy](question, engine=index, llm=generator, config=settings)
 
 
 def build_client() -> Mistral:
-    server_url = os.environ.get("GLOSSATOR_CHAT_SERVER_URL")
-    if server_url:
-        return Mistral(
-            api_key=os.environ.get("GLOSSATOR_CHAT_API_KEY", "local"), server_url=server_url
-        )
+    """The Mistral API client: embeddings, reranking, and default generation."""
     key = os.environ.get("MISTRAL_API_KEY", "")
     if not key:
         raise RuntimeError("MISTRAL_API_KEY is not set. Check your .env file.")
     return Mistral(api_key=key)
 
 
-__all__ = ["STRATEGIES", "ask", "build_client"]
+def build_generation_client() -> Mistral:
+    """The answer-generation client.
+
+    Points at the local generation server when ``GLOSSATOR_CHAT_SERVER_URL`` is
+    set (the server needs no key), otherwise at the Mistral API. Only generation
+    goes through here: retrieval's reranker keeps ``build_client`` so shipped
+    reranking never depends on which server answers are generated on.
+    """
+    server_url = os.environ.get("GLOSSATOR_CHAT_SERVER_URL")
+    if server_url:
+        return Mistral(
+            api_key=os.environ.get("GLOSSATOR_CHAT_API_KEY", "local"), server_url=server_url
+        )
+    return build_client()
+
+
+__all__ = ["STRATEGIES", "ask", "build_client", "build_generation_client"]

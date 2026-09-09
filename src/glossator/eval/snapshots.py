@@ -20,7 +20,7 @@ from pydantic import BaseModel, ConfigDict
 
 from glossator.answer.config import LOCAL_MINISTRAL_3_14B, AnswerConfig
 from glossator.answer.llm import MistralLLM
-from glossator.answer.service import build_client
+from glossator.answer.service import build_generation_client
 from glossator.corpus.snapshots import DEFAULT_MANIFEST, SnapshotRecord, read_snapshot_manifest
 from glossator.eval.agreement import agreement_report
 from glossator.eval.answer_eval import (
@@ -657,7 +657,9 @@ async def run_snapshot_eval(
     }
     directory = RunDirectory.open(run_path, config)
     settings = AnswerConfig(model=generation_model)
-    llm = MistralLLM(settings, client=build_client(), recorder=AnswerCallRecorder(directory))
+    llm = MistralLLM(
+        settings, client=build_generation_client(), recorder=AnswerCallRecorder(directory)
+    )
     judges = [] if skip_judge else [JudgeModel(provider="zai", model=PRIMARY_JUDGE)]
     providers = make_judge_providers(judges, directory)
     records: list[dict[str, Any]] = []
