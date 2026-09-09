@@ -71,13 +71,24 @@ _VARIANTS: tuple[IndexVariant, ...] = (
 )
 
 VARIANTS: dict[str, IndexVariant] = {variant.name: variant for variant in _VARIANTS}
+"""Variants created by the immutable initial migration."""
+
+SNAPSHOT_VARIANT = IndexVariant(
+    name="snap1024",
+    schema_name="docs_snapshot_fulldim",
+    chunking=ChunkStrategy.SECTION,
+    embedding=MistralEmbeddingPreset.MISTRAL_EMBED_DIM_1024,
+)
+
+ALL_VARIANTS: dict[str, IndexVariant] = {**VARIANTS, SNAPSHOT_VARIANT.name: SNAPSHOT_VARIANT}
+"""Every queryable variant, including schemas added after migration 001."""
 
 
 def get_variant(name: str) -> IndexVariant:
     """Resolve a variant by name, naming the alternatives when it is unknown."""
     try:
-        return VARIANTS[name]
+        return ALL_VARIANTS[name]
     except KeyError:
         raise ValueError(
-            f"unknown index variant {name!r}; known variants: {sorted(VARIANTS)}"
+            f"unknown index variant {name!r}; known variants: {sorted(ALL_VARIANTS)}"
         ) from None

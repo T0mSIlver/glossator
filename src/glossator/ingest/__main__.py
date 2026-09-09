@@ -10,7 +10,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from glossator.index.variants import VARIANTS
+from glossator.index.variants import ALL_VARIANTS
 from glossator.ingest.pipeline import (
     DEFAULT_CONCURRENCY,
     IndexWritePreflightError,
@@ -31,8 +31,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--variant",
         required=True,
-        choices=sorted(VARIANTS),
+        choices=sorted(ALL_VARIANTS),
         help="Index variant to write",
+    )
+    parser.add_argument(
+        "--snapshot",
+        help="Snapshot date stamped on every chunk; required for snap1024",
     )
     parser.add_argument(
         "--concurrency",
@@ -51,7 +55,8 @@ def _parse_args() -> argparse.Namespace:
 def _summary(report: IngestReport) -> str:
     return (
         f"{report.variant}: indexed {report.chunks} chunks from {report.pages} page(s); "
-        f"{report.embedding_tokens} embedding tokens (~${report.estimated_usd:.4f})"
+        f"{report.embedding_tokens} embedding tokens (~${report.estimated_usd:.4f}); "
+        f"{report.embedded_chunks} embedded, {report.cached_chunks} from cache"
     )
 
 
@@ -67,7 +72,12 @@ async def main() -> None:
         except EmbeddingProbeError as exc:
             raise SystemExit(str(exc)) from None
     try:
-        report = await ingest_corpus(args.corpus, args.variant, concurrency=args.concurrency)
+        report = await ingest_corpus(
+            args.corpus,
+            args.variant,
+            concurrency=args.concurrency,
+            snapshot=args.snapshot,
+        )
     except (IndexWritePreflightError, PartialIngestError) as exc:
         # Report what did land before failing: a partial index is still worth
         # knowing the size of, and the exit code is what a script reads.

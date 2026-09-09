@@ -11,7 +11,7 @@ from typing import Annotated, Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from glossator.index.variants import VARIANTS, IndexVariant, get_variant
+from glossator.index.variants import ALL_VARIANTS, IndexVariant, get_variant
 
 DEFAULT_TOP_K = 10
 
@@ -65,6 +65,7 @@ KINDS = frozenset({"doc", "api", "model"})
 # Filter values are interpolated into YQL, so both vocabularies are closed: kinds
 # by enumeration, locales by shape.
 _LOCALE = re.compile(r"[a-z]{2,3}(-[A-Za-z]{2,4})?")
+_SNAPSHOT = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 class RetrievalConfig(BaseModel):
@@ -84,6 +85,9 @@ class RetrievalConfig(BaseModel):
 
     locales: frozenset[str] = frozenset()
     """Restrict to these locales (D-008 is still open, so this defaults to open)."""
+
+    snapshot: str | None = None
+    """Restrict the shared snapshot index to one ISO date."""
 
     rerank: bool = False
     """Reorder the candidates with one listwise model call before returning them."""
@@ -131,6 +135,11 @@ class RetrievalConfig(BaseModel):
             raise ValueError(
                 f"malformed locale(s) {bad_locales}; expected forms like 'en' or 'pt-BR'"
             )
+        if self.snapshot is not None:
+            if self.variant != "snap1024":
+                raise ValueError("snapshot is only valid with variant 'snap1024'")
+            if not _SNAPSHOT.fullmatch(self.snapshot):
+                raise ValueError("malformed snapshot; expected YYYY-MM-DD")
         return self
 
     @classmethod
@@ -169,6 +178,7 @@ class RetrievalConfig(BaseModel):
         clauses = [
             _in_clause("kind", sorted(self.kinds)),
             _in_clause("locale", sorted(self.locales)),
+            _in_clause("snapshot", [self.snapshot] if self.snapshot is not None else []),
         ]
         present = [clause for clause in clauses if clause]
         if not present:
@@ -222,7 +232,7 @@ __all__ = [
     "RANK2_FEATURES",
     "RANKING_FEATURES",
     "RERANK_MODEL",
-    "VARIANTS",
+    "ALL_VARIANTS",
     "RetrievalConfig",
     "cosine_only_weights",
     "query_weights",

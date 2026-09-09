@@ -16,7 +16,7 @@ from glossator.answer.citations import Answer, Citation, Trace, TracedSource
 from glossator.answer.llm import TokenUsage
 from glossator.retrieval.engine import Hit, SearchTrace
 
-TOOLS = {"search", "open", "navigate", "read", "grep", "ask", "cite"}
+TOOLS = {"search", "open", "navigate", "read", "grep", "ask", "cite", "history"}
 
 
 def _reload_with(monkeypatch: pytest.MonkeyPatch, **env: str) -> Any:
@@ -189,7 +189,7 @@ def _call_error(server: Any, name: str, arguments: dict[str, Any]) -> str:
     return str(excinfo.value)
 
 
-def test_the_tool_set_is_exactly_the_seven_read_tools(mcp_server: Any) -> None:
+def test_the_tool_set_includes_history_and_the_existing_read_tools(mcp_server: Any) -> None:
     tools = asyncio.run(mcp_server.mcp.list_tools())
 
     assert {tool.name for tool in tools} == TOOLS

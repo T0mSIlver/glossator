@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-09-09T18:30:02.786650+00:00",
+  "resolved_with": "git rev-list -1 --before=<date> HEAD",
+  "snapshots": [
+    {
+      "commit": "de827c0ffd57e13bd3b026e3669c455ee2532b82",
+      "content_digest": "7f29347fb299b5fff3b286f8fa0a712754d7091db5a9d73c181c61ba9fecff89",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-06-01",
+      "date": "2026-06-01",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi.yaml",
+      "pages": 327,
+      "status": "built"
+    },
+    {
+      "commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+      "content_digest": "8e6f3756244b7fdd211e8d029b5027659f569877497a5d5a1682688f9d9be163",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-06-15",
+      "date": "2026-06-15",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi.yaml",
+      "pages": 332,
+      "status": "built"
+    },
+    {
+      "commit": "30f0c7c655287852d745d191f05e68a99d7a5b89",
+      "content_digest": "8220336d5378d84ecef04d9809b7fc5408c9dd6293ec9e08be8cc9cc78dc56bf",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-07-01",
+      "date": "2026-07-01",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 368,
+      "status": "built"
+    },
+    {
+      "commit": "7925ed1f1b7f02a453d3747e88aa58d1537c304c",
+      "content_digest": "ae400b161dcae0434f490e5f5bc630badb1d81d79b93aba8959194ed31a3cd1a",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-07-15",
+      "date": "2026-07-15",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 378,
+      "status": "built"
+    },
+    {
+      "commit": "6e06c6cfc14e66e45ddf1f06445146314cff5393",
+      "content_digest": "b9bb9845b08b046f1c202a241d0cbe6c0e2cceecc8fc190a14c087a3a0bc7c1d",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-08-01",
+      "date": "2026-08-01",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 392,
+      "status": "built"
+    },
+    {
+      "commit": "2ca5afeebb3ee0e675575d1ac60f3c138d2c4a3d",
+      "content_digest": "fb627bb04b5aeea107d357261fc33a1a1e03c437123c6f741f91c32faa0ac6a3",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-08-15",
+      "date": "2026-08-15",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 401,
+      "status": "built"
+    },
+    {
+      "commit": "0c66041e3f05a5820976e058e9e305b744e4f045",
+      "content_digest": "8b034349a5ace7a1b75466db33b8f85d1de63961f0a2e06328af23d30fbc772b",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-09-01",
+      "date": "2026-09-01",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 408,
+      "status": "built"
+    },
+    {
+      "commit": "2e094f7bbe1395de4a738a3483def3573143d973",
+      "content_digest": "f365183371dda33bc0207412aa1d61d8f0784228aded96cddebe13ab71c8046f",
+      "corpus_dir": "~/.cache/glossator/snapshots/2026-09-07",
+      "date": "2026-09-07",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 411,
+      "status": "built"
+    }
+  ],
+  "source_repo": "https://github.com/mistralai/platform-docs-public.git"
+}

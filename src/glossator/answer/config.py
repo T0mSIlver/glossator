@@ -20,6 +20,7 @@ MISTRAL_MEDIUM_3_5 = "mistral-medium-2604"
 MISTRAL_SMALL_4 = "mistral-small-2603"
 MINISTRAL_3_8B = "ministral-8b-2512"
 MINISTRAL_3_14B = "ministral-14b-2512"
+LOCAL_MINISTRAL_3_14B = "llamacpp/ministral3-14b"
 MISTRAL_EMBED = "mistral-embed-2312"
 
 
@@ -41,6 +42,7 @@ PRICES: dict[str, ModelPrice] = {
     # token counts are recorded whatever the price, so a published number can be
     # applied to a run that already happened.
     MINISTRAL_3_14B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
+    LOCAL_MINISTRAL_3_14B: ModelPrice(input_usd_per_mtok=0.15, output_usd_per_mtok=0.15),
     # Embeddings are billed on input only; the output price is zero rather than
     # absent so one arithmetic path covers every model.
     MISTRAL_EMBED: ModelPrice(input_usd_per_mtok=0.10, output_usd_per_mtok=0.0),
@@ -135,6 +137,8 @@ class AnswerConfig(BaseModel):
         applied to a run that already happened.
         """
         price = self.prices.get(model)
+        if price is None and "ministral3-14b" in model.casefold():
+            price = self.prices.get(LOCAL_MINISTRAL_3_14B)
         if price is None:
             logger.warning("No price for model, cost recorded as zero", model=model)
             return 0.0
@@ -146,6 +150,7 @@ class AnswerConfig(BaseModel):
 __all__ = [
     "DEFAULT_VARIANT",
     "MINISTRAL_3_14B",
+    "LOCAL_MINISTRAL_3_14B",
     "MINISTRAL_3_8B",
     "MISTRAL_EMBED",
     "MISTRAL_MEDIUM_3_5",

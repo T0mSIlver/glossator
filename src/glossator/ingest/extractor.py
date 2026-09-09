@@ -22,13 +22,13 @@ from glossator.ingest.pages import CorpusPage, load_page, parse_page
 # The page URL is the stable identity of a document across re-ingests and across
 # index variants, so it is what ``source_id`` carries. Chunk ids derive from it,
 # which is what makes a re-ingest replace a page's chunks rather than duplicate them.
-def page_file(page: CorpusPage) -> File:
+def page_file(page: CorpusPage, *, source_id: str | None = None) -> File:
     """The pipeline ``File`` for a corpus page, keyed on its URL."""
     return File(
         path=str(page.path),
         name=page.path.name,
         raw=page.path.read_bytes(),
-        source_id=page.url,
+        source_id=source_id or page.url,
     )
 
 

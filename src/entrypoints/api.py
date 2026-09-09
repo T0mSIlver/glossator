@@ -21,6 +21,7 @@ from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoun
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator import history as history_service
 from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
 from glossator.answer.cite import (
@@ -572,6 +573,40 @@ async def page(
         ],
         truncated=len(sections) == top_k,
     )
+
+
+@app.get("/history")
+async def history(
+    text: str | None = None,
+    section: str | None = None,
+    question: str | None = None,
+) -> dict[str, object]:
+    forms = [("text", text), ("section", section), ("question", question)]
+    selected = [(name, value) for name, value in forms if value is not None]
+    if len(selected) != 1:
+        raise ApiError(
+            400,
+            "E_BAD_PARAM",
+            "history requires exactly one of text, section, or question",
+            "set one query parameter; see /openapi.json for the three forms",
+        )
+    name, value = selected[0]
+    if value is None or not value.strip():
+        raise ApiError(400, "E_BAD_PARAM", f"{name} is empty", f"send text in {name}")
+    manifest = Path(os.environ.get("GLOSSATOR_SNAPSHOT_MANIFEST", "eval/snapshots/manifest.json"))
+    try:
+        if name == "text":
+            return await asyncio.to_thread(history_service.phrase_history, value, manifest)
+        if name == "section":
+            return await asyncio.to_thread(history_service.section_history, value, manifest)
+        return await history_service.question_history(value, manifest)
+    except (OSError, ValueError) as exc:
+        raise ApiError(
+            400,
+            "E_BAD_PARAM",
+            str(exc),
+            "check the snapshot manifest and pass one documented history form",
+        ) from exc
 
 
 def _corpus_info() -> dict[str, Any] | None:

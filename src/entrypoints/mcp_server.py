@@ -22,6 +22,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator import history as history_service
 from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer
@@ -58,12 +59,15 @@ if _variant_name not in VARIANTS:
     )
 
 CORPUS_DIR = Path(os.environ.get("GLOSSATOR_CORPUS_DIR", "corpus/mistral-docs"))
+SNAPSHOT_MANIFEST = Path(
+    os.environ.get("GLOSSATOR_SNAPSHOT_MANIFEST", "eval/snapshots/manifest.json")
+)
 
 # Bearer token for the HTTP transport (D-037). When set, every MCP HTTP
 # request except GET /health must carry `Authorization: Bearer <token>`.
 _MCP_TOKEN = os.environ.get("GLOSSATOR_MCP_TOKEN", "")
 
-_TOOL_ORDER = ("search", "open", "navigate", "read", "grep", "ask", "cite")
+_TOOL_ORDER = ("search", "open", "navigate", "read", "grep", "ask", "cite", "history")
 """Every tool this server can register, in guide order."""
 
 
@@ -257,6 +261,8 @@ def _instructions() -> str:
         flow += "; prefer `ask` for questions and the navigation tools for exploration"
     elif "cite" in _ENABLED_TOOLS:
         flow += "; use the navigation tools for exploration"
+    if "history" in _ENABLED_TOOLS:
+        flow += "; use `history` for changes over time"
     return (
         f"{flow}. Read `glossator://guide` for the shared rules; never "
         "fabricate documentation URLs or anchors: cite only a URL and anchor "
@@ -838,10 +844,6 @@ _TOOL_IMPLS: dict[str, Any] = {
 """Every tool this server can register. Only the allowlisted ones are
 registered below, so a disabled tool is absent from discovery, not an error."""
 
-for _tool_name in _TOOL_ORDER:
-    if _tool_name in _ENABLED_TOOLS:
-        mcp.tool()(_TOOL_IMPLS[_tool_name])
-
 
 def _answer_text(question: str, answer: Answer) -> str:
     headings = {source.n: " > ".join(source.heading_path) for source in answer.trace.sources}
@@ -885,6 +887,101 @@ def _answer_text(question: str, answer: Answer) -> str:
         nxt += ', or ask with strategy="search_loop" to search in several rounds before answering'
     lines.append(nxt)
     return "\n".join(lines)
+
+
+async def history(
+    text: str | None = None,
+    section: str | None = None,
+    question: str | None = None,
+) -> str:
+    """Inspect stored documentation snapshots without answer generation.
+
+    USE WHEN: you need a phrase's first and last appearance, a section's dated
+    diffs, or the top retrieved section for one question at every date.
+
+    DO NOT USE: to search only the current documentation (search); to generate
+    an answer (ask).
+
+    START WITH exactly one of text, section, or question.
+
+    Args:
+        text: Exact phrase to track with whitespace-normalized matching.
+        section: docs.mistral.ai URL with optional anchor, or a page path.
+        question: Question retrieved once per snapshot with the shipped reranker.
+    """
+    forms = [("text", text), ("section", section), ("question", question)]
+    selected = [(name, value) for name, value in forms if value is not None]
+    if len(selected) != 1:
+        raise _bad_param(
+            "history requires exactly one of text, section, or question.",
+            'use history(text="phrase"), history(section="/page#anchor"), '
+            'or history(question="question").',
+        )
+    name, value = selected[0]
+    if value is None or not value.strip():
+        raise _bad_param(
+            f"history {name} is empty or only whitespace.",
+            f"send non-whitespace text in {name}.",
+        )
+    try:
+        if name == "text":
+            result = await asyncio.to_thread(
+                history_service.phrase_history, value, SNAPSHOT_MANIFEST
+            )
+        elif name == "section":
+            result = await asyncio.to_thread(
+                history_service.section_history, value, SNAPSHOT_MANIFEST
+            )
+        else:
+            async with _admission_or_busy():
+                result = await history_service.question_history(value, SNAPSHOT_MANIFEST)
+    except (OSError, ValueError) as exc:
+        raise _bad_param(
+            str(exc),
+            "check eval/snapshots/manifest.json and pass one documented history form.",
+        ) from exc
+    lines = [f"history {name}: {json.dumps(value)}"]
+    if name == "text":
+        first = result["first"]
+        last = result["last"]
+        if first is None:
+            lines.append("Results: the phrase is absent from every stored snapshot.")
+        else:
+            lines.append(f"first: {first['snapshot']} | {first['page']} | {first['fragment_url']}")
+            lines.append(f"last: {last['snapshot']} | {last['page']} | {last['fragment_url']}")
+            lines.append(f"Results: found in {result['snapshots_found']} snapshot(s)")
+    else:
+        states = result["states"]
+        for state in states:
+            target = state.get("page") or "(absent)"
+            if state.get("anchor"):
+                target += f"#{state['anchor']}"
+            lines.append(f"{state['snapshot']}: {state['state']} | {target}")
+            if state.get("diff"):
+                lines.extend(["```diff", state["diff"], "```"])
+                if state.get("diff_truncated"):
+                    lines.append(
+                        f"note: diff clamped server-side to {history_service.DIFF_MAX_CHARS} chars"
+                    )
+            if state.get("text"):
+                lines.append(state["text"])
+                if state.get("text_truncated"):
+                    lines.append(
+                        "note: section text clamped server-side to "
+                        f"{history_service.QUESTION_TEXT_MAX_CHARS} chars"
+                    )
+        lines.append(f"Results: {len(states)} stored snapshot(s)")
+    lines.append(
+        "next: use history with another form, or search(query=...) to inspect the current index"
+    )
+    return "\n".join(lines)
+
+
+_TOOL_IMPLS["history"] = history
+
+for _tool_name in _TOOL_ORDER:
+    if _tool_name in _ENABLED_TOOLS:
+        mcp.tool()(_TOOL_IMPLS[_tool_name])
 
 
 def _manifest_pages() -> list[dict[str, Any]]:
@@ -942,6 +1039,8 @@ def _guide_steps_rows() -> str:
     if "ask" in _ENABLED_TOOLS:
         step += 1
         rows.append(f"| {step} | ask | you owe the user an answer, with verified citations |")
+    if "history" in _ENABLED_TOOLS:
+        rows.append("| any | history | track a phrase, section, or question across stored dates |")
     return "\n".join(rows)
 
 
@@ -1045,6 +1144,8 @@ with a retrieval depth of 8. Tool parameters cannot raise these caps.
 - The index covers docs.mistral.ai guides, API reference and model cards
   (commit and counts in `glossator://context`). It is not the whole internet:
   if the corpus lacks a topic, say so. Do not answer from memory.
+- `history` reads stored corpora for text and section forms. Its question form
+  runs retrieval with the shipped reranker once per date and never generates text.
 """
 
 
