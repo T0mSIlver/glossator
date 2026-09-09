@@ -279,9 +279,10 @@ def parse_judge_models(value: str) -> list[JudgeModel]:
         if not item:
             continue
         provider, separator, model = item.partition(":")
-        if separator != ":" or provider not in ("zai", "mistral") or not model.strip():
+        if separator != ":" or provider not in ("zai", "mistral", "local") or not model.strip():
             raise ValueError(
-                f"invalid judge model {item!r}; expected provider:model with provider zai or mistral"
+                f"invalid judge model {item!r}; expected provider:model with provider "
+                "zai, mistral or local"
             )
         judge = JudgeModel(provider=provider, model=model.strip())  # type: ignore[arg-type]
         if judge.identifier in seen:
@@ -1215,7 +1216,7 @@ def make_judge_providers(
     for name in {judge.provider for judge in judges}:
         providers[name] = OpenAICompatibleProvider(
             name,
-            asyncio.Semaphore(4 if name == "zai" else 1),
+            asyncio.Semaphore({"zai": 4, "local": 2}.get(name, 1)),
             caller_tag="eval.answer_eval",
             recorder=JudgeCallRecorder(run_dir),
             seed=0,

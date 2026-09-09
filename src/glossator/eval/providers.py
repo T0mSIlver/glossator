@@ -25,7 +25,11 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 logger = structlog.get_logger(__name__)
 
-ProviderName = Literal["zai", "mistral"]
+ProviderName = Literal["zai", "mistral", "local"]
+"""``local`` is an OpenAI-compatible server on the LAN (D-035c), read from
+``GLOSSATOR_CHAT_SERVER_URL``; it needs no key and its models are unpriced.
+Calls to it carry ``reasoning_effort: none`` so a judge answers instead of
+thinking for a minute, and every call is recorded like any other."""
 ThinkingMode = Literal["enabled", "disabled"]
 Message = Mapping[str, str]
 
@@ -34,7 +38,7 @@ MISTRAL_BASE_URL = "https://api.mistral.ai/v1"
 # The parameter name each provider uses for sampling determinism. Sending the
 # other one is silently ignored, which would make a run look reproducible when
 # it is not.
-_SEED_FIELD: dict[ProviderName, str] = {"zai": "seed", "mistral": "random_seed"}
+_SEED_FIELD: dict[ProviderName, str] = {"zai": "seed", "mistral": "random_seed", "local": "seed"}
 
 _HTTP_ATTEMPTS = 3
 
@@ -441,6 +445,12 @@ class OpenAICompatibleProvider:
             api_key = os.environ.get("ZAI_API_KEY")
             if not base_url or not api_key:
                 raise ValueError("ZAI_BASE_URL and ZAI_API_KEY are required")
+        elif name == "local":
+            server = os.environ.get("GLOSSATOR_CHAT_SERVER_URL", "").strip()
+            if not server:
+                raise ValueError("GLOSSATOR_CHAT_SERVER_URL is required for the local provider")
+            base_url = server.rstrip("/") + "/v1"
+            api_key = os.environ.get("GLOSSATOR_CHAT_API_KEY", "").strip() or "local"
         else:
             base_url = MISTRAL_BASE_URL
             api_key = os.environ.get("MISTRAL_API_KEY")
@@ -491,6 +501,8 @@ class OpenAICompatibleProvider:
             payload["response_format"] = {"type": "json_object"}
         if thinking is not None:
             payload["thinking"] = {"type": thinking}
+        if self.name == "local":
+            payload["reasoning_effort"] = "none"
         return payload
 
     async def _post_with_retries(self, payload: dict[str, Any]) -> tuple[dict[str, Any], float]:
