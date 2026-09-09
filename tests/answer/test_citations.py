@@ -205,6 +205,18 @@ def test_a_quote_that_dropped_backticks_still_verifies() -> None:
     assert ok and reason == VERIFIED_AFTER_EMPHASIS
 
 
+def test_emphasis_normalization_does_not_drop_identifier_underscores() -> None:
+    context = assemble(
+        [make_hit("a", "Pass `tool_call_id` with the result.")],
+        token_budget=500,
+        count_tokens=word_tokens,
+    )
+
+    ok, _, reason = verify("Pass toolcallid with the result.", context.sources[0])
+
+    assert not ok and reason == RejectionReason.FABRICATED
+
+
 def test_emphasis_normalization_does_not_rescue_a_fabrication() -> None:
     context = assemble(
         [make_hit("a", "Tools are declared as JSON objects.")],
@@ -272,6 +284,83 @@ def test_fragment_link_strips_emphasis_and_collapses_whitespace_like_the_verifie
     link = fragment_link(PAGE, None, "  **Maximum**\nnumber of tools: `128` per request.\n")
 
     assert link.endswith("text=Maximum%20number%20of%20tools%3A%20128%20per%20request.")
+
+
+def test_fragment_from_an_identifier_keeps_underscores() -> None:
+    context = assemble(
+        [make_hit("a", 'Set "tool_call_id": tool_call.id in the response.')],
+        token_budget=500,
+        count_tokens=word_tokens,
+    )
+
+    verified, _ = resolve([(1, '"tool_call_id": tool_call.id')], context)
+
+    assert verified[0].fragment_url == (f"{PAGE}#tools:~:text=%22tool_call_id%22%3A%20tool_call.id")
+
+
+def test_fragment_from_an_emphasized_word_uses_source_text_without_markers() -> None:
+    context = assemble(
+        [make_hit("a", "Use the _required_ value here.")],
+        token_budget=500,
+        count_tokens=word_tokens,
+    )
+
+    verified, _ = resolve([(1, "Use the required value here.")], context)
+
+    assert verified[0].fragment_url == (f"{PAGE}#tools:~:text=Use%20the%20required%20value%20here.")
+
+
+def test_fragment_from_bold_text_uses_source_text_without_markers() -> None:
+    context = assemble(
+        [make_hit("a", "This is a **bold phrase** in the source.")],
+        token_budget=500,
+        count_tokens=word_tokens,
+    )
+
+    verified, _ = resolve([(1, "This is a bold phrase in the source.")], context)
+
+    assert verified[0].fragment_url == (
+        f"{PAGE}#tools:~:text=This%20is%20a%20bold%20phrase%20in%20the%20source."
+    )
+
+
+def test_fragment_from_inline_code_keeps_the_identifier() -> None:
+    context = assemble(
+        [make_hit("a", "Pass `response_format` to the call.")],
+        token_budget=500,
+        count_tokens=word_tokens,
+    )
+
+    verified, _ = resolve([(1, "Pass response_format to the call.")], context)
+
+    assert verified[0].fragment_url == (
+        f"{PAGE}#tools:~:text=Pass%20response_format%20to%20the%20call."
+    )
+
+
+def test_fragment_from_a_code_block_uses_the_source_whitespace() -> None:
+    content = "Example:\n\n```python\nresult = tool_call_id\nmessages.append(result)\n```"
+    context = assemble([make_hit("a", content)], token_budget=500, count_tokens=word_tokens)
+
+    verified, _ = resolve([(1, "result = tool_call_id\nmessages.append(result)")], context)
+
+    assert verified[0].fragment_url == (
+        f"{PAGE}#tools:~:text=result%20%3D%20tool_call_id%20messages.append%28result%29"
+    )
+
+
+def test_fragment_range_uses_the_source_span_at_both_ends() -> None:
+    words = ["**first**", "source_word", *(f"word{i}" for i in range(3, 29)), "last_word"]
+    source_quote = " ".join(words)
+    model_quote = source_quote.replace("**", "")
+    context = assemble([make_hit("a", source_quote)], token_budget=500, count_tokens=word_tokens)
+
+    verified, _ = resolve([(1, model_quote)], context)
+
+    assert verified[0].fragment_url == (
+        f"{PAGE}#tools:~:text=first%20source_word%20word3%20word4%20word5,"
+        "word25%20word26%20word27%20word28%20last_word"
+    )
 
 
 def test_a_long_quote_uses_the_start_end_form_with_its_edges() -> None:
