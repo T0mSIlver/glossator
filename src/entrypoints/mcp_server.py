@@ -17,10 +17,20 @@ from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search import GrepMode
 from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
 from pydantic import ValidationError
+from starlette.middleware import Middleware as StarletteMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer
+from glossator.answer.cite import (
+    CiteInputError,
+    CiteQuote,
+    entries_with_headings,
+    sources_markdown,
+)
 from glossator.answer.config import (
     DEFAULT_VARIANT,
     MISTRAL_MEDIUM_3_5,
@@ -48,6 +58,35 @@ if _variant_name not in VARIANTS:
     )
 
 CORPUS_DIR = Path(os.environ.get("GLOSSATOR_CORPUS_DIR", "corpus/mistral-docs"))
+
+# Bearer token for the HTTP transport (D-037). When set, every MCP HTTP
+# request except GET /health must carry `Authorization: Bearer <token>`.
+_MCP_TOKEN = os.environ.get("GLOSSATOR_MCP_TOKEN", "")
+
+_TOOL_ORDER = ("search", "open", "navigate", "read", "grep", "ask", "cite")
+"""Every tool this server can register, in guide order."""
+
+
+def _parse_tool_allowlist(raw: str) -> frozenset[str]:
+    """Which tools to register from GLOSSATOR_MCP_TOOLS.
+
+    Unset or blank means every tool. Unknown names are ignored with a warning:
+    a typo must not take down the tools that were named correctly.
+    """
+    if not raw.strip():
+        return frozenset(_TOOL_ORDER)
+    wanted = {part.strip() for part in raw.split(",") if part.strip()}
+    unknown = sorted(wanted - set(_TOOL_ORDER))
+    if unknown:
+        logger.warning(
+            "Ignoring unknown tool names in GLOSSATOR_MCP_TOOLS",
+            unknown=unknown,
+            known=sorted(_TOOL_ORDER),
+        )
+    return frozenset(wanted & set(_TOOL_ORDER))
+
+
+_ENABLED_TOOLS = _parse_tool_allowlist(os.environ.get("GLOSSATOR_MCP_TOOLS", ""))
 
 # Generation model for the ask tool. The default is the shipped configuration
 # (D-017); a deployment on the free tier points this at a reachable model
@@ -83,6 +122,7 @@ LIMITS: dict[str, tuple[int, int, int]] = {
     "navigate.top_k": (1, 10, 1),
     "read.top_k": (1, 100, 20),
     "grep.top_k": (1, 25, 5),
+    "cite.quotes": (1, 20, 20),
 }
 """name -> (low, high, default). Published in glossator://context."""
 
@@ -197,16 +237,34 @@ def _deeper_search_line(query: str, ids: list[str], **fixed: Any) -> str:
     return f"search({', '.join(parts)})"
 
 
-mcp: FastMCP = FastMCP(
-    "glossator",
-    instructions=(
-        "Start with search, then open the hit to read the section in context "
-        "before answering; prefer `ask` for questions and the navigation tools "
-        "for exploration. Read `glossator://guide` for the shared rules; never "
+def _instructions() -> str:
+    """Server instructions naming the flow over the registered tools only.
+
+    A deployment that disables tools through GLOSSATOR_MCP_TOOLS must not
+    promise a flow it cannot run, so each clause is conditional on its tool.
+    """
+    flow = "Start with search"
+    if "open" in _ENABLED_TOOLS:
+        flow += ", then open the hit to read the section in context before answering"
+    else:
+        flow += " to find the sections that state each claim"
+    if "cite" in _ENABLED_TOOLS:
+        flow += (
+            "; write the answer with [n] markers and verbatim quotes, then call "
+            "`cite` and keep only verified quotes"
+        )
+    if "ask" in _ENABLED_TOOLS:
+        flow += "; prefer `ask` for questions and the navigation tools for exploration"
+    elif "cite" in _ENABLED_TOOLS:
+        flow += "; use the navigation tools for exploration"
+    return (
+        f"{flow}. Read `glossator://guide` for the shared rules; never "
         "fabricate documentation URLs or anchors: cite only a URL and anchor "
         "exactly as a tool printed them."
-    ),
-)
+    )
+
+
+mcp: FastMCP = FastMCP("glossator", instructions=_instructions())
 
 
 class _ParamGuard(Middleware):
@@ -247,7 +305,6 @@ _guard = _ParamGuard(mcp)
 mcp.add_middleware(_guard)
 
 
-@mcp.tool()
 async def search(
     query: str,
     top_k: int = 5,
@@ -394,7 +451,6 @@ class _admission_or_busy:
         _admission.release()
 
 
-@mcp.tool()
 async def open(chunk_id: str, window: int = 2) -> str:
     """Read a chunk and its neighbours in reading order, on its own page.
     The hit you pass is marked *; window chunks each side, offsets shown.
@@ -443,7 +499,6 @@ async def open(chunk_id: str, window: int = 2) -> str:
     return "\n".join(lines).rstrip()
 
 
-@mcp.tool()
 async def navigate(
     source_id: str, start_offset: int, end_offset: int, direction: str, top_k: int = 1
 ) -> str:
@@ -514,7 +569,6 @@ async def navigate(
     return "\n".join(lines).rstrip()
 
 
-@mcp.tool()
 async def read(
     source_id: str, start_offset: int | None = None, end_offset: int | None = None, top_k: int = 20
 ) -> str:
@@ -591,7 +645,6 @@ async def read(
     return "\n".join(lines).rstrip()
 
 
-@mcp.tool()
 async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 5) -> str:
     """Find an exact phrase or set of terms inside one indexed page.
     It matches words, not meaning.
@@ -653,7 +706,6 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
     return "\n".join(lines).rstrip()
 
 
-@mcp.tool()
 async def ask(question: str, strategy: str = "single_pass") -> str:
     """Answer a question from the documentation with verified citations.
     Returns the answer with [n] markers, a numbered source list, and how many
@@ -704,6 +756,93 @@ async def ask(question: str, strategy: str = "single_pass") -> str:
     return _answer_text(question, answer)
 
 
+async def cite(draft: str, quotes: list[CiteQuote]) -> str:
+    """Verify your own quotes against the chunks they claim to come from.
+    Returns per-quote verdicts, fragment links for quotes that hold, and the
+    markers no verified quote covers.
+
+    USE WHEN: you wrote an answer from search, open or read hits and need to
+    check each quote before showing it, with a paste-ready source list.
+
+    DO NOT USE: to get an answer written for you (ask does that, with its own
+    verified citations); to find sources (search).
+
+    START WITH the draft and every quote you relied on, each naming a chunk_id
+    exactly as a result printed it, or a page url with an optional #anchor.
+
+    Args:
+        draft: Your answer text with [n] markers, up to 20,000 characters (clamped, announced).
+        quotes: The quotes behind the markers: each has n, quote, and either chunk_id
+            or url. At most 20 are checked (clamped, announced).
+    """
+    if not draft.strip():
+        raise _bad_param(
+            "the draft is empty or only whitespace.",
+            "send the answer text you wrote, with [n] markers where each claim leans.",
+        )
+    async with _admission_or_busy():
+        try:
+            result = await cite_engine.cite_draft(draft, quotes, engine=_engine)
+        except CiteInputError as exc:
+            raise _bad_param(str(exc), _cite_next_hint()) from exc
+        except (IndexException, RetrieverException) as exc:
+            raise _upstream("cite()", exc) from exc
+    return _cite_text(result)
+
+
+def _cite_next_hint() -> str:
+    return (
+        "each quote needs n, quote, and either chunk_id (exactly as a result "
+        "printed it) or a page url with an optional #anchor."
+    )
+
+
+def _cite_text(result: cite_engine.CiteResult) -> str:
+    """One cite result as text: verdicts, uncovered markers, the source list."""
+    lines = []
+    for line in result.notes:
+        lines.append(line)
+    if result.notes:
+        lines.append("")
+    for item in result.quotes:
+        if item.verified:
+            detail = item.fragment_url or item.citation_url or ""
+            if item.emphasis_normalized:
+                detail += " (verified after emphasis normalization)"
+            lines.append(f"[{item.n}] verified: {detail}")
+        else:
+            lines.append(f"[{item.n}] NOT verified: {item.reason or 'unverified'}")
+    lines.append("")
+    if result.unverified_markers:
+        named = ", ".join(f"[{n}]" for n in result.unverified_markers)
+        lines.append(
+            f"markers with no verified quote: {named}; remove them or fix them "
+            "against a quoted source."
+        )
+        lines.append("")
+    lines.append(result.source_list_markdown)
+    lines.append("")
+    lines.append(f"next: {result.next}")
+    return "\n".join(lines).rstrip()
+
+
+_TOOL_IMPLS: dict[str, Any] = {
+    "search": search,
+    "open": open,
+    "navigate": navigate,
+    "read": read,
+    "grep": grep,
+    "ask": ask,
+    "cite": cite,
+}
+"""Every tool this server can register. Only the allowlisted ones are
+registered below, so a disabled tool is absent from discovery, not an error."""
+
+for _tool_name in _TOOL_ORDER:
+    if _tool_name in _ENABLED_TOOLS:
+        mcp.tool()(_TOOL_IMPLS[_tool_name])
+
+
 def _answer_text(question: str, answer: Answer) -> str:
     headings = {source.n: " > ".join(source.heading_path) for source in answer.trace.sources}
     verified = answer.citations
@@ -717,16 +856,10 @@ def _answer_text(question: str, answer: Answer) -> str:
             "sources. Treat the text above as unsupported."
         )
         lines.append("")
-    lines.append(f"Sources ({len(verified)} verified):")
-    for citation in verified:
-        heading = headings.get(citation.n, "")
-        # The fragment link scrolls a supporting browser to the quoted span and
-        # still carries the anchor inside it, so it is the link worth printing;
-        # the citation_url remains the canonical form in the API's JSON.
-        link = citation.fragment_url or citation.citation_url
-        lines.append(f"[{citation.n}] {link}" + (f" | {heading}" if heading else ""))
-    if not verified:
-        lines.append("(none)")
+    # One entry per distinct (url, anchor); markers keep their numbers and the
+    # entry lists the numbers that point at it (D-027b).
+    entries = entries_with_headings(verified, headings)
+    lines.append(sources_markdown(entries))
     lines.append("")
     for citation in rejected:
         shown = citation.quote if len(citation.quote) <= 60 else citation.quote[:60] + "…"
@@ -782,9 +915,79 @@ def guide_resource() -> str:
     return _guide_text()
 
 
+def _guide_steps_rows() -> str:
+    """The tool-flow table over the registered tools only."""
+    rows = []
+    step = 0
+    if "search" in _ENABLED_TOOLS:
+        step += 1
+        rows.append(
+            f"| {step} | search | you need where the docs say something. START WITH top_k=5 |"
+        )
+    if "open" in _ENABLED_TOOLS:
+        step += 1
+        rows.append(f"| {step} | open | a hit looks promising; read it and its neighbours |")
+    nav = [name for name in ("grep", "read", "navigate") if name in _ENABLED_TOOLS]
+    if nav:
+        step += 1
+        rows.append(
+            f"| {step} | {' · '.join(nav)} | follow an exact phrase, a range, or walk the page |"
+        )
+    if "cite" in _ENABLED_TOOLS:
+        step += 1
+        rows.append(
+            f"| {step} | cite | you wrote the answer yourself; verify each quote, "
+            "keep only verified quotes, paste the source list |"
+        )
+    if "ask" in _ENABLED_TOOLS:
+        step += 1
+        rows.append(f"| {step} | ask | you owe the user an answer, with verified citations |")
+    return "\n".join(rows)
+
+
+def _guide_limits_rows() -> str:
+    """The limits table over the registered tools only."""
+    owners = {
+        "search.top_k": "search",
+        "open.window": "open",
+        "navigate.top_k": "navigate",
+        "read.top_k": "read",
+        "grep.top_k": "grep",
+        "cite.quotes": "cite",
+    }
+    return "\n".join(
+        f"| `{name}` | {low}-{high} | {default} |"
+        for name, (low, high, default) in LIMITS.items()
+        if owners.get(name, name) in _ENABLED_TOOLS
+    )
+
+
+def _guide_preference_line() -> str:
+    if "ask" in _ENABLED_TOOLS and "cite" in _ENABLED_TOOLS:
+        return (
+            "Prefer `ask` for questions and the navigation tools for exploration. "
+            "When you write the answer yourself, verify it with `cite`."
+        )
+    if "ask" in _ENABLED_TOOLS:
+        return "Prefer `ask` for questions and the navigation tools for exploration."
+    if "cite" in _ENABLED_TOOLS:
+        return (
+            "Search, open or read the sections you rely on, write the answer with "
+            "`[n]` markers and verbatim quotes, then call `cite`."
+        )
+    return "Search the index, then read the sections you rely on before answering."
+
+
 def _guide_text() -> str:
-    limits_rows = "\n".join(
-        f"| `{name}` | {low}-{high} | {default} |" for name, (low, high, default) in LIMITS.items()
+    limits_rows = _guide_limits_rows()
+    steps_rows = _guide_steps_rows()
+    preference = _guide_preference_line()
+    cite_rules = (
+        "- Write the answer with `[n]` markers and verbatim quotes, then call "
+        "`cite` with the draft and the quotes. Keep only quotes `cite` verified, "
+        "drop every marker it names as uncovered, and paste its source list.\n"
+        if "cite" in _ENABLED_TOOLS
+        else ""
     )
     return f"""# Using glossator
 
@@ -795,12 +998,9 @@ nowhere.
 
 | Step | Tool | When |
 |---|---|---|
-| 1 | search | you need where the docs say something. START WITH top_k=5 |
-| 2 | open | a hit looks promising; read it and its neighbours |
-| 3 | grep · read · navigate | follow an exact phrase, a range, or walk the page |
-| 4 | ask | you owe the user an answer, with verified citations |
+{steps_rows}
 
-Prefer `ask` for questions and the navigation tools for exploration.
+{preference}
 
 ## Resources
 
@@ -830,7 +1030,7 @@ with a retrieval depth of 8. Tool parameters cannot raise these caps.
 - Never fabricate documentation URLs or anchors. Cite only a `url#anchor`
   exactly as a tool printed it; quote only text that appears in a hit's
   content.
-- Pass ids exactly as printed: chunk ids to `open`, `source_id` and offsets to
+{cite_rules}- Pass ids exactly as printed: chunk ids to `open`, `source_id` and offsets to
   `read`, `navigate` and `grep`. Do not construct or recall ids.
 - Read the last line of every response: `next:` names the call that fits what
   you just got. A full `search` page also prints a copy-pasteable call that
@@ -933,6 +1133,106 @@ async def context_resource() -> str:
     return json.dumps(payload, indent=2)
 
 
+class _BearerAuthMiddleware:
+    """One shared secret for the HTTP transport (D-037).
+
+    Work's custom Connector tab auto-detects HTTP bearer auth and sends a
+    static ``Authorization`` header; this middleware checks it on every HTTP
+    request except the unauthenticated ``GET /health`` the Connectors Debugger
+    and the tunnel use to check the server. Plain ASGI, so it also covers the
+    MCP endpoint itself rather than only the tool calls inside it.
+    """
+
+    def __init__(self, app: Any, token: str) -> None:
+        self.app = app
+        self.token = token
+
+    async def __call__(self, scope: Any, receive: Any, send: Any) -> None:
+        if scope["type"] != "http" or scope.get("path") == "/health":
+            await self.app(scope, receive, send)
+            return
+        headers = {
+            name.decode("latin-1").lower(): value.decode("latin-1")
+            for name, value in scope.get("headers", [])
+        }
+        if headers.get("authorization") != f"Bearer {self.token}":
+            response = JSONResponse(
+                status_code=401,
+                content={
+                    "error": {
+                        "code": "E_UNAUTHORIZED",
+                        "message": (
+                            "missing or wrong Authorization header: send "
+                            "'Authorization: Bearer <token>'."
+                        ),
+                        "next": (
+                            "retry with the Authorization header set to the "
+                            "GLOSSATOR_MCP_TOKEN value; GET /health needs no header."
+                        ),
+                    }
+                },
+            )
+            await response(scope, receive, send)
+            return
+        await self.app(scope, receive, send)
+
+
+def _package_version() -> str:
+    try:
+        from importlib.metadata import PackageNotFoundError, version
+
+        return version("glossator")
+    except PackageNotFoundError:  # running from a source tree without metadata
+        return "0.0.0+unknown"
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def _mcp_health(request: Request) -> Response:
+    """Plain health for the Connectors Debugger and the tunnel (D-037).
+
+    Unauthenticated on purpose: the Debugger must check a server it has no
+    credentials for yet. Reports the served variant, the chunk count, whether
+    the embedding probe passed, and the registered tool names.
+    """
+    try:
+        chunks = await asyncio.wait_for(_engine.document_count(), timeout=5.0)
+    except Exception as exc:
+        logger.warning("MCP health count failed", error=str(exc))
+        chunks = None
+    try:
+        probe = await check_embedding_once(_variant_name)
+        probe_passed: bool | None = True
+        probe_detail: dict[str, Any] = probe.as_dict()
+    except Exception as exc:
+        probe_passed = False
+        probe_detail = {"error": str(exc)}
+    return JSONResponse(
+        {
+            "status": "ok" if chunks is not None and probe_passed else "degraded",
+            "variant": _variant_name,
+            "chunks": chunks,
+            "embedding_probe": {"passed": probe_passed, **probe_detail},
+            "tools": sorted(_ENABLED_TOOLS),
+            "version": _package_version(),
+        }
+    )
+
+
+def build_http_app() -> Any:
+    """The Starlette app the HTTP transport serves, with auth when configured.
+
+    When GLOSSATOR_MCP_TOKEN is set every request except GET /health must
+    carry it as a bearer token; when unset one warning says the server is
+    open. Factored out so tests can drive the transport without a socket.
+    """
+    if _MCP_TOKEN:
+        return mcp.http_app(
+            middleware=[StarletteMiddleware(_BearerAuthMiddleware, token=_MCP_TOKEN)]
+        )
+    logger.warning("GLOSSATOR_MCP_TOKEN is not set; the MCP HTTP server is open to any client.")
+    return mcp.http_app()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the glossator MCP server.")
     parser.add_argument(
@@ -956,6 +1256,17 @@ if __name__ == "__main__":
     asyncio.run(check_embedding_once(_variant_name))
 
     if args.http:
-        mcp.run(transport="http", host=args.host, port=args.port)
+        if not _MCP_TOKEN:
+            logger.warning(
+                "GLOSSATOR_MCP_TOKEN is not set; the MCP HTTP server is open to any client."
+            )
+        mcp.run(
+            transport="http",
+            host=args.host,
+            port=args.port,
+            middleware=(
+                [StarletteMiddleware(_BearerAuthMiddleware, token=_MCP_TOKEN)] if _MCP_TOKEN else []
+            ),
+        )
     else:
         mcp.run()

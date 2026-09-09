@@ -16,7 +16,22 @@ from glossator.answer.citations import Answer, Citation, Trace, TracedSource
 from glossator.answer.llm import TokenUsage
 from glossator.retrieval.engine import Hit, SearchTrace
 
-TOOLS = {"search", "open", "navigate", "read", "grep", "ask"}
+TOOLS = {"search", "open", "navigate", "read", "grep", "ask", "cite"}
+
+
+def _reload_with(monkeypatch: pytest.MonkeyPatch, **env: str) -> Any:
+    """Reload the server with extra environment set (allowlist, token)."""
+    import dotenv
+
+    monkeypatch.setattr(dotenv, "load_dotenv", lambda *args, **kwargs: False)
+    monkeypatch.setenv("MISTRAL_API_KEY", "test-key-not-used")
+    monkeypatch.setenv("GLOSSATOR_CORPUS_DIR", "tests/fixtures/corpus")
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+
+    import entrypoints.mcp_server as module
+
+    return importlib.reload(module)
 
 
 @pytest.fixture
@@ -174,7 +189,7 @@ def _call_error(server: Any, name: str, arguments: dict[str, Any]) -> str:
     return str(excinfo.value)
 
 
-def test_the_tool_set_is_exactly_the_six_read_tools(mcp_server: Any) -> None:
+def test_the_tool_set_is_exactly_the_seven_read_tools(mcp_server: Any) -> None:
     tools = asyncio.run(mcp_server.mcp.list_tools())
 
     assert {tool.name for tool in tools} == TOOLS
@@ -877,3 +892,251 @@ def test_resources_survive_a_missing_manifest(
     assert context["corpus"]["pages"] == 0
     assert context["corpus"]["source_commit"] is None
     assert context["models"]["generation_default"] == "mistral-medium-2604"
+
+
+def test_cite_verifies_a_chunk_quote_and_prints_the_source_list(
+    mcp_server: Any,
+) -> None:
+    mcp_server._engine = FakeEngine()
+
+    out = _call(
+        mcp_server,
+        "cite",
+        {
+            "draft": "Alpha says the thing [1].",
+            "quotes": [{"n": 1, "chunk_id": "c1", "quote": "alpha content"}],
+        },
+    )
+
+    assert "[1] verified:" in out
+    assert "https://docs.mistral.ai/page#a-section" in out
+    assert "[1] https://docs.mistral.ai/page#a-section" in out
+    assert "markers with no verified quote" not in out
+    assert "paste the source list as-is" in out
+    assert out.rstrip().splitlines()[-1].startswith("next:")
+
+
+def test_cite_verifies_through_a_page_url_and_rejects_a_fabrication(
+    mcp_server: Any,
+) -> None:
+    mcp_server._engine = FakeEngine()
+
+    out = _call(
+        mcp_server,
+        "cite",
+        {
+            "draft": "Alpha [1] and pixels [2] plus memory [3].",
+            "quotes": [
+                {
+                    "n": 1,
+                    "url": "https://docs.mistral.ai/page#a-section",
+                    "quote": "alpha content",
+                },
+                {"n": 2, "chunk_id": "c1", "quote": "pixels are delicious"},
+            ],
+        },
+    )
+
+    assert "[1] verified:" in out
+    assert "[2] NOT verified: quote is not in the cited source" in out
+    assert "markers with no verified quote: [2], [3]" in out
+
+
+def test_cite_rejects_a_quote_naming_neither_chunk_nor_url(
+    mcp_server: Any,
+) -> None:
+    text = _call_error(
+        mcp_server,
+        "cite",
+        {"draft": "Alpha [1].", "quotes": [{"n": 1, "quote": "alpha content"}]},
+    )
+
+    assert "E_BAD_PARAM" in text
+    assert "chunk_id" in text
+    assert "next:" in text
+
+
+def test_cite_rejects_an_empty_draft(mcp_server: Any) -> None:
+    text = _call_error(mcp_server, "cite", {"draft": "   ", "quotes": []})
+
+    assert "E_BAD_PARAM" in text
+
+
+def test_cite_announces_its_clamps(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+    quotes = [{"n": n, "chunk_id": "c1", "quote": "alpha content"} for n in range(1, 26)]
+
+    out = _call(mcp_server, "cite", {"draft": "Alpha [1].", "quotes": quotes})
+
+    assert "note: clamped server-side: quotes=25 → 20" in out
+
+
+def test_ask_prints_one_entry_per_source(mcp_server: Any, monkeypatch: Any) -> None:
+    """Two markers on one source collapse to one entry (D-027b)."""
+    mcp_server._engine = FakeEngine()
+    answer = _fake_answer()
+    doubled = answer.model_copy(
+        update={
+            "answer_markdown": "Use server-sent events [1] and again [2].",
+            "citations": [
+                answer.citations[0],
+                answer.citations[0].model_copy(update={"n": 2}),
+            ],
+            "trace": answer.trace.model_copy(
+                update={
+                    "sources": [
+                        TracedSource(
+                            n=1,
+                            citation_url="https://docs.mistral.ai/page#a-section",
+                            heading_path=["Page", "A section"],
+                            chunk_ids=["c1"],
+                            tokens=100,
+                        ),
+                        TracedSource(
+                            n=2,
+                            citation_url="https://docs.mistral.ai/page#a-section",
+                            heading_path=["Page", "A section"],
+                            chunk_ids=["c1"],
+                            tokens=100,
+                        ),
+                    ]
+                }
+            ),
+        }
+    )
+
+    async def fake_ask(question: str, **kwargs: Any) -> Answer:
+        return doubled
+
+    monkeypatch.setattr(mcp_server.answer_service, "ask", fake_ask)
+
+    out = _call(mcp_server, "ask", {"question": "how do I stream?"})
+
+    assert "[1], [2] https://docs.mistral.ai/page#a-section" in out
+    assert out.count("https://docs.mistral.ai/page#a-section | Page > A section") == 1
+
+
+def test_the_allowlist_registers_only_the_named_tools(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,cite")
+    tools = asyncio.run(server.mcp.list_tools())
+
+    assert {tool.name for tool in tools} == {"search", "cite"}
+    assert "cite" in server.mcp.instructions
+    assert "ask" not in server.mcp.instructions
+
+
+def test_the_allowlist_scopes_the_guide_to_registered_tools(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,cite")
+
+    guide = _read_resource(server, "glossator://guide")
+
+    assert "| cite |" in guide
+    assert "| ask |" not in guide
+    assert "`cite.quotes`" in guide
+
+
+def test_the_allowlist_ignores_unknown_names_with_a_warning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,bogus")
+    tools = asyncio.run(server.mcp.list_tools())
+
+    assert {tool.name for tool in tools} == {"search"}
+
+
+def _health_via_http(server: Any, headers: dict[str, str] | None = None) -> Any:
+    """GET /health through the real HTTP app, lifespan included."""
+    from starlette.testclient import TestClient
+
+    with TestClient(server.build_http_app()) as client:
+        return client.get("/health", headers=headers)
+
+
+class _ProbeForHealth:
+    def as_dict(self) -> dict[str, Any]:
+        return {"variant": "sec1024", "model": "m", "dimensions": 128}
+
+
+def _fake_probe(server: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def probe(variant: str) -> _ProbeForHealth:
+        return _ProbeForHealth()
+
+    monkeypatch.setattr(server, "check_embedding_once", probe)
+
+
+def test_health_reports_variant_chunks_probe_and_tools(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mcp_server._engine = FakeEngine()
+    _fake_probe(mcp_server, monkeypatch)
+
+    response = _health_via_http(mcp_server)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["variant"] == "sec1024"
+    assert body["chunks"] == 4430
+    assert body["embedding_probe"]["passed"] is True
+    assert body["tools"] == sorted(TOOLS)
+
+
+def test_health_lists_only_allowlisted_tools(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,cite")
+    server._engine = FakeEngine()
+    _fake_probe(server, monkeypatch)
+
+    body = _health_via_http(server).json()
+
+    assert body["tools"] == ["cite", "search"]
+
+
+def _mcp_post_via_http(
+    server: Any, payload: dict[str, Any], headers: dict[str, str] | None = None
+) -> Any:
+    from starlette.testclient import TestClient
+
+    with TestClient(server.build_http_app()) as client:
+        return client.post("/mcp", json=payload, headers=headers)
+
+
+def test_bearer_token_is_required_on_the_http_transport(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
+    server._engine = FakeEngine()
+
+    denied = _mcp_post_via_http(server, {"jsonrpc": "2.0", "id": 1, "method": "ping"})
+
+    assert denied.status_code == 401
+    assert "Authorization" in denied.json()["error"]["message"]
+
+    # Health stays unauthenticated so the Debugger and the tunnel can check it.
+    assert _health_via_http(server).status_code == 200
+
+    allowed = _mcp_post_via_http(
+        server,
+        {"jsonrpc": "2.0", "id": 1, "method": "ping"},
+        headers={"Authorization": "Bearer secret-token"},
+    )
+    assert allowed.status_code != 401
+
+
+def test_a_wrong_bearer_token_is_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
+    server._engine = FakeEngine()
+
+    response = _mcp_post_via_http(
+        server,
+        {"jsonrpc": "2.0", "id": 1, "method": "ping"},
+        headers={"Authorization": "Bearer wrong-token"},
+    )
+
+    assert response.status_code == 401

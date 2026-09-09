@@ -21,7 +21,14 @@ from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoun
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
+from glossator.answer.cite import (
+    CiteInputError,
+    CiteQuote,
+    CiteResult,
+    entries_with_headings,
+)
 from glossator.answer.config import DEFAULT_VARIANT, PRICES, AnswerConfig
 from glossator.answer.llm import CALL_ERRORS
 from glossator.index.variants import VARIANTS, get_variant
@@ -123,7 +130,25 @@ class SearchRequest(BaseModel):
     variant: str = DEFAULT_VARIANT
 
 
-_BODY_MODELS: dict[str, type[BaseModel]] = {"/ask": AskRequest, "/search": SearchRequest}
+class CiteRequest(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    draft: str = Field(min_length=1, max_length=200000)
+    quotes: list[CiteQuote] = Field(default_factory=list, max_length=100)
+    variant: str = DEFAULT_VARIANT
+
+
+class CiteResponse(CiteResult):
+    model_config = ConfigDict(frozen=True)
+
+    request_id: str
+
+
+_BODY_MODELS: dict[str, type[BaseModel]] = {
+    "/ask": AskRequest,
+    "/search": SearchRequest,
+    "/cite": CiteRequest,
+}
 """Route path -> its request model, so validation errors can suggest field names."""
 
 
@@ -366,9 +391,52 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
     for citation in payload["trace"]["unverified_citations"]:
         if citation["url"]:
             citation["citation_url"] = _citation_url(citation["url"], citation["anchor"])
+    payload["sources"] = [entry.model_dump() for entry in _deduped_sources(answer)]
     payload["trace_summary"] = answer.trace.summary()
     payload["request_id"] = request.state.request_id
     return payload
+
+
+def _deduped_sources(answer: Any) -> list[Any]:
+    """One source entry per distinct (url, anchor) over the verified citations.
+
+    Markers keep their numbers; each entry lists the numbers that point at it
+    (D-027b). The per-marker ``citations`` list is unchanged beside it.
+    """
+    headings = {source.n: " > ".join(source.heading_path) for source in answer.trace.sources}
+    return entries_with_headings(answer.citations, headings)
+
+
+@app.post("/cite", response_model=CiteResponse)
+async def cite(body: CiteRequest, request: Request) -> CiteResponse:
+    """Verify a consumer's own quotes against the chunks they name.
+
+    The consumer gathered context itself through ``POST /search`` and
+    ``GET /pages``; this route checks each submitted quote against the chunk
+    (or page) it claims to come from and names the draft markers no verified
+    quote covers. It never rewrites the answer and never calls a model.
+    """
+    engine = registry.get(body.variant)
+    try:
+        result = await cite_engine.cite_draft(body.draft, list(body.quotes), engine=engine)
+    except CiteInputError as exc:
+        raise ApiError(
+            400,
+            "E_BAD_PARAM",
+            str(exc),
+            next_hint=(
+                "each quote needs n, quote, and either chunk_id (exactly as a "
+                "search hit printed it) or a page url with an optional #anchor"
+            ),
+        ) from exc
+    except (RetrieverException, IndexException) as exc:
+        raise ApiError(
+            503,
+            "E_UPSTREAM",
+            f"citation check failed: {exc}",
+            "retry the identical request; if it repeats, check GET /health",
+        ) from exc
+    return CiteResponse(**result.model_dump(), request_id=request.state.request_id)
 
 
 def _citation_url(url: str, anchor: str | None) -> str:

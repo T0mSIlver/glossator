@@ -92,6 +92,9 @@ class FakeEngine:
     def navigation_at(self, source_id: str, start: int = 0, end: int = 0) -> FakeNavigation:
         return FakeNavigation(self.sections)
 
+    async def get_chunk(self, chunk_id: str) -> Any | None:
+        return next((s for s in self.sections if s.chunk_id == chunk_id), None)
+
     async def document_count(self) -> int:
         if self.fail:
             raise self.fail
@@ -560,3 +563,177 @@ def test_pages_honours_a_smaller_top_k() -> None:
     body = response.json()
     assert [s["section_index"] for s in body["sections"]] == [1, 2]
     assert body["truncated"] is True
+
+
+def test_cite_verifies_a_chunk_quote_with_a_fragment_link() -> None:
+    response = _request(
+        "POST",
+        "/cite",
+        json={
+            "draft": "It streams via server-sent events [1].",
+            "quotes": [
+                {
+                    "n": 1,
+                    "chunk_id": "c1",
+                    "quote": "Server-sent events carry the response.",
+                }
+            ],
+        },
+        headers={"X-Request-Id": "cite-1"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    (item,) = body["quotes"]
+    assert item["verified"] is True
+    assert item["url"] == URL
+    assert item["anchor"] == ANCHOR
+    assert item["chunk_id"] == "c1"
+    assert item["fragment_url"] == (
+        f"{URL}#{ANCHOR}:~:text=Server%2Dsent%20events%20carry%20the%20response."
+    )
+    assert body["unverified_markers"] == []
+    assert body["sources"] == [
+        {
+            "url": URL,
+            "anchor": ANCHOR,
+            "citation_url": f"{URL}#{ANCHOR}",
+            "numbers": [1],
+            "quotes": [
+                {
+                    "n": 1,
+                    "fragment_url": (
+                        f"{URL}#{ANCHOR}:~:text=Server%2Dsent%20events%20carry%20the%20response."
+                    ),
+                }
+            ],
+            "heading": "",
+        }
+    ]
+    assert "[1]" in body["source_list_markdown"]
+    assert body["request_id"] == "cite-1"
+    assert response.headers["X-Request-Id"] == "cite-1"
+
+
+def test_cite_collapses_duplicate_sources_and_names_uncovered_markers() -> None:
+    response = _request(
+        "POST",
+        "/cite",
+        json={
+            "draft": "It streams [1] and again [2], plus pixels [3].",
+            "quotes": [
+                {
+                    "n": 1,
+                    "chunk_id": "c1",
+                    "quote": "Server-sent events carry the response.",
+                },
+                {
+                    "n": 2,
+                    "url": URL,
+                    "quote": "Server-sent events carry the response.",
+                },
+                {"n": 3, "chunk_id": "c1", "quote": "pixels are delicious"},
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert [item["verified"] for item in body["quotes"]] == [True, True, False]
+    assert body["unverified_markers"] == [3]
+    assert len(body["sources"]) == 1
+    assert body["sources"][0]["numbers"] == [1, 2]
+
+
+def test_cite_rejects_a_quote_naming_both_chunk_and_url() -> None:
+    response = _request(
+        "POST",
+        "/cite",
+        json={
+            "draft": "It streams [1].",
+            "quotes": [{"n": 1, "chunk_id": "c1", "url": URL, "quote": "Server-sent events"}],
+        },
+    )
+
+    assert response.status_code == 400
+    error = response.json()["error"]
+    assert error["code"] == "E_BAD_PARAM"
+    assert "exactly one" in error["message"]
+    assert "chunk_id" in error["next"]
+
+
+def test_cite_rejects_an_unknown_variant() -> None:
+    response = _request(
+        "POST",
+        "/cite",
+        json={"draft": "It streams [1].", "quotes": [], "variant": "sec2048"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "E_BAD_PARAM"
+
+
+def test_cite_validation_errors_use_the_typed_shape() -> None:
+    response = _request("POST", "/cite", json={"draft": "It streams [1].", "limit": 5})
+
+    assert response.status_code == 422
+    error = response.json()["error"]
+    assert error["code"] == "E_BAD_PARAM"
+    assert "limit" in error["message"]
+
+
+def test_ask_lists_one_source_entry_per_url_and_anchor(
+    fake_ask: list[dict[str, Any]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer = Answer(
+        question="q",
+        strategy="single_pass",
+        model="mistral-medium-2604",
+        answer_markdown="It streams [1] and again [2].",
+        citations=[
+            Citation(
+                n=1,
+                url=URL,
+                anchor=ANCHOR,
+                chunk_id="c1",
+                quote="Server-sent events carry the response.",
+                verified=True,
+                fragment_url=f"{URL}#{ANCHOR}:~:text=Server.",
+            ),
+            Citation(
+                n=2,
+                url=URL,
+                anchor=ANCHOR,
+                chunk_id="c1",
+                quote="Server-sent events carry the response.",
+                verified=True,
+                fragment_url=f"{URL}#{ANCHOR}:~:text=Server.",
+            ),
+        ],
+        trace=Trace(strategy="single_pass", variant="sec1024", prompt_version="v1"),
+        usage=TokenUsage(prompt_tokens=10, completion_tokens=5),
+    )
+
+    async def _ask(question: str, **kwargs: Any) -> Answer:
+        return answer
+
+    monkeypatch.setattr(answer_service, "ask", _ask)
+
+    response = _request("POST", "/ask", json={"question": "how do I stream?"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["citations"]) == 2
+    assert body["sources"] == [
+        {
+            "url": URL,
+            "anchor": ANCHOR,
+            "citation_url": f"{URL}#{ANCHOR}",
+            "numbers": [1, 2],
+            "quotes": [
+                {"n": 1, "fragment_url": f"{URL}#{ANCHOR}:~:text=Server."},
+                {"n": 2, "fragment_url": f"{URL}#{ANCHOR}:~:text=Server."},
+            ],
+            "heading": "",
+        }
+    ]
