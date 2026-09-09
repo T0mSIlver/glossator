@@ -1,0 +1,150 @@
+{
+  "https://docs.mistral.ai/admin/billing-usage/usage-limits": {
+    "file": "b8b3332e58eff912bff3a5bd8b869c184f65cb7c98b2b69f93c36312d58d9b36.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/chat": {
+    "file": "b5c8b7215b5c044cffc7a3fdc616e266034783b9e86d2c94dbed08b235cac732.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/inference/deployment/cloud-deployments/azure": {
+    "file": "4ffd7c8d3a4ddd7f38225da975b7b38af984aa1b6f298bec7898d99334986d05.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/deprecated/finetuning": {
+    "file": "8475e6754000a5b2e6e0304e1209168d93cd7e29b0159e456f5af493c0f6117a.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/error-glossary": {
+    "file": "45941acead3609dd1b281aaf878bddb8f2b12644cfd5f8dace9db714ec398c4b.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/known-limitations": {
+    "file": "d8f92d5709d689687b193d2f8ed015db1a48489d8687950577a87130fa532db2.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/security-advisories/MAI-2026-002": {
+    "file": "5d7fa5ab410c747c0e24c2067173876ed3fa4fa10e58d807183892997e481e2f.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/agents/agent-tools": {
+    "file": "4f8e9459d8f3387e56c3d6a4fc360cb5e6ad79485fc3a272174f11da5ea75781.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/agents/agents-api": {
+    "file": "46ae612c3e12b0bf4cb5788f4c8da4822d47c2629353bf7da189f9f38dbb1809.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/audio/speech_to_text/offline_transcription": {
+    "file": "daf00a2c11a70eecbf4b5c991a7b1ffbbc2ff1ceb875354fbc43c2b9e958856d.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/audio/speech_to_text/realtime_transcription": {
+    "file": "476e97ca7b03069c4030ae361273a2847fe10bb43197a24853998004cf414166.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/batch-processing": {
+    "file": "73379ba0d9be0bec4146ef0d451bb3cda49708aa7e4205d4145ae34e73f0cbbe.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/connectors/debugger": {
+    "file": "788dfa2fb01ad5b5423834bd76ffcdc62d03d9f0eb1ee04d395694b230653135.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/conversations/advanced/prompt-caching": {
+    "file": "32da51c703a4755a62cff4637b7938cefa51e6051477c799a1a6bacaf0e1d7d1.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/conversations/chat-completion": {
+    "file": "76a00b6125c6220fda1d6a10fd887df9fecc206adbc5391785c3b00bde553332.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/conversations/citations": {
+    "file": "8a099a2e51f91465633f640c779c2ac0739b204a6460f12a289c14f71130bd3b.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/conversations/function-calling": {
+    "file": "44ccfb2bdb8608000d0ee1746f3d993ee4b085450916c565da13180a1a8763db.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/conversations/reasoning": {
+    "file": "25bc7f93d47e2d1ccb6b1a1c8705f117ee5ec3a25311ee61fadd4e587bb978cf.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/conversations/structured-output/custom": {
+    "file": "4ac17fe43ae955a8fc401055614c1238f1fc542211f096ab6d6061cee6f7596a.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/document-processing/annotations": {
+    "file": "72cf06b79bbe6a9750ec6511fe88496c2066e8e8529fca7c2c6b02e66dfda5f2.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/document-processing/basic_ocr": {
+    "file": "f06c212e3c24636a7bc9e798cf87009c346ab369589f4b06f5f9e3ade54dcfdc.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/knowledge-rag/embeddings/text_embeddings": {
+    "file": "d8c4a9fc2b83f619725a46f08ad2ceb47b3626dbcb3b6b23d7cb715a55b65d96.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/knowledge-rag/rag_quickstart": {
+    "file": "5a63b13889887e3e9a267ec1f28b7a3982f0a75325c52f4667fd2969390033a5.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/agentic-search": {
+    "file": "6fee851230b37af0c1a11f858256f3b57a4d7d1252194533e2da6c15bbe99086.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/changelog": {
+    "file": "d6242e23e7a0758c3aed3fcc36349bd08e0529ece1c88e1aa3393507adc45b89.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/concepts/document-model": {
+    "file": "e5535b761196432db4e136a8c161e6b6776a14b4125e38f768a5933d3eb3a633.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/enrichers": {
+    "file": "4ae14ca8d89d9bc1830ffbaa068c063dd169090d9847d96f6cc66b29ddcbaee3.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/loaders": {
+    "file": "748a1e33fd5c9ce3dfe644c40805aa2fe2e86759a49262e9d9281fa7dc657462.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/retrieval": {
+    "file": "488f6b47e4f85928413f71edd73541177b8ac69b0cf9d280be2bad9c064c6c49.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/preprocessing": {
+    "file": "3646370b6ba546c76708601c0f8fc1c5fb8b9392c8978c1dfffe8af6038a0c69.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers": {
+    "file": "c54bde73a96dde0d80d3b639b124db92bbb5870786e82a57a790fbf14e168a4b.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/search-index/postgres": {
+    "file": "45294d077f63a76d4fcbda2cd61c0fa52dd58b16534a7a9bd9740652adb6f831.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy": {
+    "file": "d31f383e395ce64ea0361961cdd4f4b4404ee74020d658dfdb95e33ee968ba4d.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development": {
+    "file": "e1c702fb66a455513acf37fad668fec8ea1f6aea1260409f269271feb60f3565.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migration-helpers": {
+    "file": "bfed9460ccfb2f47b0fe26ab9daec52ba65882aac93cb8e2aed7b301173c022d.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations": {
+    "file": "48e3c5cae814caaae33c76c63c5df9512fb006298f128262b14b1235db67d8c0.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/work/connectors/mcp-connectors": {
+    "file": "57ed34f0a00dcaaea6221af45e0d64556016b806738674221333e10ff602d90f.html",
+    "status_code": 200
+  }
+}

@@ -14,17 +14,18 @@ depends on a model's opinion, so none of them moves when a judge is swapped.
 The judge answers what code cannot: whether the answer is *right*, whether its
 claims are actually in the passages it cites, and whether each citation supports
 the sentence it hangs on. It is shown the question, the reference answer, the
-gold URLs, the answer and the cited passages verbatim -- and never which strategy
-wrote the answer, so it cannot prefer one.
+answer and the cited passages verbatim. It sees no URL, page identifier, or strategy.
 
 ## Configuration
 
 - Generation model: `ministral-14b-2512`
-- Judge model: `glm-5.3` (answer-judge/v1)
-- Index variant: `sec128`, top_k 8, context budget 6000 tokens
+- Judge models: `glm-5.3`; primary first (answer-judge/v2)
+- Index variant: `sec128`, top_k 8, rerank unknown (off), context budget 6000 tokens
+- Non-English questions rendered in English for retrieval: unknown
+- Question reworded into the documentation's vocabulary for retrieval: unknown
 - Dataset: `tests/fixtures/answer-questions.jsonl`, sha256 `ef184ab31296f7caf57659e5ef6f24bd591e5841089c67c09d031d535cde5a7a`
 - Questions: 4; strategies: 1; records: 4
-- Judge prompt hashes: {"judge_citation": "4603459ac6e543de", "judge_system": "b8150fdcba16ff47", "judge_user": "5bbdcd0c47bf9a06"}
+- Judge prompt hashes: {"judge_citation": "d1565f592953cb68", "judge_system": "3b300bf0bcd8ea7f", "judge_user": "4e976b80283c7257"}
 
 `config.json` holds every other parameter, including the price table the USD
 columns were computed with.
@@ -36,11 +37,11 @@ columns were computed with.
 
 ## Results
 
-4 of 4 answers were judged by `glm-5.3` with thinking disabled. 0 answer(s) ended in an error and are recorded with it.
+4 of 4 answers were judged by the primary judge `glm-5.3`. 0 answer(s) ended in an error and are recorded with it.
 
 ### Citations against the gold sources
 
-Whether the answer's verified citations point at the pages the dataset says hold the answer. Unanswerable questions have no gold source, so they are left out of these two tables rather than counted as failures.
+Whether the answer's verified citations point at the pages the dataset says hold the answer. Unanswerable questions have no gold source, so they are left out of these tables rather than counted as failures. Capability questions also accept a named model's own card, and the last table counts matches that passed only because of that documented relaxation.
 
 **cited_url_match** -- a verified citation names a gold page
 
@@ -53,6 +54,12 @@ Whether the answer's verified citations point at the pages the dataset says hold
 | strategy | model | single_page | api_reference | capability | unanswerable | all |
 |---|---|---|---|---|---|---|
 | `single_pass` | `ministral-14b-2512` | 0.00 | 1.00 | 0.00 | -- | **0.33** |
+
+**gold_relaxed_matches** -- matches accepted through the model-card relaxation
+
+| strategy | model | single_page | api_reference | capability | unanswerable | all |
+|---|---|---|---|---|---|---|
+| `single_pass` | `ministral-14b-2512` | 0 | 0 | 0 | 0 | **0** |
 
 ### Citation verification
 
@@ -106,7 +113,7 @@ Whether the quotes the model wrote are in the sources it named. A fabricated rej
 
 ### Judged quality
 
-GLM's verdicts (D-021), reported beside the deterministic numbers and never merged into them. Correctness scores correct as 1, partial as 0.5, wrong as 0. Groundedness is the fraction of the answer's factual claims the cited passages support. Citation relevance is the fraction of citations that support the sentence they are attached to.
+The primary judge's verdicts (D-021), reported beside the deterministic numbers and never merged into them. Correctness scores correct as 1, partial as 0.5, wrong as 0. Groundedness is the fraction of the answer's factual claims the cited passages support. Citation relevance is the fraction of citations that support the sentence they are attached to.
 
 **correctness** -- correctness against the reference answer
 
@@ -158,7 +165,7 @@ What each strategy spent to get there.
 
 | strategy | model | single_page | api_reference | capability | unanswerable | all |
 |---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.00000 | 0.00000 | 0.00000 | 0.00000 | **0.00000** |
+| `single_pass` | `ministral-14b-2512` | 0.00072 | 0.00033 | 0.00043 | 0.00028 | **0.00044** |
 
 **reference_usd** -- USD per question at mistral-medium-2604 prices
 
@@ -178,16 +185,36 @@ What each strategy spent to get there.
 |---|---|---|---|---|---|---|
 | `single_pass` | `ministral-14b-2512` | 1.00 | 1.00 | 1.00 | 1.00 | **1.00** |
 
+## Agreement
+
+Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses quadratic weights. Exact agreement requires the same label.
+
+### Judge pairs
+
+| first judge | second judge | answers | quadratic-weighted kappa | exact agreement |
+|---|---|---:|---:|---:|
+| -- | -- | 0 | -- | -- |
+
+### Krippendorff's alpha
+
+| raters | ordinal alpha | pairwise exact agreement |
+|---|---:|---:|
+| configured judges | -- | -- |
+
+### Judge means
+
+| judge | answers | mean correctness | human-labeled answers |
+|---|---:|---:|---:|
+| `zai:glm-5.3` | 4 | 0.88 | -- |
+
 ## Cost and latency
 
 The run made 4 answers over 4 questions:
 11010 prompt and 708 completion tokens,
-0.0000 USD at this run's price table and
+0.0018 USD at this run's price table and
 0.0218 USD at mistral-medium-2604 prices. Median
 answer latency was 2.0 s, 95th
 percentile 4.3 s.
-
-`ministral-14b-2512` has no published price, so the USD column of this run is zero by construction. The row beside it prices the same recorded tokens at mistral-medium-2604 rates (D-017), which is what the shipped configuration would have cost.
 
 Judging spent 6278 prompt and 543 completion tokens over 4 call(s) (109 of them reasoning tokens, with thinking disabled), at a mean of 2.3 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.0135 USD.
 

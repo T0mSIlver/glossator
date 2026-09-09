@@ -1,0 +1,58 @@
+{
+  "by_question_type": {
+    "api_reference": {
+      "checked": 7,
+      "found": 3,
+      "html_eligible": 6,
+      "share_found_among_html_eligible": 0.5,
+      "tab_panel_excluded": 1
+    },
+    "capability": {
+      "checked": 7,
+      "found": 5,
+      "html_eligible": 7,
+      "share_found_among_html_eligible": 0.7142857142857143,
+      "tab_panel_excluded": 0
+    },
+    "cross_page": {
+      "checked": 14,
+      "found": 13,
+      "html_eligible": 14,
+      "share_found_among_html_eligible": 0.9285714285714286,
+      "tab_panel_excluded": 0
+    },
+    "post_cutoff": {
+      "checked": 9,
+      "found": 6,
+      "html_eligible": 8,
+      "share_found_among_html_eligible": 0.75,
+      "tab_panel_excluded": 1
+    },
+    "single_page": {
+      "checked": 13,
+      "found": 12,
+      "html_eligible": 13,
+      "share_found_among_html_eligible": 0.9230769230769231,
+      "tab_panel_excluded": 0
+    },
+    "unanswerable": {
+      "checked": 10,
+      "found": 10,
+      "html_eligible": 10,
+      "share_found_among_html_eligible": 1.0,
+      "tab_panel_excluded": 0
+    }
+  },
+  "checked": 60,
+  "failures": {
+    "text absent": 11
+  },
+  "found": 49,
+  "html_eligible": 58,
+  "kind": "fragment_resolvability",
+  "sample_requested": 60,
+  "seed": 0,
+  "share_found": 0.8166666666666667,
+  "share_found_among_html_eligible": 0.8448275862068966,
+  "tab_panel_excluded": 2
+}

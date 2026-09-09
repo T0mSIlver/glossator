@@ -1,0 +1,174 @@
+{
+  "https://docs.mistral.ai/admin/identity-access/api-key-policy": {
+    "file": "fe350736530b41b0e83b9d931f5008a2c0ef9e0f6453820a1ab8b250a285a4d8.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/admin/identity-access/service-accounts": {
+    "file": "3d1485b8b8ced2c06168c061db93ee538112e7004e1c7837bae4e4c5026a78d5.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/admin/identity-access/workload-identity": {
+    "file": "6f813ae57b6c38a52f3c13957b8e50638cf193b877bf185fe6940ecd586574d3.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference": {
+    "file": "3e38492c959b98e110274846c869a7fc1e69e61c3a6e0da0ac3334ef745f2ed8.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/admin/set-up-organization/sign-in-method/saml-sso": {
+    "file": "da9fea115a9c35f845bb8585799813caefc62a7160491d34262dbfd3ed5a9bf6.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/batch": {
+    "file": "02dfef44384722045e8068c0576172fb32ce48e3531e81684b1146480c4efbb7.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/beta/admin/audit-logs": {
+    "file": "2ee6ea8224e949b1f8472dc950769ffe5f8520a2b4a711da406b455644c881f3.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/beta/conversations": {
+    "file": "19a0632a55defa42a51bec5a27d3012ad0704336645071546e392190827a80f7.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/classifiers": {
+    "file": "021bdea77dd1dd5a9bbda3a3268f3ecdf16562fdce4540d1da30f571928e112a.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/files": {
+    "file": "2e6d1030c464424b6e45e6ec3579e88c57d624746dfc4ddb0126db4c91e2ca47.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/fim": {
+    "file": "31aebeee3c3758274834f63c6355b34a0776c0463d5bf876645865dcda8d657c.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/ocr": {
+    "file": "5cfdc693dfa97f05d10eefab99e9c666e5d108d6521078d23067dd72213ca5de.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/api/endpoint/workflows/deployments": {
+    "file": "fbdb0e5cfa57d282cc04d87d3e4c4bd5b9ea235f71b58f78d23610770f688f7b.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/getting-started/quickstarts/admin/configure-sso": {
+    "file": "94af7a4d2892345abeebba8e45f6725866fb1f11ff89e3a683fff550a168f594.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/scaffold-a-project": {
+    "file": "6ef752dfeac13530c7f61535306740756770d5b1b1476d704f53702ccdb18c0d.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/inference/deployment/cloud-deployments/vertex": {
+    "file": "adde3902b88557a1b2af92de5f9efd0b57dfc17bfecfcf1cb61698adcfd23139.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/models": {
+    "file": "d844075da16b93c5233363c17221c7e32dfcf18e23a5dc42f654f6a6ad83db77.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/models/voxtral-tts-26-03": {
+    "file": "9a4a80721376700044936a185afc183e6850e0a35dffe80a4f50179d05c86ba0.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/deprecated/customization": {
+    "file": "80926cec1cc95c33133dbc48fdf048f6ec63867aeb38aceeed6afb201ccccb07.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/deprecated/finetuning": {
+    "file": "8475e6754000a5b2e6e0304e1209168d93cd7e29b0159e456f5af493c0f6117a.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/known-limitations": {
+    "file": "d8f92d5709d689687b193d2f8ed015db1a48489d8687950577a87130fa532db2.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/resources/migration-guides": {
+    "file": "1662eb9e7d8df617331c5572190c3d62e5dc89f5584923a6b5dd5c98f710155f.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/robots": {
+    "file": "f25d647693036814d4e20175e44527088296df2a267a896f8a0350b86dd747a8.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/agents/agent-tools": {
+    "file": "4f8e9459d8f3387e56c3d6a4fc360cb5e6ad79485fc3a272174f11da5ea75781.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/agents/agent-tools/image_generation": {
+    "file": "650750e55c9df469119fb317b496f89212221444a2003e51fe6c6f7431ecae5a.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/agents/handoffs": {
+    "file": "a78e6bd22b9d3522030809b004ce7548ae5a65c46ff1c07f00c266c81ec93d15.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/audio/overview": {
+    "file": "0f59c89f64c819f252cfd8fb239524186db68e298913075413c6bb53b6f46550.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/audio/speech_to_text": {
+    "file": "86b2d438cbc9fb269f2329127651b8fe04eb77b6acb200552753a8694d225e69.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/batch-processing": {
+    "file": "73379ba0d9be0bec4146ef0d451bb3cda49708aa7e4205d4145ae34e73f0cbbe.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/libraries": {
+    "file": "4664fd3a5da66344fb6a4dc9b3c112d76598849e344bbff77283a4f2f0651a5d.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/extractors": {
+    "file": "31ce4f08062aa1543fdcbfba2bb029a9efd11deefbfec5c5e94311e6ec20c731.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/semantic-cache": {
+    "file": "174c491bbdbf76049b8d8de7c7be8ea204e4cbe9980756a795d76737b713e1b7.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/workflows/building-workflows/activities/sticky_worker_sessions": {
+    "file": "f322fa00508df3644254cfa2ac511f13307a06490f2c2e63e4a86a436b15dd93.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/workflows/interacting-with-workflows/conversational_workflows/forms_and_confirmations": {
+    "file": "52cdfe0b5f9f24213b5d28028cebc54c2d1fa61346272e91b3bce768e24ac438.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/studio/workflows/managing-workflows-in-production/concurrency": {
+    "file": "f8acc85d064d6817485a82327f4aea296d13aaea7dcdffdf4260477dbd4235b1.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe": {
+    "file": "f4a9b9da5258c32995f6d2a5ad8526ee69e5c00a0c66a1ea07f3b888e370dd13.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/chat-legacy/code-interpreter": {
+    "file": "d47a433f8059d99970949d379bc56368498273afe9639394bb7357009c0ceebb.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/code/cli/agents": {
+    "file": "08532a96678ebf274102de788cb09eeb7f17f9fdfd35e3f922088680cee30fc9.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles": {
+    "file": "b57a2dd1ed84c5e9b0a15070411c2a0859081e9d45efdf4a37d76dfbdfd8128b.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/work/connectors": {
+    "file": "fdc6179234dd3014c789b8fa81b10e4c629511961df63c7a21ed4d3bcfcd1d0e.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/work/libraries": {
+    "file": "79cce5e77bfcd7e08a6ce17091e972ba8fa126290d8fbb7023d847a57b0b5400.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/work/safety-and-approvals": {
+    "file": "6380b7021733d03d9f8eb356366b5cfc90d3512e1b2e82640c9f4ef821644243.html",
+    "status_code": 200
+  },
+  "https://docs.mistral.ai/vibe/work/web-search-open-url": {
+    "file": "ab613ec66485587c8723f43609328357a45dcbe11324f64e87a23d64441e81b5.html",
+    "status_code": 200
+  }
+}

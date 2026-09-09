@@ -22,6 +22,7 @@ answer and the cited passages verbatim. It sees no URL, page identifier, or stra
 - Judge models: `zai:glm-5.3`, `zai:glm-5.3-flash`, `mistral:ministral-14b-2512`; primary first (answer-judge/v2)
 - Index variant: `sec1024`, top_k 8, rerank unknown (off), context budget 6000 tokens
 - Non-English questions rendered in English for retrieval: unknown
+- Question reworded into the documentation's vocabulary for retrieval: unknown
 - Dataset: `eval/dev.jsonl`, sha256 `acf3c2e148f1aa4036565ac03dd7a3a7e9bef5d0717529976ce9422b68b35490`
 - Questions: 60; strategies: 3; records: 180
 - Judge prompt hashes: {"judge_citation": "d1565f592953cb68", "judge_system": "3b300bf0bcd8ea7f", "judge_user": "4e976b80283c7257"}
@@ -197,9 +198,9 @@ What each strategy spent to get there.
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `ministral-14b-2512` | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | **0.00000** |
-| `search_loop` | `ministral-14b-2512` | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | **0.00000** |
-| `outline` | `ministral-14b-2512` | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | 0.00000 | **0.00000** |
+| `single_pass` | `ministral-14b-2512` | 0.00029 | 0.00038 | 0.00041 | 0.00029 | 0.00037 | 0.00028 | **0.00034** |
+| `search_loop` | `ministral-14b-2512` | 0.00164 | 0.00273 | 0.00267 | 0.00205 | 0.00225 | 0.00362 | **0.00249** |
+| `outline` | `ministral-14b-2512` | 0.00132 | 0.00149 | 0.00125 | 0.00171 | 0.00147 | 0.00117 | **0.00140** |
 
 **reference_usd** -- USD per question at mistral-medium-2604 prices
 
@@ -255,12 +256,10 @@ Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses
 
 The run made 180 answers over 60 questions:
 1612093 prompt and 78200 completion tokens,
-0.0000 USD at this run's price table and
+0.2535 USD at this run's price table and
 3.0046 USD at mistral-medium-2604 prices. Median
 answer latency was 4.7 s, 95th
 percentile 11.9 s.
-
-`ministral-14b-2512` has no published price, so the USD column of this run is zero by construction. The row beside it prices the same recorded tokens at mistral-medium-2604 rates (D-017), which is what the shipped configuration would have cost.
 
 Judging spent 1458613 prompt and 120625 completion tokens over 540 call(s) (18557 of them reasoning tokens, with thinking disabled), at a mean of 9.4 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 3.0926 USD.
 
