@@ -140,3 +140,20 @@ def test_embedding_cache_reuses_unchanged_chunk_content(tmp_path: Path) -> None:
     assert inner.calls == 1
     assert first.embedded_chunks == 1
     assert second.cached_chunks == 1
+
+
+def test_first_and_last_follow_the_dates_not_the_manifest_order(tmp_path: Path) -> None:
+    """Every form reads its answer out of the snapshot order, so a manifest
+    written out of order would invert "first appeared" and "last seen"."""
+    manifest = _manifest(tmp_path)
+    payload = json.loads(manifest.read_text())
+    payload["snapshots"].reverse()
+    manifest.write_text(json.dumps(payload))
+
+    result = phrase_history("The limit is", manifest)
+
+    assert result["first"]["snapshot"] == "2026-06-01"
+    assert result["last"]["snapshot"] == "2026-06-15"
+    states = section_history("https://docs.mistral.ai/page#limits", manifest)["states"]
+    assert [state["snapshot"] for state in states] == ["2026-06-01", "2026-06-15"]
+    assert states[1]["state"] == "changed"

@@ -56,7 +56,15 @@ class QuestionState:
 
 
 def available_snapshots(manifest_path: Path = DEFAULT_MANIFEST) -> list[SnapshotRecord]:
-    return [row for row in read_snapshot_manifest(manifest_path) if row.status == "built"]
+    """The built snapshots, oldest date first.
+
+    Every form here reads its answer out of the order: "first appearance" is the
+    head of the list, "last" is the tail, and a section's diff is against the
+    date before it. The manifest happens to be written chronologically, but a
+    manifest that is not would silently invert all three.
+    """
+    built = [row for row in read_snapshot_manifest(manifest_path) if row.status == "built"]
+    return sorted(built, key=lambda row: row.date)
 
 
 def _pages(snapshot: SnapshotRecord) -> list[CorpusPage]:
@@ -161,11 +169,13 @@ def section_history(
             continue
         page, text, found_anchor = located
         digest = _digest(text)
-        moved = page.url.rstrip("/") != url.rstrip("/")
+        # Compared without the trailing slash on both sides: a page that only
+        # gained or lost one did not move.
+        here = page.url.rstrip("/")
         if previous_digest is None:
-            state = "moved" if moved else "same"
+            state = "moved" if here != url.rstrip("/") else "same"
         elif digest == previous_digest:
-            state = "moved" if page.url != previous_page else "same"
+            state = "moved" if here != (previous_page or "").rstrip("/") else "same"
         else:
             state = "changed"
         rendered_diff = None
