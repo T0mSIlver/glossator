@@ -32,6 +32,7 @@ from glossator.eval.consumer import (
     opencode_command,
     parse_claude_events,
     parse_claude_tokens,
+    parse_codex_events,
     parse_opencode_events,
     parse_opencode_tokens,
     prompt_for,
@@ -528,6 +529,19 @@ def test_claude_mcp_config_is_written_per_arm(tmp_path: Path) -> None:
 
     without = json.loads(write_claude_mcp_config(tmp_path, None, "s3cret").read_text())
     assert without == {"mcpServers": {}}
+
+
+def test_an_exhausted_codex_window_is_an_error_row_not_a_crash() -> None:
+    """A recorded run against an exhausted quota: the turn fails before any
+    item, and the cell records why instead of the run stopping."""
+    lines = _stream("codex-quota.jsonl")
+
+    answer, calls = parse_codex_events(lines)
+    failure = consumer_module.codex_failure(lines)
+
+    assert (answer, calls) == ("", [])
+    assert failure is not None
+    assert is_quota_error(failure)
 
 
 def test_codex_command_names_the_verified_mcp_keys() -> None:
