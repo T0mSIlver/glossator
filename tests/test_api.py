@@ -560,3 +560,50 @@ def test_pages_honours_a_smaller_top_k() -> None:
     body = response.json()
     assert [s["section_index"] for s in body["sections"]] == [1, 2]
     assert body["truncated"] is True
+
+
+def test_history_text_form_returns_the_service_result(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[str] = []
+
+    def phrase_history(text: str, manifest: object) -> dict[str, object]:
+        calls.append(text)
+        return {"form": "text", "text": text, "first": None, "last": None}
+
+    monkeypatch.setattr(api_module.history_service, "phrase_history", phrase_history)
+
+    response = _request("GET", "/history?text=rate+limits")
+
+    assert response.status_code == 200
+    assert response.json()["form"] == "text"
+    assert calls == ["rate limits"]
+
+
+def test_history_rejects_zero_or_two_forms() -> None:
+    for path in ("/history", "/history?text=a&question=b"):
+        response = _request("GET", path)
+
+        assert response.status_code == 400
+        assert response.json()["error"]["code"] == "E_BAD_PARAM"
+
+
+def test_history_rejects_an_empty_form() -> None:
+    response = _request("GET", "/history?text=++")
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "E_BAD_PARAM"
+
+
+def test_history_section_errors_become_bad_param(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def section_history(section: str, manifest: object) -> dict[str, object]:
+        raise ValueError("section must be on docs.mistral.ai")
+
+    monkeypatch.setattr(api_module.history_service, "section_history", section_history)
+
+    response = _request("GET", "/history?section=https://example.com/page")
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "E_BAD_PARAM"
