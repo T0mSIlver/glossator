@@ -117,9 +117,10 @@ the npm supply-chain advisory versions (mined-037), querying a model deployed on
 (mined-038), the batch job's endpoint enum (mined-046), where the Vibe CLI finds skills
 (mined-047), the OCR `pages` parameter and its zero-based numbering (mined-054), the model
 capability matrix (mined-040), an `llms.txt` for the documentation (mined-078), and local
-token counting before a request (mined-049). Two further candidates were dropped for having
-no evidence behind the question once written, and one for asking a question the corpus
-answers only through the same page and anchor an existing row already uses.
+token counting before a request (mined-049). Two further candidates were dropped because the
+stumble behind them did not survive being written down as a question, and one was rewritten
+as `unanswerable` rather than kept, because the page and anchor it would have cited already
+carry an existing row.
 
 ## Constraints observed
 
