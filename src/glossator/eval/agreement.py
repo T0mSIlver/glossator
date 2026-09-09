@@ -113,12 +113,10 @@ def krippendorff_alpha_ordinal(
         return None
 
     observed_sum = 0.0
-    observed_pairs = 0
     for unit in usable:
         for first, second in itertools.permutations(unit, 2):
-            observed_sum += _ordinal_distance(first, second, marginals)
-            observed_pairs += 1
-    observed = observed_sum / observed_pairs
+            observed_sum += _ordinal_distance(first, second, marginals) / (len(unit) - 1)
+    observed = observed_sum / total
 
     expected_sum = sum(
         marginals[first]

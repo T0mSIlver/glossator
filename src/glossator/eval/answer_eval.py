@@ -846,11 +846,17 @@ class RunDirectory:
         self._append(self.records_path, json.loads(record.model_dump_json()))
 
     def replace_records(self, records: Sequence[QuestionRecord]) -> None:
-        """Checkpoint rewritten records atomically after re-judging."""
+        """Checkpoint judge fields without normalizing the stored answer or trace."""
+        stored = [json.loads(line) for line in self.records_path.read_text().splitlines()]
+        if len(stored) != len(records):
+            raise ValueError("re-judge checkpoint changed the number of answer records")
         temporary = self.records_path.with_suffix(f".{os.getpid()}.tmp")
         with temporary.open("w") as handle:
-            for record in records:
-                handle.write(record.model_dump_json() + "\n")
+            for row, record in zip(stored, records, strict=True):
+                updated = record.model_dump(mode="json")
+                for field in ("judge", "judges", "judges_v1"):
+                    row[field] = updated[field]
+                handle.write(json.dumps(row, sort_keys=True) + "\n")
         temporary.replace(self.records_path)
         self.records = list(records)
 

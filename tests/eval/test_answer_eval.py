@@ -712,6 +712,10 @@ async def test_rejudge_keeps_answers_and_archives_the_old_judge(
         judge=verdict("wrong").model_copy(update={"prompt_version": "answer-judge/v1"})
     )
     run.record(original)
+    stored = json.loads(run.records_path.read_text())
+    stored["trace"].pop("retrieval_query", None)
+    stored["legacy_record_field"] = "kept"
+    run.records_path.write_text(json.dumps(stored) + "\n")
 
     class FakeProvider:
         async def aclose(self) -> None:
@@ -741,6 +745,8 @@ async def test_rejudge_keeps_answers_and_archives_the_old_judge(
     metrics = await rejudge(path, judge_models=parse_judge_models("zai:new"))
     rewritten = json.loads((path / "records.jsonl").read_text())
     assert rewritten["answer_markdown"] == original.answer_markdown
+    assert "retrieval_query" not in rewritten["trace"]
+    assert rewritten["legacy_record_field"] == "kept"
     assert rewritten["judges_v1"]["zai:glm-5.3"]["verdict"]["correctness"] == "wrong"
     assert rewritten["judges"]["zai:new"]["verdict"]["correctness"] == "correct"
     assert rewritten["judge"] == rewritten["judges"]["zai:new"]

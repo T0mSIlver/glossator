@@ -37,6 +37,13 @@ def test_ordinal_alpha_accepts_missing_ratings() -> None:
     assert complete == 1.0
 
 
+def test_ordinal_alpha_weights_units_by_their_available_rater_count() -> None:
+    # The ordinal distance between wrong and correct is 6.25 for these
+    # marginals. Observed disagreement is 2.5 and expected disagreement is 3.75.
+    alpha = krippendorff_alpha_ordinal([["wrong", "wrong"], ["wrong", "correct", "correct"]])
+    assert alpha == pytest.approx(1 / 3)
+
+
 def test_report_aligns_each_pair_on_the_items_both_judges_labeled() -> None:
     report = agreement_report(
         {
