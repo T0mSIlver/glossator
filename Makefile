@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors
+.PHONY: corpus-refresh corpus-check dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors failures
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 .PHONY: deploy deploy-check
 
@@ -116,6 +116,14 @@ eval-retrieval:
 		--name $(name) \
 		$(if $(configs),--configs $(configs),) \
 		$(if $(limit),--limit $(limit),)
+
+## Classify the failed answers of one or more answer-evaluation runs
+## Usage: make failures runs="eval/runs/a eval/runs/b" [name=failure-analysis] [judge_model=zai:glm-5.3]
+failures:
+	uv run python -m glossator.eval.failures \
+		$(foreach run,$(runs),--run $(run)) \
+		--name $(or $(name),failure-analysis) \
+		$(if $(judge_model),--judge-model $(judge_model),)
 
 ## Measure the similarity corridor between real and junk questions (D-030)
 ## Usage: make calibrate-floors dataset=eval/dev.jsonl name=dev [variant=sec1024]

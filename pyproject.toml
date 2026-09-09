@@ -87,6 +87,7 @@ ignore = [
 # Same reason: the judge's instructions are hashed into every verdict, so their
 # line breaks are data. Only the prompt constants are long here.
 "src/glossator/eval/answer_eval.py" = ["E501"]
+"src/glossator/eval/failures.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200" role="img" aria-label="Failures by class, per run">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Failures by class, per run</text>
+<text x="240" y="51.0" text-anchor="end">2026-09-09-1253-mined-shipped</text>
+<rect x="248.0" y="39.0" width="7.5" height="16" fill="#3b6fd4"/>
+<rect x="255.5" y="39.0" width="291.0" height="16" fill="#2f855a"/>
+<rect x="546.5" y="39.0" width="89.5" height="16" fill="#805ad5"/>
+<text class="v" x="646" y="51.0">52</text>
+<text x="240" y="77.0" text-anchor="end">2026-09-09-1211-fresh60-shipped</text>
+<rect x="248.0" y="65.0" width="14.9" height="16" fill="#3b6fd4"/>
+<rect x="262.9" y="65.0" width="52.2" height="16" fill="#2f855a"/>
+<rect x="315.2" y="65.0" width="59.7" height="16" fill="#805ad5"/>
+<text class="v" x="646" y="77.0">17</text>
+<text x="240" y="103.0" text-anchor="end">2026-09-09-0312-dev60-rerank</text>
+<rect x="248.0" y="91.0" width="7.5" height="16" fill="#3b6fd4"/>
+<rect x="255.5" y="91.0" width="59.7" height="16" fill="#2f855a"/>
+<rect x="315.2" y="91.0" width="89.5" height="16" fill="#805ad5"/>
+<text class="v" x="646" y="103.0">21</text>
+<text x="240" y="129.0" text-anchor="end">2026-09-09-1228-noisy-single</text>
+<rect x="248.0" y="117.0" width="97.0" height="16" fill="#3b6fd4"/>
+<rect x="345.0" y="117.0" width="89.5" height="16" fill="#2f855a"/>
+<rect x="434.5" y="117.0" width="141.8" height="16" fill="#805ad5"/>
+<text class="v" x="646" y="129.0">44</text>
+<text x="240" y="155.0" text-anchor="end">2026-09-09-1230-clean-single</text>
+<rect x="248.0" y="143.0" width="22.4" height="16" fill="#3b6fd4"/>
+<rect x="270.4" y="143.0" width="82.1" height="16" fill="#2f855a"/>
+<rect x="352.5" y="143.0" width="119.4" height="16" fill="#805ad5"/>
+<text class="v" x="646" y="155.0">30</text>
+<rect x="16" y="183" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="192">retrieval miss</text>
+<rect x="148" y="183" width="10" height="10" fill="#c05621"/>
+<text class="v" x="162" y="192">context miss</text>
+<rect x="264" y="183" width="10" height="10" fill="#2f855a"/>
+<text class="v" x="278" y="192">generation failure</text>
+<rect x="428" y="183" width="10" height="10" fill="#805ad5"/>
+<text class="v" x="442" y="192">refusal failure</text>
+</svg>

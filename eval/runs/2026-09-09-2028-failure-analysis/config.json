@@ -1,0 +1,16 @@
+{
+  "corpus": "corpus/mistral-docs",
+  "judge_model": null,
+  "kind": "failure_analysis",
+  "labels": "eval/labels/dev60-rerank-human.jsonl",
+  "name": "failure-analysis",
+  "run_dir": "eval/runs/2026-09-09-2028-failure-analysis",
+  "runs": [
+    "eval/runs/2026-09-09-1253-mined-shipped",
+    "eval/runs/2026-09-09-1211-fresh60-shipped",
+    "eval/runs/2026-09-09-0312-dev60-rerank",
+    "eval/runs/2026-09-09-1222-dev-noisy",
+    "eval/runs/2026-09-09-1228-noisy-single",
+    "eval/runs/2026-09-09-1230-clean-single"
+  ]
+}
