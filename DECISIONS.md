@@ -796,3 +796,18 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 **Decision.** Every factual sentence carries the `[n]` of the source it leans on, so a number repeats when several claims come from one source; the source list shows each source once (deduplicated by URL and anchor), with the checked quotes under it, and each citation links to the exact sentence through a text fragment (D-036). Two sources on one page with different anchors stay separate, since they are two deep links.
 
 **Facts.** Per-claim numbered markers over a deduplicated source list is the convention of Perplexity and of ChatGPT search, and the reason reviewers rate Perplexity's answers easier to audit claim by claim. Vidtheque found that many lines under one link made the model cite the wrong moment and moved to one link per line (D-029). The test the convention has to pass: point at a sentence, click once, land on the paragraph. The verifier makes each marker a checked quote, so the marker is evidence rather than decoration; a marker naming nothing is stripped.
+
+---
+
+## D-021a · The judge is blinded, and three judges agree enough to trust one
+
+**Status:** decided · 2026-09-09 · re-judged runs `dev60-baseline`, `dev60-anchors`, `dev60-rerank`, `devfr-shipped`, `devfr-translated` (492 answers, 1,476 judgements)
+
+**Facts.**
+- Judge prompt `answer-judge/v2` shows the question, the reference answer, the answer with its markers, and each verified citation's quote and passage; no gold URL and no citation URL. Every run keeps its v1 judgement under `judges_v1`, so nothing was overwritten.
+- Blinding moved the primary judge's correctness by at most 0.017 on the English runs and by 0.042 on the untranslated French run; citation relevance moved both ways (down 0.03 on the baseline, up 0.036 on the anchors run). The 0.89 to 0.98 rise that D-033a attributed to a possible URL-matching effect does not survive as such: the blinded judge still scores those two runs 0.864 and 0.985, and the answers themselves differ between them, so the rise is in the answers.
+- Agreement over 492 answers: GLM 5.3 against GLM 5.3 Flash, quadratic-weighted kappa 0.869 and exact agreement 0.907; either GLM against Ministral 14B, kappa about 0.51. Krippendorff's ordinal alpha over the three is 0.617; on the reranked run it is 0.417 despite 0.825 exact agreement, because almost every answer there is labelled correct and chance agreement is high.
+- Ministral 14B is the outlier: sole dissenter against the two GLM judges on 77 answers (GLM 5.3 on 19, Flash on 24), more lenient on API-reference and cross-page answers, stricter on capability and unanswerable ones, and in one audited case it marked an answer correct while stating that the reference treats the question as unanswerable, which the reference does not. The two GLM judges are one model family, so their agreement is not independent evidence.
+- Human labels were not yet available; the reader, matching and confusion-matrix code are tested on a fixture.
+
+**Decision.** GLM 5.3 stays the primary judge for published tables, GLM 5.3 Flash the second (kappa 0.87, faster), Ministral 14B the independent dissent check that is reported but never the primary. Every table now carries all three judges' means. Tom's labels from the annotation page decide whether Flash can become the primary and give the judge-versus-human number this record still lacks.
