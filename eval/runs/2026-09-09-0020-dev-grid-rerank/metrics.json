@@ -1,0 +1,2581 @@
+{
+  "best": {
+    "page": {
+      "configuration": "sec1024-vector-heavy+rerank",
+      "margin": 0.0185,
+      "questions": 244,
+      "ranking": [
+        {
+          "configuration": "sec1024-vector-heavy+rerank",
+          "recall@5": 0.916
+        },
+        {
+          "configuration": "sec1024-shipped+rerank",
+          "recall@5": 0.8975
+        }
+      ],
+      "recall@5": 0.916,
+      "runner_up": "sec1024-shipped+rerank"
+    },
+    "ranked_on": "recall@5 over the questions each matching can score",
+    "section": {
+      "configuration": "sec1024-vector-heavy+rerank",
+      "margin": 0.0211,
+      "questions": 142,
+      "ranking": [
+        {
+          "configuration": "sec1024-vector-heavy+rerank",
+          "recall@5": 0.8521
+        },
+        {
+          "configuration": "sec1024-shipped+rerank",
+          "recall@5": 0.831
+        }
+      ],
+      "recall@5": 0.8521,
+      "runner_up": "sec1024-shipped+rerank"
+    }
+  },
+  "common_questions": 294,
+  "configuration_order": [
+    "sec1024-shipped+rerank",
+    "sec1024-vector-heavy+rerank"
+  ],
+  "configurations": {
+    "sec1024-shipped+rerank": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {},
+        "rerank": true,
+        "rerank_candidates": 20,
+        "rerank_model": "ministral-14b-2512",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 4357.6,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.8333,
+              "ndcg@10": 0.8452,
+              "questions": 50,
+              "recall@1": 0.8,
+              "recall@10": 0.88,
+              "recall@3": 0.88,
+              "recall@5": 0.88
+            },
+            "capability": {
+              "mrr": 0.7917,
+              "ndcg@10": 0.7805,
+              "questions": 44,
+              "recall@1": 0.5682,
+              "recall@10": 0.8523,
+              "recall@3": 0.7841,
+              "recall@5": 0.8182
+            },
+            "cross_page": {
+              "mrr": 0.84,
+              "ndcg@10": 0.7808,
+              "questions": 50,
+              "recall@1": 0.38,
+              "recall@10": 0.84,
+              "recall@3": 0.78,
+              "recall@5": 0.82
+            },
+            "overall": {
+              "mrr": 0.8635,
+              "ndcg@10": 0.8578,
+              "questions": 244,
+              "recall@1": 0.7049,
+              "recall@10": 0.9078,
+              "recall@3": 0.8791,
+              "recall@5": 0.8975
+            },
+            "post_cutoff": {
+              "mrr": 0.9233,
+              "ndcg@10": 0.9326,
+              "questions": 50,
+              "recall@1": 0.9,
+              "recall@10": 0.96,
+              "recall@3": 0.96,
+              "recall@5": 0.96
+            },
+            "single_page": {
+              "mrr": 0.9207,
+              "ndcg@10": 0.9408,
+              "questions": 50,
+              "recall@1": 0.86,
+              "recall@10": 1.0,
+              "recall@3": 0.98,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.8333,
+              "ndcg@10": 0.8452,
+              "questions": 50,
+              "recall@1": 0.8,
+              "recall@10": 0.88,
+              "recall@3": 0.88,
+              "recall@5": 0.88
+            },
+            "capability": {
+              "mrr": 0.7917,
+              "ndcg@10": 0.7805,
+              "questions": 44,
+              "recall@1": 0.5682,
+              "recall@10": 0.8523,
+              "recall@3": 0.7841,
+              "recall@5": 0.8182
+            },
+            "cross_page": {
+              "mrr": 0.84,
+              "ndcg@10": 0.7808,
+              "questions": 50,
+              "recall@1": 0.38,
+              "recall@10": 0.84,
+              "recall@3": 0.78,
+              "recall@5": 0.82
+            },
+            "overall": {
+              "mrr": 0.8635,
+              "ndcg@10": 0.8578,
+              "questions": 244,
+              "recall@1": 0.7049,
+              "recall@10": 0.9078,
+              "recall@3": 0.8791,
+              "recall@5": 0.8975
+            },
+            "post_cutoff": {
+              "mrr": 0.9233,
+              "ndcg@10": 0.9326,
+              "questions": 50,
+              "recall@1": 0.9,
+              "recall@10": 0.96,
+              "recall@3": 0.96,
+              "recall@5": 0.96
+            },
+            "single_page": {
+              "mrr": 0.9207,
+              "ndcg@10": 0.9408,
+              "questions": 50,
+              "recall@1": 0.86,
+              "recall@10": 1.0,
+              "recall@3": 0.98,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.3617,
+              "ndcg@10": 0.4265,
+              "questions": 50,
+              "recall@1": 0.2,
+              "recall@10": 0.62,
+              "recall@3": 0.54,
+              "recall@5": 0.6
+            },
+            "overall": {
+              "mrr": 0.7178,
+              "ndcg@10": 0.7495,
+              "questions": 142,
+              "recall@1": 0.6408,
+              "recall@10": 0.8451,
+              "recall@3": 0.7887,
+              "recall@5": 0.831
+            },
+            "post_cutoff": {
+              "mrr": 0.9032,
+              "ndcg@10": 0.9166,
+              "questions": 47,
+              "recall@1": 0.8723,
+              "recall@10": 0.9574,
+              "recall@3": 0.9149,
+              "recall@5": 0.9574
+            },
+            "single_page": {
+              "mrr": 0.9198,
+              "ndcg@10": 0.9339,
+              "questions": 45,
+              "recall@1": 0.8889,
+              "recall@10": 0.9778,
+              "recall@3": 0.9333,
+              "recall@5": 0.9556
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.3617,
+              "ndcg@10": 0.4265,
+              "questions": 50,
+              "recall@1": 0.2,
+              "recall@10": 0.62,
+              "recall@3": 0.54,
+              "recall@5": 0.6
+            },
+            "overall": {
+              "mrr": 0.7178,
+              "ndcg@10": 0.7495,
+              "questions": 142,
+              "recall@1": 0.6408,
+              "recall@10": 0.8451,
+              "recall@3": 0.7887,
+              "recall@5": 0.831
+            },
+            "post_cutoff": {
+              "mrr": 0.9032,
+              "ndcg@10": 0.9166,
+              "questions": 47,
+              "recall@1": 0.8723,
+              "recall@10": 0.9574,
+              "recall@3": 0.9149,
+              "recall@5": 0.9574
+            },
+            "single_page": {
+              "mrr": 0.9198,
+              "ndcg@10": 0.9339,
+              "questions": 45,
+              "recall@1": 0.8889,
+              "recall@10": 0.9778,
+              "recall@3": 0.9333,
+              "recall@5": 0.9556
+            }
+          }
+        }
+      },
+      "name": "sec1024-shipped+rerank",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 6302.8,
+      "questions_run": 294,
+      "rerank": true,
+      "rerank_applied": 253,
+      "rerank_billed_calls": 294,
+      "rerank_cost_usd": 0.204376,
+      "rerank_fallbacks": 41,
+      "rerank_skipped": 0,
+      "rerank_usage": {
+        "completion_tokens": 118299,
+        "prompt_tokens": 1244206
+      },
+      "variant": "sec1024",
+      "weights": "shipped"
+    },
+    "sec1024-vector-heavy+rerank": {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 0.3,
+          "content_embedding_closeness": 8.0
+        },
+        "rerank": true,
+        "rerank_candidates": 20,
+        "rerank_model": "ministral-14b-2512",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "errors": 0,
+      "median_latency_ms": 5478.6,
+      "metrics": {
+        "page": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.95,
+              "ndcg@10": 0.9579,
+              "questions": 50,
+              "recall@1": 0.92,
+              "recall@10": 0.98,
+              "recall@3": 0.98,
+              "recall@5": 0.98
+            },
+            "capability": {
+              "mrr": 0.7936,
+              "ndcg@10": 0.7497,
+              "questions": 44,
+              "recall@1": 0.5795,
+              "recall@10": 0.7841,
+              "recall@3": 0.7386,
+              "recall@5": 0.7727
+            },
+            "cross_page": {
+              "mrr": 0.86,
+              "ndcg@10": 0.7957,
+              "questions": 50,
+              "recall@1": 0.38,
+              "recall@10": 0.85,
+              "recall@3": 0.81,
+              "recall@5": 0.85
+            },
+            "overall": {
+              "mrr": 0.8919,
+              "ndcg@10": 0.8784,
+              "questions": 244,
+              "recall@1": 0.7316,
+              "recall@10": 0.918,
+              "recall@3": 0.8975,
+              "recall@5": 0.916
+            },
+            "post_cutoff": {
+              "mrr": 0.9133,
+              "ndcg@10": 0.9252,
+              "questions": 50,
+              "recall@1": 0.88,
+              "recall@10": 0.96,
+              "recall@3": 0.96,
+              "recall@5": 0.96
+            },
+            "single_page": {
+              "mrr": 0.9307,
+              "ndcg@10": 0.9482,
+              "questions": 50,
+              "recall@1": 0.88,
+              "recall@10": 1.0,
+              "recall@3": 0.98,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.95,
+              "ndcg@10": 0.9579,
+              "questions": 50,
+              "recall@1": 0.92,
+              "recall@10": 0.98,
+              "recall@3": 0.98,
+              "recall@5": 0.98
+            },
+            "capability": {
+              "mrr": 0.7936,
+              "ndcg@10": 0.7497,
+              "questions": 44,
+              "recall@1": 0.5795,
+              "recall@10": 0.7841,
+              "recall@3": 0.7386,
+              "recall@5": 0.7727
+            },
+            "cross_page": {
+              "mrr": 0.86,
+              "ndcg@10": 0.7957,
+              "questions": 50,
+              "recall@1": 0.38,
+              "recall@10": 0.85,
+              "recall@3": 0.81,
+              "recall@5": 0.85
+            },
+            "overall": {
+              "mrr": 0.8919,
+              "ndcg@10": 0.8784,
+              "questions": 244,
+              "recall@1": 0.7316,
+              "recall@10": 0.918,
+              "recall@3": 0.8975,
+              "recall@5": 0.916
+            },
+            "post_cutoff": {
+              "mrr": 0.9133,
+              "ndcg@10": 0.9252,
+              "questions": 50,
+              "recall@1": 0.88,
+              "recall@10": 0.96,
+              "recall@3": 0.96,
+              "recall@5": 0.96
+            },
+            "single_page": {
+              "mrr": 0.9307,
+              "ndcg@10": 0.9482,
+              "questions": 50,
+              "recall@1": 0.88,
+              "recall@10": 1.0,
+              "recall@3": 0.98,
+              "recall@5": 1.0
+            }
+          }
+        },
+        "section": {
+          "all": {
+            "api_reference": {
+              "mrr": 0.3497,
+              "ndcg@10": 0.4175,
+              "questions": 50,
+              "recall@1": 0.18,
+              "recall@10": 0.62,
+              "recall@3": 0.52,
+              "recall@5": 0.62
+            },
+            "overall": {
+              "mrr": 0.7146,
+              "ndcg@10": 0.749,
+              "questions": 142,
+              "recall@1": 0.6268,
+              "recall@10": 0.8521,
+              "recall@3": 0.7958,
+              "recall@5": 0.8521
+            },
+            "post_cutoff": {
+              "mrr": 0.8926,
+              "ndcg@10": 0.9087,
+              "questions": 47,
+              "recall@1": 0.8511,
+              "recall@10": 0.9574,
+              "recall@3": 0.9149,
+              "recall@5": 0.9574
+            },
+            "single_page": {
+              "mrr": 0.9341,
+              "ndcg@10": 0.9507,
+              "questions": 45,
+              "recall@1": 0.8889,
+              "recall@10": 1.0,
+              "recall@3": 0.9778,
+              "recall@5": 1.0
+            }
+          },
+          "common": {
+            "api_reference": {
+              "mrr": 0.3497,
+              "ndcg@10": 0.4175,
+              "questions": 50,
+              "recall@1": 0.18,
+              "recall@10": 0.62,
+              "recall@3": 0.52,
+              "recall@5": 0.62
+            },
+            "overall": {
+              "mrr": 0.7146,
+              "ndcg@10": 0.749,
+              "questions": 142,
+              "recall@1": 0.6268,
+              "recall@10": 0.8521,
+              "recall@3": 0.7958,
+              "recall@5": 0.8521
+            },
+            "post_cutoff": {
+              "mrr": 0.8926,
+              "ndcg@10": 0.9087,
+              "questions": 47,
+              "recall@1": 0.8511,
+              "recall@10": 0.9574,
+              "recall@3": 0.9149,
+              "recall@5": 0.9574
+            },
+            "single_page": {
+              "mrr": 0.9341,
+              "ndcg@10": 0.9507,
+              "questions": 45,
+              "recall@1": 0.8889,
+              "recall@10": 1.0,
+              "recall@3": 0.9778,
+              "recall@5": 1.0
+            }
+          }
+        }
+      },
+      "name": "sec1024-vector-heavy+rerank",
+      "no_lexical_footing": 0,
+      "p90_latency_ms": 6817.4,
+      "questions_run": 294,
+      "rerank": true,
+      "rerank_applied": 253,
+      "rerank_billed_calls": 294,
+      "rerank_cost_usd": 0.202462,
+      "rerank_fallbacks": 41,
+      "rerank_skipped": 0,
+      "rerank_usage": {
+        "completion_tokens": 117896,
+        "prompt_tokens": 1231852
+      },
+      "variant": "sec1024",
+      "weights": "vector-heavy"
+    }
+  },
+  "errors": [],
+  "kind": "retrieval-grid",
+  "page_scoreable": 244,
+  "question_types": [
+    "api_reference",
+    "capability",
+    "cross_page",
+    "post_cutoff",
+    "single_page",
+    "unanswerable"
+  ],
+  "questions": 294,
+  "rerank_billed_calls": 588,
+  "rerank_calls": 506,
+  "rerank_cost_usd": 0.406838,
+  "rerank_fallbacks": 82,
+  "rerank_skipped": 0,
+  "section_scoreable": 142,
+  "status": "complete",
+  "unanswerable": {
+    "no_lexical_footing": 0,
+    "questions": 50,
+    "rows": [
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a timeout or expiration period for the open SSO configuration modal after which the setup must be restarted?",
+        "question_id": "dev-011",
+        "top_hit": {
+          "anchor": "start-in-admin",
+          "chunk_id": "ced83337-e0ee-54f9-adbc-9a3ac07c3d34",
+          "heading_path": [
+            "SAML SSO",
+            "Single sign-on (SSO)",
+            "Configure SSO",
+            "Start SSO setup in Admin"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 24.377452368579313,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/set-up-organization/sign-in-method/saml-sso"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum retention period for a SCIM sync run's result before it is deleted, and can completed runs be purged early via the API?",
+        "question_id": "dev-012",
+        "top_hit": {
+          "anchor": "operation-users_api_admin_scim_sync_get_scim_sync_run",
+          "chunk_id": "280bee38-7471-5448-b61c-1785d5410ae9",
+          "heading_path": [
+            "Beta Admin Scim API",
+            "Get Scim Sync Run"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 27.732984510267773,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/admin/scim"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum number of Organizations that can be linked to a single Enterprise Account, and what happens if that limit is exceeded?",
+        "question_id": "dev-093",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "477a34ec-7335-5b24-beca-0de6dc55f292",
+          "heading_path": [
+            "Beta Users API",
+            "List Organizations",
+            "Parameters"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 22.777166076192774,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/users"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum historical retention period for usage data retrievable via the Get Usage endpoint?",
+        "question_id": "dev-094",
+        "top_hit": {
+          "anchor": "operation-users_api_admin_usage_get_usage",
+          "chunk_id": "b962c93c-627d-5333-b4b4-9072cd7ee36d",
+          "heading_path": [
+            "Beta Admin Billing API",
+            "Get Usage"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.784750911644228,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/admin/billing"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of messages allowed in a single chat completion request?",
+        "question_id": "dev-095",
+        "top_hit": {
+          "anchor": "chat-completion",
+          "chunk_id": "05ba023d-99df-5ba2-afc6-6be112908f3f",
+          "heading_path": [
+            "Chat completions",
+            "Chat completion"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 21.201662477521687,
+          "score": 21.201662477521687,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/conversations/chat-completion"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Does the Mistral GCP deployment support server-side prompt caching, and is there a cache hit discount on rawPredict calls?",
+        "question_id": "dev-096",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "c00d281b-ceba-5f44-ad4e-1cf649c0906c",
+          "heading_path": [
+            "Prompt caching"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 27.880033878318716,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/conversations/advanced/prompt-caching"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of web pages MistralAI-User may visit for a single user request in Vibe, and is there a per-minute rate limit?",
+        "question_id": "dev-097",
+        "top_hit": {
+          "anchor": "limitations",
+          "chunk_id": "9729998e-642d-5440-b7f5-fbaa990888aa",
+          "heading_path": [
+            "Search the web",
+            "Limitations"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 21.024036273177245,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/web-search-open-url"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Does `mistral-vespa generate` validate that the output directory is empty before writing, or does it have a flag to force overwriting existing files?",
+        "question_id": "dev-098",
+        "top_hit": {
+          "anchor": "generate",
+          "chunk_id": "6deb1279-efe0-59a9-a53b-74486f9147f8",
+          "heading_path": [
+            "CLI reference",
+            "`generate`"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 24.572205067494092,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a keyboard shortcut to switch directly to Work mode from Chat or Code without opening the sidebar?",
+        "question_id": "dev-099",
+        "top_hit": {
+          "anchor": "step-1",
+          "chunk_id": "843a9e71-36e0-539c-b2ea-76d24566f2e0",
+          "heading_path": [
+            "Run your first Vibe Work task",
+            "Step 1: Open Vibe and switch to Work"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 25.67509216061697,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/first-task"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum number of credentials (API keys or workload identity credentials) that can be attached to a single service account?",
+        "question_id": "dev-100",
+        "top_hit": {
+          "anchor": "manage",
+          "chunk_id": "c42b2ab4-36aa-528e-97ea-b5000c2ccb49",
+          "heading_path": [
+            "Service accounts",
+            "Manage credentials"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 33.123086804536634,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/identity-access/service-accounts"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on the number of handoff targets an agent can have, and what happens if a handoff references a nonexistent agent?",
+        "question_id": "dev-101",
+        "top_hit": {
+          "anchor": "define-handoffs-responsibilities",
+          "chunk_id": "4ea4b5f1-3296-5b01-b717-44689efcdf44",
+          "heading_path": [
+            "Handoffs",
+            "Create an Agentic Workflow",
+            "Define Handoffs Responsabilities"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 22.061782493889254,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/agents/handoffs"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of API keys a single Mistral AI account can generate?",
+        "question_id": "dev-102",
+        "top_hit": {
+          "anchor": "open-backoffice",
+          "chunk_id": "d3ed2de9-ea9e-5b2b-8794-124adbb57f90",
+          "heading_path": [
+            "Enterprise Accounts and Backoffice",
+            "Manage an Enterprise Account",
+            "Open Backoffice"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.924839704695815,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/set-up-organization/enterprise-accounts"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a recommended maximum length or word limit for the role statement when providing a purpose in a prompt?",
+        "question_id": "dev-103",
+        "top_hit": {
+          "anchor": "purpose",
+          "chunk_id": "3ce67f9a-1091-5b3a-bade-1aa90e8e221c",
+          "heading_path": [
+            "Prompting",
+            "Main Concepts",
+            "Providing a Purpose"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 22.97877577127645,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/conversations/chat-completion/prompting"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many agents a single account or workspace can create?",
+        "question_id": "dev-104",
+        "top_hit": {
+          "anchor": "create-an-agentic-workflow",
+          "chunk_id": "2cd05c4f-c27f-5eb7-8c05-3c9ac61334bc",
+          "heading_path": [
+            "Handoffs",
+            "Create an Agentic Workflow"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 21.045021811800726,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/agents/handoffs"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "How long does an invitation remain valid before it expires, and can the expiration period be customized?",
+        "question_id": "dev-105",
+        "top_hit": {
+          "anchor": "invite-members",
+          "chunk_id": "da640341-7152-59c4-8db7-93cbc7ac8390",
+          "heading_path": [
+            "User management",
+            "Invite members"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.401855135051616,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/identity-access/user-management"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of selected event ids returned in a single ListCampaignSelectedEventsResponse, and does the endpoint support pagination?",
+        "question_id": "dev-106",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "24a06da4-f1ec-5419-adf9-e4fa66204c40",
+          "heading_path": [
+            "Beta Observability Campaigns API",
+            "Get event ids that were selected by the given campaign",
+            "Parameters"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.558047507860167,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the minimum GPU VRAM requirement to fine-tune the Ministral 3 14B Instruct weights locally?",
+        "question_id": "dev-107",
+        "top_hit": {
+          "anchor": "hardware",
+          "chunk_id": "b4c0f6ef-2bf7-5f93-b564-33124895ca31",
+          "heading_path": [
+            "Using offline models",
+            "Hardware"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 19.532830702268175,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/code/cli/offline-models"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum character or token length enforced for system prompts in Mistral models, and what happens if it is exceeded?",
+        "question_id": "dev-108",
+        "top_hit": {
+          "anchor": "system-prompt",
+          "chunk_id": "24bc01d0-031d-5564-a140-012972e609c5",
+          "heading_path": [
+            "Prompting",
+            "Main Concepts",
+            "System Prompt"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 19.1819181420905,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/inference/prompting"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the per-token price charged when pay-as-you-go usage kicks in after the included monthly allowance is exhausted?",
+        "question_id": "dev-187",
+        "top_hit": {
+          "anchor": "payment-schedule",
+          "chunk_id": "867f370f-b779-59a7-8770-c63b11cf64cd",
+          "heading_path": [
+            "Invoices",
+            "Payment schedule"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 21.424878316729366,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/billing-usage/invoices"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum number of campaigns that can be stored or returned per request, and is there a pagination limit for the campaigns list?",
+        "question_id": "dev-188",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "fb2a1bf9-ff7e-5e44-a156-b0f7e724a808",
+          "heading_path": [
+            "Beta Observability Campaigns API",
+            "Get all campaigns",
+            "Parameters"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.194674501980924,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of documents that can be submitted in a single Document QnA request with Ministral 3 8B?",
+        "question_id": "dev-189",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "3062375f-df82-5868-acab-0029237129c1",
+          "heading_path": [
+            "Document QnA",
+            "Document AI QnA",
+            "Usage",
+            "Leverage Document QnA"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.50674006066345,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/document-processing/document_qna"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum rate at which MistralAI-User requests can be sent to a single site during user actions in Vibe?",
+        "question_id": "dev-190",
+        "top_hit": {
+          "anchor": "mistralai-user",
+          "chunk_id": "ddebcea4-c36e-5229-9f34-eb62447e2bce",
+          "heading_path": [
+            "Mistral crawlers",
+            "MistralAI-User"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 26.908551135004267,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/robots"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Can I apply document_annotation_format when passing an image (ImageURLChunk) instead of a PDF document, and does the annotation then apply per image?",
+        "question_id": "dev-191",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "c76e9722-cc39-53e2-82a5-3b92cf4cfbc1",
+          "heading_path": [
+            "Batch Processing",
+            "Prepare Batch",
+            "Explanation"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 27.415027567633917,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/batch-processing"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many hooks can be declared, or a defined execution order when multiple hooks match the same tool call?",
+        "question_id": "dev-192",
+        "top_hit": {
+          "anchor": "declare",
+          "chunk_id": "ae727529-7cda-52d0-9b4b-a48887e4e67c",
+          "heading_path": [
+            "Hooks",
+            "Declare a hook"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 32.321281681562496,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/code/cli/hooks"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Does the platform offer a grace period or retry policy for failed invoice payments before account suspension?",
+        "question_id": "dev-193",
+        "top_hit": {
+          "anchor": "monthly-spending-limit",
+          "chunk_id": "d5242bae-c2d9-5d86-a397-d6a71b19a49d",
+          "heading_path": [
+            "Billing",
+            "Monthly spending limit"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.310025237699737,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/billing-usage/billing"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a rate limit on how many observability datasets can be deleted per minute via the API?",
+        "question_id": "dev-194",
+        "top_hit": {
+          "anchor": "case-2-rate-limit-across-activities-key-provided",
+          "chunk_id": "6b10d60c-a129-5672-8c99-8c8a361e9797",
+          "heading_path": [
+            "Rate Limiting",
+            "Rate Limiting in Workflows",
+            "How Rate Limiting Works",
+            "Case 2: Rate Limit Across Activities (Key Provided)"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.829099010400522,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/workflows/managing-workflows-in-production/rate_limiting"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum total byte size allowed for a request body before a 400 error is returned?",
+        "question_id": "dev-195",
+        "top_hit": {
+          "anchor": "what-if-my-file-size-is-larger-than-500mb-and-i-get-the-error-message-413-request-entity-too-large",
+          "chunk_id": "34248721-5481-55db-b1ef-44fd4d85f1c6",
+          "heading_path": [
+            "Text & Vision Fine-tuning",
+            "FAQ",
+            "What if my file size is larger than 500MB and I get the error message `413 Request Entity Too Large`?"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.377951642311288,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a timeout limit for code interpreter executions, and what happens if the executed code exceeds it?",
+        "question_id": "dev-196",
+        "top_hit": {
+          "anchor": "timeouts",
+          "chunk_id": "356e3b0b-1361-5ea3-ae68-93672cf2e420",
+          "heading_path": [
+            "Basics",
+            "Activity basics",
+            "Core activity features",
+            "Timeouts"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.280333785518966,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/workflows/building-workflows/activities/basics"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many agents can be created per workspace or per API key?",
+        "question_id": "dev-197",
+        "top_hit": {
+          "anchor": "scoped",
+          "chunk_id": "642e82eb-519d-538c-9f63-d93c9c118251",
+          "heading_path": [
+            "Switch Organization or Workspace",
+            "Everything is scoped per Workspace"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 21.628529512908642,
+          "score": 21.628529512908642,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/switch-organization-workspace"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "When deleting a judge that is currently referenced by active evaluations, does the API return a 409 Conflict, or does the deletion succeed and leave the evaluations without a judge?",
+        "question_id": "dev-198",
+        "top_hit": {
+          "anchor": "how-do-i-use-an-llm-as-a-judge",
+          "chunk_id": "db63b735-173e-5cf1-8b33-b7ab0e412430",
+          "heading_path": [
+            "Offline evaluations",
+            "FAQ",
+            "How do I use an LLM as a judge?"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 29.42783753508881,
+          "score": 29.42783753508881,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/observability/evaluations"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a way to configure a timeout so that pending approval prompts auto-reject if left unanswered, and can that timeout duration be customized?",
+        "question_id": "dev-199",
+        "top_hit": {
+          "anchor": "timeout",
+          "chunk_id": "502604c3-9f6f-5234-9bf2-84519a4c0851",
+          "heading_path": [
+            "Conversational Workflows",
+            "Getting started",
+            "Timeout"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 23.4747204820468,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/workflows/interacting-with-workflows/conversational_workflows"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What are the specific numeric rate limits per model included in the custom Priority Tier limits?",
+        "question_id": "dev-200",
+        "top_hit": {
+          "anchor": "quotas-and-limits",
+          "chunk_id": "c55cb1aa-318e-5d85-bb48-d7135ed43f09",
+          "heading_path": [
+            "Priority Tier",
+            "Quotas and limits"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 34.56479533072079,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/inference/priority-tier"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of fine-tuning jobs that can run concurrently per project on the fine-tuning API?",
+        "question_id": "dev-201",
+        "top_hit": {
+          "anchor": "what-happens-if-i-try-to-create-a-job-that-already-exists",
+          "chunk_id": "fb426b04-6662-5d43-bcbf-66bb86270517",
+          "heading_path": [
+            "Text & Vision Fine-tuning",
+            "FAQ",
+            "What happens if I try to create a job that already exists?"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 24.602092237283284,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there an air-gapped license validation mode, and how often does an offline installation re-check entitlements before degrading?",
+        "question_id": "dev-202",
+        "top_hit": {
+          "anchor": "offline-mode-inference",
+          "chunk_id": "6ac189f9-5357-5e17-a645-3e9fcfd8335b",
+          "heading_path": [
+            "vLLM",
+            "Getting Started",
+            "Offline Mode Inference"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 14.074852086388557,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/inference/deployment/local-deployment/vllm"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a way to automatically revoke API keys and deactivate active sessions for a member the moment they are removed from the Organization?",
+        "question_id": "dev-279",
+        "top_hit": {
+          "anchor": "api-keys",
+          "chunk_id": "b1b7f3e5-f85c-5857-8db3-bcde278c39cd",
+          "heading_path": [
+            "User management",
+            "Manage members",
+            "Review member API keys"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.52992552614224,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/identity-access/user-management"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on the number of characters or options allowed in the instructions or JudgeClassificationOutput options fields?",
+        "question_id": "dev-280",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "c0ad375e-2079-5d4f-ba0b-070b9dbef813",
+          "heading_path": [
+            "Beta Observability Judges API",
+            "Create a new judge",
+            "Request body"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.858101866088468,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/judges"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on the number of users that can auto-join per day through email-domain authentication, or a maximum organization size it enforces?",
+        "question_id": "dev-281",
+        "top_hit": {
+          "anchor": "step-2",
+          "chunk_id": "adf151f7-aa3f-5bfd-b512-f888eb689b14",
+          "heading_path": [
+            "Configure SSO and domain verification",
+            "Step 2: Enable email-domain authentication (optional)"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 31.212765788417826,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/getting-started/quickstarts/admin/configure-sso"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What are the valid ranges or allowed values for the learning_rate hyperparameter when creating a classifier fine-tuning job?",
+        "question_id": "dev-282",
+        "top_hit": {
+          "anchor": "what-is-the-recommended-learning-rate",
+          "chunk_id": "01809e53-61e2-5c1c-be9a-8848eb21e098",
+          "heading_path": [
+            "Text & Vision Fine-tuning",
+            "FAQ",
+            "What is the recommended learning rate?"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 26.627331447910755,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a documented rate limit or maximum number of page visits MistralAI-User will make per user request in Vibe?",
+        "question_id": "dev-283",
+        "top_hit": {
+          "anchor": "mistralai-user",
+          "chunk_id": "ddebcea4-c36e-5229-9f34-eb62447e2bce",
+          "heading_path": [
+            "Mistral crawlers",
+            "MistralAI-User"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 19.713715593445876,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/robots"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a documented maximum number of concurrent token-stream tasks a single workflow can run, and what happens if that limit is exceeded?",
+        "question_id": "dev-284",
+        "top_hit": {
+          "anchor": "configuration-options-offset",
+          "chunk_id": "b81325b6-1da7-5ba3-9e92-c4865772bedc",
+          "heading_path": [
+            "Concurrency Patterns",
+            "Concurrency patterns: scale your workflows",
+            "Offset Pagination Executor Pattern",
+            "Configuration Options"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 23.31273743163714,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/workflows/managing-workflows-in-production/concurrency"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum disk size available in the sandbox's default image, and can it be increased?",
+        "question_id": "dev-285",
+        "top_hit": {
+          "anchor": "limits",
+          "chunk_id": "5b922705-acbb-52e2-a51e-a968af126603",
+          "heading_path": [
+            "Add context with Libraries",
+            "Limits and processing"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.196272886957106,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/libraries"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of live-judging requests per minute that can be made against a single chat completion event via this endpoint?",
+        "question_id": "dev-286",
+        "top_hit": {
+          "anchor": "operation-judge_chat_completion_event_v1_observability_chat_completion_events_event_id_live_judging_post",
+          "chunk_id": "ac8ea7cf-7903-5696-959a-e3a891148b4b",
+          "heading_path": [
+            "Beta Observability Chat Completion Events API",
+            "Run Judge on an event based on the given options"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 25.789184525552425,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many fine-tuned custom models I can have active at the same time on my Mistral AI account?",
+        "question_id": "dev-287",
+        "top_hit": {
+          "anchor": "how-large-can-my-dataset-be",
+          "chunk_id": "003b7d3c-9fb6-5416-bd29-cb85df09ad52",
+          "heading_path": [
+            "Datasets",
+            "FAQ",
+            "How large can my dataset be?"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 21.94177613726874,
+          "score": 21.94177613726874,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/observability/evaluations/datasets"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Does Mistral AI's documentation specify any recommended or maximum token budget for an LLM judge prompt when evaluating large evaluation sets?",
+        "question_id": "dev-288",
+        "top_hit": {
+          "anchor": "basic-llm-judge",
+          "chunk_id": "6146832b-c589-59af-b251-01ec300a9833",
+          "heading_path": [
+            "Judges",
+            "Basic LLM judge"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.05915590423391,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/observability/evaluations/judges"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there a way to export or share the todos list from the Work panel once a task is complete?",
+        "question_id": "dev-289",
+        "top_hit": {
+          "anchor": "step-3",
+          "chunk_id": "d2ba71f5-502f-5804-8bf0-f4058493daa9",
+          "heading_path": [
+            "Analyze a dataset",
+            "Step 3: Refine and export"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.66397261542879,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/analyze-data"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of span field definitions that the Get span fields endpoint can return in a single response, and is there pagination support?",
+        "question_id": "dev-290",
+        "top_hit": {
+          "anchor": "operation-get_span_fields_v1_observability_spans_fields_get",
+          "chunk_id": "0429f6bf-ff83-5281-872f-99cbe904c91a",
+          "heading_path": [
+            "Beta Observability Spans API",
+            "Get span field definitions"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 30.488983579065184,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/spans"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Is there an API to programmatically list or delete reusable Prompts, and what are the rate limits for Prompt execution?",
+        "question_id": "dev-291",
+        "top_hit": {
+          "anchor": "rate-limits",
+          "chunk_id": "2fbacbf5-090d-5852-8944-ee5972c67262",
+          "heading_path": [
+            "Workspace usage and limits",
+            "Manage Workspace usage and limits",
+            "Understand rate limits"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.79676459486888,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/workspaces/usage-limits"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "Does Mistral Document AI on Azure impose a maximum page count per document for processing, and if so, what is the limit?",
+        "question_id": "dev-292",
+        "top_hit": {
+          "anchor": "limits",
+          "chunk_id": "5b922705-acbb-52e2-a51e-a968af126603",
+          "heading_path": [
+            "Add context with Libraries",
+            "Limits and processing"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 22.022364724750634,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/libraries"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of documents that can be submitted in a single Document QnA request with Magistral Small 1.0?",
+        "question_id": "dev-293",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "6d91b3e5-d559-54db-943e-26529bc44931",
+          "heading_path": [
+            "Model capability matrix",
+            "Chat completions"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.2078029939142,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/models"
+        }
+      },
+      {
+        "configuration": "sec1024-shipped+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum file size allowed for a FileField upload, and is there a limit on the number of files when multiple=True?",
+        "question_id": "dev-294",
+        "top_hit": {
+          "anchor": "operation-files_api_routes_upload_file",
+          "chunk_id": "54158a56-a137-59d5-87cd-d17fd998e4b2",
+          "heading_path": [
+            "Files API",
+            "Upload File"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 24.354780122855935,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/files"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a timeout or expiration period for the open SSO configuration modal after which the setup must be restarted?",
+        "question_id": "dev-011",
+        "top_hit": {
+          "anchor": "start-in-admin",
+          "chunk_id": "ced83337-e0ee-54f9-adbc-9a3ac07c3d34",
+          "heading_path": [
+            "SAML SSO",
+            "Single sign-on (SSO)",
+            "Configure SSO",
+            "Start SSO setup in Admin"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.557479558119468,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/set-up-organization/sign-in-method/saml-sso"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum retention period for a SCIM sync run's result before it is deleted, and can completed runs be purged early via the API?",
+        "question_id": "dev-012",
+        "top_hit": {
+          "anchor": "what-zdr-does-not-cover",
+          "chunk_id": "55a9a8e8-fcc7-5e14-b196-2898372fe897",
+          "heading_path": [
+            "Zero data retention",
+            "What zero data retention does not cover"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.47796037953923,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/monitor-comply/zero-data-retention"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum number of Organizations that can be linked to a single Enterprise Account, and what happens if that limit is exceeded?",
+        "question_id": "dev-093",
+        "top_hit": {
+          "anchor": "organizations",
+          "chunk_id": "498c76e2-6d7d-50cc-9834-39b776f6ce4b",
+          "heading_path": [
+            "Enterprise Accounts and Backoffice",
+            "Manage an Enterprise Account",
+            "Manage Organizations"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 23.46416937055261,
+          "score": 23.46416937055261,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/set-up-organization/enterprise-accounts"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum historical retention period for usage data retrievable via the Get Usage endpoint?",
+        "question_id": "dev-094",
+        "top_hit": {
+          "anchor": "operation-users_api_admin_usage_get_usage",
+          "chunk_id": "b962c93c-627d-5333-b4b4-9072cd7ee36d",
+          "heading_path": [
+            "Beta Admin Billing API",
+            "Get Usage"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.418520263912374,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/admin/billing"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of messages allowed in a single chat completion request?",
+        "question_id": "dev-095",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "e77a0cbb-27b9-5e72-b131-f115f2a948d6",
+          "heading_path": [
+            "Chat API",
+            "Chat Completion",
+            "Request body"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.74116296736577,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/chat"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Does the Mistral GCP deployment support server-side prompt caching, and is there a cache hit discount on rawPredict calls?",
+        "question_id": "dev-096",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "c00d281b-ceba-5f44-ad4e-1cf649c0906c",
+          "heading_path": [
+            "Prompt caching"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 23.661585520066378,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/conversations/advanced/prompt-caching"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of web pages MistralAI-User may visit for a single user request in Vibe, and is there a per-minute rate limit?",
+        "question_id": "dev-097",
+        "top_hit": {
+          "anchor": "mistralai-user",
+          "chunk_id": "ddebcea4-c36e-5229-9f34-eb62447e2bce",
+          "heading_path": [
+            "Mistral crawlers",
+            "MistralAI-User"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 22.009182726920404,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/robots"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Does `mistral-vespa generate` validate that the output directory is empty before writing, or does it have a flag to force overwriting existing files?",
+        "question_id": "dev-098",
+        "top_hit": {
+          "anchor": "generate",
+          "chunk_id": "6deb1279-efe0-59a9-a53b-74486f9147f8",
+          "heading_path": [
+            "CLI reference",
+            "`generate`"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 20.197598768207598,
+          "score": 20.197598768207598,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a keyboard shortcut to switch directly to Work mode from Chat or Code without opening the sidebar?",
+        "question_id": "dev-099",
+        "top_hit": {
+          "anchor": "step-1",
+          "chunk_id": "843a9e71-36e0-539c-b2ea-76d24566f2e0",
+          "heading_path": [
+            "Run your first Vibe Work task",
+            "Step 1: Open Vibe and switch to Work"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.8542247439831,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/first-task"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum number of credentials (API keys or workload identity credentials) that can be attached to a single service account?",
+        "question_id": "dev-100",
+        "top_hit": {
+          "anchor": "manage",
+          "chunk_id": "c42b2ab4-36aa-528e-97ea-b5000c2ccb49",
+          "heading_path": [
+            "Service accounts",
+            "Manage credentials"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 26.278530915729135,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/identity-access/service-accounts"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on the number of handoff targets an agent can have, and what happens if a handoff references a nonexistent agent?",
+        "question_id": "dev-101",
+        "top_hit": {
+          "anchor": "define-handoffs-responsibilities",
+          "chunk_id": "4ea4b5f1-3296-5b01-b717-44689efcdf44",
+          "heading_path": [
+            "Handoffs",
+            "Create an Agentic Workflow",
+            "Define Handoffs Responsabilities"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.14378249481534,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/agents/handoffs"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of API keys a single Mistral AI account can generate?",
+        "question_id": "dev-102",
+        "top_hit": {
+          "anchor": "when-you-need-an-enterprise-account",
+          "chunk_id": "8e513454-ef49-5ebb-9ff1-b813388526a6",
+          "heading_path": [
+            "Enterprise Accounts and Backoffice",
+            "When you need an Enterprise Account"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 14.340717782600677,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/set-up-organization/enterprise-accounts"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a recommended maximum length or word limit for the role statement when providing a purpose in a prompt?",
+        "question_id": "dev-103",
+        "top_hit": {
+          "anchor": "purpose",
+          "chunk_id": "501c31a3-d965-55a5-a9dc-59d7fbeb8927",
+          "heading_path": [
+            "Prompting",
+            "Main Concepts",
+            "Providing a Purpose"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 19.685846469274672,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/inference/prompting"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many agents a single account or workspace can create?",
+        "question_id": "dev-104",
+        "top_hit": {
+          "anchor": "create-an-agentic-workflow",
+          "chunk_id": "2cd05c4f-c27f-5eb7-8c05-3c9ac61334bc",
+          "heading_path": [
+            "Handoffs",
+            "Create an Agentic Workflow"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.4523516916736,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/agents/handoffs"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "How long does an invitation remain valid before it expires, and can the expiration period be customized?",
+        "question_id": "dev-105",
+        "top_hit": {
+          "anchor": "invite-members",
+          "chunk_id": "da640341-7152-59c4-8db7-93cbc7ac8390",
+          "heading_path": [
+            "User management",
+            "Invite members"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 13.68404475397757,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/identity-access/user-management"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of selected event ids returned in a single ListCampaignSelectedEventsResponse, and does the endpoint support pagination?",
+        "question_id": "dev-106",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "24a06da4-f1ec-5419-adf9-e4fa66204c40",
+          "heading_path": [
+            "Beta Observability Campaigns API",
+            "Get event ids that were selected by the given campaign",
+            "Parameters"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.641722596689235,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the minimum GPU VRAM requirement to fine-tune the Ministral 3 14B Instruct weights locally?",
+        "question_id": "dev-107",
+        "top_hit": {
+          "anchor": "hardware",
+          "chunk_id": "b4c0f6ef-2bf7-5f93-b564-33124895ca31",
+          "heading_path": [
+            "Using offline models",
+            "Hardware"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.50623313885041,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/code/cli/offline-models"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum character or token length enforced for system prompts in Mistral models, and what happens if it is exceeded?",
+        "question_id": "dev-108",
+        "top_hit": {
+          "anchor": "system-prompt",
+          "chunk_id": "24bc01d0-031d-5564-a140-012972e609c5",
+          "heading_path": [
+            "Prompting",
+            "Main Concepts",
+            "System Prompt"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.450914549924324,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/inference/prompting"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the per-token price charged when pay-as-you-go usage kicks in after the included monthly allowance is exhausted?",
+        "question_id": "dev-187",
+        "top_hit": {
+          "anchor": "payment-schedule",
+          "chunk_id": "867f370f-b779-59a7-8770-c63b11cf64cd",
+          "heading_path": [
+            "Invoices",
+            "Payment schedule"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.54187366532512,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/billing-usage/invoices"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a maximum number of campaigns that can be stored or returned per request, and is there a pagination limit for the campaigns list?",
+        "question_id": "dev-188",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "fb2a1bf9-ff7e-5e44-a156-b0f7e724a808",
+          "heading_path": [
+            "Beta Observability Campaigns API",
+            "Get all campaigns",
+            "Parameters"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.74995727211278,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of documents that can be submitted in a single Document QnA request with Ministral 3 8B?",
+        "question_id": "dev-189",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "1bc95d68-b74b-5abc-9c57-5155111ff8e6",
+          "heading_path": [
+            "Document QnA",
+            "Document AI QnA",
+            "Usage",
+            "Leverage Document QnA"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.129704740183065,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/document-processing/document_qna"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum rate at which MistralAI-User requests can be sent to a single site during user actions in Vibe?",
+        "question_id": "dev-190",
+        "top_hit": {
+          "anchor": "mistralai-user",
+          "chunk_id": "ddebcea4-c36e-5229-9f34-eb62447e2bce",
+          "heading_path": [
+            "Mistral crawlers",
+            "MistralAI-User"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 21.81469709259686,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/robots"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Can I apply document_annotation_format when passing an image (ImageURLChunk) instead of a PDF document, and does the annotation then apply per image?",
+        "question_id": "dev-191",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "c76e9722-cc39-53e2-82a5-3b92cf4cfbc1",
+          "heading_path": [
+            "Batch Processing",
+            "Prepare Batch",
+            "Explanation"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 21.148470153259314,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/batch-processing"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many hooks can be declared, or a defined execution order when multiple hooks match the same tool call?",
+        "question_id": "dev-192",
+        "top_hit": {
+          "anchor": "declare",
+          "chunk_id": "ae727529-7cda-52d0-9b4b-a48887e4e67c",
+          "heading_path": [
+            "Hooks",
+            "Declare a hook"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 27.414839721344002,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/code/cli/hooks"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Does the platform offer a grace period or retry policy for failed invoice payments before account suspension?",
+        "question_id": "dev-193",
+        "top_hit": {
+          "anchor": "organization-spending-limit",
+          "chunk_id": "7ec29770-b4e9-5609-800b-312d14bd4c2d",
+          "heading_path": [
+            "Usage and limits",
+            "Organization spending limit"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 13.564975402350012,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a rate limit on how many observability datasets can be deleted per minute via the API?",
+        "question_id": "dev-194",
+        "top_hit": {
+          "anchor": "operation-delete_dataset_v1_observability_datasets_dataset_id_delete",
+          "chunk_id": "eb705cdf-8476-5a26-b1be-77e72b001009",
+          "heading_path": [
+            "Beta Observability Datasets API",
+            "Delete a dataset"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 14.443782671834306,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum total byte size allowed for a request body before a 400 error is returned?",
+        "question_id": "dev-195",
+        "top_hit": {
+          "anchor": "whats-the-size-limit-of-the-validation-data",
+          "chunk_id": "9e4d9f5a-6ba9-5a5e-969f-e95d4354888a",
+          "heading_path": [
+            "Text & Vision Fine-tuning",
+            "FAQ",
+            "What's the size limit of the validation data?"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 14.232496012372104,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a timeout limit for code interpreter executions, and what happens if the executed code exceeds it?",
+        "question_id": "dev-196",
+        "top_hit": {
+          "anchor": "explanation-of-the-output",
+          "chunk_id": "4d4378bc-ba6c-5a26-9ba9-86c6050f6f93",
+          "heading_path": [
+            "Code Interpreter",
+            "How it Works",
+            "Explanation of the Output"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 21.440176987172443,
+          "score": 21.440176987172443,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/agents/agent-tools/code_interpreter"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many agents can be created per workspace or per API key?",
+        "question_id": "dev-197",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "db6c4246-25b4-5f21-9def-0f69fabaffaf",
+          "heading_path": [
+            "Your first Workspace",
+            "Create your first Workspace"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 16.431394251841727,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/workspaces/your-first-workspace"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "When deleting a judge that is currently referenced by active evaluations, does the API return a 409 Conflict, or does the deletion succeed and leave the evaluations without a judge?",
+        "question_id": "dev-198",
+        "top_hit": {
+          "anchor": "how-do-i-use-an-llm-as-a-judge",
+          "chunk_id": "db63b735-173e-5cf1-8b33-b7ab0e412430",
+          "heading_path": [
+            "Offline evaluations",
+            "FAQ",
+            "How do I use an LLM as a judge?"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 24.343022392156506,
+          "score": 24.343022392156506,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/observability/evaluations"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a way to configure a timeout so that pending approval prompts auto-reject if left unanswered, and can that timeout duration be customized?",
+        "question_id": "dev-199",
+        "top_hit": {
+          "anchor": "approvals",
+          "chunk_id": "cf479f5a-dba9-5c43-968b-fe0961c51bad",
+          "heading_path": [
+            "Safety and approvals",
+            "Approving sensitive actions"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 14.371136004269786,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/safety-and-approvals"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What are the specific numeric rate limits per model included in the custom Priority Tier limits?",
+        "question_id": "dev-200",
+        "top_hit": {
+          "anchor": "quotas-and-limits",
+          "chunk_id": "c55cb1aa-318e-5d85-bb48-d7135ed43f09",
+          "heading_path": [
+            "Priority Tier",
+            "Quotas and limits"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 28.111666708845583,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/inference/priority-tier"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of fine-tuning jobs that can run concurrently per project on the fine-tuning API?",
+        "question_id": "dev-201",
+        "top_hit": {
+          "anchor": "what-happens-if-i-try-to-create-a-job-that-already-exists",
+          "chunk_id": "fb426b04-6662-5d43-bcbf-66bb86270517",
+          "heading_path": [
+            "Text & Vision Fine-tuning",
+            "FAQ",
+            "What happens if I try to create a job that already exists?"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 21.505535792993637,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there an air-gapped license validation mode, and how often does an offline installation re-check entitlements before degrading?",
+        "question_id": "dev-202",
+        "top_hit": {
+          "anchor": "prerequisites",
+          "chunk_id": "7719cd5b-5f1f-55b0-ada0-af9ac405dd6e",
+          "heading_path": [
+            "Install and setup",
+            "Prerequisites"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 13.473168478066219,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/code/cli/install-setup"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a way to automatically revoke API keys and deactivate active sessions for a member the moment they are removed from the Organization?",
+        "question_id": "dev-279",
+        "top_hit": {
+          "anchor": "remove-members",
+          "chunk_id": "78eec881-f6d2-5dda-ab12-d0b81565fa42",
+          "heading_path": [
+            "User management",
+            "Remove a member"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.110649721067695,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/admin/identity-access/user-management"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on the number of characters or options allowed in the instructions or JudgeClassificationOutput options fields?",
+        "question_id": "dev-280",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "c0ad375e-2079-5d4f-ba0b-070b9dbef813",
+          "heading_path": [
+            "Beta Observability Judges API",
+            "Create a new judge",
+            "Request body"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.2102932684931,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/judges"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on the number of users that can auto-join per day through email-domain authentication, or a maximum organization size it enforces?",
+        "question_id": "dev-281",
+        "top_hit": {
+          "anchor": "step-2",
+          "chunk_id": "adf151f7-aa3f-5bfd-b512-f888eb689b14",
+          "heading_path": [
+            "Configure SSO and domain verification",
+            "Step 2: Enable email-domain authentication (optional)"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 24.837609902282843,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/getting-started/quickstarts/admin/configure-sso"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What are the valid ranges or allowed values for the learning_rate hyperparameter when creating a classifier fine-tuning job?",
+        "question_id": "dev-282",
+        "top_hit": {
+          "anchor": "what-is-the-recommended-learning-rate",
+          "chunk_id": "01809e53-61e2-5c1c-be9a-8848eb21e098",
+          "heading_path": [
+            "Text & Vision Fine-tuning",
+            "FAQ",
+            "What is the recommended learning rate?"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 22.29572380976039,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a documented rate limit or maximum number of page visits MistralAI-User will make per user request in Vibe?",
+        "question_id": "dev-283",
+        "top_hit": {
+          "anchor": "mistralai-user",
+          "chunk_id": "ddebcea4-c36e-5229-9f34-eb62447e2bce",
+          "heading_path": [
+            "Mistral crawlers",
+            "MistralAI-User"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.516561770685758,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/robots"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a documented maximum number of concurrent token-stream tasks a single workflow can run, and what happens if that limit is exceeded?",
+        "question_id": "dev-284",
+        "top_hit": {
+          "anchor": "configuration-options-offset",
+          "chunk_id": "b81325b6-1da7-5ba3-9e92-c4865772bedc",
+          "heading_path": [
+            "Concurrency Patterns",
+            "Concurrency patterns: scale your workflows",
+            "Offset Pagination Executor Pattern",
+            "Configuration Options"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.4153256109844,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/workflows/managing-workflows-in-production/concurrency"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum disk size available in the sandbox's default image, and can it be increased?",
+        "question_id": "dev-285",
+        "top_hit": {
+          "anchor": "how-many-tokens-correspond-to-an-image-andor-what-is-the-maximum-resolution",
+          "chunk_id": "fa0c2d54-c37a-5da2-92a1-365b75419279",
+          "heading_path": [
+            "Vision",
+            "FAQ",
+            "How many tokens correspond to an image and/or what is the maximum resolution?"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 16.168767230035694,
+          "score": 16.168767230035694,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/conversations/vision"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of live-judging requests per minute that can be made against a single chat completion event via this endpoint?",
+        "question_id": "dev-286",
+        "top_hit": {
+          "anchor": "operation-judge_chat_completion_event_v1_observability_chat_completion_events_event_id_live_judging_post",
+          "chunk_id": "ac8ea7cf-7903-5696-959a-e3a891148b4b",
+          "heading_path": [
+            "Beta Observability Chat Completion Events API",
+            "Run Judge on an event based on the given options"
+          ],
+          "rank": 1,
+          "rerank_score": null,
+          "retrieval_score": 20.85261285119151,
+          "score": 20.85261285119151,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a limit on how many fine-tuned custom models I can have active at the same time on my Mistral AI account?",
+        "question_id": "dev-287",
+        "top_hit": {
+          "anchor": "limits",
+          "chunk_id": "ff31695e-4d5e-501b-ab24-f45ef86edaa7",
+          "heading_path": [
+            "Schedule tasks",
+            "Limits"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.867418732687248,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/scheduled-tasks"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Does Mistral AI's documentation specify any recommended or maximum token budget for an LLM judge prompt when evaluating large evaluation sets?",
+        "question_id": "dev-288",
+        "top_hit": {
+          "anchor": "basic-llm-judge",
+          "chunk_id": "6146832b-c589-59af-b251-01ec300a9833",
+          "heading_path": [
+            "Judges",
+            "Basic LLM judge"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 17.741388400783894,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/studio/observability/evaluations/judges"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there a way to export or share the todos list from the Work panel once a task is complete?",
+        "question_id": "dev-289",
+        "top_hit": {
+          "anchor": "todos-panel",
+          "chunk_id": "92b1fe04-2f30-5533-9374-d44921fd4682",
+          "heading_path": [
+            "Safety and approvals",
+            "Todos panel"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 23.30945967807628,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/safety-and-approvals"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of span field definitions that the Get span fields endpoint can return in a single response, and is there pagination support?",
+        "question_id": "dev-290",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "e3764327-28b0-5a6f-8705-60d3487c2099",
+          "heading_path": [
+            "Beta Observability Spans API",
+            "Get span field definitions",
+            "Responses"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.26946007289297,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/observability/spans"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Is there an API to programmatically list or delete reusable Prompts, and what are the rate limits for Prompt execution?",
+        "question_id": "dev-291",
+        "top_hit": {
+          "anchor": "operation-prompts_delete",
+          "chunk_id": "33165c60-132d-552a-af58-fa1e2790a6c4",
+          "heading_path": [
+            "Beta Prompts API",
+            "DeletePrompt"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.535128391908497,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/beta/prompts"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "Does Mistral Document AI on Azure impose a maximum page count per document for processing, and if so, what is the limit?",
+        "question_id": "dev-292",
+        "top_hit": {
+          "anchor": "limits",
+          "chunk_id": "5b922705-acbb-52e2-a51e-a968af126603",
+          "heading_path": [
+            "Add context with Libraries",
+            "Limits and processing"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 18.376639227687445,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/vibe/work/libraries"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum number of documents that can be submitted in a single Document QnA request with Magistral Small 1.0?",
+        "question_id": "dev-293",
+        "top_hit": {
+          "anchor": null,
+          "chunk_id": "6d91b3e5-d559-54db-943e-26529bc44931",
+          "heading_path": [
+            "Model capability matrix",
+            "Chat completions"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 15.515302163114942,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/models"
+        }
+      },
+      {
+        "configuration": "sec1024-vector-heavy+rerank",
+        "lexical_footing": null,
+        "question": "What is the maximum file size allowed for a FileField upload, and is there a limit on the number of files when multiple=True?",
+        "question_id": "dev-294",
+        "top_hit": {
+          "anchor": "operation-files_api_routes_upload_file",
+          "chunk_id": "54158a56-a137-59d5-87cd-d17fd998e4b2",
+          "heading_path": [
+            "Files API",
+            "Upload File"
+          ],
+          "rank": 1,
+          "rerank_score": 1.0,
+          "retrieval_score": 20.287708769313628,
+          "score": 1.0,
+          "similarity": null,
+          "url": "https://docs.mistral.ai/api/endpoint/files"
+        }
+      }
+    ],
+    "with_a_top_hit": 100
+  }
+}

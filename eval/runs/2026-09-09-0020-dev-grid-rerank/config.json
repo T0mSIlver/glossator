@@ -1,0 +1,76 @@
+{
+  "dataset": "eval/dev.jsonl",
+  "dataset_sha256": "acf3c2e148f1aa4036565ac03dd7a3a7e9bef5d0717529976ce9422b68b35490",
+  "grid": [
+    {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {},
+        "rerank": true,
+        "rerank_candidates": 20,
+        "rerank_model": "ministral-14b-2512",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "name": "sec1024-shipped+rerank",
+      "rerank": true,
+      "variant": "sec1024",
+      "weights": "shipped"
+    },
+    {
+      "config": {
+        "check_lexical_footing": false,
+        "corpus_dir": "corpus/mistral-docs",
+        "kinds": [],
+        "locales": [],
+        "ranking_weights": {
+          "bm25_content": 0.3,
+          "content_embedding_closeness": 8.0
+        },
+        "rerank": true,
+        "rerank_candidates": 20,
+        "rerank_model": "ministral-14b-2512",
+        "rerank_temperature": 0.0,
+        "similarity_floor": null,
+        "similarity_margin": null,
+        "top_k": 10,
+        "variant": "sec1024"
+      },
+      "name": "sec1024-vector-heavy+rerank",
+      "rerank": true,
+      "variant": "sec1024",
+      "weights": "vector-heavy"
+    }
+  ],
+  "kind": "retrieval-grid",
+  "name": "retrieval-grid",
+  "questions": 294,
+  "questions_by_type": {
+    "api_reference": 50,
+    "capability": 44,
+    "cross_page": 50,
+    "post_cutoff": 50,
+    "single_page": 50,
+    "unanswerable": 50
+  },
+  "request_interval_seconds": 1.1,
+  "rerank": {
+    "candidates": 20,
+    "configurations": [
+      "sec1024-shipped",
+      "sec1024-vector-heavy"
+    ],
+    "max_calls": 600,
+    "model": "ministral-14b-2512",
+    "prompt_sha256": "257020c17044",
+    "prompt_version": "listwise-rerank/v1",
+    "temperature": 0.0
+  },
+  "top_k": 10
+}
