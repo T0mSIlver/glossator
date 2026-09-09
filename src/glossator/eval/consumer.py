@@ -1583,7 +1583,8 @@ def collect_defects(records: Sequence[ConsumerRecord]) -> list[dict[str, str]]:
     defects: list[dict[str, str]] = []
     for record in records:
         for call in record.tool_calls:
-            error = call.error or ""
+            # The row already names the tool, so the observation reads it once.
+            error = (call.error or "").removeprefix(f"{call.name}: ")
             if _BAD_PARAM in error:
                 defects.append(
                     {
