@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 import time
 import uuid
 from collections.abc import AsyncIterator
@@ -12,15 +13,17 @@ from typing import Annotated, Any, Literal
 
 import structlog
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from entrypoints.param_suggestions import suggest_fields
 from glossator.answer import service as answer_service
 from glossator.answer.config import DEFAULT_VARIANT, PRICES, AnswerConfig
+from glossator.answer.llm import CALL_ERRORS
 from glossator.index.variants import VARIANTS, get_variant
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
@@ -30,7 +33,6 @@ load_dotenv(override=True)
 
 logger = structlog.get_logger(__name__)
 
-CORPUS_DIR = Path("corpus/mistral-docs")
 PAGE_SECTION_CAP = 100
 
 
@@ -42,6 +44,10 @@ def _package_version() -> str:
 
 
 PACKAGE_VERSION = _package_version()
+
+
+def _corpus_dir() -> Path:
+    return Path(os.environ.get("GLOSSATOR_CORPUS_DIR", "corpus/mistral-docs"))
 
 
 class ApiError(Exception):
@@ -115,6 +121,10 @@ class SearchRequest(BaseModel):
     locales: frozenset[str] = frozenset()
     exclude_ids: list[str] = Field(default_factory=list)
     variant: str = DEFAULT_VARIANT
+
+
+_BODY_MODELS: dict[str, type[BaseModel]] = {"/ask": AskRequest, "/search": SearchRequest}
+"""Route path -> its request model, so validation errors can suggest field names."""
 
 
 class HitOut(BaseModel):
@@ -198,11 +208,18 @@ registry = EngineRegistry()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    # Refuse traffic when the configured embeddings fail the semantic probe.
-    if not registry.engines:
-        registry.get(DEFAULT_VARIANT)
-    probe = await check_embedding_once(DEFAULT_VARIANT)
-    app.state.embedding_probe = {"status": "passed", **probe.as_dict()}
+    # A startup probe that fails degrades /health instead of killing the
+    # process: an operator can then see what is broken through the API itself,
+    # which never answers if the lifespan raises (D-031).
+    probe: dict[str, Any] = {"status": "passed"}
+    try:
+        if not registry.engines:
+            registry.get(DEFAULT_VARIANT)
+        probe.update((await check_embedding_once(DEFAULT_VARIANT)).as_dict())
+    except Exception as exc:
+        probe = {"status": "failed", "error": str(exc)}
+        logger.warning("Startup probe failed", default_variant=DEFAULT_VARIANT, error=str(exc))
+    app.state.embedding_probe = probe
     logger.info("Startup", default_variant=DEFAULT_VARIANT, variants=sorted(VARIANTS))
     yield
 
@@ -247,16 +264,29 @@ async def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    fields = ", ".join(
-        ".".join(str(part) for part in error["loc"][1:]) or str(error["loc"][0])
-        for error in exc.errors()
-    )
+    model = _BODY_MODELS.get(request.url.path)
+    known = set(model.model_fields) if model is not None else set()
+    fields: list[str] = []
+    suggestions: list[str] = []
+    for error in exc.errors():
+        field = ".".join(str(part) for part in error["loc"][1:]) or str(error["loc"][0])
+        if error["type"] == "extra_forbidden" and known:
+            right = suggest_fields([field], known)[0]
+            suggestions.append(right)
+        fields.append(field)
+    next_hint = "the response's 'message' names the fields; see /openapi.json for the schema"
+    if suggestions:
+        next_hint = (
+            f"did you mean {'; '.join(suggestions)}? "
+            f"{request.url.path} accepts: {', '.join(sorted(known))}; "
+            "unknown names are rejected, not applied; see /openapi.json for the schema"
+        )
     return JSONResponse(
         status_code=422,
         content=_error_body(
             "E_BAD_PARAM",
-            f"invalid request: {fields}",
-            "the response's 'message' names the fields; see /openapi.json for the schema",
+            f"invalid request: {', '.join(fields)}",
+            next_hint,
             getattr(request.state, "request_id", None),
         ),
     )
@@ -279,6 +309,17 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
 def _answer_config(model: str | None) -> AnswerConfig:
     """Build a validated answer configuration for one request."""
     return AnswerConfig(model=model) if model is not None else AnswerConfig()
+
+
+_ASK_UPSTREAM_ERRORS: tuple[type[Exception], ...] = (
+    RetrieverException,
+    IndexException,
+    RuntimeError,
+    *CALL_ERRORS,
+)
+"""What the answer path fails with that is upstream's fault rather than a bug
+here: retrieval and index errors, a missing key, and every generation-client
+error after the service layer has exhausted its own retries."""
 
 
 @app.post("/ask")
@@ -308,7 +349,11 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
             engine=engine,
             config=config,
         )
-    except (RetrieverException, IndexException, RuntimeError) as exc:
+    except _ASK_UPSTREAM_ERRORS as exc:
+        # CALL_ERRORS are the generation client's own failures (a zero-quota
+        # 429 included, D-017a); they reach here only after the service layer
+        # exhausted its retries, so the caller hears 503, not a 500 the
+        # /health dashboard cannot explain.
         raise ApiError(
             503,
             "E_UPSTREAM",
@@ -358,6 +403,10 @@ async def search(body: SearchRequest) -> SearchResponse:
             f"unknown page kind(s) {bad_kinds}",
             next_hint=f"kinds are {sorted(KINDS)}; omit for no filter",
         )
+    # First, so an unknown variant never surfaces as a locale hint: the config
+    # constructor validates the variant too, but with a message this handler
+    # would wrongly answer as if locales were the problem.
+    _require_variant(body.variant)
     try:
         RetrievalConfig(
             variant=body.variant,
@@ -396,7 +445,14 @@ async def search(body: SearchRequest) -> SearchResponse:
 
 
 @app.get("/pages/{page_path:path}", response_model=PageResponse)
-async def page(page_path: str, variant: str = DEFAULT_VARIANT) -> PageResponse:
+async def page(
+    page_path: str,
+    variant: str = DEFAULT_VARIANT,
+    start_offset: Annotated[int, Query(ge=0)] = 0,
+    top_k: Annotated[int, Query(ge=1, le=PAGE_SECTION_CAP)] = PAGE_SECTION_CAP,
+) -> PageResponse:
+    """One page's sections in reading order; `start_offset` continues a truncated
+    read from the last returned section's `end_offset`, mirroring MCP read."""
     clean = page_path.strip("/")
     if not clean:
         raise ApiError(
@@ -408,7 +464,7 @@ async def page(page_path: str, variant: str = DEFAULT_VARIANT) -> PageResponse:
     url = f"https://docs.mistral.ai/{clean}"
     engine = registry.get(variant)
     try:
-        sections = await engine.navigation_at(url).read(None, None, top_k=PAGE_SECTION_CAP)
+        sections = await engine.navigation_at(url).read(start_offset or None, None, top_k=top_k)
     except SourceNotFoundError as exc:
         raise ApiError(
             404,
@@ -446,12 +502,12 @@ async def page(page_path: str, variant: str = DEFAULT_VARIANT) -> PageResponse:
             )
             for hit in sections
         ],
-        truncated=len(sections) == PAGE_SECTION_CAP,
+        truncated=len(sections) == top_k,
     )
 
 
 def _corpus_info() -> dict[str, Any] | None:
-    manifest_path = CORPUS_DIR / "manifest.json"
+    manifest_path = _corpus_dir() / "manifest.json"
     if not manifest_path.is_file():
         return None
     try:
@@ -472,25 +528,34 @@ def _corpus_info() -> dict[str, Any] | None:
     }
 
 
-CORPUS_INFO = _corpus_info()
+async def _variant_health(name: str) -> tuple[VariantHealth, bool]:
+    """One variant's document count, or the failure of asking for it."""
+    try:
+        count = await asyncio.wait_for(registry.get(name).document_count(), timeout=5.0)
+    except Exception as exc:
+        logger.warning("Health probe failed", variant=name, error=str(exc))
+        return VariantHealth(schema_name=VARIANTS[name].schema_name, documents=None), False
+    return VariantHealth(schema_name=VARIANTS[name].schema_name, documents=count), True
 
 
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
-    counts: dict[str, VariantHealth] = {}
-    reachable = 0
-    for name in sorted(VARIANTS):
-        try:
-            count = await asyncio.wait_for(registry.get(name).document_count(), timeout=5.0)
-        except Exception as exc:
-            logger.warning("Health probe failed", variant=name, error=str(exc))
-            counts[name] = VariantHealth(schema_name=VARIANTS[name].schema_name, documents=None)
-        else:
-            reachable += 1
-            counts[name] = VariantHealth(schema_name=VARIANTS[name].schema_name, documents=count)
+    # Concurrently: three serial 5 s timeouts are a 15 s answer, and a health
+    # endpoint that slow is its own outage.
+    names = sorted(VARIANTS)
+    probed = await asyncio.gather(*(_variant_health(name) for name in names))
+    counts = {name: health_ for name, (health_, _ok) in zip(names, probed, strict=True)}
+    reachable = sum(1 for _health, ok in probed if ok)
     vespa: Literal["reachable", "unreachable"] = "reachable" if reachable else "unreachable"
+    probe = getattr(app.state, "embedding_probe", {"status": "not_run"})
+    # "not_run" is the un-started state (the lifespan has not answered yet), not
+    # a failure; only a probe that ran and failed degrades the verdict.
     status: Literal["ok", "degraded", "down"] = (
-        "ok" if reachable == len(VARIANTS) else "degraded" if reachable else "down"
+        "ok"
+        if reachable == len(VARIANTS) and probe.get("status") != "failed"
+        else "degraded"
+        if reachable
+        else "down"
     )
     if status == "down":
         raise ApiError(
@@ -499,13 +564,15 @@ async def health() -> HealthResponse:
             "Vespa is not reachable; no index variant answered a count query",
             next_hint="start it with `make setup-vespa`, then retry GET /health",
         )
+    # Read per request, so a corpus refresh shows without a restart and the
+    # directory can move through GLOSSATOR_CORPUS_DIR.
     return HealthResponse(
         status=status,
         vespa=vespa,
         default_variant=DEFAULT_VARIANT,
         variants=counts,
-        embedding_probe=getattr(app.state, "embedding_probe", {"status": "not_run"}),
-        corpus=CORPUS_INFO,
+        embedding_probe=probe,
+        corpus=await asyncio.to_thread(_corpus_info),
         version=PACKAGE_VERSION,
     )
 

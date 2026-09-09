@@ -12,7 +12,7 @@ src/glossator/
   retrieval/             retriever over Vespa, reranker, query rewriting
   answer/                context assembly, grounded generation, citation verification, search loop
   eval/                  datasets, retrieval metrics, answer judge, experiment grid, reports
-src/entrypoints/         api (FastAPI), mcp_server, cli
+src/entrypoints/         api (FastAPI) and mcp_server; CLIs are python -m glossator.{corpus,ingest,retrieval,answer}
 corpus/                  vendored normalized corpus + manifest + upstream LICENSE
 eval/                    datasets and results
 tests/
@@ -29,7 +29,7 @@ tests/
 - `structlog` for logging in library code; no `print` outside CLI output.
 - Every module has one job; entrypoints only parse arguments and call the engine.
 - Tests run with `make test`; tests that need Vespa or an API key skip when they are not configured.
-- `uv run ruff format . && uv run ruff check --fix . && uv run mypy src` before a commit.
+- `uv run ruff format . && uv run ruff check --fix . && uv run mypy` before a commit. Bare `mypy` uses the file list in `pyproject.toml` (src and tests), matching CI.
 - Comments explain why, not what. No commented-out code, no TODOs without an owner.
 - All LLM calls go through `glossator.eval.providers` (offline tools) or `glossator.answer` (serving path), are cached on disk by content hash, and log token usage.
 

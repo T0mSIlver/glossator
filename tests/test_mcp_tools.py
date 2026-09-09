@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 from fastmcp.exceptions import ToolError
+from fastmcp.exceptions import ValidationError as FastMcpValidationError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import SourceNotFoundError
 
@@ -55,9 +56,16 @@ def _hit(chunk_id: str, content: str, *, anchor: str | None = "a-section") -> Hi
 
 
 class FakeNavigation:
-    def __init__(self, hits: list[Hit], *, missing: bool = False) -> None:
+    def __init__(
+        self,
+        hits: list[Hit],
+        *,
+        missing: bool = False,
+        previous_hits: list[Hit] | None = None,
+    ) -> None:
         self.hits = hits
         self.missing = missing
+        self.previous_hits: list[Hit] | None = previous_hits
 
     def _require_page(self) -> None:
         if self.missing:
@@ -73,7 +81,9 @@ class FakeNavigation:
 
     async def previous(self, top_k: int = 1) -> list[Hit]:
         self._require_page()
-        return []
+        if self.previous_hits is None:
+            return []
+        return self.previous_hits[:top_k]
 
     async def read(
         self, start: int | None = None, end: int | None = None, top_k: int = 20
@@ -109,7 +119,13 @@ class FakeEngine:
         locales: frozenset[str] | None = None,
     ) -> list[Hit]:
         self.search_calls.append(
-            {"query": query, "exclude_ids": exclude_ids, "top_k": top_k, "kinds": kinds}
+            {
+                "query": query,
+                "exclude_ids": exclude_ids,
+                "top_k": top_k,
+                "kinds": kinds,
+                "locales": locales,
+            }
         )
         return [] if self.empty else self.hits[: top_k or 5]
 
@@ -194,6 +210,22 @@ def test_instructions_name_the_flow_the_guide_and_the_sin(mcp_server: Any) -> No
     assert "Start with search" in instructions
     assert "glossator://guide" in instructions
     assert "never fabricate documentation URLs or anchors" in instructions
+
+
+def test_search_forwards_the_locale_filter(mcp_server: Any) -> None:
+    engine = FakeEngine()
+    mcp_server._engine = engine
+
+    out = _call(
+        mcp_server,
+        "search",
+        {"query": "streaming", "kinds": ["doc"], "locales": ["en"]},
+    )
+
+    call = engine.search_calls[0]
+    assert call["kinds"] == frozenset({"doc"})
+    assert call["locales"] == frozenset({"en"})
+    assert "note: filtered to kinds=['doc'] locales=['en']" in out
 
 
 def test_search_happy_path_carries_per_unit_citations_and_next(mcp_server: Any) -> None:
@@ -321,6 +353,16 @@ def test_open_truncation_names_a_read_call_that_accepts_every_parameter(mcp_serv
     )
 
 
+def test_open_truncation_without_offsets_still_names_a_valid_read(mcp_server: Any) -> None:
+    hit = dataclasses.replace(_hit("c1", "x" * 1500), start_offset=None, end_offset=None)
+    mcp_server._engine = FakeEngine(hits=[hit])
+
+    out = _call(mcp_server, "open", {"chunk_id": "c1"})
+
+    assert 'read(source_id="https://docs.mistral.ai/page", top_k=1)' in out
+    assert "start_offset=None" not in out
+
+
 def test_open_unknown_chunk_is_a_typed_error(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
 
@@ -347,6 +389,7 @@ def test_navigate_walks_forward_with_next(mcp_server: Any) -> None:
     )
 
     assert "next 1 chunk(s)" in out
+    assert "(top_k=1 was full; more may exist)" in out
     assert "https://docs.mistral.ai/page#a-section" in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
 
@@ -367,6 +410,32 @@ def test_navigate_at_the_end_of_a_page_says_so(mcp_server: Any) -> None:
 
     assert "Results: 0 chunks previous" in out
     assert "nothing further in that direction" in out
+    assert out.rstrip().splitlines()[-1].startswith("next:")
+
+
+def test_navigate_previous_walks_backward_with_results(mcp_server: Any) -> None:
+    earlier = _hit("c0", "chunk before the anchor")
+
+    class PreviousEngine(FakeEngine):
+        def navigation_at(self, source_id: str, start: int = 0, end: int = 0) -> FakeNavigation:
+            return FakeNavigation([earlier], previous_hits=[earlier])
+
+    mcp_server._engine = PreviousEngine()
+
+    out = _call(
+        mcp_server,
+        "navigate",
+        {
+            "source_id": "https://docs.mistral.ai/page",
+            "start_offset": 10,
+            "end_offset": 20,
+            "direction": "previous",
+            "top_k": 2,
+        },
+    )
+
+    assert "previous 1 chunk(s)" in out
+    assert "(every chunk in this direction)" in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
 
 
@@ -410,8 +479,24 @@ def test_read_returns_the_page_with_next(mcp_server: Any) -> None:
     out = _call(mcp_server, "read", {"source_id": "https://docs.mistral.ai/page"})
 
     assert "page: https://docs.mistral.ai/page" in out
-    assert "Results: 2 chunks (the whole requested range)" in out
+    assert "Results: 2 chunks (the whole requested range; none dropped)" in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
+
+
+def test_read_continues_from_the_last_end_offset(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+
+    out = _call(
+        mcp_server,
+        "read",
+        {"source_id": "https://docs.mistral.ai/page", "top_k": 1},
+    )
+
+    assert "Results: 1 chunks (top_k=1; the page may have more)" in out
+    assert (
+        'next: read(source_id="https://docs.mistral.ai/page", start_offset=20, '
+        "top_k=1) to continue after this page of chunks" in out
+    )
 
 
 def test_read_returns_long_chunk_content_without_truncating_it(mcp_server: Any) -> None:
@@ -441,8 +526,20 @@ def test_grep_matches_with_next(mcp_server: Any) -> None:
     )
 
     assert 'matches for "alpha" (mode=phrase)' in out
-    assert "Results: 2 chunks matched" in out
+    assert "Results: 2 chunks matched (every match on this page)" in out
     assert out.rstrip().splitlines()[-1].startswith("next:")
+
+
+def test_grep_full_page_names_the_cap(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+
+    out = _call(
+        mcp_server,
+        "grep",
+        {"source_id": "https://docs.mistral.ai/page", "pattern": "alpha", "top_k": 2},
+    )
+
+    assert "Results: 2 chunks matched (top_k=2 was full; more matches may exist)" in out
 
 
 def test_grep_empty_names_the_kind_of_empty(mcp_server: Any) -> None:
@@ -577,6 +674,7 @@ def test_ask_insufficient_evidence_points_at_the_next_strategy(
     assert "insufficient evidence" in out
     assert "(none)" in out
     assert 'strategy="outline"' in out
+    assert "no citations were proposed" in out
 
 
 def test_ask_rejects_an_unknown_strategy(mcp_server: Any) -> None:
@@ -585,6 +683,51 @@ def test_ask_rejects_an_unknown_strategy(mcp_server: Any) -> None:
     assert "E_BAD_PARAM" in text
     assert "single_pass" in text
     assert "next:" in text
+
+
+def test_ask_reports_a_bad_model_env_as_a_bad_param(mcp_server: Any, monkeypatch: Any) -> None:
+    # A bad GLOSSATOR_MODEL is deterministic misconfiguration; E_UPSTREAM's
+    # "retry the identical call" would loop forever.
+    monkeypatch.setenv("GLOSSATOR_MODEL", "not-a-priced-model")
+    server: Any = importlib.reload(mcp_server)
+    server._engine = FakeEngine()
+
+    async def fake_ask(question: str, **kwargs: Any) -> Answer:
+        raise AssertionError("the route must fail before calling the service")
+
+    monkeypatch.setattr(server.answer_service, "ask", fake_ask)
+    text = _call_error(server, "ask", {"question": "how do I stream?"})
+
+    assert "E_BAD_PARAM" in text
+    assert "GLOSSATOR_MODEL" in text
+    assert "ministral-14b-2512" in text
+    assert "E_UPSTREAM" not in text
+
+
+def test_ask_maps_service_failures_to_upstream(mcp_server: Any, monkeypatch: Any) -> None:
+    mcp_server._engine = FakeEngine()
+
+    async def failing(question: str, **kwargs: Any) -> Answer:
+        raise RuntimeError("generation failed after retries")
+
+    monkeypatch.setattr(mcp_server.answer_service, "ask", failing)
+
+    text = _call_error(mcp_server, "ask", {"question": "how do I stream?"})
+
+    assert "E_UPSTREAM" in text
+    assert "generation failed" in text
+    assert "retry the identical call" in text
+
+
+def test_a_known_parameter_with_a_wrong_type_fails_framework_validation(
+    mcp_server: Any,
+) -> None:
+    # The guard only inspects names; a wrong-typed known name passes it and is
+    # rejected by the framework's own validation, naming the field.
+    with pytest.raises(FastMcpValidationError) as excinfo:
+        asyncio.run(mcp_server.mcp.call_tool("search", {"query": "x", "top_k": "many"}))
+
+    assert "top_k" in str(excinfo.value)
 
 
 def test_busy_tells_the_caller_to_retry_the_identical_call(mcp_server: Any) -> None:
@@ -623,6 +766,36 @@ def test_upstream_failure_is_typed_with_a_retry_hint(mcp_server: Any) -> None:
     assert "retry the identical call" in text
 
 
+def test_a_failed_call_releases_its_admission_slot(mcp_server: Any) -> None:
+    class ExplodingEngine:
+        config: Any = None
+
+        async def search_with_trace(
+            self, query: str, **kwargs: Any
+        ) -> tuple[list[Hit], SearchTrace]:
+            raise RetrieverException("vespa down")
+
+    mcp_server._engine = ExplodingEngine()
+    first = _call_error(mcp_server, "search", {"query": "x"})
+    assert "E_UPSTREAM" in first
+
+    mcp_server._engine = FakeEngine()
+    second = _call(mcp_server, "search", {"query": "x"})
+
+    assert "E_BUSY" not in second
+    assert "https://docs.mistral.ai/page#a-section" in second
+
+
+def test_multiple_unknown_parameters_use_the_plural_grammar(mcp_server: Any) -> None:
+    text = _call_error(mcp_server, "search", {"query": "x", "limit": 3, "lang": ["en"]})
+
+    assert "E_BAD_PARAM" in text
+    assert "unknown parameters for search: limit=, lang=" in text
+    assert "they were rejected, not applied" in text
+    assert "did you mean limit= → top_k=, lang= → locales=?" in text
+    assert "search accepts:" in text
+
+
 def _read_resource(server: Any, uri: str) -> str:
     result = asyncio.run(server.mcp.read_resource(uri))
     raw = result.contents[0]
@@ -647,6 +820,13 @@ def test_the_guide_states_the_flow_the_limits_and_no_other_uris(mcp_server: Any)
     assert "glossator://index" in guide and "glossator://context" in guide
     assert "| `search.top_k` | 1-50 | 5 |" in guide
     assert "E_BAD_PARAM" in guide
+
+
+def test_the_guide_limits_table_matches_the_published_limits(mcp_server: Any) -> None:
+    guide = _read_resource(mcp_server, "glossator://guide")
+
+    for name, (low, high, default) in mcp_server.LIMITS.items():
+        assert f"| `{name}` | {low}-{high} | {default} |" in guide, name
 
 
 def test_the_index_resource_lists_pages_one_per_line(mcp_server: Any) -> None:
@@ -676,3 +856,20 @@ def test_the_context_resource_publishes_limits_formats_and_counts(mcp_server: An
         "glossator://index",
         "glossator://context",
     ]
+
+
+def test_resources_survive_a_missing_manifest(
+    mcp_server: Any, monkeypatch: Any, tmp_path: Any
+) -> None:
+    monkeypatch.setenv("GLOSSATOR_CORPUS_DIR", str(tmp_path / "nowhere"))
+    server: Any = importlib.reload(mcp_server)
+    server._engine = FakeEngine()
+
+    index = _read_resource(server, "glossator://index")
+    assert index.splitlines()[0].endswith("0 pages · docs commit 0 commits")
+    assert "url\ttitle\tkind" in index
+
+    context = json.loads(_read_resource(server, "glossator://context"))
+    assert context["corpus"]["pages"] == 0
+    assert context["corpus"]["source_commit"] is None
+    assert context["models"]["generation_default"] == "mistral-medium-2604"
