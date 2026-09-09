@@ -402,41 +402,20 @@ def parse_opencode_events(lines: Sequence[str]) -> tuple[str, list[ToolCallRecor
 
 
 def _parse_tool_part(part: Mapping[str, Any]) -> ToolCallRecord:
+    """One opencode ``tool`` part: the call's input and what it printed."""
     name = str(part.get("tool", "unknown"))
-    state = part.get("state")
-    arguments: dict[str, str] = {}
-    output_chars = 0
-    error: str | None = None
-    if isinstance(state, dict):
-        raw_input = state.get("input")
-        if isinstance(raw_input, dict):
-            arguments = {}
-            for key, value in raw_input.items():
-                # The cite quotes are the judge's evidence; truncating them
-                # would corrupt the JSON the judge reads back.
-                if is_verify_tool(name) and key == "quotes":
-                    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
-                    arguments[key] = text
-                else:
-                    arguments[key] = _short(value)
-        output = state.get("output")
-        if isinstance(output, str):
-            output_chars = len(output)
-            error = _tool_error(name, output)
-            notes = _tool_notes(output)
-            if is_verify_tool(name):
-                # Which quotes the server verified, so the judge and the
-                # metrics can count them without re-reading the transcript.
-                arguments["__verdicts"] = json.dumps(_verdicts(output), sort_keys=True)
-        elif state.get("status") not in (None, "completed"):
-            error = f"tool status: {state.get('status')}"
-    return ToolCallRecord(
-        name=name,
-        arguments=arguments,
-        output_chars=output_chars,
-        error=error,
-        notes=notes,
+    raw_state = part.get("state")
+    state: dict[str, Any] = raw_state if isinstance(raw_state, dict) else {}
+    output = state.get("output")
+    record = _tool_call_record(
+        name, state.get("input"), output if isinstance(output, str) else "", failed=False
     )
+    status = state.get("status")
+    if not isinstance(output, str) and status not in (None, "completed"):
+        # A call the harness abandoned prints nothing, so its failure is only
+        # readable in the status.
+        return record.model_copy(update={"error": f"tool status: {status}"})
+    return record
 
 
 def _short(value: Any) -> str:
@@ -541,8 +520,12 @@ def _tool_call_record(name: str, arguments: Any, output: str, failed: bool) -> T
     recorded: dict[str, str] = {}
     if isinstance(arguments, Mapping):
         for key, value in arguments.items():
+            # The cite quotes are the judge's evidence; truncating them would
+            # corrupt the JSON the judge reads back.
             if is_verify_tool(name) and key == "quotes":
-                recorded[key] = value if isinstance(value, str) else json.dumps(value)
+                recorded[key] = (
+                    value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+                )
             else:
                 recorded[key] = _short(value)
     elif arguments not in (None, ""):
@@ -551,6 +534,8 @@ def _tool_call_record(name: str, arguments: Any, output: str, failed: bool) -> T
     if error is None and failed:
         error = f"{name}: {output.strip().splitlines()[0] if output.strip() else 'failed'}"
     if is_verify_tool(name) and output:
+        # Which quotes the server verified, so the judge and the metrics can
+        # count them without re-reading the transcript.
         recorded["__verdicts"] = json.dumps(_verdicts(output), sort_keys=True)
     return ToolCallRecord(
         name=name,
@@ -810,12 +795,16 @@ TOKEN_ENV_VAR = "GLOSSATOR_MCP_TOKEN"
 def codex_command(
     spec: ConsumerSpec, answer_path: Path, mcp_url: str | None, *, token_env: str = TOKEN_ENV_VAR
 ) -> list[str]:
-    """Headless codex, prompt on stdin. The MCP keys are the ones
-    ``codex mcp add --url ... --bearer-token-env-var ...`` writes into
-    ``config.toml``: ``mcp_servers.<name>.url`` and
+    """Headless codex, prompt on stdin.
+
+    The MCP keys are the ones ``codex mcp add --url ... --bearer-token-env-var
+    ...`` writes into ``config.toml``: ``mcp_servers.<name>.url`` and
     ``mcp_servers.<name>.bearer_token_env_var``. The token itself never reaches
-    the command line; codex reads it from the environment."""
-    command = ["codex", "exec", "--skip-git-repo-check", "-m", spec.model]
+    the command line; codex reads it from the environment.
+    ``--ignore-user-config`` keeps the machine's own servers, plugins and hooks
+    out of the consumer, so the arm decides the tool surface and nothing else.
+    """
+    command = ["codex", "exec", "--skip-git-repo-check", "--ignore-user-config", "-m", spec.model]
     if spec.variant is not None:
         command += ["-c", f"model_reasoning_effort='\"{spec.variant}\"'"]
     if mcp_url is not None:

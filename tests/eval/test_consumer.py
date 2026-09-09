@@ -229,6 +229,28 @@ def test_verdicts_are_read_from_the_count_line() -> None:
     assert cite_verdicts(calls) == (2, 1)
 
 
+def test_an_abandoned_opencode_tool_call_is_an_error_row() -> None:
+    """A call the harness gave up on prints nothing, so the status is the only
+    place its failure shows."""
+    lines = [
+        json.dumps(
+            {
+                "type": "tool_use",
+                "part": {
+                    "type": "tool",
+                    "tool": "glossator_search",
+                    "state": {"status": "error", "input": {"query": "x"}},
+                },
+            }
+        )
+    ]
+
+    _answer, calls = parse_opencode_events(lines)
+
+    assert calls[0].error == "tool status: error"
+    assert calls[0].notes == []
+
+
 def test_parse_skips_garbage_lines() -> None:
     answer, calls = parse_opencode_events(["not json", "", "[]"])
     assert answer == "" and calls == []
@@ -479,7 +501,7 @@ def test_codex_command_names_the_verified_mcp_keys() -> None:
     )
     command = codex_command(spec, Path("/tmp/scratch/q/answer.md"), "http://127.0.0.1:8111/mcp")
 
-    assert command[:4] == ["codex", "exec", "--skip-git-repo-check", "-m"]
+    assert command[:5] == ["codex", "exec", "--skip-git-repo-check", "--ignore-user-config", "-m"]
     assert command[-1] == "-", "the prompt arrives on stdin"
     assert "mcp_servers.mistral-docs.url=http://127.0.0.1:8111/mcp" in command
     assert "mcp_servers.mistral-docs.bearer_token_env_var=GLOSSATOR_MCP_TOKEN" in command
