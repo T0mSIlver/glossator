@@ -1274,6 +1274,8 @@ wrote the answer, so it cannot prefer one.
 {config.get("context_token_budget")} tokens
 - Non-English questions rendered in English for retrieval: \
 {config.get("translate_for_retrieval", "unknown")}
+- Question reworded into the documentation's vocabulary for retrieval: \
+{config.get("rewrite_for_retrieval", "unknown")}
 - Dataset: `{metrics["dataset"]}`, sha256 `{metrics["dataset_sha256"]}`
 - Questions: {metrics["questions"]}; strategies: {len(metrics["strategies"])}; \
 records: {metrics["records"]}

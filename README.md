@@ -172,6 +172,19 @@ to 0.80 and correctness from 0.75 to 0.94, against 0.82 and 0.93 for the same
 questions in English; the runs are `eval/runs/*-devfr-shipped/` and
 `eval/runs/*-devfr-translated/`.
 
+Generated questions are well worded by construction, so they say little about
+badly worded ones. `eval/dev-noisy.jsonl` is the same 120 development questions
+degraded into typos, bare keywords, vague wording, a wrong product term, or a
+request buried in a user's context, with the gold sources and reference answers
+unchanged. Noise costs the shipped single pass 19 points of correctness (0.87 to
+0.68 on the same questions) and the search loop 16 (0.90 to 0.74), so the loop's
+lead widens from 3 points to 6 at three times the latency and seven times the
+prompt tokens. Rewording the question into the documentation's vocabulary before
+retrieval (`AnswerConfig.rewrite_for_retrieval`, off by default, `--rewrite` on
+the CLI and the answer eval) recovers 4 of the 19 points for a quarter of a
+second and 275 prompt tokens, and costs 5 points on clean questions. The runs are
+`eval/runs/*-noisy-*/` and `eval/runs/*-clean-*/`.
+
 ## Retrieval evaluation
 
 The retrieval grid compares index variants, ranking weights, and the listwise
