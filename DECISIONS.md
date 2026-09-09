@@ -587,3 +587,13 @@ Separation is the check that catches random weights; raw similarity does not, be
 **Facts.** The ingestion integration test writes the fixture corpus into the shared `sec128` schema, and one fixture page shares its URL with a real page, so `make test` replaces that page's chunks and adds eight fixture pages beside the real corpus. The fixture retrieval grid did the same to all three variants; the real `/models` page was re-ingested afterwards and the fixture-only pages deleted from `sec1024` and `page128`.
 
 **Decision.** Fixture pages get a URL prefix that cannot collide with the corpus, and the integration test filters to its own pages (done); a test-only schema is the durable fix if the collision recurs.
+
+---
+
+## D-025b · A redeploy on a full disk empties the index
+
+**Status:** decided · 2026-09-09
+
+**Facts.** The host disk sat at 92%. Vespa blocks external feeds above 80% of disk, and the toolkit's generated `services.xml` offers no seam for `<resource-limits>`, so the local deployment carried a hand-patched limit (D-025). At 01:55 a worker redeployed the application package through the toolkit's CLI, which reset the limit; its `make ingest` then had every feed rejected, and because re-indexing deletes a page's chunks before writing the new ones, the `sec1024` schema was left with zero documents. The retrieval grid's two reranked rows and the first floor calibration ran against the empty schema and scored zero; the eleven non-reranked rows had completed before it. The patched package was redeployed and `sec1024` re-ingested (4,440 chunks, zero failures); the reranked rows and the calibration were re-run as separate run directories.
+
+**Decisions.** (1) Ingestion must not delete before it has something to write: the pipeline verifies that the embedding step succeeded and the feed is accepted for the first page before deleting anything, and aborts on the first "Failed to index document" instead of continuing through 411 pages. (2) The README warns that Vespa refuses feeds above 80% disk. (3) Only one process writes to Vespa at a time during evaluation runs.
