@@ -5,9 +5,9 @@ description: Use when the user asks any question about Mistral products, models,
 
 # Answer from the Mistral documentation
 
-1. Search first with the mistral-docs connector (`search` with two or three distinctive words).
-2. Open or read the sections you rely on (`open` a promising hit, `read` for a range).
+1. Search first with the mistral-docs connector (`mistral_docs_search`, two or three distinctive words).
+2. Read the sections you rely on (`mistral_docs_open_section` on a promising hit, `mistral_docs_read_page` for a range).
 3. Write the answer with `[n]` markers and verbatim quotes from the hits.
-4. Call `cite` with the draft and the quotes. Drop every marker it did not verify.
-5. Paste its source list under the answer.
+4. Call `mistral_docs_verify_quotes` with the draft and the quotes. Drop every marker it did not verify.
+5. Paste its Sources block under the answer.
 6. Never answer from memory. When the documentation does not answer, say so.

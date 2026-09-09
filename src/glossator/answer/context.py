@@ -286,7 +286,7 @@ def _merged(hits: list[Hit]) -> tuple[str, tuple[SourcePiece, ...]]:
     previous_end: int | None = None
 
     for hit in hits:
-        body = _body(hit) if parts else hit.content
+        body = chunk_body(hit) if parts else hit.content
         if previous_end is not None and hit.start_offset is not None:
             overlap = previous_end - hit.start_offset
             if overlap > 0:
@@ -315,7 +315,7 @@ def _merged(hits: list[Hit]) -> tuple[str, tuple[SourcePiece, ...]]:
     return "".join(parts), tuple(pieces)
 
 
-def _body(hit: Hit) -> str:
+def chunk_body(hit: Hit) -> str:
     """A chunk's content without the heading line the chunker prefixes it with."""
     prefix = _HEADING_SEPARATOR.join(hit.heading_path)
     if prefix and hit.content.startswith(f"{prefix}\n\n"):
@@ -329,5 +329,6 @@ __all__ = [
     "SourcePiece",
     "TokenCounter",
     "assemble",
+    "chunk_body",
     "count_mistral_tokens",
 ]

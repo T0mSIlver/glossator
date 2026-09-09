@@ -1,7 +1,7 @@
 # mistral-docs workspace Skill
 
 Answers questions about Mistral products from the documentation, with verified
-quotes, through the glossator connector.
+quotes, through the `mistral-docs` connector.
 
 ## Add it as a workspace Skill
 

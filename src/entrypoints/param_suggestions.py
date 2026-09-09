@@ -10,6 +10,10 @@ so the two surfaces never disagree about what a caller meant.
 import difflib
 from collections.abc import Iterable
 
+_COUNTS = ("max_hits", "max_chunks", "max_matches", "steps", "top_k")
+"""How many results to return, named per tool. The first name the tool actually
+takes wins, so one alias covers every count parameter on either surface."""
+
 ALIASES: dict[str, tuple[str, ...]] = {
     "q": ("query",),
     "text": ("query",),
@@ -17,17 +21,20 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "keyword": ("query",),
     "keywords": ("query",),
     "question": ("query",),
-    "limit": ("top_k",),
-    "k": ("top_k",),
-    "n": ("top_k",),
-    "num": ("top_k",),
-    "max_results": ("top_k",),
+    "limit": _COUNTS,
+    "k": _COUNTS,
+    "n": _COUNTS,
+    "num": _COUNTS,
+    "max_results": _COUNTS,
+    "top_k": _COUNTS,
     "id": ("chunk_id",),
     "chunk": ("chunk_id",),
     "chunkid": ("chunk_id",),
-    "url": ("source_id",),
-    "page": ("source_id",),
+    "url": ("page_url", "source_id"),
+    "page": ("page_url", "source_id"),
     "page_url": ("source_id",),
+    "source_id": ("page_url",),
+    "format": ("response_format",),
     "start": ("start_offset",),
     "end": ("end_offset",),
     "window_size": ("window",),

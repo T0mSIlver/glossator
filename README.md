@@ -104,19 +104,31 @@ curl -s http://127.0.0.1:8080/ask \
 uv run python -m entrypoints.mcp_server
 ```
 
+The server is named `mistral-docs` and every tool is namespaced by the corpus it
+reads, so a model choosing tools sees the domain in the name.
+
 | Tool | Purpose |
 |---|---|
-| `search(query, top_k=5, kinds, locales, exclude_ids)` | Find citable sections by meaning or keywords. |
-| `open(chunk_id, window=2)` | Read a hit with nearby chunks in page order. |
-| `navigate(source_id, start_offset, end_offset, direction, top_k=1)` | Step forward or backward through a page. |
-| `read(source_id, start_offset, end_offset, top_k=20)` | Read a known page range without ranking it again. |
-| `grep(source_id, pattern, mode="phrase", top_k=5)` | Match a phrase or terms inside one page. |
-| `ask(question, strategy="single_pass")` | Generate an answer and print only verified citations as links. |
-| `cite(draft, quotes)` | Verify your own quotes against the chunks they name; keep only verified quotes. |
-| `history(text \| section \| question)` | Track a phrase, a section or a question across the stored dated snapshots. No model runs inside it. |
+| `mistral_docs_search(query, max_hits=5, rerank=False, response_format, kinds, locales, exclude_ids)` | Find citable sections by meaning or keywords. |
+| `mistral_docs_open_section(chunk_id, window=2, response_format)` | Read a hit with nearby chunks in page order. |
+| `mistral_docs_step(chunk_id, direction, steps=1)` | Step forward or backward through a page. |
+| `mistral_docs_read_page(page_url, start_offset, end_offset, max_chunks=8, response_format)` | Read a known page range without ranking it again. |
+| `mistral_docs_find_on_page(page_url, pattern, mode="phrase", max_matches=5, response_format)` | Match a phrase or terms inside one page. |
+| `mistral_docs_answer(question, strategy="single_pass")` | Generate an answer and print only verified citations as links. |
+| `mistral_docs_verify_quotes(draft, quotes)` | Verify your own quotes against the chunks they name; keep only verified quotes. |
+| `mistral_docs_history(text \| section \| question)` | Track a phrase, a section or a question across the stored dated snapshots. No model runs inside it. |
+
+`search`, `open_section`, `read_page` and `find_on_page` take
+`response_format="concise"` (the default: citation, heading path, snippet and
+chunk id) or `"detailed"` (scores, offsets, counts, untruncated text and the
+paginated re-search call). `search` ranks with the index alone unless
+`rerank=True`, which reorders the candidates with a model for about five
+seconds; `mistral_docs_answer` always reranks.
 
 Every tool response ends with `next:`. The server announces clamps, rejects
-unknown parameters with `E_BAD_PARAM`, and prints a citation URL on each hit.
+unknown parameters with `E_BAD_PARAM`, ignores host-supplied arguments whose
+name starts with an underscore (naming them in a `note:` line), and prints a
+citation URL on each hit.
 The MCP tools clamp out-of-range values to their published ranges (a `note:`
 line names the move, and `glossator://context` publishes the ranges), while the
 HTTP API validates and rejects out-of-range values with `E_BAD_PARAM` and
@@ -130,9 +142,11 @@ The MCP server cannot ingest or delete content. Corpus changes go through the
 adapter, manifest checks, and ingestion command.
 
 Set `GLOSSATOR_MCP_TOOLS` to a comma-separated subset of tool names to register
-only those tools (unset means every tool). The server instructions, the
-`glossator://guide` resource, and `GET /health` then cover only the registered
-tools.
+only those tools (unset means every tool). The names the tools had before they
+were namespaced (`search`, `open`, `navigate`, `read`, `grep`, `ask`, `cite`,
+`history`) are still accepted and translated. The server instructions, the
+`glossator://guide` resource, every `DO NOT USE` clause, and `GET /health` then
+cover only the registered tools.
 
 ## Mistral Work
 

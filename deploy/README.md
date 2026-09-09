@@ -149,8 +149,11 @@ Then pre-authorize the functions you use, again in the page's words:
 > Pre-authorize read functions you use frequently to reduce approval prompts. Keep write functions on manual approval until you're confident in the Connector's behavior.
 
 Every glossator tool is a read function; the server exposes nothing that writes.
-`search`, `open`, `read`, `grep`, `cite` and `ask` are the ones worth
-pre-authorizing.
+`mistral_docs_search`, `mistral_docs_open_section`, `mistral_docs_read_page`,
+`mistral_docs_find_on_page`, `mistral_docs_verify_quotes` and
+`mistral_docs_answer` are the ones worth pre-authorizing. Name the Connector
+`mistral_docs` and describe it as "Searches docs.mistral.ai at a pinned commit
+and verifies quoted sentences.".
 
 `skills/mistral-docs/` in this repository is the workspace Skill that tells Work
 when to reach for the Connector.
@@ -203,8 +206,8 @@ claude mcp add --transport http mistral-docs https://glossator.example.com/mcp \
 claude mcp list
 ```
 
-Then ask a question that needs the documentation and watch for a `search` call.
-`claude mcp remove glossator` undoes it.
+Then ask a question that needs the documentation and watch for a
+`mistral_docs_search` call. `claude mcp remove mistral-docs` undoes it.
 
 ## What each variable does
 
@@ -215,11 +218,11 @@ change per deployment:
 |---|---|
 | `MISTRAL_API_KEY` | embeddings, and generation unless a chat server is set |
 | `GLOSSATOR_MCP_TOKEN` | the bearer token every MCP request must carry |
-| `GLOSSATOR_MCP_TOOLS` | comma-separated subset of the tools to register; blank means all |
+| `GLOSSATOR_MCP_TOOLS` | comma-separated subset of the tools to register; blank means all. The pre-namespace names are still accepted |
 | `VESPA_ENDPOINT` | the index to serve; blank in full mode |
 | `GLOSSATOR_VARIANT` | `page128`, `sec128` or `sec1024` |
 | `GLOSSATOR_PUBLIC_HOSTNAME` | the tunnel hostname, used in the printed commands and the Connector URL |
-| `GLOSSATOR_CHAT_SERVER_URL` | optional local generation server for `ask` |
+| `GLOSSATOR_CHAT_SERVER_URL` | optional local generation server for `mistral_docs_answer` |
 | `MCP_PORT`, `API_PORT`, `VESPA_QUERY_PORT` | published ports on the host |
 | `MCP_BIND_ADDRESS` | `127.0.0.1` so only the tunnel reaches the server |
 
