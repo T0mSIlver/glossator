@@ -740,3 +740,15 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 **Decision.** Every verified citation carries a second link, `url#anchor:~:text=<quote>` (URL Fragment Text Directives), built from the quote the verifier already checked; the canonical `url#anchor` stays beside it. Chromium, Safari 16 and Firefox 131 and later scroll to and highlight the span; other browsers land on the anchor or the page. Quotes over 120 characters use the `start,end` form.
 
 **Facts.** Most headings on docs.mistral.ai have no anchor (D-003a), so a citation often lands on a section top or the page top even when the engine holds the exact sentence. The verified quote is, by construction, a span of the page; on three citations checked by hand the stripped quote occurs exactly once in the vendored page. Rehosting the documentation with generated anchors was rejected: the brief asks for links back to the documentation pages, and a mirror would break that.
+
+---
+
+## D-037 · Demo target: a custom Connector in Mistral Work, behind a tunnel
+
+**Status:** decided by Tom · 2026-09-09
+
+**Decision.** The engine is demonstrated inside Mistral Work as a custom MCP Connector: the MCP server runs on Tom's machine behind a Cloudflare tunnel to an LXC container (the vidtheque deployment pattern), registered from the Connectors page with the server URL and a bearer token. Vibe Code CLI over stdio is the local fallback that cannot fail on conference network, and `client.beta.connectors.create_async(name, server=url)` is the API-side registration shown as the "ship to a client" path.
+
+**Facts** (docs corpus, 2026-09-07 commit). Work's Connectors page has a "Custom MCP Connector" tab taking a server URL; auth is auto-detected (none, HTTP bearer or basic, OAuth 2.1); users can pre-authorize read functions per Connector so `search` and `ask` run without approval prompts (`vibe/work/connectors/mcp-connectors`). The Vibe Code CLI configures MCP servers in `config.toml` over `stdio`, `http` or `streamable-http` with a static header and does not support OAuth yet (`vibe/code/cli/mcp-servers`). The Agents API registers a Connector by URL with private, workspace or organization visibility, and a Connectors Debugger validates connectivity (`studio/connectors/management`). Tom confirmed his plan can add a custom Connector.
+
+**Consequences for the code.** A bearer-token check on the HTTP transport (`GLOSSATOR_MCP_TOKEN`; the Connector and Vibe both send a static `Authorization` header); `/health` reachable for the Connectors Debugger; the tunnel and LXC setup documented outside the repository, with only a `make mcp` bind option in the README. The blind consumer evaluation (D-032) runs against the same HTTP transport the Connector will use.
