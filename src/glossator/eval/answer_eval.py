@@ -444,31 +444,52 @@ def _exact_gold_anchor_match(record: QuestionRecord) -> bool:
     )
 
 
-def gold_relaxed_match(record: QuestionRecord) -> bool:
-    """Accept a named model's card as evidence for a capability-matrix question.
+def accepts_model_card(
+    url: str, *, question: str, question_type: str, gold_urls: Sequence[str]
+) -> bool:
+    """Whether one URL is a named model's card standing in for the capability matrix.
 
     Capability gold points to ``/models`` because the matrix answers the full
     question. A card for a model named in the question is also valid evidence for
     that model. The relaxation requires the exact model title or one of the API
-    names declared by that card, and its use is counted separately in the run.
+    names declared by that card. It takes a bare URL rather than a record so that
+    the same rule can be applied to a citation, a retrieved chunk or an assembled
+    source, which is what the failure analysis needs.
     """
-    if record.question_type != QuestionType.CAPABILITY.value:
+    if question_type != QuestionType.CAPABILITY.value:
         return False
-    matrix_gold = [urlparse(url) for url in record.gold_urls]
-    matrix_hosts = {parsed.netloc for parsed in matrix_gold if parsed.path.rstrip("/") == "/models"}
+    matrix_hosts = {
+        parsed.netloc
+        for parsed in (urlparse(gold) for gold in gold_urls)
+        if parsed.path.rstrip("/") == "/models"
+    }
     if not matrix_hosts:
         return False
-    for citation in record.citations:
-        parsed = urlparse(citation.url)
-        prefix = "/models/"
-        if parsed.netloc not in matrix_hosts or not parsed.path.startswith(prefix):
-            continue
-        slug = parsed.path.removeprefix(prefix).strip("/")
-        if not slug or "/" in slug:
-            continue
-        if any(_names_model(record.question, name) for name in _model_names(slug)):
-            return True
-    return False
+    parsed = urlparse(url)
+    prefix = "/models/"
+    if parsed.netloc not in matrix_hosts or not parsed.path.startswith(prefix):
+        return False
+    slug = parsed.path.removeprefix(prefix).strip("/")
+    if not slug or "/" in slug:
+        return False
+    return any(_names_model(question, name) for name in _model_names(slug))
+
+
+def gold_relaxed_match(record: QuestionRecord) -> bool:
+    """A verified citation names the card of a model the capability question names.
+
+    Counted separately in the run, because it is a relaxation of the dataset's
+    gold and not a match against it.
+    """
+    return any(
+        accepts_model_card(
+            citation.url,
+            question=record.question,
+            question_type=record.question_type,
+            gold_urls=record.gold_urls,
+        )
+        for citation in record.citations
+    )
 
 
 @cache

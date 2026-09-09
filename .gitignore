@@ -28,3 +28,7 @@ venv/
 
 .cursorignore
 .cursorindexingignore
+
+deploy/.env.deploy
+deploy/embedding-cache/
+.agent-runs/

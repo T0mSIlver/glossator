@@ -1140,3 +1140,87 @@ def test_a_wrong_bearer_token_is_rejected(
     )
 
     assert response.status_code == 401
+
+
+def test_the_token_is_compared_in_constant_time(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A byte-by-byte comparison leaks the token's prefix to anyone who can
+    time the 401, so the check must go through `hmac.compare_digest`."""
+    import hmac
+
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
+    server._engine = FakeEngine()
+    seen: list[tuple[str, str]] = []
+    real = hmac.compare_digest
+
+    def spy(left: str, right: str) -> bool:
+        seen.append((left, right))
+        return real(left, right)
+
+    monkeypatch.setattr(server.hmac, "compare_digest", spy)
+    _mcp_post_via_http(
+        server,
+        {"jsonrpc": "2.0", "id": 1, "method": "ping"},
+        headers={"Authorization": "Bearer secret-token"},
+    )
+
+    assert ("Bearer secret-token", "Bearer secret-token") in seen
+
+
+def test_a_non_http_connection_does_not_bypass_the_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Startup passes through; anything else carries no header to check and is
+    closed rather than handed to the app unauthenticated."""
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
+    reached: list[str] = []
+    sent: list[dict[str, Any]] = []
+
+    async def app(scope: Any, receive: Any, send: Any) -> None:
+        reached.append(scope["type"])
+
+    async def send(message: dict[str, Any]) -> None:
+        sent.append(message)
+
+    guard = server._BearerAuthMiddleware(app, "secret-token")
+    asyncio.run(guard({"type": "websocket", "path": "/mcp", "headers": []}, None, send))
+
+    assert reached == []
+    assert sent == [{"type": "websocket.close", "code": 1008}]
+
+    asyncio.run(guard({"type": "lifespan"}, None, send))
+    assert reached == ["lifespan"]
+
+
+def test_hints_never_name_a_tool_the_allowlist_turned_off(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A `next:` line naming an unregistered tool is the same trap as one
+    naming a parameter the tool lacks (D-029): the call fails with "unknown
+    tool" and the model has nothing to act on."""
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,cite")
+    server._engine = FakeEngine()
+
+    out = _call(server, "search", {"query": "streaming", "top_k": 2})
+
+    hints = [line for line in out.splitlines() if line.startswith("next:")]
+    assert hints
+    for line in hints:
+        assert "open(" not in line
+        assert "ask(" not in line
+        assert "read(" not in line
+    assert "cite(" in hints[-1]
+
+
+def test_a_truncation_marker_names_a_registered_tool(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,open")
+    long_hit = _hit("chunk-long", "word " * 400)
+
+    block = server._hit_block(long_hit, 1, 50)
+
+    assert "…[truncated; use " in block
+    assert "read(" not in block
+    assert 'open(chunk_id="chunk-long"' in block

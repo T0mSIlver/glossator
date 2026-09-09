@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import hmac
 import json
 import os
 import time
@@ -206,6 +207,25 @@ def _clamp(kind: str, value: int | None) -> tuple[int, str | None]:
     return applied, f"note: clamped server-side: {name}={value} → {applied}"
 
 
+def _hint(*choices: tuple[str, str]) -> str:
+    """The first suggestion whose tool this deployment registered (D-029).
+
+    A `next:` line, or a truncation marker, that names a tool the allowlist
+    turned off is the same trap as one naming a parameter the tool lacks: the
+    model calls it, gets "unknown tool", and has no failure to act on. The
+    choices are tried in order and the last one is the fallback that assumes
+    nothing.
+    """
+    for tool, text in choices:
+        if tool in _ENABLED_TOOLS:
+            return text
+    return "read `glossator://guide` for the tools this deployment registered"
+
+
+def _next(*choices: tuple[str, str]) -> str:
+    return f"next: {_hint(*choices)}"
+
+
 def _hit_block(hit: Hit, n: int, chars: int | None, mark: bool = False) -> str:
     """One retrieved unit, always carrying its own citation url and handle.
 
@@ -227,19 +247,20 @@ def _hit_block(hit: Hit, n: int, chars: int | None, mark: bool = False) -> str:
     preview = hit.content if chars is None else " ".join(hit.content.split())
     if chars is not None and len(preview) > chars:
         if hit.start_offset is not None and hit.end_offset is not None:
-            continuation = (
+            ranged = (
                 f'read(source_id="{hit.source_id}", start_offset={hit.start_offset}, '
                 f"end_offset={hit.end_offset}, top_k=1)"
             )
         else:
-            continuation = f'read(source_id="{hit.source_id}", top_k=1)'
+            ranged = f'read(source_id="{hit.source_id}", top_k=1)'
+        continuation = _hint(
+            ("read", ranged),
+            ("open", f'open(chunk_id="{hit.chunk_id}", window=1)'),
+            ("grep", f'grep(source_id="{hit.source_id}", pattern="…")'),
+        )
         preview = preview[:chars] + f" …[truncated; use {continuation}]"
     lines.append(f"    {preview}")
     return "\n".join(lines)
-
-
-def _source_id_of(hit: Hit) -> str:
-    return hit.source_id
 
 
 def _deeper_search_line(query: str, ids: list[str], **fixed: Any) -> str:
@@ -409,20 +430,27 @@ async def search(
         if locales:
             fixed["locales"] = locales
         lines.append("  " + _deeper_search_line(query, seen_ids, **fixed))
-        lines.append(
-            f'next: open(chunk_id="{hits[0].chunk_id}") to read hit 1 in context, '
-            f'or ask(question="{query}") for a grounded answer'
-        )
+        lines.append(_search_next(query, hits[0]))
     else:
         lines.append(
             f"Results: {trace.kept}/{trace.considered} kept/considered "
             f"(all that matched within top_k={applied})"
         )
-        lines.append(
-            f'next: open(chunk_id="{hits[0].chunk_id}") to read hit 1 in context, '
-            f'or ask(question="{query}") for a grounded answer'
-        )
+        lines.append(_search_next(query, hits[0]))
     return "\n".join(lines).rstrip()
+
+
+def _search_next(query: str, first: Hit) -> str:
+    """What to do with a hit, over the tools this deployment registered."""
+    reading = _hint(
+        ("open", f'open(chunk_id="{first.chunk_id}") to read hit 1 in context'),
+        ("read", f'read(source_id="{first.source_id}") to read hit 1\'s page'),
+    )
+    if "ask" in _ENABLED_TOOLS:
+        return f'next: {reading}, or ask(question="{query}") for a grounded answer'
+    if "cite" in _ENABLED_TOOLS:
+        return f"next: {reading}, then cite(draft=…, quotes=[…]) to verify what you quote"
+    return f"next: {reading}"
 
 
 def _empty_search(
@@ -452,6 +480,18 @@ def _empty_search(
             "or check glossator://index for what exists"
         )
     return lines
+
+
+def _page_next(source_id: str, chunk_id: str | None = None) -> str:
+    """Where to go from a page, over the tools this deployment registered."""
+    choices = [
+        ("read", f'read(source_id="{source_id}") for the whole page'),
+        ("grep", f'grep(source_id="{source_id}", pattern="…") for an exact phrase on it'),
+    ]
+    if chunk_id is not None:
+        choices.append(("open", f'open(chunk_id="{chunk_id}") for context around it'))
+    choices.append(("search", "search(query=…) to change page"))
+    return _next(*choices)
 
 
 class _admission_or_busy:
@@ -507,10 +547,7 @@ async def open(chunk_id: str, window: int = 2) -> str:
         lines.append(_hit_block(hit, i, OPEN_PREVIEW_CHARS, mark=hit is center))
         lines.append("")
     lines.append(f"Results: {len(hits)} chunks")
-    lines.append(
-        f'next: read(source_id="{anchor.source_id}") for the whole page, '
-        f'or grep(source_id="{anchor.source_id}", pattern="…") for an exact phrase on it'
-    )
+    lines.append(_page_next(anchor.source_id))
     return "\n".join(lines).rstrip()
 
 
@@ -559,7 +596,13 @@ async def navigate(
             f"{start_offset}..{end_offset} on {source_id}",
             f"- you are at the {'start' if direction == 'previous' else 'end'} of the page; "
             "there is nothing further in that direction.",
-            "next: open(chunk_id=…) around a hit you hold, or search(query=…) to change page",
+            _next(
+                (
+                    "open",
+                    "open(chunk_id=…) around a hit you hold, or search(query=…) to change page",
+                ),
+                ("search", "search(query=…) to change page"),
+            ),
         ]
         return "\n".join(lines)
     count = (
@@ -618,7 +661,7 @@ async def read(
             return "\n".join(
                 [
                     f"Results: 0 content chunks on indexed page {source_id}",
-                    "next: search(query=…) to find another page with content",
+                    _next(("search", "search(query=…) to find another page with content")),
                 ]
             )
         raise _error(
@@ -648,15 +691,10 @@ async def read(
                 f"top_k={applied}) to continue after this page of chunks"
             )
         else:
-            lines.append(
-                f'next: grep(source_id="{source_id}", pattern="…") to jump to an exact phrase'
-            )
+            lines.append(_page_next(source_id))
     else:
         lines.append(f"Results: {len(hits)} chunks (the whole requested range; none dropped)")
-        lines.append(
-            f'next: grep(source_id="{source_id}", pattern="…") for an exact '
-            "phrase on this page, or search(query=…) to change page"
-        )
+        lines.append(_page_next(source_id))
     return "\n".join(lines).rstrip()
 
 
@@ -704,8 +742,14 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
             f"{json.dumps(pattern)}. The page is indexed; the words are not on it."
         )
         lines.append(
-            f'next: search(query="{pattern}") corpus-wide, or grep with mode="term" '
-            "to relax the order"
+            _next(
+                (
+                    "search",
+                    f'search(query="{pattern}") corpus-wide, or grep with mode="term" '
+                    "to relax the order",
+                ),
+                ("grep", 'grep with mode="term" to relax the order'),
+            )
         )
         return "\n".join(lines).rstrip()
     for i, hit in enumerate(hits, 1):
@@ -717,7 +761,7 @@ async def grep(source_id: str, pattern: str, mode: str = "phrase", top_k: int = 
     else:
         count += " (every match on this page)"
     lines.append(count)
-    lines.append(f'next: open(chunk_id="{hits[0].chunk_id}") for context around match 1')
+    lines.append(_page_next(source_id, hits[0].chunk_id))
     return "\n".join(lines).rstrip()
 
 
@@ -889,9 +933,9 @@ def _answer_text(question: str, answer: Answer) -> str:
     )
     first_id = verified[0].chunk_id if verified else None
     nxt = (
-        f'next: open(chunk_id="{first_id}") to read source 1 in context'
+        _next(("open", f'open(chunk_id="{first_id}") to read source 1 in context'))
         if first_id
-        else f'next: search(query="{question}") to look for sources yourself'
+        else _next(("search", f'search(query="{question}") to look for sources yourself'))
     )
     if answer.insufficient_evidence:
         nxt += ', or ask with strategy="search_loop" to search in several rounds before answering'
@@ -982,7 +1026,14 @@ async def history(
                     )
         lines.append(f"Results: {len(states)} stored snapshot(s)")
     lines.append(
-        "next: use history with another form, or search(query=...) to inspect the current index"
+        _hint(
+            (
+                "search",
+                "next: use history with another form, or search(query=...) to inspect the "
+                "current index",
+            ),
+            ("history", "next: use history with another form"),
+        )
     )
     return "\n".join(lines)
 
@@ -1259,14 +1310,25 @@ class _BearerAuthMiddleware:
         self.token = token
 
     async def __call__(self, scope: Any, receive: Any, send: Any) -> None:
-        if scope["type"] != "http" or scope.get("path") == "/health":
+        if scope["type"] == "lifespan":
+            await self.app(scope, receive, send)
+            return
+        if scope["type"] != "http":
+            # A connection that is not a request carries no header to check, so
+            # it is refused rather than waved through: a transport added later
+            # must not inherit an exemption written for startup.
+            await _reject_scope(scope, send)
+            return
+        if scope.get("path") == "/health":
             await self.app(scope, receive, send)
             return
         headers = {
             name.decode("latin-1").lower(): value.decode("latin-1")
             for name, value in scope.get("headers", [])
         }
-        if headers.get("authorization") != f"Bearer {self.token}":
+        # Constant time: a byte-by-byte comparison leaks the token's prefix to
+        # anyone who can time the 401.
+        if not hmac.compare_digest(headers.get("authorization", ""), f"Bearer {self.token}"):
             response = JSONResponse(
                 status_code=401,
                 content={
@@ -1286,6 +1348,12 @@ class _BearerAuthMiddleware:
             await response(scope, receive, send)
             return
         await self.app(scope, receive, send)
+
+
+async def _reject_scope(scope: Any, send: Any) -> None:
+    """Close a non-HTTP connection the bearer check cannot apply to."""
+    if scope["type"] == "websocket":
+        await send({"type": "websocket.close", "code": 1008})
 
 
 def _package_version() -> str:
@@ -1329,19 +1397,26 @@ async def _mcp_health(request: Request) -> Response:
     )
 
 
+def http_middleware() -> list[StarletteMiddleware]:
+    """The HTTP transport's middleware: the bearer check, when a token is set.
+
+    One list for both entry points, so the stack the tests drive through
+    ``build_http_app`` is the stack ``--http`` serves.
+    """
+    if not _MCP_TOKEN:
+        logger.warning("GLOSSATOR_MCP_TOKEN is not set; the MCP HTTP server is open to any client.")
+        return []
+    return [StarletteMiddleware(_BearerAuthMiddleware, token=_MCP_TOKEN)]
+
+
 def build_http_app() -> Any:
     """The Starlette app the HTTP transport serves, with auth when configured.
 
     When GLOSSATOR_MCP_TOKEN is set every request except GET /health must
-    carry it as a bearer token; when unset one warning says the server is
-    open. Factored out so tests can drive the transport without a socket.
+    carry it as a bearer token. Factored out so tests can drive the transport
+    without a socket.
     """
-    if _MCP_TOKEN:
-        return mcp.http_app(
-            middleware=[StarletteMiddleware(_BearerAuthMiddleware, token=_MCP_TOKEN)]
-        )
-    logger.warning("GLOSSATOR_MCP_TOKEN is not set; the MCP HTTP server is open to any client.")
-    return mcp.http_app()
+    return mcp.http_app(middleware=http_middleware())
 
 
 if __name__ == "__main__":
@@ -1367,17 +1442,6 @@ if __name__ == "__main__":
     asyncio.run(check_embedding_once(_variant_name))
 
     if args.http:
-        if not _MCP_TOKEN:
-            logger.warning(
-                "GLOSSATOR_MCP_TOKEN is not set; the MCP HTTP server is open to any client."
-            )
-        mcp.run(
-            transport="http",
-            host=args.host,
-            port=args.port,
-            middleware=(
-                [StarletteMiddleware(_BearerAuthMiddleware, token=_MCP_TOKEN)] if _MCP_TOKEN else []
-            ),
-        )
+        mcp.run(transport="http", host=args.host, port=args.port, middleware=http_middleware())
     else:
         mcp.run()

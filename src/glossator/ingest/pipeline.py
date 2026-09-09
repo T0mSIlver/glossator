@@ -312,14 +312,18 @@ def build_pipeline(
     ``loader=None`` because pages are fed as in-memory ``File``s through
     ``run_file``: the corpus is already on disk in the shape we want, so there is
     nothing for a loader to decide.
+
+    Every variant embeds through the cache. Its key is the model, the dimension
+    count and the chunk's exact text, so a re-ingest after a corpus edit pays
+    only for the chunks whose text changed, and a deployment that carries the
+    operator's cache pays for nothing it already holds.
     """
-    embedder: Embedder = MistralEmbedder(
+    inner: Embedder = MistralEmbedder(
         client=client or _mistral_client(),
         model_name=variant.embedding_model_name,
         max_retry=_EMBEDDER_MAX_RETRY,
     )
-    if snapshot is not None:
-        embedder = CachedEmbedder(embedder, variant.embedding_dimensions, embedding_cache)
+    embedder: Embedder = CachedEmbedder(inner, variant.embedding_dimensions, embedding_cache)
     return Pipeline(
         loader=None,
         extractor=CorpusPageExtractor(),

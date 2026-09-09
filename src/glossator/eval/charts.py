@@ -1,4 +1,4 @@
-"""The two chart shapes a run README needs, written straight to SVG.
+"""The chart shapes a run README needs, written straight to SVG.
 
 D-023 asks for charts rendered by a script so they can be regenerated. Hand-written
 SVG has no fonts to find, no backend to select, and nothing to download, which is
@@ -92,6 +92,69 @@ def bar_chart(
     return "\n".join(parts) + "\n"
 
 
+def stacked_bar_chart(
+    title: str,
+    rows: Sequence[tuple[str, Sequence[float]]],
+    series_names: Sequence[str],
+) -> str:
+    """One bar per row, split into its series end to end.
+
+    Grouped bars answer "how many of each"; a stacked bar answers "what is this
+    row made of", which is the question a breakdown into classes is drawn for.
+    Every bar is scaled by the largest row total, so the bars also compare across
+    rows rather than each filling the width.
+    """
+    height = TITLE_HEIGHT + max(len(rows), 1) * ROW_HEIGHT + MARGIN + 20
+    totals = [sum(max(0.0, value) for value in values) for _label, values in rows]
+    largest = max(totals, default=0.0) or 1.0
+    plot_width = WIDTH - LABEL_WIDTH - MARGIN * 2 - 60
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {height}" '
+        f'width="{WIDTH}" height="{height}" role="img" aria-label="{escape(title)}">',
+        _FONT,
+        f'<text class="t" x="{MARGIN}" y="22">{escape(title)}</text>',
+    ]
+    for index, (label, values) in enumerate(rows):
+        top = TITLE_HEIGHT + index * ROW_HEIGHT
+        parts.append(
+            f'<text x="{LABEL_WIDTH}" y="{top + ROW_HEIGHT / 2 + 4}" '
+            f'text-anchor="end">{escape(label)}</text>'
+        )
+        x = float(LABEL_WIDTH + 8)
+        for series, value in enumerate(values):
+            width = max(0.0, value) / largest * plot_width
+            if width <= 0:
+                continue
+            color = SERIES_COLORS[series % len(SERIES_COLORS)]
+            parts.append(
+                f'<rect x="{x:.1f}" y="{top + (ROW_HEIGHT - BAR_HEIGHT) / 2:.1f}" '
+                f'width="{width:.1f}" height="{BAR_HEIGHT}" fill="{color}"/>'
+            )
+            x += width
+        parts.append(
+            f'<text class="v" x="{LABEL_WIDTH + 12 + plot_width + 6}" '
+            f'y="{top + ROW_HEIGHT / 2 + 4}">{totals[index]:g}</text>'
+        )
+    parts.append(_legend(series_names, height))
+    parts.append("</svg>")
+    return "\n".join(part for part in parts if part) + "\n"
+
+
+def _legend(series_names: Sequence[str], height: float) -> str:
+    if not series_names:
+        return ""
+    parts = []
+    x = MARGIN
+    legend_y = height - 8
+    for series, name in enumerate(series_names):
+        color = SERIES_COLORS[series % len(SERIES_COLORS)]
+        parts.append(f'<rect x="{x}" y="{legend_y - 9}" width="10" height="10" fill="{color}"/>')
+        parts.append(f'<text class="v" x="{x + 14}" y="{legend_y}">{escape(name)}</text>')
+        x += 20 + 8 * len(name)
+    return "\n".join(parts)
+
+
 def scatter(
     title: str,
     points: Sequence[tuple[str, float, float]],
@@ -142,7 +205,7 @@ def scatter(
     return "\n".join(parts) + "\n"
 
 
-__all__ = ["SERIES_COLORS", "bar_chart", "scatter"]
+__all__ = ["SERIES_COLORS", "bar_chart", "scatter", "stacked_bar_chart"]
 
 
 def line_chart(

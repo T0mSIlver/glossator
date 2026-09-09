@@ -1,6 +1,7 @@
 .PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
 .PHONY: corpus-refresh corpus-check dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
+.PHONY: deploy deploy-check
 
 ifneq (,$(wildcard .env))
 include .env
@@ -165,3 +166,16 @@ corpus-refresh:
 corpus-check:
 	uv run pytest tests/corpus -q
 	uv run python -m glossator.corpus.mistral_docs check --live --corpus $(CORPUS_DIR)
+
+## Deploy the MCP server to a Linux host over SSH
+## Usage: make deploy HOST=lxc-glossator [MODE=remote-index|full] [API=1] [REMOTE_DIR=path]
+deploy:
+	@test -n "$(HOST)" || { echo "error: HOST is required. Usage: make deploy HOST=<ssh-host> [MODE=full]"; exit 1; }
+	deploy/deploy.sh $(HOST) --mode $(or $(MODE),remote-index) \
+		$(if $(API),--with-api,) $(if $(REMOTE_DIR),--remote-dir $(REMOTE_DIR),)
+
+## Check a deployed host: GET /health, then one MCP call without the token and one with it
+## Usage: make deploy-check HOST=lxc-glossator
+deploy-check:
+	@test -n "$(HOST)" || { echo "error: HOST is required. Usage: make deploy-check HOST=<ssh-host>"; exit 1; }
+	deploy/deploy.sh $(HOST) --check-only $(if $(REMOTE_DIR),--remote-dir $(REMOTE_DIR),)

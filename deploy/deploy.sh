@@ -148,17 +148,24 @@ parse_args() {
     remote-index | full) ;;
     *) die "unknown mode '$MODE'; use remote-index or full" ;;
   esac
+  case "$REMOTE_DIR" in
+    '') die "--remote-dir needs a path" ;;
+    # rsync hands the far side of a transfer to the host's shell, which would
+    # split a path with a space in it into two paths.
+    *[[:space:]]*) die "--remote-dir must not contain whitespace: '$REMOTE_DIR'" ;;
+  esac
 }
 
-# Space-separated compose profiles this mode needs. Empty in remote-index mode,
-# where the mcp service carries no profile and starts on its own.
+# The compose profiles this mode needs, as COMPOSE_PROFILES wants them. Empty
+# in remote-index mode, where the mcp service carries no profile and starts on
+# its own.
 profiles_for_mode() {
   local profiles=""
   if [ "$MODE" = "full" ]; then
     profiles="full"
   fi
   if [ "$WITH_API" = "1" ]; then
-    profiles="${profiles:+$profiles }api"
+    profiles="${profiles:+$profiles,}api"
   fi
   echo "$profiles"
 }
@@ -186,9 +193,19 @@ require_local_tools() {
   [ -z "$missing" ] || die "missing on this machine:$missing"
 }
 
+# ssh hands the remote shell one string, so every argument is single-quoted
+# here or the remote shell would re-split it on its own spaces.
+shell_quote() {
+  local arg out=""
+  for arg in "$@"; do
+    out="$out '${arg//\'/\'\\\'\'}'"
+  done
+  printf '%s' "$out"
+}
+
 # Run a script read from stdin on the host, with any extra words as $1, $2, ...
 remote_bash() {
-  ssh -o BatchMode=yes "$HOST" bash -s -- "$@"
+  ssh -o BatchMode=yes "$HOST" "bash -s --$(shell_quote "$@")"
 }
 
 require_remote_tools() {
@@ -280,17 +297,13 @@ REMOTE
 # `docker compose` on the host with this mode's profiles and this deployment's
 # env file. DEPLOY_UID and DEPLOY_GID let the ingest job write the cache mount.
 compose() {
-  local profile_args="" profile
-  for profile in $(profiles_for_mode); do
-    profile_args="$profile_args --profile $profile"
-  done
-  remote_bash "$REMOTE_DIR" "$profile_args" "$@" <<'REMOTE'
+  remote_bash "$REMOTE_DIR" "$(profiles_for_mode)" "$@" <<'REMOTE'
 dir="$1"
 profiles="$2"
 shift 2
 cd "$dir"
-DEPLOY_UID="$(id -u)" DEPLOY_GID="$(id -g)" \
-  docker compose --env-file deploy/.env.deploy -f deploy/compose.yaml $profiles "$@"
+COMPOSE_PROFILES="$profiles" DEPLOY_UID="$(id -u)" DEPLOY_GID="$(id -g)" \
+  docker compose --env-file deploy/.env.deploy -f deploy/compose.yaml "$@"
 REMOTE
 }
 
@@ -301,8 +314,8 @@ compose_job() {
 dir="$1"
 shift
 cd "$dir"
-DEPLOY_UID="$(id -u)" DEPLOY_GID="$(id -g)" \
-  docker compose --env-file deploy/.env.deploy -f deploy/compose.yaml --profile jobs run --rm "$@"
+COMPOSE_PROFILES=jobs DEPLOY_UID="$(id -u)" DEPLOY_GID="$(id -g)" \
+  docker compose --env-file deploy/.env.deploy -f deploy/compose.yaml run --rm "$@"
 REMOTE
 }
 
@@ -324,7 +337,7 @@ wait_for_vespa() {
 # then checks that an unauthenticated MCP call is refused and an authenticated
 # one is accepted.
 run_probe() {
-  ssh -o BatchMode=yes "$HOST" bash -s -- "$REMOTE_DIR" <<'REMOTE'
+  remote_bash "$REMOTE_DIR" <<'REMOTE'
 dir="$1"
 cd "$dir"
 set -a
