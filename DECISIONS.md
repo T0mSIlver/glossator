@@ -646,3 +646,21 @@ Section-level numbers cover the 142 questions whose gold names an anchor; page-l
 - Capability questions stay hard for retrieval at rank 1 (0.51 reranked): the gold is the matrix page while model cards also carry the fact (D-033).
 
 **Decision.** The product serves `RetrievalConfig.shipped()`: `sec1024`, vector-heavy weights, reranker on, with `rerank=False` as the documented fast path (median 9 ms). The reranker's serving model is Mistral Small 4 (D-017); `GLOSSATOR_RERANK_MODEL` overrides it, and every evaluation records the model used. Reranking on `sec128` and the reranker prompt's 13% fallback rate are the two follow-ups the numbers point at.
+
+---
+
+## D-033a · The anchor fallback and marker stripping, measured
+
+**Status:** decided · 2026-09-09 · runs `dev60-baseline` against `dev60-anchors` (same 60 questions, Ministral 14B, shipped weights, no reranker)
+
+| metric | single_pass before → after | search_loop before → after |
+|---|---|---|
+| cited URL matches gold | 0.70 → 0.76 | 0.78 → 0.80 |
+| cited anchor matches gold | 0.50 → 0.58 | 0.40 → 0.48 |
+| quote verification rate | 0.86 → 0.89 | 0.82 → 0.87 |
+| fabricated quotes per answer | 0.40 → 0.28 | 0.55 → 0.37 |
+| correctness (judge) | 0.81 → 0.83 | 0.93 → 0.94 |
+| citation relevance (judge) | 0.89 → 0.98 | 0.91 → 0.94 |
+| refusal correct | 0.82 → 0.87 | 0.88 → 0.88 |
+
+Every chunk now carries the anchor of the nearest anchored heading above it, so citations deep-link to the closest linkable section instead of the page top; markers that name no verified citation are stripped from the answer text and kept in the trace. The fabricated-quote drop is partly the emphasis-normalized verification counting cosmetic matches as verified (D-027a). One capability question per strategy matched gold only through the model-card relaxation (D-033, decision 4), reported as `gold_relaxed_matches`.
