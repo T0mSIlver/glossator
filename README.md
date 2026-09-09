@@ -40,8 +40,16 @@ stdio transport is configured in `.mcp.json` and `.vibe/config.toml`.
 `VESPA_CONFIG_URL`, and `WORKSPACE_ROOT` (used by the Bruno API export). The
 API server also reads `GLOSSATOR_CORPUS_DIR`, and the MCP server reads
 `GLOSSATOR_VARIANT`, `GLOSSATOR_MODEL`, `GLOSSATOR_CORPUS_DIR`,
-`GLOSSATOR_MCP_TOKEN`, and `GLOSSATOR_MCP_TOOLS`. Do not put
+`GLOSSATOR_MCP_TOKEN`, and `GLOSSATOR_MCP_TOOLS`. Both read
+`GLOSSATOR_SNAPSHOT_MANIFEST` for the `history` forms. Do not put
 schema names in `.env`.
+
+Chat completions -- the answer model, the listwise reranker, and the translation
+and rewrite calls -- go to a local OpenAI-compatible server when
+`GLOSSATOR_CHAT_SERVER_URL` is set, with `GLOSSATOR_CHAT_API_KEY` if it wants a
+key and `GLOSSATOR_CHAT_REASONING_EFFORT` to set or disable its thinking.
+Embeddings always go to the Mistral API. Every run records which server and
+which effort it used.
 
 Vespa blocks feeds when disk usage exceeds 80% by default. Ingestion tests a small
 write before processing the corpus and aborts without replacing any page if Vespa
@@ -63,6 +71,7 @@ schema.
 | `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
 | `POST /cite` | `draft`, `quotes` (`n`, `quote`, plus `chunk_id` or page `url`); optional `variant` | per-quote verdicts with fragment links, uncovered markers, deduplicated sources |
 | `GET /pages/{path}` | documentation path; optional `variant`, `start_offset`, `top_k` | up to 100 page sections in reading order; `truncated` says whether more exist |
+| `GET /history` | exactly one of `text`, `section`, `question` | a phrase's first and last stored snapshot, a section's state and diff per date, or the top retrieved section per date |
 | `GET /health` | none | Vespa counts, corpus commit, and embedding-probe status |
 | `GET /version` | none | package version, variants, and allowed generation models |
 
@@ -104,6 +113,7 @@ uv run python -m entrypoints.mcp_server
 | `grep(source_id, pattern, mode="phrase", top_k=5)` | Match a phrase or terms inside one page. |
 | `ask(question, strategy="single_pass")` | Generate an answer and print only verified citations as links. |
 | `cite(draft, quotes)` | Verify your own quotes against the chunks they name; keep only verified quotes. |
+| `history(text \| section \| question)` | Track a phrase, a section or a question across the stored dated snapshots. No model runs inside it. |
 
 Every tool response ends with `next:`. The server announces clamps, rejects
 unknown parameters with `E_BAD_PARAM`, and prints a citation URL on each hit.
@@ -265,6 +275,13 @@ retrieval (`AnswerConfig.rewrite_for_retrieval`, off by default, `--rewrite` on
 the CLI and the answer eval) recovers 4 of the 19 points for a quarter of a
 second and 275 prompt tokens, and costs 5 points on clean questions. The runs are
 `eval/runs/*-noisy-*/` and `eval/runs/*-clean-*/`.
+
+Recorded spend is a lower bound for runs made before 2026-09-09: their answer
+evaluations built the search engine without a call recorder, so the listwise
+reranker's calls are absent from their `calls.jsonl` and from their totals, and
+embeddings are not priced per run at all. The console figure is the number of
+record for spend. Runs from that date on share one recorder between the engine
+and the answer model, so reranker calls land beside generation calls.
 
 ## Retrieval evaluation
 
