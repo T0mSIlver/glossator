@@ -12,7 +12,7 @@ import urllib.parse
 from collections.abc import Collection
 
 import structlog
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from glossator.answer.context import AssembledContext, Source
 from glossator.answer.llm import TokenUsage
@@ -85,7 +85,7 @@ class Citation(BaseModel):
     headings have no anchor, so the fragment is what lands the reader on the
     sentence)."""
 
-    fragment_url_v1: str | None = None
+    fragment_url_v1: str | None = Field(default=None, exclude_if=lambda value: value is None)
     """The previous fragment URL when an evaluation run has been refragmented."""
 
     @property

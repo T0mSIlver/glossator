@@ -319,7 +319,7 @@ class QuestionRecord(BaseModel):
     usage: AnswerTokenUsage = AnswerTokenUsage()
     latency_ms: float = 0.0
     cost_usd: float = 0.0
-    cost_usd_v1: float | None = None
+    cost_usd_v1: float | None = Field(default=None, exclude_if=lambda value: value is None)
     """The recorded cost before an existing run was repriced."""
     error: str | None = None
     judge: JudgeRecord | None = None

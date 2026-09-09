@@ -354,7 +354,7 @@ def refragment(run_dir: Path) -> dict[str, int]:
         record = QuestionRecord.model_validate(row)
         passages = _source_passages(record)
         for raw, citation in zip(row.get("citations", []), record.citations, strict=True):
-            if not citation.verified or not citation.fragment_url:
+            if not citation.verified:
                 continue
             citations += 1
             source_quote = matched_source_quote(citation.quote, passages.get(citation.n, ""))
@@ -362,9 +362,9 @@ def refragment(run_dir: Path) -> dict[str, int]:
                 raise ValueError(
                     f"could not relocate citation {citation.n} for {record.question_id}"
                 )
-            old = str(raw["fragment_url"])
+            old = raw.get("fragment_url")
             new = fragment_link(citation.url, citation.anchor, source_quote)
-            if raw.get("fragment_url_v1") is None:
+            if "fragment_url_v1" not in raw:
                 raw["fragment_url_v1"] = old
             raw["fragment_url"] = new
             changed += old != new

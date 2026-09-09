@@ -121,3 +121,22 @@ def test_refragment_uses_source_text_and_archives_the_old_url(tmp_path: Path) ->
     assert citation["fragment_url"].endswith(
         "text=Use%20tool_call_id%20when%20appending%20the%20result%20%26%20response."
     )
+
+
+def test_refragment_adds_a_missing_url_and_records_that_it_was_absent(tmp_path: Path) -> None:
+    run = tmp_path / "run"
+    _write_run(run)
+    row = json.loads((run / "records.jsonl").read_text())
+    row["citations"][0].pop("fragment_url")
+    (run / "records.jsonl").write_text(json.dumps(row) + "\n")
+
+    first = refragment(run)
+    second = refragment(run)
+    citation = json.loads((run / "records.jsonl").read_text())["citations"][0]
+
+    assert first["changed"] == 1
+    assert second["changed"] == 0
+    assert citation["fragment_url_v1"] is None
+    assert citation["fragment_url"].endswith(
+        "text=Use%20tool_call_id%20when%20appending%20the%20result%20%26%20response."
+    )
