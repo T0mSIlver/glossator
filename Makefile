@@ -1,4 +1,4 @@
-.PHONY: installdeps install-workflows ingest search ask mcp test start-examples execute-ingestion
+.PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
 .PHONY: corpus-refresh corpus-check dev-set eval-report eval-answers eval-retrieval calibrate-floors
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
@@ -9,6 +9,8 @@ endif
 
 MCP_HOST := $(or $(host),127.0.0.1)
 MCP_PORT := $(or $(port),8000)
+API_HOST := $(or $(host),127.0.0.1)
+API_PORT := $(or $(port),8080)
 VESPA_CONTAINER := glossator-vespa
 VESPA_QUERY_PORT := $(or $(VESPA_QUERY_PORT),18080)
 VESPA_CONFIG_PORT := $(or $(VESPA_CONFIG_PORT),19072)
@@ -64,6 +66,11 @@ search:
 ## Usage: make ask question="how do I stream a chat completion" [strategy=single_pass] [variant=sec1024] [model=id] [record=path]
 ask:
 	uv run python -m glossator.answer "$(question)" $(if $(strategy),--strategy $(strategy),) $(if $(variant),--variant $(variant),) $(if $(model),--model $(model),) $(if $(record),--record $(record),)
+
+## Start the HTTP API
+## Usage: make api [host=0.0.0.0] [port=8080]
+api:
+	uv run uvicorn entrypoints.api:app --host $(API_HOST) --port $(API_PORT)
 
 ## Start the MCP server in HTTP mode
 ## Usage: make mcp [host=0.0.0.0] [port=8000]

@@ -7,6 +7,7 @@ is the whole subject.
 
 import asyncio
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from mistralai.search.toolkit.document import ChunkType
@@ -165,3 +166,36 @@ def test_footing_is_unknown_when_the_check_is_off() -> None:
     _hits, trace = search(RetrievalConfig(top_k=10))
     assert trace.lexical_footing is None
     assert trace.missing_terms == ()
+
+
+def test_request_filters_build_a_transient_retriever_without_mutating_the_engine(
+    monkeypatch: Any,
+) -> None:
+    built = engine(RetrievalConfig(kinds=frozenset({"doc"})), SIMILARITIES)
+    built.index = object()  # type: ignore[assignment]
+    built.embedder = object()  # type: ignore[assignment]
+    captured: list[RetrievalConfig] = []
+
+    def make_retriever(index: object, embedder: object, config: RetrievalConfig) -> Any:
+        captured.append(config)
+        return SimpleNamespace(config=config)
+
+    monkeypatch.setattr("glossator.retrieval.engine.DocsRetriever", make_retriever)
+    selected: Any = built._retriever_for(frozenset({"api"}), frozenset({"en"}))
+
+    assert selected.config.kinds == frozenset({"api"})
+    assert selected.config.locales == frozenset({"en"})
+    assert built.config.kinds == frozenset({"doc"})
+    assert captured == [selected.config]
+
+
+def test_document_count_reads_the_variant_coverage() -> None:
+    class Client:
+        async def query(self, body: dict[str, Any]) -> Any:
+            assert "from docs_section_fulldim" in body["yql"]
+            return SimpleNamespace(json={"root": {"coverage": {"documents": 4430}}})
+
+    built = engine(RetrievalConfig(), SIMILARITIES)
+    built.index = SimpleNamespace(_client=Client())  # type: ignore[assignment]
+
+    assert asyncio.run(built.document_count()) == 4430
