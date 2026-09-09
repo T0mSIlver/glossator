@@ -60,7 +60,7 @@ def _answer_config() -> AnswerConfig:
 
 
 # Construction checks the variant, embedding model, and navigation support.
-_engine = SearchEngine(RetrievalConfig(variant=_variant_name, check_lexical_footing=True))
+_engine = SearchEngine(RetrievalConfig.shipped(variant=_variant_name, check_lexical_footing=True))
 
 # Extra engines for the other variants, for the context resource's document
 # counts. Built lazily, reused once built; counts are cached briefly so a
@@ -288,7 +288,7 @@ async def search(
     filter_note = None
     if kinds_set or locales_set:
         try:
-            RetrievalConfig(variant=_variant_name, kinds=kinds_set, locales=locales_set)
+            RetrievalConfig.shipped(variant=_variant_name, kinds=kinds_set, locales=locales_set)
         except ValueError as exc:
             raise _bad_param(
                 str(exc), 'locales look like "en" or "pt-BR"; kinds are doc, api, model.'
@@ -870,7 +870,7 @@ async def _variant_documents(name: str) -> int | None:
         if name == _variant_name:
             engine: SearchEngine = _engine
         else:
-            engine = _extra_engines.get(name) or SearchEngine(RetrievalConfig(variant=name))
+            engine = _extra_engines.get(name) or SearchEngine(RetrievalConfig.shipped(variant=name))
             _extra_engines[name] = engine
         count = await asyncio.wait_for(engine.document_count(), timeout=5.0)
     except Exception as exc:

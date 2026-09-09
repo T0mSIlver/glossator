@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200" role="img" aria-label="recall@5 by question type, section-level matching">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">recall@5 by question type, section-level matching</text>
+<text x="240" y="51.0" text-anchor="end">api_reference</text>
+<rect x="248" y="39.0" width="380.2" height="7" fill="#3b6fd4"/>
+<rect x="248" y="47.0" width="372.5" height="7" fill="#c05621"/>
+<text class="v" x="646" y="51.0">0.98 / 0.96</text>
+<text x="240" y="77.0" text-anchor="end">capability</text>
+<rect x="248" y="65.0" width="0.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="73.0" width="0.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="77.0">0 / 0</text>
+<text x="240" y="103.0" text-anchor="end">cross_page</text>
+<rect x="248" y="91.0" width="0.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="99.0" width="0.0" height="7" fill="#c05621"/>
+<text class="v" x="646" y="103.0">0 / 0</text>
+<text x="240" y="129.0" text-anchor="end">post_cutoff</text>
+<rect x="248" y="117.0" width="371.5" height="7" fill="#3b6fd4"/>
+<rect x="248" y="125.0" width="371.5" height="7" fill="#c05621"/>
+<text class="v" x="646" y="129.0">0.9574 / 0.9574</text>
+<text x="240" y="155.0" text-anchor="end">single_page</text>
+<rect x="248" y="143.0" width="388.0" height="7" fill="#3b6fd4"/>
+<rect x="248" y="151.0" width="370.8" height="7" fill="#c05621"/>
+<text class="v" x="646" y="155.0">1 / 0.9556</text>
+<rect x="16" y="183" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="192">sec1024-vector-heavy+rerank</text>
+<rect x="252" y="183" width="10" height="10" fill="#c05621"/>
+<text class="v" x="266" y="192">sec128-vector-heavy</text>
+</svg>

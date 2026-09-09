@@ -10,7 +10,7 @@ from typing import Any
 
 from glossator.answer.config import MISTRAL_SMALL_4
 from glossator.answer.llm import Completion, Message
-from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.config import DEFAULT_RERANK_MODEL, RERANK_MODEL, RetrievalConfig
 from glossator.retrieval.engine import Hit
 from glossator.retrieval.reranker import (
     CANDIDATE_TOKEN_BUDGET,
@@ -60,7 +60,8 @@ def ranking(*positions: int) -> Ranking:
 def test_the_default_rerank_model_is_the_priced_mistral_small_4_id() -> None:
     """The id is spelled out in the retrieval config to avoid an import cycle;
     this is what stops the two spellings from drifting apart."""
-    assert RetrievalConfig().rerank_model == MISTRAL_SMALL_4
+    assert DEFAULT_RERANK_MODEL == MISTRAL_SMALL_4
+    assert RetrievalConfig().rerank_model == RERANK_MODEL
 
 
 def test_a_model_that_is_not_in_the_price_table_is_refused() -> None:

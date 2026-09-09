@@ -69,7 +69,7 @@ from glossator.eval.providers import (
 )
 from glossator.eval.run_records import RUN_NAME_RE
 from glossator.ingest.pages import load_page
-from glossator.retrieval.config import RetrievalConfig
+from glossator.retrieval.config import RERANK_MODEL, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
 
 logger = structlog.get_logger(__name__)
@@ -1003,6 +1003,7 @@ async def run(
     run_dir: RunDirectory,
     settings: AnswerConfig,
     quota_ceiling: int = QUOTA_CEILING_PERCENT,
+    rerank: bool = True,
 ) -> dict[str, Any]:
     """Every question through every strategy, judged, recorded, summarized.
 
@@ -1021,7 +1022,9 @@ async def run(
     if judge_model:
         await wait_for_quota(quota_ceiling)
 
-    engine = SearchEngine(RetrievalConfig(variant=variant, top_k=settings.top_k))
+    engine = SearchEngine(
+        RetrievalConfig.shipped(variant=variant, top_k=settings.top_k, rerank=rerank)
+    )
     llm = MistralLLM(settings, client=build_client(), recorder=AnswerCallRecorder(run_dir))
     provider = (
         OpenAICompatibleProvider(
@@ -1267,7 +1270,7 @@ wrote the answer, so it cannot prefer one.
 
 - Generation model: `{metrics["model"]}`
 - Judge model: `{metrics.get("judge_model") or "none (--skip-judge)"}` ({JUDGE_VERSION})
-- Index variant: `{metrics["variant"]}`, top_k {config.get("top_k")}, context budget \
+- Index variant: `{metrics["variant"]}`, top_k {config.get("top_k")}, rerank {config.get("rerank", "unknown")} ({config.get("rerank_model") or "off"}), context budget \
 {config.get("context_token_budget")} tokens
 - Dataset: `{metrics["dataset"]}`, sha256 `{metrics["dataset_sha256"]}`
 - Questions: {metrics["questions"]}; strategies: {len(metrics["strategies"])}; \
@@ -1454,6 +1457,12 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--skip-judge", action="store_true")
     parser.add_argument("--top-k", type=int, default=AnswerConfig().top_k)
+    parser.add_argument(
+        "--no-rerank",
+        dest="rerank",
+        action="store_false",
+        help="Retrieve without the listwise reranker (the shipped default reranks)",
+    )
     parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
     parser.add_argument(
         "--note",
@@ -1504,6 +1513,8 @@ async def _run(args: argparse.Namespace) -> None:
         "judge_thinking": "disabled",
         "judge_provider": "zai",
         "top_k": settings.top_k,
+        "rerank": args.rerank,
+        "rerank_model": RERANK_MODEL if args.rerank else None,
         "context_token_budget": settings.context_token_budget,
         "answer_config": settings.model_dump(mode="json"),
         "unpriced_models": sorted(UNPRICED_MODELS),
@@ -1521,6 +1532,7 @@ async def _run(args: argparse.Namespace) -> None:
             run_dir=run_dir,
             settings=settings,
             quota_ceiling=args.quota_ceiling,
+            rerank=args.rerank,
         )
     except Exception as error:
         run_dir.finalize(status="failed", error=f"{type(error).__name__}: {error}")

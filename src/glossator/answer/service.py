@@ -62,7 +62,7 @@ async def ask(
     settings = config or AnswerConfig()
     if model is not None and model != settings.model:
         settings = AnswerConfig.model_validate({**settings.model_dump(), "model": model})
-    index = engine or SearchEngine(RetrievalConfig(variant=variant, top_k=settings.top_k))
+    index = engine or SearchEngine(RetrievalConfig.shipped(variant=variant, top_k=settings.top_k))
     generator = llm or MistralLLM(settings, client=build_client(), recorder=recorder)
 
     logger.info("Ask", strategy=strategy, variant=variant, question=question)

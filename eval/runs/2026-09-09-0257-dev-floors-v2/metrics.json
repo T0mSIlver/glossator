@@ -1,0 +1,149 @@
+{
+  "depths": [
+    1,
+    5,
+    20,
+    50
+  ],
+  "distributions": {
+    "junk": {
+      "at_depth": {
+        "1": {
+          "max": 0.6789,
+          "median": 0.609,
+          "min": 0.5464,
+          "n": 15,
+          "p10": 0.5592,
+          "p90": 0.669
+        },
+        "20": {
+          "max": 0.6335,
+          "median": 0.5465,
+          "min": 0.5053,
+          "n": 15,
+          "p10": 0.5252,
+          "p90": 0.61
+        },
+        "5": {
+          "max": 0.6577,
+          "median": 0.5794,
+          "min": 0.5258,
+          "n": 15,
+          "p10": 0.5462,
+          "p90": 0.6424
+        },
+        "50": {
+          "max": 0.5844,
+          "median": 0.4975,
+          "min": 0.4568,
+          "n": 15,
+          "p10": 0.4649,
+          "p90": 0.55
+        }
+      },
+      "queries": 15,
+      "scored": 15
+    },
+    "real": {
+      "at_depth": {
+        "1": {
+          "max": 0.927,
+          "median": 0.8654,
+          "min": 0.6958,
+          "n": 244,
+          "p10": 0.8167,
+          "p90": 0.8999
+        },
+        "20": {
+          "max": 0.8404,
+          "median": 0.7788,
+          "min": 0.5996,
+          "n": 244,
+          "p10": 0.7353,
+          "p90": 0.8136
+        },
+        "5": {
+          "max": 0.8838,
+          "median": 0.8239,
+          "min": 0.661,
+          "n": 244,
+          "p10": 0.7859,
+          "p90": 0.8555
+        },
+        "50": {
+          "max": 0.7656,
+          "median": 0.6837,
+          "min": 0.5214,
+          "n": 244,
+          "p10": 0.6434,
+          "p90": 0.7263
+        }
+      },
+      "queries": 244,
+      "scored": 244
+    },
+    "unanswerable": {
+      "at_depth": {
+        "1": {
+          "max": 0.8706,
+          "median": 0.8247,
+          "min": 0.7232,
+          "n": 50,
+          "p10": 0.7941,
+          "p90": 0.8529
+        },
+        "20": {
+          "max": 0.7982,
+          "median": 0.7506,
+          "min": 0.6798,
+          "n": 50,
+          "p10": 0.7239,
+          "p90": 0.7847
+        },
+        "5": {
+          "max": 0.8397,
+          "median": 0.7919,
+          "min": 0.7158,
+          "n": 50,
+          "p10": 0.758,
+          "p90": 0.8137
+        },
+        "50": {
+          "max": 0.7077,
+          "median": 0.6702,
+          "min": 0.6178,
+          "n": 50,
+          "p10": 0.6324,
+          "p90": 0.6946
+        }
+      },
+      "queries": 50,
+      "scored": 50
+    }
+  },
+  "errors": [],
+  "kind": "floor-calibration",
+  "no_lexical_footing": {
+    "junk": 0,
+    "real": 0,
+    "unanswerable": 0
+  },
+  "proposal": {
+    "best_junk_best_hit": 0.6789,
+    "corridor": true,
+    "margin_basis": "the largest best-to-fifth spread over 244 real questions, so the margin never cuts a real question below five hits",
+    "similarity_floor": 0.687,
+    "similarity_margin": 0.114,
+    "width": 0.0169,
+    "worst_real_best_hit": 0.6958
+  },
+  "queries": 309,
+  "status": "complete",
+  "top_k": 50,
+  "unanswerable_against_the_floor": {
+    "clearing_the_floor": 50,
+    "floor": 0.687,
+    "questions": 50
+  },
+  "variant": "sec1024"
+}

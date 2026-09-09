@@ -1,0 +1,16 @@
+{
+  "corpus_dir": "corpus/mistral-docs",
+  "dataset": "eval/dev.jsonl",
+  "dataset_sha256": "acf3c2e148f1aa4036565ac03dd7a3a7e9bef5d0717529976ce9422b68b35490",
+  "depths": [
+    1,
+    5,
+    20,
+    50
+  ],
+  "junk_questions": 15,
+  "kind": "floor-calibration",
+  "real_questions": 294,
+  "top_k": 50,
+  "variant": "sec1024"
+}

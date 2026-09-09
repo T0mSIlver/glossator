@@ -86,7 +86,7 @@ class EngineRegistry:
         _require_variant(variant)
         engine = self.engines.get(variant)
         if engine is None:
-            engine = SearchEngine(RetrievalConfig(variant=variant))
+            engine = SearchEngine(RetrievalConfig.shipped(variant=variant))
             self.engines[variant] = engine
         return engine
 

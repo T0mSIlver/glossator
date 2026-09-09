@@ -4,9 +4,10 @@ Everything that an eval row varies lives here, so a grid is a list of these and
 nothing else in the retrieval path has to be reconfigured.
 """
 
+import os
 import re
 from pathlib import Path
-from typing import Annotated, Self
+from typing import Annotated, Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -16,7 +17,16 @@ DEFAULT_TOP_K = 10
 
 DEFAULT_RERANK_CANDIDATES = 20
 
-RERANK_MODEL = "mistral-small-2603"
+# The serving default (D-017). GLOSSATOR_RERANK_MODEL overrides it for a key on which
+# Mistral Small is unreachable (D-017a); every evaluation records the model it used.
+DEFAULT_RERANK_MODEL = "mistral-small-2603"
+RERANK_MODEL = os.environ.get("GLOSSATOR_RERANK_MODEL", DEFAULT_RERANK_MODEL)
+
+# The weight set the development-set grid chose (D-034): the vector term at 8 and BM25
+# at 0.3 in the first phase lifted section-level recall@1 over the migration's baked-in
+# weights on both section variants, and the reranker on top was the largest single gain.
+SHIPPED_RANKING_WEIGHTS = {"content_embedding_closeness": 8.0, "bm25_content": 0.3}
+SHIPPED_VARIANT = "sec1024"
 """Mistral Small 4's fixed id, spelled out rather than imported.
 
 ``glossator.answer.config`` owns the price table this id is resolved through, and
@@ -122,6 +132,19 @@ class RetrievalConfig(BaseModel):
                 f"malformed locale(s) {bad_locales}; expected forms like 'en' or 'pt-BR'"
             )
         return self
+
+    @classmethod
+    def shipped(cls, **overrides: Any) -> Self:
+        """The configuration the product serves: section chunks at 1024 dimensions, the
+        grid's weight set, and the listwise reranker on (D-034). Overrides win, so a
+        caller can pass ``rerank=False`` for the fast path or a different variant."""
+        base: dict[str, Any] = {
+            "variant": SHIPPED_VARIANT,
+            "ranking_weights": dict(SHIPPED_RANKING_WEIGHTS),
+            "rerank": True,
+        }
+        base.update(overrides)
+        return cls(**base)
 
     @property
     def index_variant(self) -> IndexVariant:
