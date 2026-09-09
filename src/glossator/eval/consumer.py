@@ -90,11 +90,52 @@ ARMS = ("A0", "A1", "A2")
 
 ARM_TOOLS: dict[str, str | None] = {
     "A0": None,
-    "A1": "search,open,navigate,read,grep,cite",
-    "A2": "ask",
+    "A1": (
+        "mistral_docs_search,mistral_docs_open_section,mistral_docs_step,"
+        "mistral_docs_read_page,mistral_docs_find_on_page,mistral_docs_verify_quotes"
+    ),
+    "A2": "mistral_docs_answer",
 }
 """The GLOSSATOR_MCP_TOOLS allowlist each arm's server runs. A0 never sees an
 MCP server at all; A1 and A2 talk to servers started with these allowlists."""
+
+TOOL_SUFFIXES = (
+    "mistral_docs_search",
+    "mistral_docs_open_section",
+    "mistral_docs_step",
+    "mistral_docs_read_page",
+    "mistral_docs_find_on_page",
+    "mistral_docs_answer",
+    "mistral_docs_verify_quotes",
+    "mistral_docs_history",
+    # The names the tools had before they were namespaced, so recorded runs
+    # keep reading the way they did when they were collected.
+    "search",
+    "open",
+    "navigate",
+    "read",
+    "grep",
+    "ask",
+    "cite",
+    "history",
+)
+"""Every tool name this server has ever served. A harness prefixes them its own
+way -- `glossator_search`, `mcp__mistral-docs__mistral_docs_search` -- so the
+match is on the suffix, longest first."""
+
+VERIFY_SUFFIXES = ("mistral_docs_verify_quotes", "cite")
+"""The quote checker, under either name."""
+
+
+def is_server_tool(name: str) -> bool:
+    """Whether one harness tool name is one of this server's tools."""
+    return any(name.endswith(suffix) for suffix in TOOL_SUFFIXES)
+
+
+def is_verify_tool(name: str) -> bool:
+    """Whether one harness tool name is the quote checker."""
+    return any(name.endswith(suffix) for suffix in VERIFY_SUFFIXES)
+
 
 MAX_PARALLEL = 2
 """At most two headless harness processes at once: opencode hangs at a third."""
@@ -119,7 +160,11 @@ _REFUSAL = re.compile("|".join(REFUSAL_PATTERNS), re.IGNORECASE)
 
 _URL = re.compile(r"https?://[^\s)>\]\"']+")
 _CITE_VERIFIED = re.compile(r"^\[(\d+)\] verified:", re.MULTILINE)
+"""The per-quote verdict line recorded runs carry; it is one count line now."""
+
+_CITE_COUNT = re.compile(r"^verified: \d+ of \d+ quotes?(?: \(([^)]*)\))?", re.MULTILINE)
 _CITE_REJECTED = re.compile(r"^\[(\d+)\] NOT verified:", re.MULTILINE)
+_MARKER = re.compile(r"\[(\d+)\]")
 _BAD_PARAM = "error: E_BAD_PARAM"
 _CLAMP = "clamped server-side"
 
@@ -332,7 +377,7 @@ def _parse_tool_part(part: Mapping[str, Any]) -> ToolCallRecord:
             for key, value in raw_input.items():
                 # The cite quotes are the judge's evidence; truncating them
                 # would corrupt the JSON the judge reads back.
-                if name.endswith("cite") and key == "quotes":
+                if is_verify_tool(name) and key == "quotes":
                     text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
                     arguments[key] = text
                 else:
@@ -342,14 +387,10 @@ def _parse_tool_part(part: Mapping[str, Any]) -> ToolCallRecord:
             output_chars = len(output)
             error = _tool_error(name, output)
             notes = _tool_notes(output)
-            if name.endswith("cite"):
+            if is_verify_tool(name):
                 # Which quotes the server verified, so the judge and the
                 # metrics can count them without re-reading the transcript.
-                verdicts = {match.group(1): True for match in _CITE_VERIFIED.finditer(output)}
-                verdicts.update(
-                    {match.group(1): False for match in _CITE_REJECTED.finditer(output)}
-                )
-                arguments["__verdicts"] = json.dumps(verdicts, sort_keys=True)
+                arguments["__verdicts"] = json.dumps(_verdicts(output), sort_keys=True)
         elif state.get("status") not in (None, "completed"):
             error = f"tool status: {state.get('status')}"
     return ToolCallRecord(
@@ -371,6 +412,20 @@ def _tool_error(name: str, output: str) -> str | None:
         if line.startswith("error:"):
             return f"{name}: {line.strip()}"
     return None
+
+
+def _verdicts(output: str) -> dict[str, bool]:
+    """Which markers the quote checker held, over either output format.
+
+    Today's check prints one count line naming the markers that verified;
+    recorded runs print one verdict line per quote. Both are read, so a run
+    collected before the change still counts.
+    """
+    verdicts = {match.group(1): True for match in _CITE_VERIFIED.finditer(output)}
+    for match in _CITE_COUNT.finditer(output):
+        verdicts.update({n: True for n in _MARKER.findall(match.group(1) or "")})
+    verdicts.update({match.group(1): False for match in _CITE_REJECTED.finditer(output)})
+    return verdicts
 
 
 def _tool_notes(output: str) -> list[str]:
@@ -424,7 +479,7 @@ def cite_verdicts(calls: Sequence[ToolCallRecord]) -> tuple[int, int]:
     consumer itself saw in each cite output."""
     verified = rejected = 0
     for call in calls:
-        if not call.name.endswith("cite"):
+        if not is_verify_tool(call.name):
             continue
         try:
             verdicts = json.loads(call.arguments.get("__verdicts", "{}"))
@@ -659,8 +714,8 @@ async def _collect_cell(
         tokens=collected.tokens,
         harness_cost_usd=collected.cost_usd,
         tool_calls=calls,
-        mcp_called=any(call.name.startswith("glossator_") for call in calls),
-        cite_called=any(call.name.endswith("cite") for call in calls),
+        mcp_called=any(is_server_tool(call.name) for call in calls),
+        cite_called=any(is_verify_tool(call.name) for call in calls),
         links=links,
         transcript=collected.transcript,
         error=collected.error,
@@ -735,7 +790,7 @@ def judged_citations(record: ConsumerRecord) -> list[JudgedCitation]:
     """
     citations: list[JudgedCitation] = []
     for call in record.tool_calls:
-        if not call.name.endswith("cite"):
+        if not is_verify_tool(call.name):
             continue
         raw_quotes = call.arguments.get("quotes", "")
         try:
@@ -1454,6 +1509,7 @@ if __name__ == "__main__":
 __all__ = [
     "ARMS",
     "ARM_TOOLS",
+    "TOOL_SUFFIXES",
     "CONSUMERS",
     "CONSUMER_NAMES",
     "MAX_PARALLEL",
@@ -1474,6 +1530,8 @@ __all__ = [
     "corpus_page_urls",
     "extract_links",
     "is_quota_error",
+    "is_server_tool",
+    "is_verify_tool",
     "judge_payload",
     "judge_record",
     "load_records",

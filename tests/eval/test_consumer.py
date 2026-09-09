@@ -19,6 +19,8 @@ from glossator.eval.consumer import (
     corpus_page_urls,
     extract_links,
     is_quota_error,
+    is_server_tool,
+    is_verify_tool,
     judged_citations,
     load_records,
     opencode_command,
@@ -96,8 +98,8 @@ def test_parse_opencode_events() -> None:
                     "tool": "glossator_search",
                     "state": {
                         "status": "completed",
-                        "input": {"query": "limit", "top_k": 5},
-                        "output": "query: limit\nhits: 1/20",
+                        "input": {"query": "limit", "max_hits": 5},
+                        "output": "query: limit\nResults: 1/20 kept/considered",
                     },
                 },
             }
@@ -107,11 +109,11 @@ def test_parse_opencode_events() -> None:
                 "type": "tool_use",
                 "part": {
                     "type": "tool",
-                    "tool": "glossator_cite",
+                    "tool": "mcp__mistral-docs__mistral_docs_verify_quotes",
                     "state": {
                         "status": "completed",
                         "input": {"draft": "x [1]", "quotes": []},
-                        "output": "[1] verified: https://docs.mistral.ai/a#x\n",
+                        "output": "verified: 1 of 1 quotes ([1])\n",
                     },
                 },
             }
@@ -126,12 +128,78 @@ def test_parse_opencode_events() -> None:
     ]
     answer, calls = parse_opencode_events(lines)
     assert answer == "The limit is 128 [1]."
-    assert [call.name for call in calls] == ["glossator_search", "glossator_cite"]
-    assert calls[0].arguments == {"query": "limit", "top_k": "5"}
+    assert [call.name for call in calls] == [
+        "glossator_search",
+        "mcp__mistral-docs__mistral_docs_verify_quotes",
+    ]
+    assert calls[0].arguments == {"query": "limit", "max_hits": "5"}
     tokens, cost = parse_opencode_tokens(lines)
     assert (tokens.input_tokens, tokens.output_tokens, tokens.reasoning_tokens) == (10, 5, 2)
     assert cost == 0
     assert cite_verdicts(calls) == (1, 0)
+
+
+def test_tool_names_match_on_the_suffix_whatever_the_harness_prefixes() -> None:
+    """Harnesses name the same tool their own way; a recorded run keeps reading."""
+    assert is_server_tool("mcp__mistral-docs__mistral_docs_search")
+    assert is_server_tool("mistral_docs_read_page")
+    assert is_server_tool("glossator_search")
+    assert not is_server_tool("webfetch")
+    assert is_verify_tool("mcp__mistral-docs__mistral_docs_verify_quotes")
+    assert is_verify_tool("glossator_cite")
+    assert not is_verify_tool("mistral_docs_search")
+
+
+def test_verdicts_are_read_from_the_old_per_quote_lines() -> None:
+    """Runs recorded before the count line still count."""
+    lines = [
+        json.dumps(
+            {
+                "type": "tool_use",
+                "part": {
+                    "type": "tool",
+                    "tool": "glossator_cite",
+                    "state": {
+                        "status": "completed",
+                        "input": {"draft": "x [1] y [2]", "quotes": []},
+                        "output": (
+                            "[1] verified: https://docs.mistral.ai/a#x\n"
+                            "[2] NOT verified: quote is not in the cited source\n"
+                        ),
+                    },
+                },
+            }
+        )
+    ]
+    _answer, calls = parse_opencode_events(lines)
+
+    assert cite_verdicts(calls) == (1, 1)
+
+
+def test_verdicts_are_read_from_the_count_line() -> None:
+    lines = [
+        json.dumps(
+            {
+                "type": "tool_use",
+                "part": {
+                    "type": "tool",
+                    "tool": "mcp__mistral-docs__mistral_docs_verify_quotes",
+                    "state": {
+                        "status": "completed",
+                        "input": {"draft": "x [1] y [2] z [3]", "quotes": []},
+                        "output": (
+                            "[2] NOT verified: quote is not in the cited source — "
+                            "mistral_docs_open_section(chunk_id=…) and copy the sentence\n"
+                            "verified: 2 of 3 quotes ([1], [3])\n"
+                        ),
+                    },
+                },
+            }
+        )
+    ]
+    _answer, calls = parse_opencode_events(lines)
+
+    assert cite_verdicts(calls) == (2, 1)
 
 
 def test_parse_skips_garbage_lines() -> None:
@@ -221,7 +289,7 @@ def test_judged_citations_keep_verified_quotes_only() -> None:
     record = _record(
         tool_calls=[
             ToolCallRecord(
-                name="glossator_cite",
+                name="mcp__mistral-docs__mistral_docs_verify_quotes",
                 arguments={"quotes": quotes, "__verdicts": '{"1": true, "2": false}'},
                 output_chars=10,
             )
