@@ -121,7 +121,7 @@ def test_the_shipped_grid_expands_and_keeps_the_reranker_under_its_budget() -> N
     assert {entry.variant for entry in reranked} == {"sec1024"}
     assert len(reranked) == 2
     assert shipped.rerank.max_calls == 600
-    assert all(entry.config.top_k == 10 for entry in entries)
+    assert all(entry.config.top_k == 20 for entry in entries)
     assert all(entry.config.rerank_candidates == 20 for entry in reranked)
 
 
@@ -332,5 +332,5 @@ def test_metrics_and_the_readme_regenerate_from_the_records_alone(tmp_path: Path
 
 def test_the_shipped_grid_file_parses(tmp_path: Path) -> None:
     raw = yaml.safe_load(SHIPPED_GRID.read_text())
-    assert raw["top_k"] == 10
+    assert raw["top_k"] == 20
     assert set(raw["axes"]["variant"]) == {"page128", "sec128", "sec1024"}
