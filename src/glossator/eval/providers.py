@@ -186,6 +186,7 @@ class OpenAICompatibleProvider:
         client: httpx.AsyncClient | None = None,
         recorder: CallRecorder | None = None,
         seed: int | None = None,
+        minimum_interval: float = 0.0,
     ) -> None:
         self.name = name
         self.semaphore = semaphore
@@ -193,6 +194,9 @@ class OpenAICompatibleProvider:
         self.caller_tag = caller_tag
         self.recorder = recorder
         self.seed = seed
+        self.minimum_interval = minimum_interval
+        self._rate_lock = asyncio.Lock()
+        self._last_request_started = 0.0
         self._owns_client = client is None
         self.client = client or self._make_client(name)
 
@@ -472,6 +476,7 @@ class OpenAICompatibleProvider:
     async def _post_with_retries(self, payload: dict[str, Any]) -> tuple[dict[str, Any], float]:
         for attempt in range(_HTTP_ATTEMPTS):
             last = attempt == _HTTP_ATTEMPTS - 1
+            await self._pace_request()
             async with self.semaphore:
                 # Timed inside the semaphore: waiting for a slot is the run's
                 # concurrency, not the provider's latency.
@@ -501,6 +506,16 @@ class OpenAICompatibleProvider:
                 raise ProviderCallError("chat completion response must be a JSON object")
             return data, latency_ms
         raise ProviderCallError("request retry loop ended unexpectedly")
+
+    async def _pace_request(self) -> None:
+        """Keep request starts apart when a provider enforces a per-second limit."""
+        if self.minimum_interval <= 0:
+            return
+        async with self._rate_lock:
+            wait = self.minimum_interval - (time.perf_counter() - self._last_request_started)
+            if wait > 0:
+                await asyncio.sleep(wait)
+            self._last_request_started = time.perf_counter()
 
     def _record_http_error(
         self, payload: dict[str, Any], response: httpx.Response, latency_ms: float

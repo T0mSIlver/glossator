@@ -9,11 +9,10 @@ answer's claims in the cited text, whether each citation supports the sentence i
 is attached to -- come from GLM through `glossator.eval.providers` (D-021) and are
 reported beside them, never merged into them.
 
-The judge never learns which strategy produced an answer: it sees the question,
-the reference answer, the gold URLs, the answer, and the verified citations with
-the cited passage quoted verbatim. That is the whole of its input, and it is
-recorded verbatim with its raw output, because a judgement that cannot be re-read
-cannot be argued with (D-023).
+The judges never learn which strategy produced an answer or which pages the
+dataset and citations name. They see the question, the reference answer, the
+answer, and each verified citation's quote and cited passage. The run records
+that input verbatim with the raw output so each judgement can be audited (D-023).
 """
 
 from __future__ import annotations
@@ -27,6 +26,7 @@ import math
 import os
 import re
 import statistics
+import sys
 import time
 from collections.abc import Iterator, Mapping, Sequence
 from contextvars import ContextVar
@@ -52,6 +52,12 @@ from glossator.answer.config import MISTRAL_MEDIUM_3_5, PRICES, AnswerConfig, Mo
 from glossator.answer.llm import LLMCall, MistralLLM
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.answer.service import STRATEGIES, ask, build_client
+from glossator.eval.agreement import (
+    CorrectnessLabel,
+    agreement_report,
+    labels_for_run,
+    read_human_labels,
+)
 from glossator.eval.charts import bar_chart, scatter
 from glossator.eval.datasets import (
     EvalQuestion,
@@ -63,6 +69,7 @@ from glossator.eval.datasets import (
 from glossator.eval.providers import (
     OpenAICompatibleProvider,
     ProviderCallError,
+    ProviderName,
     TokenUsage,
     call_scope,
     candidate_scope,
@@ -85,6 +92,7 @@ DEFAULT_GENERATION_MODEL = "ministral-14b-2512"
 zero requests per minute, which no backoff can get through."""
 
 DEFAULT_JUDGE_MODEL = "glm-5.3"
+DEFAULT_JUDGE_MODELS = "zai:glm-5.3"
 
 REFERENCE_PRICING_MODEL = MISTRAL_MEDIUM_3_5
 """Prices the recorded tokens a second time, at the shipped model's rates (D-017),
@@ -113,11 +121,11 @@ QUESTION_TYPES: tuple[str, ...] = tuple(question_type.value for question_type in
 # with every run and a rewording is a new version, not an edit.
 # --------------------------------------------------------------------------- #
 
-JUDGE_VERSION = "answer-judge/v1"
+JUDGE_VERSION = "answer-judge/v2"
 
 JUDGE_SYSTEM = """You grade answers produced by a documentation question-answering system over Mistral AI's platform documentation.
 
-You are given the question, a short reference answer written by the dataset, the gold source URLs, the answer under test, and the citations the answer carries. Each citation shows the passage it points at, quoted verbatim from the documentation the system read. You have no other access to the documentation: if a claim is not supported by a passage shown to you, it is not supported.
+You are given the question, a short reference answer written by the dataset, the answer under test, and the citations the answer carries. Each citation shows its number, the quote used in the answer, and the cited passage verbatim. Page titles, URLs, and other page identifiers are withheld. You have no other access to the documentation: if a claim is not supported by a passage shown to you, it is not supported.
 
 Grade three things, independently.
 
@@ -135,9 +143,6 @@ JUDGE_USER = """QUESTION
 REFERENCE ANSWER
 {reference_answer}
 
-GOLD SOURCES
-{gold_urls}
-
 ANSWER UNDER TEST
 {answer_markdown}
 
@@ -146,7 +151,7 @@ CITATIONS IN THE ANSWER UNDER TEST
 
 JUDGE_NO_CITATIONS = "(the answer carries no verified citation)"
 
-JUDGE_CITATION = """[{n}] {citation_url}
+JUDGE_CITATION = """[{n}]
 quoted by the answer: "{quote}"
 passage the citation points at, verbatim:
 {source_text}"""
@@ -210,7 +215,6 @@ class JudgedCitation(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     n: int
-    citation_url: str
     quote: str
     source_text: str
 
@@ -222,7 +226,6 @@ class JudgeInput(BaseModel):
 
     question: str
     reference_answer: str
-    gold_urls: list[str]
     answer_markdown: str
     citations: list[JudgedCitation]
 
@@ -230,7 +233,6 @@ class JudgeInput(BaseModel):
         citations = "\n\n".join(
             JUDGE_CITATION.format(
                 n=citation.n,
-                citation_url=citation.citation_url,
                 quote=citation.quote,
                 source_text=citation.source_text,
             )
@@ -239,7 +241,6 @@ class JudgeInput(BaseModel):
         return JUDGE_USER.format(
             question=self.question,
             reference_answer=self.reference_answer,
-            gold_urls="\n".join(self.gold_urls) or "(none: the documentation does not cover this)",
             answer_markdown=self.answer_markdown or "(the system produced no text)",
             citations=citations or JUDGE_NO_CITATIONS,
         )
@@ -251,6 +252,7 @@ class JudgeRecord(BaseModel):
     model_config = ConfigDict(frozen=True, protected_namespaces=())
 
     model: str
+    provider: ProviderName | None = None
     prompt_version: str
     input_text: str
     raw_output: str = ""
@@ -258,6 +260,42 @@ class JudgeRecord(BaseModel):
     error: str | None = None
     latency_ms: float = 0.0
     usage: TokenUsage = TokenUsage()
+
+
+class JudgeModel(BaseModel):
+    """A provider-qualified judge model from the command line."""
+
+    model_config = ConfigDict(frozen=True)
+
+    provider: ProviderName
+    model: str
+
+    @property
+    def identifier(self) -> str:
+        return f"{self.provider}:{self.model}"
+
+
+def parse_judge_models(value: str) -> list[JudgeModel]:
+    """Parse a comma-separated list and preserve its primary-first order."""
+    judges: list[JudgeModel] = []
+    seen: set[str] = set()
+    for item in value.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        provider, separator, model = item.partition(":")
+        if separator != ":" or provider not in ("zai", "mistral") or not model.strip():
+            raise ValueError(
+                f"invalid judge model {item!r}; expected provider:model with provider zai or mistral"
+            )
+        judge = JudgeModel(provider=provider, model=model.strip())  # type: ignore[arg-type]
+        if judge.identifier in seen:
+            raise ValueError(f"duplicate judge model {judge.identifier}")
+        judges.append(judge)
+        seen.add(judge.identifier)
+    if not judges:
+        raise ValueError("at least one judge model is required")
+    return judges
 
 
 class QuestionRecord(BaseModel):
@@ -289,6 +327,8 @@ class QuestionRecord(BaseModel):
     cost_usd: float = 0.0
     error: str | None = None
     judge: JudgeRecord | None = None
+    judges: dict[str, JudgeRecord] = Field(default_factory=dict)
+    judges_v1: dict[str, JudgeRecord] = Field(default_factory=dict)
 
     @property
     def key(self) -> tuple[str, str]:
@@ -333,16 +373,31 @@ def source_texts(trace: Trace | None) -> dict[int, str]:
 
 def judge_input(question: EvalQuestion, record: QuestionRecord) -> JudgeInput:
     """What the judge is shown for one answer."""
-    passages = source_texts(record.trace)
-    return JudgeInput(
+    return _judge_input(
         question=question.question,
         reference_answer=question.reference_answer,
-        gold_urls=[gold.url for gold in question.gold],
+        record=record,
+    )
+
+
+def judge_input_from_record(record: QuestionRecord) -> JudgeInput:
+    """Reconstruct judge input without reading or changing the answer dataset."""
+    return _judge_input(
+        question=record.question,
+        reference_answer=record.reference_answer,
+        record=record,
+    )
+
+
+def _judge_input(*, question: str, reference_answer: str, record: QuestionRecord) -> JudgeInput:
+    passages = source_texts(record.trace)
+    return JudgeInput(
+        question=question,
+        reference_answer=reference_answer,
         answer_markdown=record.answer_markdown,
         citations=[
             JudgedCitation(
                 n=citation.n,
-                citation_url=citation.citation_url,
                 quote=citation.quote,
                 source_text=passages.get(citation.n, "(the passage was not recorded)"),
             )
@@ -593,7 +648,7 @@ def judge_spend(records: Sequence[QuestionRecord]) -> dict[str, Any]:
     month's plan, not about the work, and a Mistral judge would be priced from
     exactly these numbers.
     """
-    judged = [record.judge for record in records if record.judge is not None]
+    judged = [judgement for record in records for judgement in _current_judgements(record)]
     prompt = sum(judgement.usage.prompt_tokens for judgement in judged)
     completion = sum(judgement.usage.completion_tokens for judgement in judged)
     reasoning = sum(judgement.usage.reasoning_tokens for judgement in judged)
@@ -611,6 +666,44 @@ def judge_spend(records: Sequence[QuestionRecord]) -> dict[str, Any]:
         )
         / 1_000_000,
     }
+
+
+def _current_judgements(record: QuestionRecord) -> list[JudgeRecord]:
+    """Current prompt-version judgements, without counting the primary twice."""
+    if record.judges:
+        return list(record.judges.values())
+    return [record.judge] if record.judge is not None else []
+
+
+def _agreement_metrics(
+    records: Sequence[QuestionRecord], config: Mapping[str, Any]
+) -> dict[str, object]:
+    configured = config.get("judge_models") or []
+    judges: dict[str, dict[tuple[str, str], CorrectnessLabel]] = {
+        str(name): {} for name in configured if name
+    }
+    for record in records:
+        item = record.key
+        current: list[tuple[str, JudgeRecord]]
+        if record.judges:
+            current = list(record.judges.items())
+        elif record.judge is not None:
+            provider = record.judge.provider or config.get("judge_provider") or "zai"
+            current = [(f"{provider}:{record.judge.model}", record.judge)]
+        else:
+            current = []
+        for name, judgement in current:
+            if judgement.verdict is not None:
+                judges.setdefault(name, {})[item] = judgement.verdict.correctness
+
+    human: dict[tuple[str, str], CorrectnessLabel] | None = None
+    labels_path = config.get("labels")
+    if labels_path:
+        labels = read_human_labels(Path(str(labels_path)))
+        run_path = Path(str(config.get("run_dir", "")))
+        run_names = [str(run_path), run_path.name, str(config.get("name", ""))]
+        human = labels_for_run(labels, run_names)
+    return agreement_report(judges, human)
 
 
 def aggregate(records: Sequence[QuestionRecord], config: Mapping[str, Any]) -> dict[str, Any]:
@@ -639,6 +732,8 @@ def aggregate(records: Sequence[QuestionRecord], config: Mapping[str, Any]) -> d
         "kind": "answer_eval",
         "model": config.get("model"),
         "judge_model": config.get("judge_model"),
+        "judge_models": config.get("judge_models")
+        or ([config.get("judge_model")] if config.get("judge_model") else []),
         "variant": config.get("variant"),
         "dataset": config.get("dataset"),
         "dataset_sha256": config.get("dataset_sha256"),
@@ -649,6 +744,7 @@ def aggregate(records: Sequence[QuestionRecord], config: Mapping[str, Any]) -> d
         "by_strategy": by_strategy,
         "totals": cell(list(records)),
         "winners": winners(by_strategy),
+        "agreement": _agreement_metrics(records, config),
     }
 
 
@@ -747,6 +843,15 @@ class RunDirectory:
     def record(self, record: QuestionRecord) -> None:
         self.records.append(record)
         self._append(self.records_path, json.loads(record.model_dump_json()))
+
+    def replace_records(self, records: Sequence[QuestionRecord]) -> None:
+        """Checkpoint rewritten records atomically after re-judging."""
+        temporary = self.records_path.with_suffix(f".{os.getpid()}.tmp")
+        with temporary.open("w") as handle:
+            for record in records:
+                handle.write(record.model_dump_json() + "\n")
+        temporary.replace(self.records_path)
+        self.records = list(records)
 
     def append_call(self, source: str, row: Mapping[str, Any]) -> None:
         """One line in `calls.jsonl`, tagged with which client made the call."""
@@ -949,14 +1054,13 @@ async def answer_one(
 
 
 async def judge_one(
-    question: EvalQuestion,
     record: QuestionRecord,
     *,
     provider: OpenAICompatibleProvider,
     model: str,
 ) -> JudgeRecord:
     """Grade one answer. The judge never learns which strategy wrote it."""
-    payload = judge_input(question, record)
+    payload = judge_input_from_record(record)
     rendered = payload.render()
     started = time.perf_counter()
     with candidate_scope(f"{record.question_id}:{record.strategy}"), call_scope("judge"):
@@ -970,11 +1074,12 @@ async def judge_one(
                 temperature=JUDGE_TEMPERATURE,
                 max_tokens=JUDGE_MAX_TOKENS,
                 response_schema=JudgeVerdict,
-                thinking="disabled",
+                thinking="disabled" if provider.name == "zai" else None,
             )
         except ProviderCallError as error:
             return JudgeRecord(
                 model=model,
+                provider=provider.name,
                 prompt_version=JUDGE_VERSION,
                 input_text=rendered,
                 error=str(error),
@@ -983,6 +1088,7 @@ async def judge_one(
     verdict = completion.parsed if isinstance(completion.parsed, JudgeVerdict) else None
     return JudgeRecord(
         model=model,
+        provider=provider.name,
         prompt_version=JUDGE_VERSION,
         input_text=rendered,
         raw_output=completion.text,
@@ -993,13 +1099,45 @@ async def judge_one(
     )
 
 
+def make_judge_providers(
+    judges: Sequence[JudgeModel], run_dir: RunDirectory
+) -> dict[ProviderName, OpenAICompatibleProvider]:
+    """One shared, provider-throttled client for all configured judges."""
+    providers: dict[ProviderName, OpenAICompatibleProvider] = {}
+    for name in {judge.provider for judge in judges}:
+        providers[name] = OpenAICompatibleProvider(
+            name,
+            asyncio.Semaphore(4 if name == "zai" else 1),
+            caller_tag="eval.answer_eval",
+            recorder=JudgeCallRecorder(run_dir),
+            seed=0,
+            minimum_interval=1.05 if name == "mistral" else 0.0,
+        )
+    return providers
+
+
+async def judge_with_models(
+    record: QuestionRecord,
+    judges: Sequence[JudgeModel],
+    providers: Mapping[ProviderName, OpenAICompatibleProvider],
+) -> dict[str, JudgeRecord]:
+    """Judge one recorded answer with every requested model."""
+    results = await asyncio.gather(
+        *(
+            judge_one(record, provider=providers[judge.provider], model=judge.model)
+            for judge in judges
+        )
+    )
+    return {judge.identifier: result for judge, result in zip(judges, results, strict=True)}
+
+
 async def run(
     questions: Sequence[EvalQuestion],
     *,
     strategies: Sequence[str],
     variant: str,
     model: str,
-    judge_model: str | None,
+    judge_models: Sequence[JudgeModel],
     run_dir: RunDirectory,
     settings: AnswerConfig,
     quota_ceiling: int = QUOTA_CEILING_PERCENT,
@@ -1010,7 +1148,6 @@ async def run(
     Questions run one at a time: the Mistral account is on the free tier, where
     concurrency buys 429s rather than throughput (D-028).
     """
-    by_id = {question.id: question for question in questions}
     done = run_dir.done
     pending = [
         (question, strategy)
@@ -1019,24 +1156,14 @@ async def run(
         if (question.id, strategy) not in done
     ]
     logger.info("Answer eval", pending=len(pending), recorded=len(done), run_dir=str(run_dir.path))
-    if judge_model:
+    if any(judge.provider == "zai" for judge in judge_models):
         await wait_for_quota(quota_ceiling)
 
     engine = SearchEngine(
         RetrievalConfig.shipped(variant=variant, top_k=settings.top_k, rerank=rerank)
     )
     llm = MistralLLM(settings, client=build_client(), recorder=AnswerCallRecorder(run_dir))
-    provider = (
-        OpenAICompatibleProvider(
-            "zai",
-            asyncio.Semaphore(1),
-            caller_tag="eval.answer_eval",
-            recorder=JudgeCallRecorder(run_dir),
-            seed=0,
-        )
-        if judge_model
-        else None
-    )
+    providers = make_judge_providers(judge_models, run_dir)
     try:
         for question, strategy in pending:
             record = await answer_one(
@@ -1048,15 +1175,14 @@ async def run(
                 engine=engine,
                 llm=llm,
             )
-            if provider is not None and judge_model and record.error is None:
-                judgement = await judge_one(
-                    by_id[question.id], record, provider=provider, model=judge_model
+            if judge_models and record.error is None:
+                judgements = await judge_with_models(record, judge_models, providers)
+                record = record.model_copy(
+                    update={"judge": judgements[judge_models[0].identifier], "judges": judgements}
                 )
-                record = record.model_copy(update={"judge": judgement})
             run_dir.record(record)
     finally:
-        if provider is not None:
-            await provider.aclose()
+        await asyncio.gather(*(provider.aclose() for provider in providers.values()))
     return run_dir.finalize(status="complete", error=None)
 
 
@@ -1104,7 +1230,7 @@ FAMILIES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ),
     (
         "Judged quality",
-        "GLM's verdicts (D-021), reported beside the deterministic numbers and "
+        "The primary judge's verdicts (D-021), reported beside the deterministic numbers and "
         "never merged into them. Correctness scores correct as 1, partial as 0.5, "
         "wrong as 0. Groundedness is the fraction of the answer's factual claims "
         "the cited passages support. Citation relevance is the fraction of "
@@ -1198,6 +1324,93 @@ def _trade_off(metrics: Mapping[str, Any]) -> str:
     )
 
 
+def _agreement_section(metrics: Mapping[str, Any]) -> str:
+    agreement = metrics.get("agreement") or {}
+    pairwise = agreement.get("pairwise") or []
+    kappa_rows = [
+        "| first judge | second judge | answers | quadratic-weighted kappa | exact agreement |",
+        "|---|---|---:|---:|---:|",
+    ]
+    for row in pairwise:
+        kappa_rows.append(
+            f"| `{row['first']}` | `{row['second']}` | {row['items']} | "
+            f"{_format(row['quadratic_weighted_kappa'], 'agreement')} | "
+            f"{_format(row['percentage_agreement'], 'agreement')} |"
+        )
+    if not pairwise:
+        kappa_rows.append("| -- | -- | 0 | -- | -- |")
+
+    alpha_rows = [
+        "| raters | ordinal alpha | pairwise exact agreement |",
+        "|---|---:|---:|",
+        f"| configured judges | {_format(agreement.get('krippendorff_alpha_ordinal'), 'agreement')} | "
+        f"{_format(agreement.get('percentage_agreement'), 'agreement')} |",
+    ]
+    human = agreement.get("human")
+    if human:
+        alpha_rows.append(
+            f"| configured judges and human | "
+            f"{_format(human.get('krippendorff_alpha_ordinal'), 'agreement')} | "
+            f"{_format(human.get('percentage_agreement'), 'agreement')} |"
+        )
+
+    means = [
+        "| judge | answers | mean correctness | human-labeled answers |",
+        "|---|---:|---:|---:|",
+    ]
+    for name, row in (agreement.get("per_judge") or {}).items():
+        means.append(
+            f"| `{name}` | {row['items']} | {_format(row['mean_correctness'], 'agreement')} | "
+            f"{row.get('human_items', '--')} |"
+        )
+
+    human_section = ""
+    if human:
+        rows = [
+            "| judge | answers | quadratic-weighted kappa | exact agreement |",
+            "|---|---:|---:|---:|",
+        ]
+        for row in human.get("pairwise") or []:
+            rows.append(
+                f"| `{row['judge']}` | {row['items']} | "
+                f"{_format(row['quadratic_weighted_kappa'], 'agreement')} | "
+                f"{_format(row['percentage_agreement'], 'agreement')} |"
+            )
+        matrices = []
+        for name, judge_row in (agreement.get("per_judge") or {}).items():
+            matrix = judge_row.get("confusion_matrix_human_rows")
+            if not matrix:
+                continue
+            matrix_rows = [
+                "| human \\ judge | wrong | partial | correct |",
+                "|---|---:|---:|---:|",
+            ]
+            for label in ("wrong", "partial", "correct"):
+                matrix_rows.append(
+                    f"| {label} | {matrix[label]['wrong']} | {matrix[label]['partial']} | "
+                    f"{matrix[label]['correct']} |"
+                )
+            matrices.append(f"#### `{name}` confusion matrix\n\n" + "\n".join(matrix_rows))
+        human_section = (
+            "\n\n### Against human labels\n\n"
+            + "\n".join(rows)
+            + ("\n\n" + "\n\n".join(matrices) if matrices else "")
+        )
+
+    return (
+        "## Agreement\n\n"
+        "Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. "
+        "Kappa uses quadratic weights. Exact agreement requires the same label.\n\n"
+        "### Judge pairs\n\n"
+        + "\n".join(kappa_rows)
+        + "\n\n### Krippendorff's alpha\n\n"
+        + "\n".join(alpha_rows)
+        + "\n\n### Judge means\n\n"
+        + "\n".join(means)
+        + human_section
+    )
+
+
 def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     """The run README (D-023). Every sentence in it is computed from the records."""
     totals = metrics["totals"]
@@ -1212,7 +1425,7 @@ def render_readme(config: Mapping[str, Any], metrics: Mapping[str, Any]) -> str:
     )
     judged = (
         f"{totals['judged']} of {metrics['records']} answers were judged by "
-        f"`{metrics['judge_model']}` with thinking disabled."
+        f"the primary judge `{metrics['judge_model']}`."
         if metrics.get("judge_model")
         else "The judge was skipped in this run, so only the deterministic tables below are filled."
     )
@@ -1263,13 +1476,12 @@ depends on a model's opinion, so none of them moves when a judge is swapped.
 The judge answers what code cannot: whether the answer is *right*, whether its
 claims are actually in the passages it cites, and whether each citation supports
 the sentence it hangs on. It is shown the question, the reference answer, the
-gold URLs, the answer and the cited passages verbatim -- and never which strategy
-wrote the answer, so it cannot prefer one.
+answer and the cited passages verbatim. It sees no URL, page identifier, or strategy.
 
 ## Configuration
 
 - Generation model: `{metrics["model"]}`
-- Judge model: `{metrics.get("judge_model") or "none (--skip-judge)"}` ({JUDGE_VERSION})
+- Judge models: {", ".join(f"`{model}`" for model in metrics.get("judge_models") or []) or "none (--skip-judge)"}; primary first ({JUDGE_VERSION})
 - Index variant: `{metrics["variant"]}`, top_k {config.get("top_k")}, rerank {config.get("rerank", "unknown")} ({config.get("rerank_model") or "off"}), context budget \
 {config.get("context_token_budget")} tokens
 - Non-English questions rendered in English for retrieval: \
@@ -1287,6 +1499,8 @@ columns were computed with.{notes_section}
 {judged} {totals["errors"]} answer(s) ended in an error and are recorded with it.
 
 {(chr(10) * 2).join(family_sections)}
+
+{_agreement_section(metrics)}
 
 ## Cost and latency
 
@@ -1432,6 +1646,88 @@ def regenerate(run_dir: Path) -> dict[str, Any]:
     )
 
 
+def _archive_old_judges(record: QuestionRecord, config: Mapping[str, Any]) -> QuestionRecord:
+    archived = dict(record.judges_v1)
+    for identifier, judgement in record.judges.items():
+        if judgement.prompt_version != JUDGE_VERSION:
+            archived.setdefault(identifier, judgement)
+    if record.judge is not None and record.judge.prompt_version != JUDGE_VERSION:
+        provider = record.judge.provider or config.get("judge_provider") or "zai"
+        archived.setdefault(f"{provider}:{record.judge.model}", record.judge)
+    current = {
+        identifier: judgement
+        for identifier, judgement in record.judges.items()
+        if judgement.prompt_version == JUDGE_VERSION
+    }
+    primary = (
+        record.judge if record.judge and record.judge.prompt_version == JUDGE_VERSION else None
+    )
+    return record.model_copy(update={"judge": primary, "judges": current, "judges_v1": archived})
+
+
+async def _rejudge_record(
+    record: QuestionRecord,
+    judges: Sequence[JudgeModel],
+    providers: Mapping[ProviderName, OpenAICompatibleProvider],
+) -> QuestionRecord:
+    judgements = dict(record.judges)
+    missing = [judge for judge in judges if judge.identifier not in judgements]
+    if missing:
+        judgements.update(await judge_with_models(record, missing, providers))
+    return record.model_copy(
+        update={"judge": judgements[judges[0].identifier], "judges": judgements}
+    )
+
+
+async def rejudge(
+    run_path: Path,
+    *,
+    judge_models: Sequence[JudgeModel],
+    labels: Path | None = None,
+    quota_ceiling: int = QUOTA_CEILING_PERCENT,
+) -> dict[str, Any]:
+    """Replace a run's current judgements without changing any answer."""
+    if not (run_path / "records.jsonl").is_file():
+        raise ValueError(f"run has no records.jsonl: {run_path}")
+    config = json.loads((run_path / "config.json").read_text())
+    archive_config = dict(config)
+    config.update(
+        {
+            "judge_model": judge_models[0].identifier,
+            "judge_models": [judge.identifier for judge in judge_models],
+            "judge_prompt_version": JUDGE_VERSION,
+            "judge_prompt_hashes": JUDGE_PROMPT_HASHES,
+            "judge_temperature": JUDGE_TEMPERATURE,
+            "judge_max_tokens": JUDGE_MAX_TOKENS,
+            "judge_thinking": {
+                judge.identifier: "disabled" if judge.provider == "zai" else None
+                for judge in judge_models
+            },
+            "judge_provider": None,
+            "labels": str(labels) if labels is not None else config.get("labels"),
+        }
+    )
+    run_dir = RunDirectory.open(run_path, config)
+    records = [_archive_old_judges(record, archive_config) for record in run_dir.records]
+    if any(judge.provider == "zai" for judge in judge_models):
+        await wait_for_quota(quota_ceiling)
+    providers = make_judge_providers(judge_models, run_dir)
+    try:
+        for start in range(0, len(records), 4):
+            stop = min(start + 4, len(records))
+            records[start:stop] = await asyncio.gather(
+                *(
+                    _rejudge_record(record, judge_models, providers)
+                    for record in records[start:stop]
+                )
+            )
+            run_dir.replace_records(records)
+            logger.info("Re-judge checkpoint", run=str(run_path), judged=stop, total=len(records))
+    finally:
+        await asyncio.gather(*(provider.aclose() for provider in providers.values()))
+    return run_dir.finalize(status="complete", error=None)
+
+
 # --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
@@ -1456,8 +1752,14 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--seed", type=int, default=0, help="Seed for --limit's sampler")
     parser.add_argument("--model", default=DEFAULT_GENERATION_MODEL)
-    parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
+    parser.add_argument(
+        "--judge-models",
+        default=DEFAULT_JUDGE_MODELS,
+        help="Comma-separated provider-qualified judge models; the first is primary",
+    )
+    parser.add_argument("--judge-model", help=argparse.SUPPRESS)
     parser.add_argument("--skip-judge", action="store_true")
+    parser.add_argument("--labels", type=Path, help="Human correctness labels as JSONL")
     parser.add_argument("--top-k", type=int, default=AnswerConfig().top_k)
     parser.add_argument(
         "--no-translate",
@@ -1491,6 +1793,20 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _parse_rejudge_args(argv: Sequence[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Judge the stored answers in an existing run")
+    parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--judge-models", required=True)
+    parser.add_argument("--labels", type=Path)
+    parser.add_argument(
+        "--quota-ceiling",
+        type=int,
+        default=QUOTA_CEILING_PERCENT,
+        help="Pause before judging while the z.ai token window is this full",
+    )
+    return parser.parse_args(argv)
+
+
 async def _run(args: argparse.Namespace) -> None:
     strategies = [name.strip() for name in args.strategies.split(",") if name.strip()]
     unknown = sorted(set(strategies) - set(STRATEGIES))
@@ -1506,7 +1822,17 @@ async def _run(args: argparse.Namespace) -> None:
         translate_for_retrieval=args.translate_for_retrieval,
         prices=EVAL_PRICES,
     )
-    judge_model = None if args.skip_judge else args.judge_model
+    try:
+        judge_models = (
+            []
+            if args.skip_judge
+            else parse_judge_models(
+                f"zai:{args.judge_model}" if args.judge_model else args.judge_models
+            )
+        )
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
+    primary_judge = judge_models[0].identifier if judge_models else None
 
     run_path = resolve_run_directory(args.name, root=args.runs_root)
     config: dict[str, Any] = {
@@ -1521,13 +1847,18 @@ async def _run(args: argparse.Namespace) -> None:
         "variant": args.variant,
         "strategies": strategies,
         "model": args.model,
-        "judge_model": judge_model,
+        "judge_model": primary_judge,
+        "judge_models": [judge.identifier for judge in judge_models],
         "judge_prompt_version": JUDGE_VERSION,
         "judge_prompt_hashes": JUDGE_PROMPT_HASHES,
         "judge_temperature": JUDGE_TEMPERATURE,
         "judge_max_tokens": JUDGE_MAX_TOKENS,
-        "judge_thinking": "disabled",
-        "judge_provider": "zai",
+        "judge_thinking": {
+            judge.identifier: "disabled" if judge.provider == "zai" else None
+            for judge in judge_models
+        },
+        "judge_provider": None,
+        "labels": str(args.labels) if args.labels else None,
         "top_k": settings.top_k,
         "rerank": args.rerank,
         "translate_for_retrieval": settings.translate_for_retrieval,
@@ -1545,7 +1876,7 @@ async def _run(args: argparse.Namespace) -> None:
             strategies=strategies,
             variant=args.variant,
             model=args.model,
-            judge_model=judge_model,
+            judge_models=judge_models,
             run_dir=run_dir,
             settings=settings,
             quota_ceiling=args.quota_ceiling,
@@ -1574,6 +1905,32 @@ async def _run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     load_dotenv()
+    if len(sys.argv) > 1 and sys.argv[1] == "rejudge":
+        args = _parse_rejudge_args(sys.argv[2:])
+        try:
+            judges = parse_judge_models(args.judge_models)
+        except ValueError as error:
+            raise SystemExit(str(error)) from error
+        metrics = asyncio.run(
+            rejudge(
+                args.run,
+                judge_models=judges,
+                labels=args.labels,
+                quota_ceiling=args.quota_ceiling,
+            )
+        )
+        print(
+            json.dumps(
+                {
+                    "run_dir": str(args.run),
+                    "records": metrics["records"],
+                    "judge_models": metrics["judge_models"],
+                    "judge_calls": metrics["totals"]["judge_calls"],
+                },
+                indent=2,
+            )
+        )
+        return
     asyncio.run(_run(_parse_args()))
 
 

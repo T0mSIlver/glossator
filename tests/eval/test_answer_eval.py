@@ -30,8 +30,10 @@ from glossator.eval.answer_eval import (
     aggregate,
     cell,
     judge_input,
+    parse_judge_models,
     question_metrics,
     regenerate,
+    rejudge,
     render_readme,
     resolve_run_directory,
     source_texts,
@@ -478,6 +480,8 @@ def test_the_judge_sees_the_passage_behind_each_citation_and_no_strategy_name() 
     assert "a JSON Schema description" in rendered
     assert "single_pass" not in rendered
     assert "ministral" not in rendered
+    assert PAGE not in rendered
+    assert "GOLD SOURCES" not in rendered
 
 
 def test_an_answer_with_no_verified_citation_says_so_to_the_judge() -> None:
@@ -485,12 +489,28 @@ def test_an_answer_with_no_verified_citation_says_so_to_the_judge() -> None:
     assert "no verified citation" in payload.render()
 
 
-def test_an_unanswerable_question_tells_the_judge_the_corpus_has_no_gold_source() -> None:
+def test_an_unanswerable_question_does_not_reveal_that_gold_has_no_source() -> None:
     payload = judge_input(
         question(QuestionType.UNANSWERABLE),
         record(question_type="unanswerable", gold_urls=[], gold_anchors=[], insufficient=True),
     )
-    assert "the documentation does not cover this" in payload.render()
+    rendered = payload.render()
+    assert "GOLD SOURCES" not in rendered
+    assert "documentation does not cover this" not in rendered
+
+
+def test_provider_qualified_judge_models_keep_the_primary_first() -> None:
+    judges = parse_judge_models("zai:glm-5.3, mistral:ministral-14b-2512")
+    assert [judge.identifier for judge in judges] == [
+        "zai:glm-5.3",
+        "mistral:ministral-14b-2512",
+    ]
+
+
+@pytest.mark.parametrize("value", ["glm-5.3", "openai:gpt", "zai:", "zai:a,zai:a"])
+def test_invalid_or_duplicate_judge_models_are_rejected(value: str) -> None:
+    with pytest.raises(ValueError):
+        parse_judge_models(value)
 
 
 def test_a_verdict_wrapped_in_prose_and_a_fence_still_parses() -> None:
@@ -680,6 +700,51 @@ def test_a_run_directory_is_rebuilt_from_its_rows_alone(tmp_path: Path) -> None:
     assert metrics["records"] == 2
     assert "Answer evaluation" in (path / "README.md").read_text()
     assert metrics["by_strategy"]["single_pass"]["all"]["correctness"] == 1.0
+
+
+@pytest.mark.asyncio
+async def test_rejudge_keeps_answers_and_archives_the_old_judge(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "fixture-run"
+    run = RunDirectory.open(path, config_for(path))
+    original = record(
+        judge=verdict("wrong").model_copy(update={"prompt_version": "answer-judge/v1"})
+    )
+    run.record(original)
+
+    class FakeProvider:
+        async def aclose(self) -> None:
+            pass
+
+    async def no_quota_wait(_: int) -> None:
+        return None
+
+    async def fake_judges(
+        answer: QuestionRecord, judges: list[Any], providers: dict[str, Any]
+    ) -> dict[str, JudgeRecord]:
+        del answer, providers
+        return {
+            judge.identifier: verdict("correct").model_copy(
+                update={"model": judge.model, "provider": judge.provider}
+            )
+            for judge in judges
+        }
+
+    monkeypatch.setattr("glossator.eval.answer_eval.wait_for_quota", no_quota_wait)
+    monkeypatch.setattr(
+        "glossator.eval.answer_eval.make_judge_providers",
+        lambda judges, run_dir: {"zai": FakeProvider()},
+    )
+    monkeypatch.setattr("glossator.eval.answer_eval.judge_with_models", fake_judges)
+
+    metrics = await rejudge(path, judge_models=parse_judge_models("zai:new"))
+    rewritten = json.loads((path / "records.jsonl").read_text())
+    assert rewritten["answer_markdown"] == original.answer_markdown
+    assert rewritten["judges_v1"]["zai:glm-5.3"]["verdict"]["correctness"] == "wrong"
+    assert rewritten["judges"]["zai:new"]["verdict"]["correctness"] == "correct"
+    assert rewritten["judge"] == rewritten["judges"]["zai:new"]
+    assert metrics["agreement"]["per_judge"]["zai:new"]["mean_correctness"] == 1.0
 
 
 def test_make_eval_report_picks_the_renderer_from_the_run_itself(tmp_path: Path) -> None:
