@@ -299,7 +299,7 @@ def _instructions() -> str:
     )
 
 
-mcp: FastMCP = FastMCP("glossator", instructions=_instructions())
+mcp: FastMCP = FastMCP("mistral-docs", instructions=_instructions())
 
 
 class _ParamGuard(Middleware):

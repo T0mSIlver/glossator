@@ -198,7 +198,7 @@ text/event-stream"` for a `200` with the server's capabilities.
 **Claude Code.** Verified against `claude mcp add --help`:
 
 ```bash
-claude mcp add --transport http glossator https://glossator.example.com/mcp \
+claude mcp add --transport http mistral-docs https://glossator.example.com/mcp \
   --header "Authorization: Bearer <token>"
 claude mcp list
 ```
