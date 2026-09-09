@@ -34,7 +34,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from glossator.answer.config import AnswerConfig
 from glossator.answer.prompts import REPAIR_INSTRUCTION
-from glossator.clients import chat_reasoning_effort
+from glossator.clients import chat_reasoning_effort, chat_sampling
 
 logger = structlog.get_logger(__name__)
 
@@ -113,6 +113,7 @@ class LLMCall(BaseModel):
     of the record so a run on a server that ignores schemas says which mode its
     numbers were produced under (D-035c)."""
     reasoning_effort: str | None = None
+    top_p: float | None = None
     """The thinking setting sent with the request, or `None` when the parameter
     was not sent at all. D-023 wants it per call, not only per run: the operator
     exports it next to the run, so a run that changed it halfway would otherwise
@@ -225,10 +226,18 @@ class MistralLLM:
         purpose: str = "",
     ) -> Completion:
         """One completion, retried on transient failures and repaired once on bad JSON."""
+        sampling = chat_sampling()
+        wanted_tokens = max_tokens or self.config.max_tokens
         settings = _Settings(
             model=model or self.config.model,
-            temperature=self.config.temperature if temperature is None else temperature,
-            max_tokens=max_tokens or self.config.max_tokens,
+            temperature=float(
+                sampling.get(
+                    "temperature",
+                    self.config.temperature if temperature is None else temperature,
+                )
+            ),
+            top_p=sampling.get("top_p"),
+            max_tokens=max(wanted_tokens, int(sampling.get("min_tokens", 0))),
             tools=tools,
             tool_choice=tool_choice,
             response_schema=response_schema,
@@ -373,6 +382,7 @@ class _Settings(BaseModel):
     model: str
     temperature: float
     max_tokens: int
+    top_p: float | None
     tools: list[ToolSpec] | None
     tool_choice: str | None
     response_schema: type[BaseModel] | None
@@ -381,8 +391,13 @@ class _Settings(BaseModel):
     purpose: str
 
     def reasoning_kwargs(self) -> dict[str, Any]:
-        """``reasoning_effort`` for the SDK when the operator set it, else nothing."""
-        return {"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}
+        """``reasoning_effort`` and ``top_p`` for the SDK when the operator set them."""
+        out: dict[str, Any] = {}
+        if self.reasoning_effort:
+            out["reasoning_effort"] = self.reasoning_effort
+        if self.top_p is not None:
+            out["top_p"] = self.top_p
+        return out
 
     def response_format_payload(self) -> ResponseFormatTypedDict | None:
         if self.response_schema is None:
@@ -415,6 +430,7 @@ def _blank_call(messages: list[Message], settings: _Settings, attempt: int) -> L
             settings.response_format if settings.response_schema is not None else None
         ),
         reasoning_effort=settings.reasoning_effort,
+        top_p=settings.top_p,
     )
 
 

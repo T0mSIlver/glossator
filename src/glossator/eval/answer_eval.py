@@ -58,7 +58,7 @@ from glossator.answer.config import (
 from glossator.answer.llm import LLMCall, MistralLLM
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.answer.service import STRATEGIES, ask
-from glossator.clients import chat_client, chat_reasoning_effort, chat_server_url
+from glossator.clients import chat_client, chat_reasoning_effort, chat_sampling, chat_server_url
 from glossator.eval.agreement import (
     CorrectnessLabel,
     agreement_report,
@@ -2188,6 +2188,7 @@ async def _run(args: argparse.Namespace) -> None:
         "answer_config_overrides": overrides,
         "generation_server": chat_server_url(),
         "reasoning_effort": chat_reasoning_effort(),
+        "chat_sampling": chat_sampling(),
         "unpriced_models": sorted(UNPRICED_MODELS),
         "reference_pricing_model": REFERENCE_PRICING_MODEL,
         "notes": list(args.notes),

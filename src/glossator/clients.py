@@ -39,6 +39,32 @@ def chat_server_url() -> str | None:
     return os.environ.get(CHAT_SERVER_URL_VAR, "").strip() or None
 
 
+CHAT_SAMPLING_VAR = "GLOSSATOR_CHAT_SAMPLING"
+"""Sampling overrides for the local server, as ``key=value`` pairs separated by
+commas: ``temperature``, ``top_p`` and ``min_tokens`` (a floor on ``max_tokens``).
+A reasoning model behaves differently from the instruct model the pipeline was
+tuned on: its card asks for temperature 1, and its thinking needs token headroom,
+so a run on the local server sets these here instead of changing the shipped
+defaults. Unset means every call keeps the pipeline's own settings."""
+
+
+def chat_sampling() -> dict[str, float]:
+    """The sampling overrides in force, or an empty mapping."""
+    raw = os.environ.get(CHAT_SAMPLING_VAR, "").strip()
+    if not raw:
+        return {}
+    allowed = {"temperature", "top_p", "min_tokens"}
+    out: dict[str, float] = {}
+    for part in raw.split(","):
+        key, _, value = part.strip().partition("=")
+        if key not in allowed:
+            raise ValueError(
+                f"{CHAT_SAMPLING_VAR}: unknown key {key!r}; allowed: {sorted(allowed)}"
+            )
+        out[key] = float(value)
+    return out
+
+
 def chat_reasoning_effort() -> str | None:
     """The reasoning effort to send with chat calls, or ``None`` to send nothing."""
     return os.environ.get(CHAT_REASONING_EFFORT_VAR, "").strip() or None
@@ -78,9 +104,11 @@ def _api_key() -> str:
 __all__ = [
     "CHAT_API_KEY_VAR",
     "CHAT_REASONING_EFFORT_VAR",
+    "CHAT_SAMPLING_VAR",
     "CHAT_SERVER_URL_VAR",
     "chat_client",
     "chat_reasoning_effort",
+    "chat_sampling",
     "chat_server_url",
     "embedding_client",
 ]
