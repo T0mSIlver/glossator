@@ -10,6 +10,7 @@ from glossator.answer.citations import (
     mask_code,
     normalize,
     resolve,
+    strip_markers,
     unmatched,
     verify,
 )
@@ -139,6 +140,12 @@ def test_array_indexing_in_code_is_not_a_citation_marker() -> None:
 
 def test_an_inline_code_span_is_not_a_citation_marker() -> None:
     assert markers("Use `messages[2]` to reach it [1].") == [1]
+
+
+def test_stripping_a_prose_marker_keeps_the_same_marker_in_inline_code() -> None:
+    assert strip_markers("Stray [2], but `messages[2]` is code.", {2}) == (
+        "Stray , but `messages[2]` is code."
+    )
 
 
 def test_an_unclosed_code_fence_swallows_the_rest_of_the_text() -> None:

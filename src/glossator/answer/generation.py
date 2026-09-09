@@ -19,7 +19,9 @@ from glossator.answer.citations import (
     Trace,
     TracedSource,
     TraceEvent,
+    fabricated,
     resolve,
+    strip_markers,
     unmatched,
 )
 from glossator.answer.config import AnswerConfig
@@ -207,6 +209,12 @@ class AnswerRun:
         rejected: list[Citation],
         insufficient: bool,
     ) -> Answer:
+        unmatched_markers = unmatched(markdown, verified + rejected)
+        verified_numbers = {citation.n for citation in verified}
+        rejected_fabricated = {
+            citation.n for citation in fabricated(rejected) if citation.n not in verified_numbers
+        }
+        rendered_markdown = strip_markers(markdown, set(unmatched_markers) | rejected_fabricated)
         trace = Trace(
             strategy=self.strategy,
             variant=self.variant,
@@ -228,13 +236,13 @@ class AnswerRun:
             context_text=context.text,
             dropped_chunk_ids=list(context.dropped_chunk_ids),
             unverified_citations=rejected,
-            unmatched_markers=unmatched(markdown, verified + rejected),
+            unmatched_markers=unmatched_markers,
         )
         return Answer(
             question=question,
             strategy=self.strategy,
             model=config.model,
-            answer_markdown=markdown,
+            answer_markdown=rendered_markdown,
             citations=verified,
             insufficient_evidence=insufficient,
             trace=trace,
