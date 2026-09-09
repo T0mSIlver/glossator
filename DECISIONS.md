@@ -979,3 +979,23 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Facts.** The answer evaluation built its search engine without a recorder, so every listwise reranker call it made (one per single-pass question, one per loop round) was neither in `calls.jsonl` nor in the record's trace; only the retrieval grid recorded its reranker calls. That is why the recorded spend (2.81 USD across every recorded chat call, D-036b) sits well under the console's 7.04 EUR: roughly one reranker call of about five thousand tokens per generation call went unrecorded, on top of embeddings. The answers themselves were unaffected.
 
 **Decision.** The answer evaluation and the snapshot evaluation now share one recorder between the engine and the answer model, so reranker calls land in `calls.jsonl` beside generation calls. The evaluations already recorded keep their generation-only ledgers, stated as such; the console figure remains the number of record for spend, and the README says the recorded totals are a lower bound for runs before this date.
+
+---
+
+## D-021b · Forty human labels: the judges are stricter than the reader, so judged correctness is a floor
+
+**Status:** decided · 2026-09-09 · 40 answers from `2026-09-09-0312-dev60-rerank` (36 questions; 20 single pass, 20 search loop) labelled by hand on the annotation page, compared with the three blinded judges already stored in the run (judge prompt v2)
+
+| judge | agrees with the human | weighted kappa | judge said partial or wrong where the human said correct | judge said correct where the human did not |
+|---|---|---|---|---|
+| GLM 5.3 (primary) | 35 of 40 | 0.46 | 3 | 0 |
+| GLM 5.3 flash | 35 of 40 | 0.22 | 2 | 1 |
+| Ministral 3 14B | 32 of 40 | 0.45 | 6 | 0 |
+
+**Facts.**
+- The human labelled 38 correct, 1 partial, 1 wrong. With that little disagreement mass the kappas are unstable (two off-diagonal labels decide them) and the raw agreement is the readable number: the primary judge matches the reader on 35 of 40 and never calls an answer correct that the reader rejected. Every primary-judge disagreement is in the strict direction, so the correctness figures in this file understate what a reader accepts.
+- Ministral 14B is the strict outlier again (six "partial" on answers the reader accepted), consistent with D-021a.
+- The reader's notes carry product feedback the judges cannot give: answers that produce code or pseudo-code for a simple factual question ("this tendency ... is frustrating"); examples added where none were asked for; a list whose items come from different sources should carry one marker per item, or one marker for the whole list when it comes from one source; one reference answer judged wrong by the reader while the answer under test was right (dev-188), which is a generated-reference defect, not a pipeline defect.
+- On the one answer the reader called wrong (dev-052, search loop) the primary judge said partial and flash said correct; on the reader's partial (dev-052, single pass) all three judges said wrong. The two strategies disagree on that question in both directions, which is the kind of item the consumer evaluation should include.
+
+**Decisions.** GLM 5.3 stays the primary judge, and every correctness number it produces is read as a floor. The answer prompt gains two rules from the notes: answer a factual question in prose and add code only when the question asks how to do something in code; cite each list item that comes from its own source. Both go into the precision-and-refusal stream and are measured before they ship. The reference-answer defect rate is estimated on the same 40 items (1 in 40 here) and reported beside the judge study.

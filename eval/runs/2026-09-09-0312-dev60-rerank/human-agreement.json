@@ -1,0 +1,120 @@
+{
+ "pairwise": [
+  {
+   "first": "mistral:ministral-14b-2512",
+   "second": "zai:glm-5.3",
+   "items": 40,
+   "quadratic_weighted_kappa": 0.6816976127320955,
+   "percentage_agreement": 0.85
+  },
+  {
+   "first": "mistral:ministral-14b-2512",
+   "second": "zai:glm-5.3-flash",
+   "items": 40,
+   "quadratic_weighted_kappa": 0.6174863387978142,
+   "percentage_agreement": 0.825
+  },
+  {
+   "first": "zai:glm-5.3",
+   "second": "zai:glm-5.3-flash",
+   "items": 40,
+   "quadratic_weighted_kappa": 0.7354497354497354,
+   "percentage_agreement": 0.875
+  }
+ ],
+ "krippendorff_alpha_ordinal": 0.5017290660225442,
+ "percentage_agreement": 0.85,
+ "per_judge": {
+  "mistral:ministral-14b-2512": {
+   "items": 40,
+   "mean_correctness": 0.8875,
+   "human_items": 40,
+   "confusion_matrix_human_rows": {
+    "wrong": {
+     "wrong": 0,
+     "partial": 1,
+     "correct": 0
+    },
+    "partial": {
+     "wrong": 1,
+     "partial": 0,
+     "correct": 0
+    },
+    "correct": {
+     "wrong": 0,
+     "partial": 6,
+     "correct": 32
+    }
+   }
+  },
+  "zai:glm-5.3": {
+   "items": 40,
+   "mean_correctness": 0.9125,
+   "human_items": 40,
+   "confusion_matrix_human_rows": {
+    "wrong": {
+     "wrong": 0,
+     "partial": 1,
+     "correct": 0
+    },
+    "partial": {
+     "wrong": 1,
+     "partial": 0,
+     "correct": 0
+    },
+    "correct": {
+     "wrong": 1,
+     "partial": 2,
+     "correct": 35
+    }
+   }
+  },
+  "zai:glm-5.3-flash": {
+   "items": 40,
+   "mean_correctness": 0.925,
+   "human_items": 40,
+   "confusion_matrix_human_rows": {
+    "wrong": {
+     "wrong": 0,
+     "partial": 0,
+     "correct": 1
+    },
+    "partial": {
+     "wrong": 1,
+     "partial": 0,
+     "correct": 0
+    },
+    "correct": {
+     "wrong": 1,
+     "partial": 2,
+     "correct": 35
+    }
+   }
+  }
+ },
+ "human": {
+  "items": 40,
+  "pairwise": [
+   {
+    "judge": "mistral:ministral-14b-2512",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.4539249146757679,
+    "percentage_agreement": 0.8
+   },
+   {
+    "judge": "zai:glm-5.3",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.46488294314381273,
+    "percentage_agreement": 0.875
+   },
+   {
+    "judge": "zai:glm-5.3-flash",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.21985815602836867,
+    "percentage_agreement": 0.875
+   }
+  ],
+  "krippendorff_alpha_ordinal": 0.4540315015274742,
+  "percentage_agreement": 0.85
+ }
+}
