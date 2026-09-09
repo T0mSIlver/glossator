@@ -1,8 +1,8 @@
 """Rebuild a run's README and figures from its records.
 
 D-023 asks for charts rendered by a script so they can be regenerated. Several kinds
-of run write directories -- dataset generation, translation, answer evaluation,
-retrieval grids and floor calibration -- and
+of run write directories -- dataset generation, translation, perturbation, answer
+evaluation, retrieval grids and floor calibration -- and
 `make eval-report run=<dir>` has to work on either without being told which, so
 the run's own `config.json` names its kind and this module dispatches on it.
 """
@@ -15,11 +15,12 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from glossator.eval import answer_eval
+from glossator.eval import answer_eval, perturb
 from glossator.eval.charts import bar_chart
 from glossator.eval.run_records import regenerate
 
 ANSWER_EVAL_KIND = "answer_eval"
+PERTURB_KIND = "perturb"
 
 
 def render_figures(metrics: Mapping[str, Any], figures_dir: Path) -> list[Path]:
@@ -70,6 +71,10 @@ def rebuild(run_dir: Path) -> dict[str, Any]:
     kind = run_kind(run_dir)
     if kind == ANSWER_EVAL_KIND:
         return answer_eval.regenerate(run_dir)
+    if kind == PERTURB_KIND:
+        metrics = regenerate(run_dir)
+        perturb.render_figures(metrics, run_dir / "figures")
+        return metrics
     if kind not in ("generate", "translate"):
         from glossator.eval.retrieval_report import rebuild_by_kind
 

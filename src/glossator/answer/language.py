@@ -1,4 +1,4 @@
-"""The question's language, and the English wording retrieval is run with.
+"""The question's language, the wording retrieval is run with, and where it came from.
 
 The index holds English pages, so a French question meets a hybrid ranking whose
 BM25 half has no term in common with any page, and a reranker reading French
@@ -9,6 +9,14 @@ from the original question, so it comes back in the language it was asked in.
 Detection is deterministic and free: an English question must not pay a model
 call to learn that it is English. The rendering is one short structured call,
 recorded like every other call in the run.
+
+The rewrite is the second, optional step over the same seam. Every generated dev
+question was written from the section that answers it, so it already uses the
+documentation's words and a rewrite has nothing to fix (D-035); a question typed
+by a user does not, and reformulating it is the one thing the search loop does
+that a single pass cannot. The two steps compose in the order a badly worded
+French question needs them: render into English first, then reword into the
+documentation's vocabulary.
 """
 
 import re
@@ -19,7 +27,12 @@ from pydantic import BaseModel, ConfigDict
 
 from glossator.answer.config import AnswerConfig
 from glossator.answer.llm import LLM, Completion
-from glossator.answer.prompts import RETRIEVAL_QUERY_SYSTEM, RETRIEVAL_QUERY_USER
+from glossator.answer.prompts import (
+    RETRIEVAL_QUERY_SYSTEM,
+    RETRIEVAL_QUERY_USER,
+    RETRIEVAL_REWRITE_SYSTEM,
+    RETRIEVAL_REWRITE_USER,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -32,6 +45,17 @@ certainly not English, so it is rendered like any other non-English question."""
 RETRIEVAL_QUERY_PURPOSE = "retrieval_query"
 """The call kind a rendering is recorded under, prefixed by the strategy that
 asked for it."""
+
+RETRIEVAL_REWRITE_PURPOSE = "retrieval_rewrite"
+"""The call kind a rewrite is recorded under, likewise."""
+
+ORIGINAL = "original"
+RENDERING = "rendering"
+REWRITE = "rewrite"
+"""Where the text retrieval ran with came from: the question as asked, its
+English rendering, or the rewrite over whichever of those preceded it. Reported
+in the trace as ``retrieval_query_source``, because "the query was bad" and "the
+question was bad" are different findings."""
 
 # Elisions split apart, so "l'API" contributes the French marker "l" and the
 # identifier "api"; digits and underscores stay inside a token, so `safe_prompt`
@@ -84,11 +108,19 @@ class EnglishRendering(BaseModel):
     english_question: str
 
 
+class RetrievalRewriting(BaseModel):
+    """The structured output the rewrite prompt asks for."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    retrieval_query: str
+
+
 class RetrievalQuery(BaseModel):
     """What retrieval should be run with, and where it came from.
 
     ``question`` is always the original: generation reads it from here, so no
-    caller can accidentally answer the rendering instead of the question.
+    caller can accidentally answer the rewrite instead of the question.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid", arbitrary_types_allowed=True)
@@ -96,9 +128,11 @@ class RetrievalQuery(BaseModel):
     question: str
     language: str
     text: str
+    source: str = ORIGINAL
     completion: Completion | None = None
-    """The rendering call, for the run to charge and record. ``None`` when the
-    question needed no call."""
+    """The call this step made, for the run to charge and record. ``None`` when
+    the step needed no call. Each step returns its own call and the run charges
+    it before handing the query to the next, so no call is charged twice."""
 
     note: str | None = None
 
@@ -171,7 +205,57 @@ async def render_for_retrieval(
         question=question,
         language=language,
         text=rendering.english_question.strip(),
+        source=RENDERING,
         completion=completion,
+    )
+
+
+async def rewrite_for_retrieval(
+    query: RetrievalQuery,
+    *,
+    llm: LLM,
+    config: AnswerConfig,
+    purpose: str = RETRIEVAL_REWRITE_PURPOSE,
+) -> RetrievalQuery:
+    """The query again, in the documentation's vocabulary.
+
+    Takes the query the rendering settled rather than the raw question, so a
+    French question badly worded in French is rendered once and reworded once
+    instead of asking one call to do both. Off, or failing, the query passes
+    through unchanged: a rewrite is an improvement on a query that already
+    works, so a broken one must cost nothing but the call.
+    """
+    if not config.rewrite_for_retrieval:
+        return query
+
+    completion = await llm.complete(
+        [
+            {"role": "system", "content": RETRIEVAL_REWRITE_SYSTEM},
+            {"role": "user", "content": RETRIEVAL_REWRITE_USER.format(question=query.text)},
+        ],
+        temperature=0.0,
+        max_tokens=config.rewrite_max_tokens,
+        response_schema=RetrievalRewriting,
+        purpose=purpose,
+    )
+
+    rewriting = completion.parsed
+    if not isinstance(rewriting, RetrievalRewriting) or not rewriting.retrieval_query.strip():
+        logger.warning("Retrieval rewrite unusable, keeping the query as it was")
+        return query.model_copy(
+            update={
+                "completion": completion,
+                "note": "rewrite failed; retrieved with the query as it was",
+            }
+        )
+
+    return query.model_copy(
+        update={
+            "text": rewriting.retrieval_query.strip(),
+            "source": REWRITE,
+            "completion": completion,
+            "note": None,
+        }
     )
 
 
@@ -201,10 +285,16 @@ __all__ = [
     "FRENCH",
     "FRENCH_LETTERS",
     "FRENCH_MARKERS",
+    "ORIGINAL",
+    "RENDERING",
     "RETRIEVAL_QUERY_PURPOSE",
+    "RETRIEVAL_REWRITE_PURPOSE",
+    "REWRITE",
     "UNKNOWN",
     "EnglishRendering",
     "RetrievalQuery",
+    "RetrievalRewriting",
     "detect_language",
     "render_for_retrieval",
+    "rewrite_for_retrieval",
 ]

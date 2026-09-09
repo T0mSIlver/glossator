@@ -63,6 +63,38 @@ RETRIEVAL_QUERY_USER = """\
 Question: {question}
 """
 
+RETRIEVAL_REWRITE_VERSION = "retrieval-rewrite/v1"
+
+# A well-worded question is already a good query, so the instruction is to keep
+# it when it needs nothing: a rewrite that paraphrases every question spends a
+# call to move the wording away from the page as often as towards it.
+RETRIEVAL_REWRITE_SYSTEM = """\
+You turn a question into a search query for Mistral's documentation.
+
+The question may be badly worded: bare keywords, typos, a vague description from \
+someone who does not know the product's terms, a wrong term, or one line buried in a \
+paragraph of context.
+
+Rules:
+- Return one short query, at most twenty words, in the vocabulary the documentation \
+uses: product names, feature names, parameters, endpoints, error codes.
+- Keep what the question is asking for. Never answer it, never narrow it to one of \
+several things it asks about, and never add a topic it does not mention.
+- Correct obvious typos in product terms. When a term looks wrong for what is being \
+described, use the documented term the description points at.
+- Drop greetings, apologies and the story around the question; keep the request.
+- When the question is already worded the way the documentation would word it, return \
+it unchanged.
+- Write plain text: no markdown, no quotation marks around terms, no question mark \
+needed. The result is sent to a search index, not to a reader.
+
+Return JSON with retrieval_query.
+"""
+
+RETRIEVAL_REWRITE_USER = """\
+Question: {question}
+"""
+
 SEARCH_LOOP_VERSION = "search-loop/v2"
 
 # Mixedbread's search-agent work found that models retrieve better when they
@@ -146,6 +178,9 @@ __all__ = [
     "RETRIEVAL_QUERY_SYSTEM",
     "RETRIEVAL_QUERY_USER",
     "RETRIEVAL_QUERY_VERSION",
+    "RETRIEVAL_REWRITE_SYSTEM",
+    "RETRIEVAL_REWRITE_USER",
+    "RETRIEVAL_REWRITE_VERSION",
     "SEARCH_LOOP_SEED_USER",
     "SEARCH_LOOP_SYSTEM",
     "SEARCH_LOOP_VERSION",

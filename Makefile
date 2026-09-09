@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check dev-set eval-report eval-answers eval-retrieval calibrate-floors
+.PHONY: corpus-refresh corpus-check dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 
 ifneq (,$(wildcard .env))
@@ -85,8 +85,17 @@ test:
 dev-set:
 	uv run python -m glossator.eval.generate --corpus corpus/mistral-docs --out eval/dev.jsonl --n 300 --provider zai --model glm-5.3-flash --seed 0
 
+## Build badly worded variants of a stratified subset of a dataset
+## Usage: make dev-noisy [dataset=eval/dev.jsonl] [out=eval/dev-noisy.jsonl] [n=120] [seed=0]
+dev-noisy:
+	uv run python -m glossator.eval.perturb \
+		--dataset $(or $(dataset),eval/dev.jsonl) \
+		--out $(or $(out),eval/dev-noisy.jsonl) \
+		--n $(or $(n),120) --seed $(or $(seed),0) \
+		--provider zai --model glm-5.3 --name $(or $(name),dev-noisy)
+
 ## Score a question dataset through the answer strategies
-## Usage: make eval-answers dataset=eval/dev.jsonl name=answers-dev [strategies=single_pass,search_loop,outline] [variant=sec1024] [limit=N] [model=id] [judge_model=glm-5.3] [skip_judge=1]
+## Usage: make eval-answers dataset=eval/dev.jsonl name=answers-dev [strategies=single_pass,search_loop,outline] [variant=sec1024] [limit=N] [model=id] [judge_model=glm-5.3] [skip_judge=1] [rewrite=1]
 eval-answers:
 	uv run python -m glossator.eval.answer_eval --dataset $(dataset) --name $(name) \
 		$(if $(strategies),--strategies $(strategies),) \
@@ -95,6 +104,7 @@ eval-answers:
 		$(if $(model),--model $(model),) \
 		$(if $(judge_model),--judge-model $(judge_model),) \
 		$(if $(note),--note "$(note)",) \
+		$(if $(rewrite),--rewrite,) \
 		$(if $(skip_judge),--skip-judge,)
 ## Run every question through every retrieval configuration in the grid
 ## Usage: make eval-retrieval dataset=eval/dev.jsonl name=dev [configs=a,b] [limit=N]

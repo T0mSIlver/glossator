@@ -117,7 +117,11 @@ class Trace(BaseModel):
 
     retrieval_query: str = ""
     """The wording every retrieval in this run used: the question itself when it
-    was already English, its English rendering when it was not."""
+    was already English and needed no rewriting, its English rendering when it was
+    not, the rewrite when one was asked for."""
+
+    retrieval_query_source: str = "original"
+    """Which of those it was: `original`, `rendering` or `rewrite`."""
 
     rounds: int = 0
     events: list[TraceEvent] = []
@@ -137,9 +141,10 @@ class Trace(BaseModel):
             f"{len(self.events)} steps in {self.rounds} round(s)",
             f"{len(self.sources)} sources, {self.context_tokens} context tokens",
         ]
-        if self.question_language != "en":
+        if self.question_language != "en" or self.retrieval_query_source != "original":
             parts.append(
-                f"asked in {self.question_language}, retrieved as {self.retrieval_query!r}"
+                f"asked in {self.question_language}, retrieved as {self.retrieval_query!r} "
+                f"({self.retrieval_query_source})"
             )
         if self.dropped_chunk_ids:
             parts.append(f"{len(self.dropped_chunk_ids)} chunks over budget")
