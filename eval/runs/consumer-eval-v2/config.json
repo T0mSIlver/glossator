@@ -1,0 +1,77 @@
+{
+  "arm_tools": {
+    "A0": null,
+    "A1": "mistral_docs_search,mistral_docs_open_section,mistral_docs_step,mistral_docs_read_page,mistral_docs_find_on_page,mistral_docs_verify_quotes",
+    "A2": "mistral_docs_answer"
+  },
+  "arms": [
+    "A0",
+    "A1",
+    "A2"
+  ],
+  "consumer_harnesses": {
+    "claude-sonnet-low": "claude"
+  },
+  "consumer_models": {
+    "claude-sonnet-low": "sonnet"
+  },
+  "consumer_variants": {
+    "claude-sonnet-low": "low"
+  },
+  "consumers": [
+    "claude-sonnet-low"
+  ],
+  "fresh_count": 10,
+  "judge_model": null,
+  "judge_prompt_hashes": {
+    "judge_citation": "d1565f592953cb68",
+    "judge_system": "3b300bf0bcd8ea7f",
+    "judge_user": "4e976b80283c7257"
+  },
+  "judge_prompt_version": "answer-judge/v2",
+  "kind": "consumer_eval",
+  "mcp_server_name": "mistral-docs",
+  "mcp_urls": {
+    "A1": "http://127.0.0.1:8111/mcp",
+    "A2": "http://127.0.0.1:8102/mcp"
+  },
+  "mined_count": 20,
+  "name": "consumer-eval-v2",
+  "prompt_lead": "You are helping a developer with Mistral's platform. Answer precisely and cite the documentation pages you used with links.",
+  "question_count": 30,
+  "questions": [
+    "mined-040",
+    "mined-080",
+    "mined-084",
+    "mined-043",
+    "mined-058",
+    "mined-003",
+    "mined-052",
+    "mined-054",
+    "mined-082",
+    "mined-015",
+    "mined-070",
+    "mined-001",
+    "mined-021",
+    "mined-037",
+    "mined-011",
+    "mined-029",
+    "mined-048",
+    "mined-078",
+    "mined-045",
+    "mined-013",
+    "dev-044",
+    "dev-159",
+    "dev-196",
+    "dev-247",
+    "dev-277",
+    "dev-215",
+    "dev-222",
+    "dev-166",
+    "dev-097",
+    "dev-245"
+  ],
+  "run_dir": "eval/runs/consumer-eval-v2",
+  "scratch_root": "/home/dev/.local/share/glossator-mcp-eval",
+  "unanswerable_count": 7
+}

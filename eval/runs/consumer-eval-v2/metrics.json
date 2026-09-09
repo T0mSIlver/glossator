@@ -1,0 +1,51 @@
+{
+  "cells": {
+    "claude-sonnet-low / A0": {
+      "bad_param_errors": 0.0,
+      "cite_called": 0.0,
+      "cite_rejected": 0.0,
+      "cite_verified": 0.0,
+      "clamps": 0.0,
+      "correctness": null,
+      "errors": 0,
+      "latency_p50": 22.144401549943723,
+      "links_on_gold": 0.4782608695652174,
+      "links_resolve": 0.3494047619047619,
+      "mcp_called": 0.0,
+      "n": 30,
+      "refusal_correct": 0.7,
+      "tokens_total": 135042.16666666666,
+      "tool_calls": 3.933333333333333
+    },
+    "claude-sonnet-low / A1": {
+      "bad_param_errors": 0.0,
+      "cite_called": 0.42857142857142855,
+      "cite_rejected": 0.0,
+      "cite_verified": 0.8571428571428571,
+      "clamps": 2.857142857142857,
+      "correctness": null,
+      "errors": 0,
+      "latency_p50": 21.895545842009597,
+      "links_on_gold": 0.8125,
+      "links_resolve": 0.888888888888889,
+      "mcp_called": 1.0,
+      "n": 21,
+      "refusal_correct": 0.7619047619047619,
+      "tokens_total": 185068.66666666666,
+      "tool_calls": 5.142857142857143
+    }
+  },
+  "correctness_cost": {
+    "claude-sonnet-low / A0": null,
+    "claude-sonnet-low / A1": null
+  },
+  "fragments": {
+    "fragment_links": 1,
+    "fragments_found": 0,
+    "links_checked": 60,
+    "seed": 0,
+    "share_found": 0.0
+  },
+  "judged": 0,
+  "records": 51
+}
