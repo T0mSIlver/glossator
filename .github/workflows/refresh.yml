@@ -1,10 +1,25 @@
 name: Refresh documentation snapshot
 
+# Builds the head of the docs repository as a candidate snapshot, answers the
+# frozen question set against it and against the snapshot currently served, in
+# one pass with the same code and models, and compares the two question by
+# question (DECISIONS.md D-045). On a pass it opens a pull request that moves
+# the served pointer, re-vendors the corpus at the accepted commit and records
+# the run; on a regression it opens an issue listing the questions that broke.
+# Nothing is served until the pull request is merged and `make deploy` runs, so
+# the gate can never flip the live index by itself.
+
 on:
   workflow_dispatch:
   # schedule:
   #   - cron: "17 3 * * 1"
-  # The weekly schedule stays off until the embedding and generation budget is approved.
+  # The weekly schedule stays off until the refresh budget is approved
+  # (D-045 states the cost of one run).
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   refresh:
@@ -15,6 +30,7 @@ jobs:
       ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
       ZAI_BASE_URL: https://api.z.ai/api/coding/paas/v4
       GLOSSATOR_CHAT_SERVER_URL: ${{ vars.GLOSSATOR_CHAT_SERVER_URL }}
+      GH_TOKEN: ${{ github.token }}
       VESPA_QUERY_PORT: "18080"
       VESPA_CONFIG_PORT: "19072"
 
@@ -28,42 +44,132 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
 
+      - name: Build the docs head as a candidate snapshot
+        id: candidate
+        run: |
+          uv run python -m glossator.corpus.refresh build > candidate.json
+          cat candidate.json
+          echo "changed=$(jq -r '.changed' candidate.json)" >> "$GITHUB_OUTPUT"
+          echo "date=$(jq -r '.date // empty' candidate.json)" >> "$GITHUB_OUTPUT"
+          echo "commit=$(jq -r '.commit' candidate.json)" >> "$GITHUB_OUTPUT"
+          echo "corpus=$(jq -r '.corpus_dir // empty' candidate.json)" >> "$GITHUB_OUTPUT"
+          echo "manifest=$(jq -r '.gate_manifest // empty' candidate.json)" >> "$GITHUB_OUTPUT"
+          echo "served_snapshot=$(jq -r '.snapshot' eval/refresh/served.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Nothing to refresh
+        if: steps.candidate.outputs.changed != 'true'
+        run: echo "The docs head is the served commit; nothing to evaluate." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Start Vespa and deploy schemas
+        if: steps.candidate.outputs.changed == 'true'
         run: make setup-vespa
 
-      - name: Fetch docs and build stored snapshots
-        run: uv run python -m glossator.corpus.snapshots build
-
-      - name: Ingest the newest snapshot
+      - name: Ingest the served snapshot from the vendored corpus
+        if: steps.candidate.outputs.changed == 'true'
         run: |
-          snapshot=$(jq -r '.snapshots | map(select(.status == "built")) | last | .date' eval/snapshots/manifest.json)
           uv run python -m glossator.ingest \
             --variant snap1024 \
-            --snapshot "$snapshot" \
-            --corpus "$HOME/.cache/glossator/snapshots/$snapshot"
+            --snapshot "${{ steps.candidate.outputs.served_snapshot }}" \
+            --corpus corpus/mistral-docs
 
-      - name: Label the fixed question sets
+      - name: Ingest the candidate snapshot
+        if: steps.candidate.outputs.changed == 'true'
+        run: |
+          uv run python -m glossator.ingest \
+            --variant snap1024 \
+            --snapshot "${{ steps.candidate.outputs.date }}" \
+            --corpus "${{ steps.candidate.outputs.corpus }}"
+
+      - name: Label the frozen question sets on both snapshots
+        if: steps.candidate.outputs.changed == 'true'
+        id: labels
         run: |
           uv run python -m glossator.eval.snapshots label \
             --dataset eval/dev-fresh60.jsonl \
             --dataset eval/mined.jsonl \
-            --name snapshot-labels
+            --manifest "${{ steps.candidate.outputs.manifest }}" \
+            --name refresh-labels
+          labels=$(find eval/runs -maxdepth 2 -path '*-refresh-labels/labels.jsonl' | sort | tail -1)
+          echo "path=$labels" >> "$GITHUB_OUTPUT"
 
-      - name: Evaluate the fixed question set
-        if: env.GLOSSATOR_CHAT_SERVER_URL != ''
+      - name: Answer the frozen question set on both snapshots
+        if: steps.candidate.outputs.changed == 'true'
+        id: eval
         run: |
-          labels=$(find eval/runs -maxdepth 2 -path '*-snapshot-labels/labels.jsonl' | sort | tail -1)
           uv run python -m glossator.eval.snapshots run \
             --dataset eval/dev-fresh60.jsonl \
-            --labels "$labels" \
-            --name snapshot-eval
+            --labels "${{ steps.labels.outputs.path }}" \
+            --manifest "${{ steps.candidate.outputs.manifest }}" \
+            --name refresh-eval
+          run=$(find eval/runs -maxdepth 1 -name '*-refresh-eval' | sort | tail -1)
+          echo "path=$run" >> "$GITHUB_OUTPUT"
+
+      - name: Gate the candidate against the served snapshot
+        if: steps.candidate.outputs.changed == 'true'
+        id: gate
+        run: |
+          set +e
+          uv run python -m glossator.eval.gate \
+            --baseline "${{ steps.eval.outputs.path }}" \
+            --baseline-snapshot "${{ steps.candidate.outputs.served_snapshot }}" \
+            --baseline-labels "${{ steps.labels.outputs.path }}" \
+            --candidate "${{ steps.eval.outputs.path }}" \
+            --candidate-snapshot "${{ steps.candidate.outputs.date }}" \
+            --candidate-labels "${{ steps.labels.outputs.path }}" \
+            --output "${{ steps.eval.outputs.path }}/gate"
+          code=$?
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          cat "${{ steps.eval.outputs.path }}/gate/gate.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload run records
+        if: steps.candidate.outputs.changed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: snapshot-refresh-${{ github.run_id }}
+          name: refresh-${{ steps.candidate.outputs.date }}-${{ github.run_id }}
           path: |
+            candidate.json
             eval/snapshots/manifest.json
-            eval/runs/*-snapshot-labels/
-            eval/runs/*-snapshot-eval/
+            eval/runs/*-refresh-labels/
+            eval/runs/*-refresh-eval/
           if-no-files-found: error
+
+      - name: Open an issue for the regression
+        if: steps.candidate.outputs.changed == 'true' && steps.gate.outputs.code != '0'
+        run: |
+          verdict=$(jq -r '.verdict' "${{ steps.eval.outputs.path }}/gate/gate.json")
+          title="Refresh ${{ steps.candidate.outputs.date }}: $verdict against served ${{ steps.candidate.outputs.served_snapshot }}"
+          {
+            echo "Docs commit \`${{ steps.candidate.outputs.commit }}\` was evaluated against the served snapshot and not accepted."
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            cat "${{ steps.eval.outputs.path }}/gate/gate.md"
+          } > issue.md
+          gh issue create --title "$title" --body-file issue.md --label refresh
+
+      - name: Open a pull request that moves the served pointer
+        if: steps.candidate.outputs.changed == 'true' && steps.gate.outputs.code == '0'
+        run: |
+          uv run python -m glossator.corpus.refresh accept \
+            --date "${{ steps.candidate.outputs.date }}" \
+            --commit "${{ steps.candidate.outputs.commit }}" \
+            --run "${{ steps.eval.outputs.path }}" \
+            --labels "${{ steps.labels.outputs.path }}" \
+            --gate "${{ steps.eval.outputs.path }}/gate"
+          make corpus-refresh REF="${{ steps.candidate.outputs.commit }}"
+          branch="refresh/${{ steps.candidate.outputs.date }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add corpus eval/snapshots/manifest.json eval/refresh/served.json \
+            eval/runs/*-refresh-labels eval/runs/*-refresh-eval
+          git commit -m "Accept the ${{ steps.candidate.outputs.date }} docs snapshot after the refresh gate passed"
+          git push origin "$branch"
+          {
+            echo "Docs commit \`${{ steps.candidate.outputs.commit }}\` passed the refresh gate against the served snapshot ${{ steps.candidate.outputs.served_snapshot }}."
+            echo "Merging moves the served pointer and re-vendors the corpus; \`make deploy\` then rebuilds the index from the embedding cache (D-037d)."
+            echo
+            cat "${{ steps.eval.outputs.path }}/gate/gate.md"
+          } > pr.md
+          gh pr create --title "Accept the ${{ steps.candidate.outputs.date }} docs snapshot" \
+            --body-file pr.md --base "${{ github.ref_name }}" --head "$branch" --label refresh

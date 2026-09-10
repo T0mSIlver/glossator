@@ -1,0 +1,8 @@
+{
+  "accepted_at": "2026-09-09T19:49:00+00:00",
+  "commit": "2e094f7bbe1395de4a738a3483def3573143d973",
+  "gate": null,
+  "labels": "eval/runs/2026-09-09-1929-snapshot-labels/labels.jsonl",
+  "run": "eval/runs/2026-09-09-1949-snapshot-eval",
+  "snapshot": "2026-09-07"
+}
