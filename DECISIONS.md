@@ -1148,3 +1148,22 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - The earlier partial run on the old surface with a small consumer (D-040a) and this one are the only two consumer runs; neither had a host-fidelity arm yet.
 
 **Decision.** The recommendation for capable consumers stands: retrieval tools plus `verify_quotes`, the consumer writes the answer. The next arm to run is the up-front instruction: the same consumers with one sentence naming the server (the CLAUDE.md block, the Work Skill), which is the lever D-029a and the improvement axes name for the discoverability failure GPT luna reproduces; the rerank-on comparison and the host-fidelity arm follow. Consumer runs report "called the server" beside correctness from now on, since a consumer that ignores the server scores its own habit.
+
+---
+
+## D-035e · The loop's caps are not a lever
+
+**Status:** decided · 2026-09-10 · summary `2026-09-10-0120-loop-grid` over six run directories; 30 stratified fresh questions per configuration, search loop, generated on the local Ministral 3 14B Reasoning at the model card's settings, judged blind by GLM 5.3
+
+| configuration | correctness | groundedness | rounds | tool calls | hit the round cap |
+|---|---|---|---|---|---|
+| shipped: 4 rounds, 4 searches per round, 600-char previews | 0.85 | 0.84 | 2.6 | 2.1 | 0.13 |
+| 6 rounds | 0.77 | 0.74 | 2.9 | 2.4 | 0.07 |
+| 8 rounds | 0.82 | 0.70 | 2.8 | 2.6 | 0.00 |
+| 6 searches per round | 0.75 | 0.80 | 2.1 | 1.5 | 0.03 |
+| 1,500-char previews | 0.87 | 0.71 | 2.0 | 1.3 | 0.00 |
+| full previews | 0.77 | 0.80 | 2.0 | 1.3 | 0.00 |
+
+**Facts.** Thirty questions give a 95% interval of about ±0.13 per cell, and every configuration lands inside the shipped point's interval. Lifting the round cap removes the 13% of questions that hit it without moving correctness; wider previews do not help either, and the reasoning model uses two to three rounds and about two tool calls whatever the cap. These are relative numbers on a local reasoning model, not the API figures (D-035c); the instruct model's partial run was set aside when the model changed.
+
+**Decision.** The caps stay at 4 rounds, 4 searches per round and 600-character previews. The question "what if the answer is past the preview" is answered by the design (the final generation reads the full chunks of everything collected) and by this grid (wider previews change nothing); the loop's remaining cost is its tokens, which is why it is the thorough mode and not the default (D-035b).

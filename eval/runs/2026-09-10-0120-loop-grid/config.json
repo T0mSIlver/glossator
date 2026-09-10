@@ -1,0 +1,137 @@
+{
+  "axes": {
+    "round_cap": [
+      "4",
+      "6",
+      "8"
+    ],
+    "searches_per_round": [
+      "4",
+      "6"
+    ],
+    "tool_result_chars": [
+      "600",
+      "1500",
+      "full"
+    ]
+  },
+  "dataset": "eval/dev-fresh60.jsonl",
+  "dataset_sha256": "c663126d79ebf3c0c8cc6000a73be2fd9281c0ae672ae4d42532f1fae8fa7fc0",
+  "generation_server": "http://192.168.1.183:8080",
+  "judge_model": null,
+  "judge_models": [],
+  "kind": "loop_grid",
+  "model": "llamacpp/ministral3-14b",
+  "name": "loop-grid",
+  "notes": [
+    "Generation-only grid on the local Ministral 3 server with reasoning off; judged columns are filled by rejudge later."
+  ],
+  "questions": [
+    "dev-044",
+    "dev-159",
+    "dev-196",
+    "dev-247",
+    "dev-277",
+    "dev-215",
+    "dev-222",
+    "dev-166",
+    "dev-097",
+    "dev-245",
+    "dev-268",
+    "dev-209",
+    "dev-033",
+    "dev-072",
+    "dev-012",
+    "dev-237",
+    "dev-079",
+    "dev-218",
+    "dev-035",
+    "dev-252",
+    "dev-294",
+    "dev-149",
+    "dev-173",
+    "dev-112",
+    "dev-125",
+    "dev-262",
+    "dev-106",
+    "dev-049",
+    "dev-180",
+    "dev-111"
+  ],
+  "reasoning_effort": "low",
+  "response_format": "json_schema",
+  "runs": [
+    {
+      "axis": null,
+      "name": "loop-grid-shipped",
+      "overrides": {
+        "round_cap": 4,
+        "searches_per_round": 4,
+        "tool_result_chars": 600
+      },
+      "run_dir": "eval/runs/2026-09-09-2300-loop-grid-shipped",
+      "value": "shipped"
+    },
+    {
+      "axis": "round_cap",
+      "name": "loop-grid-round-cap-6",
+      "overrides": {
+        "round_cap": 6,
+        "searches_per_round": 4,
+        "tool_result_chars": 600
+      },
+      "run_dir": "eval/runs/2026-09-09-2337-loop-grid-round-cap-6",
+      "value": "6"
+    },
+    {
+      "axis": "round_cap",
+      "name": "loop-grid-round-cap-8",
+      "overrides": {
+        "round_cap": 8,
+        "searches_per_round": 4,
+        "tool_result_chars": 600
+      },
+      "run_dir": "eval/runs/2026-09-10-0005-loop-grid-round-cap-8",
+      "value": "8"
+    },
+    {
+      "axis": "searches_per_round",
+      "name": "loop-grid-searches-per-round-6",
+      "overrides": {
+        "round_cap": 4,
+        "searches_per_round": 6,
+        "tool_result_chars": 600
+      },
+      "run_dir": "eval/runs/2026-09-10-0027-loop-grid-searches-per-round-6",
+      "value": "6"
+    },
+    {
+      "axis": "tool_result_chars",
+      "name": "loop-grid-tool-result-chars-1500",
+      "overrides": {
+        "round_cap": 4,
+        "searches_per_round": 4,
+        "tool_result_chars": 1500
+      },
+      "run_dir": "eval/runs/2026-09-10-0045-loop-grid-tool-result-chars-1500",
+      "value": "1500"
+    },
+    {
+      "axis": "tool_result_chars",
+      "name": "loop-grid-tool-result-chars-full",
+      "overrides": {
+        "round_cap": 4,
+        "searches_per_round": 4,
+        "tool_result_chars": null
+      },
+      "run_dir": "eval/runs/2026-09-10-0103-loop-grid-tool-result-chars-full",
+      "value": "full"
+    }
+  ],
+  "shipped_point": {
+    "round_cap": 4,
+    "searches_per_round": 4,
+    "tool_result_chars": 600
+  },
+  "variant": "sec1024"
+}

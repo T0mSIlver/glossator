@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 96" width="720" height="96" role="img" aria-label="Citation verification">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="22">Citation verification</text>
+<text x="240" y="51.0" text-anchor="end">search_loop</text>
+<rect x="248" y="39.5" width="388.0" height="4" fill="#3b6fd4"/>
+<rect x="248" y="44.5" width="182.6" height="4" fill="#c05621"/>
+<rect x="248" y="49.5" width="0.0" height="4" fill="#2f855a"/>
+<text class="v" x="646" y="51.0">0.85 / 0.4 / 0</text>
+<rect x="16" y="79" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="88">verified rate</text>
+<rect x="140" y="79" width="10" height="10" fill="#c05621"/>
+<text class="v" x="154" y="88">fabricated/answer</text>
+<rect x="296" y="79" width="10" height="10" fill="#2f855a"/>
+<text class="v" x="310" y="88">cosmetic/answer</text>
+</svg>
