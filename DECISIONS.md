@@ -1125,3 +1125,26 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - On the shipped configuration, generated on the local reasoning model at the settings its card asks for (temperature 1, top_p 0.95, thinking on, effort low): correctness 0.65 (correct 0.52, partial 0.25, wrong 0.23), refusal correct 0.78, quote verification 0.83, URL match 0.57, anchor match 0.39, p50 29 s. Not comparable with the first mined set, which ran the API's instruct model with no reasoning; unanswerable questions are the strongest slice (0.85), api_reference the weakest (4 questions, 0.25).
 
 **Decision.** `eval/mined-v2.jsonl` joins the reporting sets, to be validated by hand from the private evidence before its numbers are quoted, and re-run on the API model when credits allow so it is comparable with the first set. The Vibe CLI pages are the product area to read first when improving retrieval on real questions.
+
+---
+
+## D-040b · Two blind consumers on the agent-facing surface: the tools double a strong consumer's accuracy, and a consumer with its own web search never picks the server
+
+**Status:** decided · 2026-09-10 · run `consumer-eval-v2` (30 questions: 20 mined, 10 fresh; three arms; Claude Sonnet at low effort, GPT luna at low effort; judge GLM 5.3 blind; transcripts in the run directory, D-023c)
+
+| consumer | arm | correctness | refusal correct | called the server | links that resolve | tool calls | p50 |
+|---|---|---|---|---|---|---|---|
+| Sonnet | no tools | 0.50 | 0.70 | 0 of 30 | 0.35 | 3.9 (its own) | 22 s |
+| Sonnet | retrieval tools plus verify | 0.77 | 0.80 | 30 of 30 | 0.92 | 5.2 | 21 s |
+| Sonnet | answer only | 0.78 | 0.80 | 30 of 30 | 0.90 | 2.3 | 74 s |
+| GPT luna | no tools | 0.58 | 0.80 | 0 of 30 | 0.86 | 2.0 | 15 s |
+| GPT luna | retrieval tools plus verify | 0.52 | 0.80 | 0 of 30 | 0.85 | 2.2 | 14 s |
+| GPT luna | answer only | 0.58 | 0.83 | 0 of 30 | 0.81 | 2.2 | 15 s |
+
+**Facts.**
+- With the retrieval tools, Sonnet's correctness rises from 0.50 to 0.77 and its links resolve 0.92 of the time instead of 0.35, at the same latency; the answer-only arm reaches the same correctness with fewer calls and three times the latency (the server's own generation on the local reasoning model). Sonnet called `mistral_docs_verify_quotes` on 14 of 30 questions and asked for the reranker on 7.
+- GPT luna, which carries a built-in web search, never called the server in 60 cells with it available: every tools-arm transcript shows `site:docs.mistral.ai` web searches and no MCP call. A hand probe with the same configuration and a prompt that names the server shows it can call `mistral_docs_search` and read the result, so this is a choice, not a defect: with nothing in the prompt naming the server, a low-effort consumer with a competing tool keeps its habit. Its web search resolves links well (0.86) and answers at 0.52 to 0.58 across arms.
+- The judge is the same blinded GLM 5.3 as everywhere else; the question set is 30 items, so a 95% interval is about ±0.17 per cell and only the large gaps are read.
+- The earlier partial run on the old surface with a small consumer (D-040a) and this one are the only two consumer runs; neither had a host-fidelity arm yet.
+
+**Decision.** The recommendation for capable consumers stands: retrieval tools plus `verify_quotes`, the consumer writes the answer. The next arm to run is the up-front instruction: the same consumers with one sentence naming the server (the CLAUDE.md block, the Work Skill), which is the lever D-029a and the improvement axes name for the discoverability failure GPT luna reproduces; the rerank-on comparison and the host-fidelity arm follow. Consumer runs report "called the server" beside correctness from now on, since a consumer that ignores the server scores its own habit.
