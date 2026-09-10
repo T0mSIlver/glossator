@@ -8,9 +8,10 @@ manifest holding exactly two snapshots, the served one and the candidate, so
 labelling and evaluation run on both dates in one pass with the same code and
 models, and prints the dates and commits for the workflow to carry to
 ingestion and the gate. Whether a snapshot is served is not a manifest
-status: the served pointer under `eval/refresh/served.json` names the accepted
-snapshot, its commit and the run whose gate accepted it, and the deploy reads
-that pointer.
+status: the served pointer under `eval/refresh/served.json` names the served snapshot,
+its commit and the run it was set from (the gate's run once a refresh has
+been accepted; at v1.0 the D-041 evaluation, with no gate), and the deploy
+reads that pointer.
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ from typing import Any
 
 import structlog
 
+from glossator.corpus.mistral_docs.__main__ import _configure_logging
 from glossator.corpus.mistral_docs.build import build_corpus
 from glossator.corpus.mistral_docs.source import DEFAULT_CACHE_DIR, fetch_docs_repo
 from glossator.corpus.snapshots import (
@@ -39,6 +41,7 @@ from glossator.corpus.snapshots import (
 logger = structlog.get_logger(__name__)
 
 SERVED_POINTER = Path("eval/refresh/served.json")
+SERVED_CORPUS = Path("corpus/mistral-docs")
 DEFAULT_GATE_MANIFEST = DEFAULT_SNAPSHOT_ROOT / "gate-manifest.json"
 DOCS_HEAD = "main"
 
@@ -76,6 +79,7 @@ def build_candidate(
     repo: Path = DEFAULT_CACHE_DIR,
     served_path: Path = SERVED_POINTER,
     gate_manifest: Path = DEFAULT_GATE_MANIFEST,
+    served_corpus: Path = SERVED_CORPUS,
 ) -> dict[str, Any]:
     """Build the head of the docs repository as a candidate snapshot.
 
@@ -94,6 +98,15 @@ def build_candidate(
             "served_snapshot": served.get("snapshot"),
         }
     date = datetime.now(UTC).strftime("%Y-%m-%d")
+    existing = read_snapshot_manifest(manifest_path)
+    for record in existing:
+        if record.date == date and record.commit != checkout.commit:
+            # A run that lands on a fixed snapshot date must not overwrite the
+            # historical record the history tool serves.
+            raise ValueError(
+                f"snapshot {date} already records commit {record.commit}; "
+                f"refusing to replace it with {checkout.commit}"
+            )
     corpus_dir = snapshot_root.expanduser() / date
     openapi = _openapi_path(checkout.path)
     summary = build_corpus(
@@ -115,13 +128,18 @@ def build_candidate(
         openapi_snapshot_exact=openapi is not None,
         models_snapshot_exact=True,
     )
-    records = [r for r in read_snapshot_manifest(manifest_path) if r.date != date]
+    records = [r for r in existing if r.date != date]
     records.append(record)
     write_snapshot_manifest(manifest_path, records)
     served_records = [r for r in records if r.date == served.get("snapshot")]
     if served.get("snapshot") and not served_records:
         raise ValueError(f"served snapshot {served['snapshot']} is not in {manifest_path}")
-    write_snapshot_manifest(gate_manifest.expanduser(), [*served_records, record])
+    # The served snapshot's corpus is the vendored one; the manifest's cache
+    # path for it does not exist on a fresh runner.
+    served_for_gate = [
+        SnapshotRecord(**{**asdict(r), "corpus_dir": str(served_corpus)}) for r in served_records
+    ]
+    write_snapshot_manifest(gate_manifest.expanduser(), [*served_for_gate, record])
     logger.info(
         "Built candidate snapshot", date=date, commit=checkout.commit, pages=summary.total_pages
     )
@@ -175,6 +193,8 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument("--repo", type=Path, default=DEFAULT_CACHE_DIR)
     build.add_argument("--served", type=Path, default=SERVED_POINTER)
     build.add_argument("--gate-manifest", type=Path, default=DEFAULT_GATE_MANIFEST)
+    build.add_argument("--served-corpus", type=Path, default=SERVED_CORPUS)
+    build.add_argument("--output", type=Path, default=None, help="write the JSON here as well")
     acc = sub.add_parser("accept", help="move the served pointer to a candidate the gate passed")
     acc.add_argument("--date", required=True)
     acc.add_argument("--commit", required=True)
@@ -184,6 +204,10 @@ def main(argv: list[str] | None = None) -> int:
     acc.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     acc.add_argument("--served", type=Path, default=SERVED_POINTER)
     args = parser.parse_args(argv)
+    if __name__ == "__main__":
+        # Logs go to stderr so stdout is the JSON alone; the same lazy stream
+        # the corpus CLI uses, so a host that replaces stderr keeps working.
+        _configure_logging(False)
     if args.command == "build":
         result = build_candidate(
             ref=args.ref,
@@ -192,6 +216,7 @@ def main(argv: list[str] | None = None) -> int:
             repo=args.repo,
             served_path=args.served,
             gate_manifest=args.gate_manifest,
+            served_corpus=args.served_corpus,
         )
     else:
         result = accept(
@@ -203,7 +228,10 @@ def main(argv: list[str] | None = None) -> int:
             manifest_path=args.manifest,
             served_path=args.served,
         )
-    print(json.dumps(result, indent=2, sort_keys=True))
+    text = json.dumps(result, indent=2, sort_keys=True)
+    if getattr(args, "output", None) is not None:
+        args.output.write_text(text + "\n")
+    print(text)
     return 0
 
 

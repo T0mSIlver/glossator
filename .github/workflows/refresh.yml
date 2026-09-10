@@ -47,8 +47,7 @@ jobs:
       - name: Build the docs head as a candidate snapshot
         id: candidate
         run: |
-          uv run python -m glossator.corpus.refresh build > candidate.json
-          cat candidate.json
+          uv run python -m glossator.corpus.refresh build --output candidate.json
           echo "changed=$(jq -r '.changed' candidate.json)" >> "$GITHUB_OUTPUT"
           echo "date=$(jq -r '.date // empty' candidate.json)" >> "$GITHUB_OUTPUT"
           echo "commit=$(jq -r '.commit' candidate.json)" >> "$GITHUB_OUTPUT"
@@ -88,8 +87,8 @@ jobs:
             --dataset eval/dev-fresh60.jsonl \
             --dataset eval/mined.jsonl \
             --manifest "${{ steps.candidate.outputs.manifest }}" \
-            --name refresh-labels
-          labels=$(find eval/runs -maxdepth 2 -path '*-refresh-labels/labels.jsonl' | sort | tail -1)
+            --name "refresh-labels-${{ steps.candidate.outputs.date }}"
+          labels=$(find eval/runs -maxdepth 2 -path "*-refresh-labels-${{ steps.candidate.outputs.date }}/labels.jsonl" | sort | tail -1)
           echo "path=$labels" >> "$GITHUB_OUTPUT"
 
       - name: Answer the frozen question set on both snapshots
@@ -100,8 +99,8 @@ jobs:
             --dataset eval/dev-fresh60.jsonl \
             --labels "${{ steps.labels.outputs.path }}" \
             --manifest "${{ steps.candidate.outputs.manifest }}" \
-            --name refresh-eval
-          run=$(find eval/runs -maxdepth 1 -name '*-refresh-eval' | sort | tail -1)
+            --name "refresh-eval-${{ steps.candidate.outputs.date }}"
+          run=$(find eval/runs -maxdepth 1 -name "*-refresh-eval-${{ steps.candidate.outputs.date }}" | sort | tail -1)
           echo "path=$run" >> "$GITHUB_OUTPUT"
 
       - name: Gate the candidate against the served snapshot
@@ -120,24 +119,39 @@ jobs:
           code=$?
           set -e
           echo "code=$code" >> "$GITHUB_OUTPUT"
-          cat "${{ steps.eval.outputs.path }}/gate/gate.md" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "${{ steps.eval.outputs.path }}/gate/gate.md" ]; then
+            cat "${{ steps.eval.outputs.path }}/gate/gate.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The gate did not produce a verdict (exit $code)." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload run records
-        if: steps.candidate.outputs.changed == 'true'
+        if: steps.candidate.outputs.changed == 'true' && !cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: refresh-${{ steps.candidate.outputs.date }}-${{ github.run_id }}
           path: |
             candidate.json
             eval/snapshots/manifest.json
-            eval/runs/*-refresh-labels/
-            eval/runs/*-refresh-eval/
-          if-no-files-found: error
+            eval/runs/*-refresh-labels-*/
+            eval/runs/*-refresh-eval-*/
+          if-no-files-found: warn
+
+      - name: Make sure the refresh label exists
+        if: steps.candidate.outputs.changed == 'true' && !cancelled()
+        run: gh label create refresh --force --color 0E8A16 --description "Opened by the refresh workflow"
 
       - name: Open an issue for the regression
-        if: steps.candidate.outputs.changed == 'true' && steps.gate.outputs.code != '0'
+        if: steps.candidate.outputs.changed == 'true' && !cancelled() && steps.gate.outputs.code != '0'
         run: |
-          verdict=$(jq -r '.verdict' "${{ steps.eval.outputs.path }}/gate/gate.json")
+          gate="${{ steps.eval.outputs.path }}/gate"
+          if [ -f "$gate/gate.json" ]; then
+            verdict=$(jq -r '.verdict' "$gate/gate.json")
+          else
+            verdict="gate failed (exit ${{ steps.gate.outputs.code }})"
+            mkdir -p "$gate"
+            echo "The gate command did not run to completion; see the workflow log." > "$gate/gate.md"
+          fi
           title="Refresh ${{ steps.candidate.outputs.date }}: $verdict against served ${{ steps.candidate.outputs.served_snapshot }}"
           {
             echo "Docs commit \`${{ steps.candidate.outputs.commit }}\` was evaluated against the served snapshot and not accepted."
@@ -156,13 +170,19 @@ jobs:
             --run "${{ steps.eval.outputs.path }}" \
             --labels "${{ steps.labels.outputs.path }}" \
             --gate "${{ steps.eval.outputs.path }}/gate"
-          make corpus-refresh REF="${{ steps.candidate.outputs.commit }}"
+          # The vendored corpus becomes the candidate exactly as it was
+          # evaluated, not a fresh build against live inputs.
+          rsync -a --delete "${{ steps.candidate.outputs.corpus }}/" corpus/mistral-docs/
+          sed -i 's/^PINNED_REF = ".*"/PINNED_REF = "${{ steps.candidate.outputs.commit }}"/' \
+            src/glossator/corpus/mistral_docs/__init__.py
+          sed -i 's/^CORPUS_REF := $(or $(REF),.*)/CORPUS_REF := $(or $(REF),${{ steps.candidate.outputs.commit }})/' Makefile
           branch="refresh/${{ steps.candidate.outputs.date }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add corpus eval/snapshots/manifest.json eval/refresh/served.json \
-            eval/runs/*-refresh-labels eval/runs/*-refresh-eval
+          git add corpus eval/snapshots/manifest.json eval/refresh/served.json Makefile \
+            src/glossator/corpus/mistral_docs/__init__.py \
+            eval/runs/*-refresh-labels-* eval/runs/*-refresh-eval-*
           git commit -m "Accept the ${{ steps.candidate.outputs.date }} docs snapshot after the refresh gate passed"
           git push origin "$branch"
           {

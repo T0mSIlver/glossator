@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -48,9 +49,10 @@ def population(n: int, **overrides: object) -> dict[str, Cell]:
 
 
 def test_threshold_is_the_larger_of_floor_and_share() -> None:
-    assert threshold_for(20, share=0.05, floor=3) == 3
-    assert threshold_for(145, share=0.05, floor=3) == 8
-    assert threshold_for(0, share=0.05, floor=3) == 3
+    assert threshold_for(20, share=0.05, floor=4) == 4
+    assert threshold_for(60, share=0.05, floor=4) == 4
+    assert threshold_for(145, share=0.05, floor=4) == 8
+    assert threshold_for(0, share=0.05, floor=4) == 4
 
 
 def test_page_drops_the_fragment_only() -> None:
@@ -76,30 +78,30 @@ def test_symmetric_churn_passes() -> None:
 def test_net_loss_beyond_threshold_is_a_regression() -> None:
     baseline = population(60)
     candidate = population(60)
-    for q in ("q0", "q1", "q2", "q3"):
+    for q in ("q0", "q1", "q2", "q3", "q4"):
         candidate[q] = cell(q, cited=False)
     result = compare(baseline, candidate)
     assert result["verdict"] == "regression"
     assert result["regressed_signals"] == ["cited"]
     cited = next(s for s in result["signals"] if s["signal"] == "cited")
-    assert cited["net_loss"] == 4 and cited["threshold"] == 3
+    assert cited["net_loss"] == 5 and cited["threshold"] == 4
 
 
 def test_net_loss_at_threshold_passes() -> None:
     baseline = population(60)
     candidate = population(60)
-    for q in ("q0", "q1", "q2"):
+    for q in ("q0", "q1", "q2", "q3"):
         candidate[q] = cell(q, retrieved=False)
     assert compare(baseline, candidate)["verdict"] == "pass"
 
 
 def test_only_questions_present_in_both_snapshots_are_paired() -> None:
-    baseline = population(10)
-    candidate = population(10)
+    baseline = population(30)
+    candidate = population(30)
     candidate["q0"] = cell("q0", label="absent", cited=False, verdict="wrong")
     candidate["q1"] = cell("q1", label=None, cited=False)
     result = compare(baseline, candidate)
-    assert result["paired_answerable"] == 8
+    assert result["paired_answerable"] == 28
     assert "q0" in result["dropped_from_population"]
     assert "q1" in result["dropped_from_population"]
     assert result["verdict"] == "pass"
@@ -116,7 +118,7 @@ def test_refusal_is_scored_on_absent_cells_and_unanswerable_questions() -> None:
         "u1": cell("u1", question_type="unanswerable", label="absent", refused=True, verdict=None),
         "a0": cell("a0", label="absent", refused=True, verdict=None),
     }
-    result = compare(baseline, candidate)
+    result = compare(baseline, candidate, min_paired=0)
     refused = next(s for s in result["signals"] if s["signal"] == "refused")
     assert refused["population"] == 3
     assert refused["worse"] == [{"question_id": "u0", "before": True, "after": False}]
@@ -134,12 +136,36 @@ def test_too_many_unscored_cells_is_inconclusive_not_a_pass() -> None:
 
 
 def test_unjudged_runs_gate_on_the_deterministic_signals() -> None:
-    baseline = population(10, verdict=None)
-    candidate = population(10, verdict=None)
+    baseline = population(30, verdict=None)
+    candidate = population(30, verdict=None)
     result = compare(baseline, candidate)
     correct = next(s for s in result["signals"] if s["signal"] == "correct")
     assert correct["population"] == 0 and correct["baseline_mean"] is None
     assert result["verdict"] == "pass"
+
+
+def test_a_judge_outage_on_the_candidate_side_is_inconclusive() -> None:
+    baseline = population(30)
+    candidate = population(30)
+    for q in ("q0", "q1", "q2", "q3"):
+        candidate[q] = cell(q, verdict=None)
+    result = compare(baseline, candidate)
+    assert result["verdict"] == "inconclusive"
+    assert result["candidate_unscored"] == 4
+
+
+def test_missing_candidate_rows_count_as_unscored() -> None:
+    baseline = population(30)
+    candidate = {q: c for q, c in population(30).items() if q not in ("q0", "q1", "q2", "q3")}
+    result = compare(baseline, candidate)
+    assert result["verdict"] == "inconclusive"
+    assert result["candidate_unscored"] == 4
+
+
+def test_too_few_paired_questions_is_inconclusive() -> None:
+    result = compare(population(10), population(10))
+    assert result["verdict"] == "inconclusive"
+    assert result["paired_answerable"] == 10
 
 
 def _write_run(tmp_path: Path, name: str, rows: list[dict]) -> Path:
@@ -212,13 +238,15 @@ def test_cli_writes_gate_files_and_exit_code_names_the_verdict(
 ) -> None:
     rows_old = [_record(f"q{i}", "2026-09-01") for i in range(10)]
     rows_new = [_record(f"q{i}", "2026-09-07") for i in range(10)]
-    for i in range(4):
+    for i in range(5):
         rows_new[i] = _record(f"q{i}", "2026-09-07", cited_url=None, verdict="wrong")
     baseline = _write_run(tmp_path, "baseline", rows_old)
     candidate = _write_run(tmp_path, "candidate", rows_new)
     out = tmp_path / "gate"
     code = main(
         [
+            "--min-paired",
+            "0",
             "--baseline",
             str(baseline),
             "--baseline-snapshot",
@@ -242,7 +270,33 @@ def test_cli_writes_gate_files_and_exit_code_names_the_verdict(
 
 
 def test_render_reports_inconclusive_counts() -> None:
-    result = compare(population(10), population(10, error="down"))
+    result = compare(population(30), population(30, error="down"))
     text = render(result, baseline_name="b", candidate_name="c")
     assert "# Refresh gate: inconclusive" in text
-    assert "10 of 10 candidate cells" in text
+    assert "Inconclusive: 30 questions (100%)" in text
+
+
+def test_crash_exit_code_is_distinct_from_regression(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from glossator.eval import gate
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "gate",
+            "--baseline",
+            "/nowhere",
+            "--baseline-snapshot",
+            "x",
+            "--candidate",
+            "/nowhere",
+            "--candidate-snapshot",
+            "y",
+            "--output",
+            "/tmp/x",
+        ],
+    )
+    assert gate.run() == 3
+    assert "gate failed" in capsys.readouterr().err

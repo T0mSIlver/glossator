@@ -98,8 +98,67 @@ def test_new_head_becomes_a_candidate_beside_the_served_snapshot(
     assert result["served_snapshot"] == "2026-09-07"
     dates = [r["date"] for r in json.loads(manifest.read_text())["snapshots"]]
     assert dates == ["2026-09-01", "2026-09-07", result["date"]]
-    gate_dates = [(r["date"], r["commit"]) for r in json.loads(gate.read_text())["snapshots"]]
-    assert gate_dates == [("2026-09-07", "abc"), (result["date"], "def")]
+    gate_rows = json.loads(gate.read_text())["snapshots"]
+    assert [(r["date"], r["commit"]) for r in gate_rows] == [
+        ("2026-09-07", "abc"),
+        (result["date"], "def"),
+    ]
+    # The served snapshot's corpus is the vendored one on a runner, not a cache path.
+    assert gate_rows[0]["corpus_dir"] == "corpus/mistral-docs"
+    assert gate_rows[1]["status"] == "built"
+
+
+def test_build_refuses_to_overwrite_a_fixed_snapshot_date(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from datetime import UTC, datetime
+
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
+    checkout = _Checkout(tmp_path / "checkout", "main", "def")
+    checkout.path.mkdir()
+    monkeypatch.setattr(refresh, "fetch_docs_repo", lambda ref, cache_dir: checkout)
+    monkeypatch.setattr(refresh, "build_corpus", lambda *a, **k: _Summary())
+    served = _served(tmp_path, "2026-09-07", "abc")
+    manifest = _manifest(tmp_path, _record("2026-09-07", "abc"), _record(today, "historical"))
+    with pytest.raises(ValueError, match="already records commit historical"):
+        refresh.build_candidate(
+            manifest_path=manifest,
+            snapshot_root=tmp_path / "snapshots",
+            repo=tmp_path / "repo",
+            served_path=served,
+            gate_manifest=tmp_path / "gate.json",
+        )
+
+
+def test_cli_writes_the_json_to_the_output_file_and_stdout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(
+        refresh, "fetch_docs_repo", lambda ref, cache_dir: _Checkout(tmp_path, ref, "abc")
+    )
+    served = _served(tmp_path, "2026-09-07", "abc")
+    manifest = _manifest(tmp_path, _record("2026-09-07", "abc"))
+    out = tmp_path / "candidate.json"
+    code = refresh.main(
+        [
+            "build",
+            "--manifest",
+            str(manifest),
+            "--out",
+            str(tmp_path / "snapshots"),
+            "--repo",
+            str(tmp_path / "repo"),
+            "--served",
+            str(served),
+            "--gate-manifest",
+            str(tmp_path / "gate.json"),
+            "--output",
+            str(out),
+        ]
+    )
+    assert code == 0
+    assert json.loads(out.read_text())["changed"] is False
+    assert json.loads(capsys.readouterr().out)["changed"] is False
 
 
 def test_build_refuses_when_the_served_snapshot_is_missing_from_the_manifest(

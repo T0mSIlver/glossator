@@ -42,8 +42,14 @@ SCORE = {"correct": 1.0, "partial": 0.5, "wrong": 0.0}
 DEFAULT_NET_LOSS_SHARE = 0.05
 """Net loss tolerated on each signal, as a share of the paired population."""
 
-DEFAULT_NET_LOSS_FLOOR = 3
-"""Net loss tolerated on a small population, whatever the share says."""
+DEFAULT_NET_LOSS_FLOOR = 4
+"""Net loss tolerated on a small population, whatever the share says. At sixty
+questions and a flip rate of one in ten this is 1.6 standard deviations of the
+repeat-run churn; the 5% share takes over above eighty questions."""
+
+DEFAULT_MIN_PAIRED = 20
+"""Below this many paired answerable questions the gate is inconclusive: a
+verdict on a handful of questions is not a verdict."""
 
 DEFAULT_MAX_UNSCORED_SHARE = 0.10
 """Above this share of candidate cells without an answer or a label, the gate
@@ -216,11 +222,25 @@ def compare(
     share: float = DEFAULT_NET_LOSS_SHARE,
     floor: int = DEFAULT_NET_LOSS_FLOOR,
     max_unscored_share: float = DEFAULT_MAX_UNSCORED_SHARE,
+    min_paired: int = DEFAULT_MIN_PAIRED,
 ) -> dict[str, Any]:
     """The gate's verdict: ``pass``, ``regression`` or ``inconclusive``."""
     candidate_cells = list(candidate.values())
-    unscored = [cell for cell in candidate_cells if not cell.scored]
-    unscored_share = len(unscored) / len(candidate_cells) if candidate_cells else 1.0
+    # A question the baseline answered and the candidate did not, or one the
+    # baseline judged and the candidate did not, is an outage on the candidate
+    # side and counts as unscored; both sides unjudged is a deterministic-only
+    # gate and counts as nothing.
+    judged_baseline = any(cell.verdict for cell in baseline.values())
+    unscored = {cell.question_id for cell in candidate_cells if not cell.scored}
+    unscored |= {q for q in baseline if q not in candidate}
+    if judged_baseline:
+        unscored |= {
+            q
+            for q, cell in candidate.items()
+            if q in baseline and baseline[q].verdict and not cell.verdict and cell.scored
+        }
+    denominator = len(set(candidate) | set(baseline))
+    unscored_share = len(unscored) / denominator if denominator else 1.0
 
     common = sorted(baseline.keys() & candidate.keys())
     answerable = [
@@ -248,7 +268,7 @@ def compare(
         _compare_verdict(answerable, share=share, floor=floor),
     ]
     regressed = [s.name for s in signals if s.regressed]
-    if unscored_share > max_unscored_share:
+    if unscored_share > max_unscored_share or len(answerable) < min_paired:
         verdict = "inconclusive"
     elif regressed:
         verdict = "regression"
@@ -263,6 +283,7 @@ def compare(
         "candidate_unscored": len(unscored),
         "candidate_unscored_share": unscored_share,
         "max_unscored_share": max_unscored_share,
+        "min_paired": min_paired,
         "net_loss_share": share,
         "net_loss_floor": floor,
         "signals": [s.as_dict() for s in signals],
@@ -300,9 +321,11 @@ def render(result: Mapping[str, Any], *, baseline_name: str, candidate_name: str
     if result["verdict"] == "inconclusive":
         lines += [
             "",
-            f"{result['candidate_unscored']} of {result['candidate_cells']} candidate cells "
-            f"({result['candidate_unscored_share']:.0%}) have no answer or no label, above the "
-            f"{result['max_unscored_share']:.0%} the gate accepts. The index was not flipped.",
+            f"Inconclusive: {result['candidate_unscored']} questions "
+            f"({result['candidate_unscored_share']:.0%}) have no answer, label or verdict on the "
+            f"candidate side (the gate accepts {result['max_unscored_share']:.0%}), and "
+            f"{result['paired_answerable']} answerable questions were paired (the gate needs "
+            f"{result['min_paired']}). Nothing was accepted.",
         ]
     for s in result["signals"]:
         if not s["worse"] and not s["better"]:
@@ -355,6 +378,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--net-loss-share", type=float, default=DEFAULT_NET_LOSS_SHARE)
     parser.add_argument("--net-loss-floor", type=int, default=DEFAULT_NET_LOSS_FLOOR)
     parser.add_argument("--max-unscored-share", type=float, default=DEFAULT_MAX_UNSCORED_SHARE)
+    parser.add_argument("--min-paired", type=int, default=DEFAULT_MIN_PAIRED)
     args = parser.parse_args(argv)
 
     baseline = read_cells(
@@ -373,6 +397,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         share=args.net_loss_share,
         floor=args.net_loss_floor,
         max_unscored_share=args.max_unscored_share,
+        min_paired=args.min_paired,
     )
     result["baseline"] = {"run": str(args.baseline), "snapshot": args.baseline_snapshot}
     result["candidate"] = {"run": str(args.candidate), "snapshot": args.candidate_snapshot}
@@ -388,5 +413,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     return {"pass": 0, "regression": 1, "inconclusive": 2}[result["verdict"]]
 
 
+def run() -> int:
+    """Exit 0 pass, 1 regression, 2 inconclusive, 3 the gate itself failed."""
+    try:
+        return main()
+    except Exception as error:  # noqa: BLE001 - the exit code is the contract
+        print(f"gate failed: {type(error).__name__}: {error}", file=sys.stderr)
+        return 3
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())

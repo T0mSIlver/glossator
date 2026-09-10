@@ -241,7 +241,9 @@ manifest and the embedding cache (D-037d); it is never copied as a Vespa volume.
 The corpus under `corpus/mistral-docs` is one commit of
 `mistralai/platform-docs-public`, and `eval/refresh/served.json` names that
 commit, the snapshot date it corresponds to (`2026-09-07` at v1.0, commit
-`2e094f7b`) and the evaluation run that accepted it. The eight dated snapshots
+`2e094f7b`) and the evaluation run it was set from: at v1.0 the recorded
+eight-date evaluation and no gate, since nothing has been refreshed yet; after
+the first accepted refresh, the gate's own run. The eight dated snapshots
 behind `history` are the same corpus adapter at older commits, listed in
 `eval/snapshots/manifest.json`; the served snapshot is the newest of them and
 reproduces the served index chunk for chunk (D-041a). A newer docs commit
