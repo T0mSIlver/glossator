@@ -1177,3 +1177,22 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Facts.** Copying the development Vespa data volume to the container (1.5 GB) failed to start there: the config server's ZooKeeper refused its own copied state ("the current epoch, 1, is older than the last zxid"). Rebuilding from the embedding cache instead took under four minutes for the shipped index plus the eight snapshots (32,543 chunks) with zero embedding calls, because every chunk's embedding was already cached under its content hash. The public server now registers all eight tools, and `mistral_docs_history` answers over the tunnel: the sentence "Email domain authentication is available on Team plans and above", which a Work session quoted last night, first appears in the snapshot of 2026-07-01.
 
 **Decision.** An index is reproduced from the vendored corpus, the manifest and the embedding cache, never moved as a Vespa volume. The deploy script's full mode plus the snapshot ingestion is the documented path, and the cache directory is the one artefact worth backing up beside the repository.
+
+---
+
+## D-021c · A free local judge agrees with the primary judge as well as the second cloud judge does
+
+**Status:** decided · 2026-09-10 · `eval/runs/2026-09-10-0345-dev60-rerank-qwen-judge` (the 120 answers of dev60-rerank re-judged by Qwen 3.8 27B on the local server, reasoning off, judge prompt v2; `agreement-four-judges.json`)
+
+| pair | weighted kappa | agreement |
+|---|---|---|
+| GLM 5.3 and Qwen 3.8 27B | 0.72 | 0.89 |
+| GLM 5.3 and GLM 5.3 flash | 0.62 | 0.90 |
+| GLM 5.3 flash and Qwen | 0.61 | 0.85 |
+| Ministral 3 14B and Qwen | 0.58 | 0.80 |
+| human (40 items) and Qwen | 0.43 | 0.85 |
+| human (40 items) and GLM 5.3 | 0.46 | 0.88 |
+
+**Facts.** Qwen judged all 120 answers with no parse failure at about 7 s per call on the local server. Its mean correctness (0.90) sits between the strict Ministral (0.85) and the two GLM judges (0.93 and 0.94). Krippendorff's alpha over the four judges is 0.49, pulled down by Ministral (D-021a).
+
+**Decision.** Qwen on the local server is the judge for local-only nights and a third opinion on any run, at no cost; GLM 5.3 remains the reporting judge so the published tables stay on one scale. The judge study now covers four judges and one human.

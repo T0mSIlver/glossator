@@ -1,0 +1,237 @@
+{
+ "all": {
+  "pairwise": [
+   {
+    "first": "mistral:ministral-14b-2512",
+    "second": "zai:glm-5.3",
+    "items": 120,
+    "quadratic_weighted_kappa": 0.4370860927152318,
+    "percentage_agreement": 0.7916666666666666
+   },
+   {
+    "first": "mistral:ministral-14b-2512",
+    "second": "zai:glm-5.3-flash",
+    "items": 120,
+    "quadratic_weighted_kappa": 0.41666666666666663,
+    "percentage_agreement": 0.7833333333333333
+   },
+   {
+    "first": "mistral:ministral-14b-2512",
+    "second": "local:qwen38-27b",
+    "items": 120,
+    "quadratic_weighted_kappa": 0.578125,
+    "percentage_agreement": 0.8
+   },
+   {
+    "first": "zai:glm-5.3",
+    "second": "zai:glm-5.3-flash",
+    "items": 120,
+    "quadratic_weighted_kappa": 0.6153846153846154,
+    "percentage_agreement": 0.9
+   },
+   {
+    "first": "zai:glm-5.3",
+    "second": "local:qwen38-27b",
+    "items": 120,
+    "quadratic_weighted_kappa": 0.7194244604316546,
+    "percentage_agreement": 0.8916666666666667
+   },
+   {
+    "first": "zai:glm-5.3-flash",
+    "second": "local:qwen38-27b",
+    "items": 120,
+    "quadratic_weighted_kappa": 0.6065573770491803,
+    "percentage_agreement": 0.85
+   }
+  ],
+  "krippendorff_alpha_ordinal": 0.4892468414252247,
+  "percentage_agreement": 0.8361111111111111,
+  "per_judge": {
+   "mistral:ministral-14b-2512": {
+    "items": 120,
+    "mean_correctness": 0.85
+   },
+   "zai:glm-5.3": {
+    "items": 120,
+    "mean_correctness": 0.9333333333333333
+   },
+   "zai:glm-5.3-flash": {
+    "items": 120,
+    "mean_correctness": 0.9375
+   },
+   "local:qwen38-27b": {
+    "items": 120,
+    "mean_correctness": 0.8958333333333334
+   }
+  }
+ },
+ "human": {
+  "pairwise": [
+   {
+    "first": "mistral:ministral-14b-2512",
+    "second": "zai:glm-5.3",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.6816976127320955,
+    "percentage_agreement": 0.85
+   },
+   {
+    "first": "mistral:ministral-14b-2512",
+    "second": "zai:glm-5.3-flash",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.6174863387978142,
+    "percentage_agreement": 0.825
+   },
+   {
+    "first": "mistral:ministral-14b-2512",
+    "second": "local:qwen38-27b",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.6391752577319587,
+    "percentage_agreement": 0.825
+   },
+   {
+    "first": "zai:glm-5.3",
+    "second": "zai:glm-5.3-flash",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.7354497354497354,
+    "percentage_agreement": 0.875
+   },
+   {
+    "first": "zai:glm-5.3",
+    "second": "local:qwen38-27b",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.9504950495049505,
+    "percentage_agreement": 0.975
+   },
+   {
+    "first": "zai:glm-5.3-flash",
+    "second": "local:qwen38-27b",
+    "items": 40,
+    "quadratic_weighted_kappa": 0.6938775510204082,
+    "percentage_agreement": 0.85
+   }
+  ],
+  "krippendorff_alpha_ordinal": 0.5551956048119733,
+  "percentage_agreement": 0.8666666666666667,
+  "per_judge": {
+   "mistral:ministral-14b-2512": {
+    "items": 40,
+    "mean_correctness": 0.8875,
+    "human_items": 40,
+    "confusion_matrix_human_rows": {
+     "wrong": {
+      "wrong": 0,
+      "partial": 1,
+      "correct": 0
+     },
+     "partial": {
+      "wrong": 1,
+      "partial": 0,
+      "correct": 0
+     },
+     "correct": {
+      "wrong": 0,
+      "partial": 6,
+      "correct": 32
+     }
+    }
+   },
+   "zai:glm-5.3": {
+    "items": 40,
+    "mean_correctness": 0.9125,
+    "human_items": 40,
+    "confusion_matrix_human_rows": {
+     "wrong": {
+      "wrong": 0,
+      "partial": 1,
+      "correct": 0
+     },
+     "partial": {
+      "wrong": 1,
+      "partial": 0,
+      "correct": 0
+     },
+     "correct": {
+      "wrong": 1,
+      "partial": 2,
+      "correct": 35
+     }
+    }
+   },
+   "zai:glm-5.3-flash": {
+    "items": 40,
+    "mean_correctness": 0.925,
+    "human_items": 40,
+    "confusion_matrix_human_rows": {
+     "wrong": {
+      "wrong": 0,
+      "partial": 0,
+      "correct": 1
+     },
+     "partial": {
+      "wrong": 1,
+      "partial": 0,
+      "correct": 0
+     },
+     "correct": {
+      "wrong": 1,
+      "partial": 2,
+      "correct": 35
+     }
+    }
+   },
+   "local:qwen38-27b": {
+    "items": 40,
+    "mean_correctness": 0.9,
+    "human_items": 40,
+    "confusion_matrix_human_rows": {
+     "wrong": {
+      "wrong": 0,
+      "partial": 1,
+      "correct": 0
+     },
+     "partial": {
+      "wrong": 1,
+      "partial": 0,
+      "correct": 0
+     },
+     "correct": {
+      "wrong": 1,
+      "partial": 3,
+      "correct": 34
+     }
+    }
+   }
+  },
+  "human": {
+   "items": 40,
+   "pairwise": [
+    {
+     "judge": "mistral:ministral-14b-2512",
+     "items": 40,
+     "quadratic_weighted_kappa": 0.4539249146757679,
+     "percentage_agreement": 0.8
+    },
+    {
+     "judge": "zai:glm-5.3",
+     "items": 40,
+     "quadratic_weighted_kappa": 0.46488294314381273,
+     "percentage_agreement": 0.875
+    },
+    {
+     "judge": "zai:glm-5.3-flash",
+     "items": 40,
+     "quadratic_weighted_kappa": 0.21985815602836867,
+     "percentage_agreement": 0.875
+    },
+    {
+     "judge": "local:qwen38-27b",
+     "items": 40,
+     "quadratic_weighted_kappa": 0.430379746835443,
+     "percentage_agreement": 0.85
+    }
+   ],
+   "krippendorff_alpha_ordinal": 0.5064379752959927,
+   "percentage_agreement": 0.86
+  }
+ }
+}
