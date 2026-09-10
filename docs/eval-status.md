@@ -83,7 +83,7 @@ extension is generated and thrown away, and its seams do not reach Vespa);
   loop leads by 2 points of correctness (0.95 against 0.93, Ministral 3 14B,
   GLM 5.3 judge) and by 6 on badly worded questions, at three times the latency
   and five times the cost. The loop stays one parameter away. D-035, D-035b.
-- **Reranker off by default in `search`, on in `answer`.** The reranker is 91%
+- **No reranker on the agent path, kept in `answer`.** The reranker is 91%
   of a search's latency and buys +0.14 section recall@1 but only +0.04 at depth
   5; an agent reads several hits. D-015b.
 - **Query rewrite off.** One call recovers 4 of the 19 points noise costs and
@@ -95,10 +95,9 @@ extension is generated and thrown away, and its seams do not reach Vespa);
 - **Similarity floors off.** The corridor between the worst real question and
   the best off-topic one is 0.017 wide, and every unanswerable question clears
   any floor. D-030b.
-- **Markers kept beside the Sources block** rather than links-only prose. Inline
-  fragment links are 170 encoded characters a weak consumer must reproduce;
-  a sources-only block loses the claim-to-quote pairing. Dropping markers is a
-  rendering switch. D-027c.
+- **Markers and a Sources block in the generated answer** (D-027c); on the agent
+  path the citation is a Markdown link on the `url#anchor` a hit printed, and
+  sentence-level fragment links were dropped with the verifier tool (D-044).
 - **GLM 5.3 as the reporting judge.** It matches the human reader on 35 of 40
   and never calls correct what the reader rejected; every disagreement is in
   the strict direction, so its numbers are floors. Flash agrees at kappa 0.87
@@ -202,20 +201,16 @@ credited.
 - **Prompt rules from the human labels** (prose for factual questions, one
   marker per list item, state the exact value first) are decided, D-021b and
   D-042, but not yet measured or shipped.
-- **Nothing in Work has been measured**, only two hand sessions on 9 September
-  that drove D-029a, D-037b and the improvement axes.
+- **Nothing in Work has been measured beyond hand sessions**: two on 9 September
+  (D-029a, D-037b) and one on 10 September (D-044). A host-fidelity arm in the
+  consumer evaluation is the follow-up.
 
-## What the Work test is expected to touch
+## What the Work test showed
 
-The items Tom named are the ones the record already points at:
-
-- **Tool descriptions.** Now under 120 words each, 1,673 tokens for the seven tools measured before `history` went live
-  plus 240 of instructions; Work bills them against every message. D-029a.
-- **The workspace Skill.** Work does not read MCP resources, prompts or dynamic
-  tool lists, so `glossator://guide` never reaches it; the Skill under
-  `skills/mistral-docs/` is the only client-side channel and must carry the
-  whole rulebook (corpus scope, never fabricate, refusal, source block shape,
-  search before answering). It currently runs 129 words. Improvement axis 2 in
-  `docs/improvement-axes.md`.
-- **The approval prompts.** Read-only annotations ship; whether Work honours
-  them is what the hand test shows. D-037b.
+Tom's session of 10 September (two questions) ran ten calls: six searches,
+three section opens, one page read; never the quote verifier, never the answer
+tool; a correct answer with one page link. Work rendered every tool result in
+the chat, ids and cost notes included. With the page-size numbers (D-043) that
+decided D-044: three tools, sections addressed by `url#anchor`, no ids, no time
+or cost in model-facing text, the answer path kept behind the HTTP API as the
+baseline. The Skill under `skills/mistral-docs/` describes the three-tool flow.

@@ -1287,3 +1287,13 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 3. `answer`, the reranker, the search loop and `cite` stay in the package and the HTTP API as the measured context-injection baseline (`POST /ask`, `POST /cite`); the MCP surface is the agent path. The argument for the agent path is the evidence above: equal correctness, one fewer model, a third of the latency, and the consumer keeps its own reasoning and can reformulate, which is where the loop won on badly worded questions (D-035b).
 4. The Work Skill, the custom instructions and the CLAUDE.md block describe the three-tool flow; the consumer evaluation's arms are `no tools` and `tools` from now on, with `answer` measured through the API.
 5. The server serves an unauthenticated landing page and favicon on the subdomain beside `/health`.
+
+---
+
+## D-018a · The upstream list is written; nothing is sent before the review
+
+**Status:** decided by Tom · 2026-09-10 · `docs/upstream.md`
+
+**Facts.** Fifteen defects across the toolkit, its Vespa plugin, the starter app and the documentation repository are reproduced with package lines in `docs/search-toolkit.md` and `docs/mistral-stack.md`. The toolkit still has no public repository; the starter app and the docs repository accept pull requests.
+
+**Decision.** `docs/upstream.md` ranks them by what a fix saves the next person and names where each goes. Reports and pull requests are sent after the review, so the review is on the work; the three ranking defects that produce a plausible wrong order rather than an error go first.
