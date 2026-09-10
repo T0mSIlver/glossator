@@ -39,7 +39,22 @@ python run_replay.py --base-url https://<host>/v1 --model <medium id> \
 ```
 
 `--api-key-env` names another variable; `--header "Name: value"` adds one.
-Bring back `results.jsonl`. The import side pairs each row with its source
-record by `source_call_id`, parses and verifies citations with the same code
-the original run used, judges with GLM 5.3 blind, and writes a run directory
-beside the originals.
+Bring back `results.jsonl`, committed on the branch as
+`eval/replay/medium-3-5/results.jsonl`.
+
+## Scoring the completions
+
+```
+uv run python -m glossator.eval.replay import eval/replay/medium-3-5/results.jsonl     --prompts eval/replay/medium-3-5/prompts.jsonl     --name medium35-replay --model mistral-medium-2604     --judge-models zai:glm-5.3,zai:glm-5.3-flash
+```
+
+writes one run directory per source run (`<date>-medium35-replay-dev60-rerank`
+and so on). Each replayed answer is parsed, its quotes verified against the
+sources rebuilt from the recorded context, its markers stripped where nothing
+verified, and the record keeps the source run's retrieval trace untouched; the
+call ledger holds every completion verbatim. Without `--judge-models` the run
+is written unjudged and `answer_eval rejudge` scores it later.
+
+`check` proves the rebuild: it re-verifies each source run's own citations
+against the rebuilt sources and reports how many answers reproduce the recorded
+verdicts and chunk ids. On the four reporting runs it is 286 of 286.
