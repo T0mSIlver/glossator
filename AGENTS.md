@@ -1,6 +1,6 @@
 # Working in this repository
 
-glossator answers technical questions over Mistral's documentation with cited sources. Read `DECISIONS.md` before changing behaviour: every choice is recorded there with the facts behind it, and a change that reverses one gets a new entry. If `.local/AGENTS.md` exists, read it first: it holds machine-local context and is never committed.
+glossator gives agents Mistral's documentation through three read-only MCP tools (search, read a page, history) over the vendored corpus at a pinned commit; the agent does the research and writes the answer (D-044). A FastAPI service keeps the generated-answer path, with verified citations, as the evaluated baseline behind `POST /ask` and `POST /cite`. Read `DECISIONS.md` before changing behaviour: every choice is recorded there with the facts behind it, and a change that reverses one gets a new entry. If `.local/AGENTS.md` exists, read it first: it holds machine-local context and is never committed.
 
 ## Layout
 
@@ -14,8 +14,11 @@ src/glossator/
   eval/                  datasets, retrieval metrics, answer judge, experiment grid, reports
 src/entrypoints/         api (FastAPI) and mcp_server; CLIs are python -m glossator.{corpus,ingest,retrieval,answer}
 corpus/                  vendored normalized corpus + manifest + upstream LICENSE
-eval/                    datasets and results
-tests/
+eval/                    datasets, committed run directories, corpus-stats, replay exports
+docs/                    architecture, evaluation, retrieval, corpus, stack notes
+skills/                  the mistral-docs workspace Skill for Mistral Work
+deploy/                  image, compose, deploy script, Cloudflare tunnel templates
+tests/                   offline tests; tests that need Vespa or an API key skip when unconfigured
 ```
 
 ## Toolkit
