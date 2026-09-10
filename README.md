@@ -8,16 +8,49 @@ snapshots. The agent does the research and writes the answer. A FastAPI
 service keeps the generated-answer path, with `[n]` markers and quotes checked
 against the retrieved chunks, as the evaluated baseline.
 
+## Why an MCP server, and what decided its shape
+
+Agents inside Mistral Work, Le Chat, scheduled tasks and chat bots have no
+filesystem and no grep. What they can reach is a Connector. A coding agent with
+the SDK checked out can grep a parameter name, but not a rate limit, a price, a
+deprecation date, the capability matrix or what changed last month; 54 of the
+85 real questions in `eval/mined.jsonl` were asked by people who had the SDK
+and still failed (`DECISIONS.md` D-038, D-039). This server gives those agents
+the documentation at a pinned commit, addressed by the same `url#anchor` a
+reader clicks, plus the one thing the live site cannot show: how a fact
+changed over time.
+
+Every choice is in `DECISIONS.md` with the run that decided it. The ones that
+shaped the product:
+
+| Decision | Evidence | Entry |
+|---|---|---|
+| Source the docs repo at a commit, not `llms.txt` or HTML | all 75 `llms.txt` links return 404; rendered HTML is 1.7% text with empty tab panels | D-001 |
+| Section chunks with tested anchors, not whole pages | page chunks score section recall 0 and cost twice the tokens at answer time | D-034, D-035a |
+| Vector-heavy hybrid weights inside Vespa | best section recall on a 13-configuration grid over 294 questions | D-034 |
+| The agent does the research; no generation inside the server | a capable consumer reaches the same correctness with the tools as with a server-side answer (0.77 against 0.78), one model instead of two, a third of the latency, and its own reasoning to reformulate | D-040b, D-044 |
+| No reranker on the agent path | it was 91% of a search's latency for rank-1 precision an agent that reads several hits does not need | D-015b |
+| Swapping the generator changes nothing | Medium 3.5 replayed on the recorded prompts: correctness unchanged within the interval on four sets | D-017b |
+| Three tools, addressed by `url#anchor`, no ids | 97% of pages fit one read under 8,000 tokens; the Work session never used the other five tools | D-043, D-044 |
+| Read-only tool annotations | without them Work asks for approval on every call and a headless consumer never calls at all | D-037b, D-037c |
+| A time axis: eight biweekly snapshots and a history tool | the docs renamed their API section in August; `-latest` aliases moved under users' feet | D-041, D-041a |
+| Judges: GLM 5.3 primary, checked against four judges and 40 human labels | every primary-judge disagreement with the reader is in the strict direction, so its numbers are floors | D-021a, D-021b, D-021c |
+
+What was kept from the Mistral Search Toolkit, what was wrapped, replaced or
+skipped, and why, is in `docs/search-toolkit.md`; every Mistral component with
+its version, defects and constraints is in `docs/mistral-stack.md`; the state
+of the evaluation in one page is `docs/eval-status.md`.
+
 ## Architecture in ten lines
 
 1. The repository vendors 411 normalized documentation pages at a pinned source commit.
 2. The corpus adapter converts the documentation MDX, OpenAPI file, and model data to Markdown.
 3. Ingestion splits pages at headings with a 600-token target and a 1,024-token cap.
-4. Mistral embeddings map each chunk to either 128 or 1,024 dimensions.
-5. Vespa stores one schema for each index variant.
+4. Mistral embeddings map each chunk to 1,024 dimensions (128 stays as a measured variant).
+5. Vespa stores one schema for each index variant, and one more for the dated snapshots.
 6. Vespa combines BM25 and vector features in a two-phase ranking profile.
-7. Search hits carry a URL, anchor, heading path, page offsets, and an opaque chunk ID.
-8. The answer layer gathers context, generates structured output, and verifies quoted citations.
+7. The MCP server exposes search, whole-page reads and history; every result is addressed by `url#anchor`.
+8. The answer layer gathers context, generates structured output and verifies quoted citations, behind the HTTP API.
 9. FastAPI and MCP share lazily constructed `SearchEngine` instances.
 10. Evaluation records every query, model call, hit, score, citation, cost, and latency.
 

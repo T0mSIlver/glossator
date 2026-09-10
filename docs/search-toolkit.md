@@ -75,7 +75,7 @@ and Vespa plugin" table only, package paths are relative to `plugins/vespa/`.
 | `ranking_weights` per query | Override weights per request | wrap | Needs a `_weight` suffix nothing checks (`search/bodies.py:33-34`, D-025) | Translate in one place |
 | `exclude_ids` | Skip chunks already seen | as is | Bound as a YQL param (`search/query_builder.py:118-126`) | Builder path only |
 | `extra_yql_filter` | Raw YQL predicate per query | as is | The only per-query filter (`search/query.py:25-30`) | Close over the values |
-| `NavigableIndex` ops | navigate, read, grep, get_chunk | as is | Most of the MCP surface (`retrieval/engine.py`, `Navigation`) | Keep |
+| `NavigableIndex` ops | navigate, read, grep, get_chunk | as is | `read_page` and the answer layer's section reads (`retrieval/engine.py`, `Navigation`) | Keep |
 | HNSW distance metric | Vector index configuration | wrap | Hardcoded euclidean (`app/schemas/field.py:29`) | Restrict by id to read cosine |
 | `matchfeatures` | Per-hit feature values | replace | Dropped by the hit parser (`…/document_per_chunk_index.py:490-529`) | Budget a second query |
 | Generated `services.xml` | Deployment descriptor | wrap | No `<resource-limits>` seam (`deploy/templates/services.xml.j2`) | Patch outside the toolkit |
@@ -154,7 +154,7 @@ page deletes its chunks by `source_id` before writing. Ids are derived
 (`compute_id(source_id, locator)`), so keying `source_id` on the page URL makes a
 re-ingest idempotent without a manifest of chunk ids.
 
-**The positional operations gave the MCP server its whole navigation surface.**
+**The positional operations are the MCP server's page reads.**
 `navigate`, `read`, `grep` and `get_chunk` are implemented in the plugin and
 wrapped in about 70 lines (`src/glossator/retrieval/engine.py`, `Navigation`). Against
 the live index:
@@ -172,10 +172,13 @@ $ uv run python -m glossator.retrieval "how do I stream a chat completion" --top
 
 and from the top hit, `around(window=1)` returns the sections at offsets
 3743-4606, 5975-7452 and 8755-10285 of the same page in reading order, `next()`
-returns 8755-10285, and `grep("stream")` returns 5975-7452 and 7434-8773. Seven
-MCP tools rest on that. The three top hits being three chunks of one section is
-the crowding D-012a records and the reason the evaluation collapses the ranked
-list before scoring (D-016a).
+returns 8755-10285, and `grep("stream")` returns 5975-7452 and 7434-8773. The
+`read_page` tool rests on `read`; `around`, `next` and `grep` backed the section,
+step and find-on-page tools until D-044 cut the surface to three tools, and the
+answer layer still uses `around`. The three top hits being three chunks of one
+section is the crowding D-012a records, the reason the evaluation collapses the
+ranked list before scoring (D-016a) and the reason `mistral_docs_search` prints
+one hit per section (D-044).
 
 **`exclude_ids` and per-query filters work, on the builder path.** The same query
 object carries both, and the generated YQL shows it:
