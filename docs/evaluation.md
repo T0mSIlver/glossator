@@ -55,7 +55,9 @@ No retrieved evidence was lost during context assembly.
 Of the 77 generation failures, 53 quoted the expected section correctly. The
 answer still omitted or misstated part of the reference
 ([`2026-09-09-2028-failure-analysis`](../eval/runs/2026-09-09-2028-failure-analysis/),
-D-042).
+D-042). [`failure-classes.md`](failure-classes.md) turns the attribution into
+four named classes of question the system still gets wrong, each with question
+ids, the cause, the fix and its cost.
 
 D-017b replaces only the answer-writing model while preserving each recorded
 prompt. The four Ministral 3 14B to Medium 3.5 correctness pairs are:

@@ -155,6 +155,7 @@ tests/            offline tests and optional backend integration tests
 ## Read next
 
 - [`docs/evaluation.md`](docs/evaluation.md): the evaluation story, dataset by dataset, with every run linked; [`docs/eval-status.md`](docs/eval-status.md) is the stage-by-stage table.
+- [`docs/failure-classes.md`](docs/failure-classes.md): the four classes of question still answered wrong, with question ids, causes, fixes and costs; the refresh gate that decides whether a new docs commit is served is D-045 and `deploy/README.md`.
 - [`docs/mcp.md`](docs/mcp.md): the tool contract and the Mistral Work setup; [`docs/architecture.md`](docs/architecture.md): the pipeline in ten lines.
 - [`docs/upstream.md`](docs/upstream.md): the defects found in Mistral's packages and documentation, ranked, with where each fix goes.
 - [`docs/search-toolkit.md`](docs/search-toolkit.md): the Mistral Search Toolkit kept, wrapped, replaced, skipped.

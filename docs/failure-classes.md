@@ -10,9 +10,11 @@ resolve in `eval/dev.jsonl`, `eval/dev-noisy.jsonl` and `eval/mined.jsonl`; the
 run directory named with each id holds the answer, its context, the judge's
 reason and the class.
 
-This lives in `docs/` rather than the README because the README is the short
-form and every number here needs its run beside it. The README's "Read next"
-list points here.
+This is its own page rather than a section of `evaluation.md` because that
+page tells the evaluation story dataset by dataset and this one is organised by
+what to fix next; each class needs its run beside every number, which is more
+than a section carries. `evaluation.md` and the README's "Read next" list
+point here.
 
 Sizes, over the 177 classified failures: exact-value shortfalls 55, false
 refusals 35, missed refusals 34, retrieval misses 26, answers citing the wrong
