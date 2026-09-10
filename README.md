@@ -36,6 +36,35 @@ shaped the product:
 | A time axis: eight biweekly snapshots and a history tool | the docs renamed their API section in August; `-latest` aliases moved under users' feet | D-041, D-041a |
 | Judges: GLM 5.3 primary, checked against four judges and 40 human labels | every primary-judge disagreement with the reader is in the strict direction, so its numbers are floors | D-021a, D-021b, D-021c |
 
+### Why not the alternatives
+
+**Put the whole documentation in a 1M context.** The corpus is 765,646 tokens
+in Medium 3.5's tokenizer (`eval/corpus-stats/`). It does not fit Medium 3.5's
+256k window, and Work runs on Medium 3.5. It fits the 1M window of Z.ai GLM 5.2,
+which Mistral serves at 1.4 USD per million input tokens, 0.14 cached: about
+1.07 USD per question uncached and 0.11 cached, against about 0.005 for the
+agent path, with no section link behind any claim and no way to say the
+documentation does not answer. A search returns the right thousand tokens of
+the right page; that is the whole trade.
+
+**Old-school RAG: retrieve, stuff, generate inside the server.** This
+repository built it, measured it, and keeps it as the baseline (`POST /ask`).
+On the same questions a capable agent given search and read tools reaches the
+same correctness (0.77 against 0.78) at a third of the latency, with one model
+instead of two, and it can reformulate when the first search misses, which is
+where the server-side loop won on badly worded questions (D-035b, D-040b). The
+generator was not the ceiling either: Medium 3.5 in place of Ministral 3 14B
+moved nothing (D-017b). What is left in the server is what an agent cannot do
+for itself: a pinned corpus, tested section anchors, and history.
+
+**Mistral's own retrieval: Libraries and web search.** Libraries index uploaded
+files for an agent's `document_library` tool and cite the document; they do not
+know docs.mistral.ai's section anchors, a commit, or what changed since June.
+Web search finds the live page: a consumer with its own web search resolved
+links well (0.86) and answered at 0.52 to 0.58, against 0.77 with these tools
+(D-040b). The live site also has no history, and its `llms.txt` points at 75
+pages that return 404 (D-001).
+
 What was kept from the Mistral Search Toolkit, what was wrapped, replaced or
 skipped, and why, is in `docs/search-toolkit.md`; every Mistral component with
 its version, defects and constraints is in `docs/mistral-stack.md`; the state
