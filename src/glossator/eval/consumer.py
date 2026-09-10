@@ -98,14 +98,14 @@ ARMS = ("A0", "A1", "A2")
 
 ARM_TOOLS: dict[str, str | None] = {
     "A0": None,
-    "A1": (
-        "mistral_docs_search,mistral_docs_open_section,mistral_docs_step,"
-        "mistral_docs_read_page,mistral_docs_find_on_page,mistral_docs_verify_quotes"
-    ),
+    "A1": "mistral_docs_search,mistral_docs_read_page",
     "A2": "mistral_docs_answer",
 }
 """The GLOSSATOR_MCP_TOOLS allowlist each arm's server runs. A0 never sees an
-MCP server at all; A1 and A2 talk to servers started with these allowlists."""
+MCP server at all; A1 talks to a server started with this allowlist. A2 named
+the answer tool while it was on the MCP surface (runs up to 2026-09-10); it is
+kept so recorded runs read back, and a new A2 cell needs the API's `POST /ask`
+instead (D-044)."""
 
 NAMESPACED_TOOLS = (
     "mistral_docs_search",
@@ -117,8 +117,8 @@ NAMESPACED_TOOLS = (
     "mistral_docs_verify_quotes",
     "mistral_docs_history",
 )
-"""The tool names this server serves. Nothing else is called any of these, so
-they are this server's wherever they appear."""
+"""Every tool name this server has served. The surface is three tools since
+D-044; the other five stay here so runs recorded before then keep reading."""
 
 LEGACY_TOOLS = ("search", "open", "navigate", "read", "grep", "ask", "cite", "history")
 """The names the tools had before they were namespaced, so recorded runs keep

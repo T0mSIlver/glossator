@@ -1,5 +1,7 @@
 # Improvement axes
 
+*This audit describes the eight-tool surface used from 2026-09-09 to 2026-09-10; D-044 cut it to three tools on 2026-09-10, so its `src/entrypoints/mcp_server.py` line references are historical.*
+
 Where the documentation server loses value between the index and the consumer, ordered by how much
 each change is expected to move the product as it is actually used: from a custom Connector in
 Mistral Work, and from a coding agent such as Claude Code.

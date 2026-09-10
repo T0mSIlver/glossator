@@ -1,4 +1,4 @@
-"""Health and bearer-token checks, run inside the MCP container.
+"""Health, protocol and bearer-token checks, run inside the MCP container.
 
 ``deploy.sh`` streams this file into ``docker compose exec -T mcp python -``, so
 the deployment host needs no curl and no port has to be reachable from the
@@ -14,6 +14,7 @@ import urllib.request
 from typing import Any
 
 BASE = "http://127.0.0.1:8000"
+PROTOCOL_VERSION = "2025-11-25"
 
 INITIALIZE = json.dumps(
     {
@@ -21,7 +22,7 @@ INITIALIZE = json.dumps(
         "id": 1,
         "method": "initialize",
         "params": {
-            "protocolVersion": "2025-06-18",
+            "protocolVersion": PROTOCOL_VERSION,
             "capabilities": {},
             "clientInfo": {"name": "glossator-deploy", "version": "1"},
         },
@@ -44,12 +45,33 @@ def _status(request: urllib.request.Request) -> tuple[int, bytes]:
         return int(error.code), bytes(error.read())
 
 
-def _initialize(token: str | None) -> int:
+def _initialize(token: str | None) -> tuple[int, str | None]:
     headers: dict[str, str] = dict(JSON_RPC_HEADERS)
     if token:
         headers["authorization"] = f"Bearer {token}"
-    code, _ = _status(urllib.request.Request(f"{BASE}/mcp", data=INITIALIZE, headers=headers))
-    return code
+    code, body = _status(urllib.request.Request(f"{BASE}/mcp", data=INITIALIZE, headers=headers))
+    if code != 200:
+        return code, None
+    try:
+        text = body.decode()
+    except UnicodeDecodeError:
+        return code, None
+    candidates = [text]
+    candidates.extend(
+        line.removeprefix("data:").lstrip()
+        for line in text.splitlines()
+        if line.startswith("data:")
+    )
+    for candidate in candidates:
+        try:
+            response: Any = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        result = response.get("result") if isinstance(response, dict) else None
+        version = result.get("protocolVersion") if isinstance(result, dict) else None
+        if isinstance(version, str):
+            return code, version
+    return code, None
 
 
 def main(token: str) -> int:
@@ -67,9 +89,10 @@ def main(token: str) -> int:
         )
         return 1
 
-    anonymous = _initialize(None)
-    authorized = _initialize(token)
+    anonymous, _ = _initialize(None)
+    authorized, negotiated = _initialize(token)
     print(f"token check: without a token HTTP {anonymous}, with the token HTTP {authorized}")
+    print(f"protocol check: requested {PROTOCOL_VERSION}, negotiated {negotiated or 'missing'}")
     if anonymous != 401:
         print(
             f"an unauthenticated MCP call got HTTP {anonymous}; the token is not enforced",
@@ -78,6 +101,13 @@ def main(token: str) -> int:
         return 1
     if authorized != 200:
         print(f"the configured token got HTTP {authorized}", file=sys.stderr)
+        return 1
+    if negotiated != PROTOCOL_VERSION:
+        print(
+            f"the server negotiated MCP protocol {negotiated or 'missing'}; "
+            f"expected {PROTOCOL_VERSION}",
+            file=sys.stderr,
+        )
         return 1
     if health.get("status") != "ok":
         print(f"the server reports status {health.get('status')!r}", file=sys.stderr)

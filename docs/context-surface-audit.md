@@ -1,5 +1,7 @@
 # Context surface audit
 
+*This audit describes the eight-tool surface used from 2026-09-09 to 2026-09-10; D-044 cut it to three tools on 2026-09-10, so its `src/entrypoints/mcp_server.py` line references are historical.*
+
 Everything a consumer of the MCP server sees — the server name, the instructions string, eight tool
 descriptions, and the text every tool returns — measured against published guidance on tool design
 and against what two real consumers did with the deployed server.

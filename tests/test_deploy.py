@@ -14,6 +14,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from deploy import probe
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEPLOY_DIR = REPO_ROOT / "deploy"
@@ -347,6 +348,50 @@ def test_the_build_ignores_secrets_and_the_test_suite() -> None:
         if line.strip() and not line.startswith("#")
     }
     assert {".env", ".venv", ".git", "tests", "deploy"} <= ignored
+
+
+def test_probe_requests_the_latest_installed_protocol() -> None:
+    request = json.loads(probe.INITIALIZE)
+    assert request["params"]["protocolVersion"] == "2025-11-25"
+
+
+def test_probe_prints_the_negotiated_protocol(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    responses = iter(
+        [
+            (200, b'{"status":"ok"}'),
+            (401, b""),
+            (
+                200,
+                b'data: {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25"}}\r\n\r\n',
+            ),
+        ]
+    )
+    monkeypatch.setattr(probe, "_status", lambda request: next(responses))
+
+    assert probe.main("secret") == 0
+    output = capsys.readouterr()
+    assert "protocol check: requested 2025-11-25, negotiated 2025-11-25" in output.out
+    assert output.err == ""
+
+
+def test_probe_rejects_a_different_negotiated_protocol(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    responses = iter(
+        [
+            (200, b'{"status":"ok"}'),
+            (401, b""),
+            (200, b'{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-06-18"}}'),
+        ]
+    )
+    monkeypatch.setattr(probe, "_status", lambda request: next(responses))
+
+    assert probe.main("secret") == 1
+    output = capsys.readouterr()
+    assert "protocol check: requested 2025-11-25, negotiated 2025-06-18" in output.out
+    assert "the server negotiated MCP protocol 2025-06-18; expected 2025-11-25" in output.err
 
 
 @pytest.mark.slow

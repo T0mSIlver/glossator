@@ -11,8 +11,9 @@ commit, embedded with `mistral-embed` at 1024 dimensions into one Vespa document
 per chunk; hybrid retrieval inside Vespa with vector-heavy weights; a listwise
 LLM reranker over 20 candidates; a single-pass generation with verified quotes,
 per-claim markers, a deduplicated Sources block and text-fragment deep links;
-a refusal path; and an MCP surface of eight read-only tools where an agent does
-its own retrieval and asks the server only to verify its quotes. On 60 generated
+a refusal path; and an MCP surface of three read-only tools (search, read a
+page, history) where the agent does its own retrieval and writes the answer
+(D-044). On 60 generated
 development questions the shipped path scores 0.93 judged correctness with
 Ministral 3 14B generating and GLM 5.3 judging; on 85 questions mined from real
 GitHub issues it scores 0.76 under the same models, and the failure analysis
@@ -37,7 +38,7 @@ key's quota for both models is zero (D-017a).
 | Query rewrite | Off by default, per-request switch | D-035b | `clean-rewrite`, `noisy-rewrite` | Ministral 3 14B gen, GLM 5.3 judge |
 | Citations | Verified quotes, `[n]` per claim, one Sources line per (url, anchor), fragment link to the sentence | D-016, D-027b, D-027c, D-036, D-036a, D-036b | `fragments/` under `mined-shipped`, `fresh60-shipped` | none (live-page fetch) |
 | Refusal | Insufficient-evidence flag plus "no verified citation" rule, unchanged | D-030b, D-042 | `failure-analysis`, `-v2` | Ministral 3 14B answers, GLM 5.3 verdicts |
-| MCP surface | `mistral-docs`, eight namespaced read-only tools, concise results, 240-token instructions | D-029a, D-037b, D-037c, D-040, D-040a | `consumer-eval`, `consumer-eval-v2` | Claude Sonnet, GPT luna, muse spark 1.3 as consumers; GLM 5.3 judge |
+| MCP surface | `mistral-docs`, three read-only tools addressed by url#anchor, no ids, no time or cost in model-facing text | D-044, D-029a, D-037b, D-037c, D-040b | `consumer-eval`, `consumer-eval-v2` | Claude Sonnet, GPT luna, muse spark 1.3 as consumers; GLM 5.3 judge |
 | Deployment | One image, `remote-index` and `full`, Cloudflare tunnel, bearer token, index rebuilt from cache | D-037a, D-037d | `tests/test_deploy.py` | none |
 | Time axis | Eight biweekly snapshots in one schema, `history` tool, labels by span search then two judges | D-041, D-041a | `snapshot-labels`, `snapshot-eval` | local Ministral 3 14B Reasoning gen, GLM 5.3 judge |
 
@@ -52,7 +53,7 @@ system and CLI; `DOCUMENT_PER_CHUNK`; custom root fields from chunk metadata,
 which is what makes URL, anchor, heading path and kind filterable and rankable;
 `set_default_ranking_weights` and its build-time check; `exclude_ids` and
 `extra_yql_filter` on the builder path; the `NavigableIndex` positional
-operations, which are five of the eight MCP tools; `MetricsCalculator` and
+operations behind `read_page` and the section reads; `MetricsCalculator` and
 `RetrieverEvaluator` for retrieval metrics.
 
 **Used behind a workaround.** `MistralEmbedder` (retries raised from 3 to 8 for
