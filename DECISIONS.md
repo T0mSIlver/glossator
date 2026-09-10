@@ -1167,3 +1167,13 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Facts.** Thirty questions give a 95% interval of about ±0.13 per cell, and every configuration lands inside the shipped point's interval. Lifting the round cap removes the 13% of questions that hit it without moving correctness; wider previews do not help either, and the reasoning model uses two to three rounds and about two tool calls whatever the cap. These are relative numbers on a local reasoning model, not the API figures (D-035c); the instruct model's partial run was set aside when the model changed.
 
 **Decision.** The caps stay at 4 rounds, 4 searches per round and 600-character previews. The question "what if the answer is past the preview" is answered by the design (the final generation reads the full chunks of everything collected) and by this grid (wider previews change nothing); the loop's remaining cost is its tokens, which is why it is the thorough mode and not the default (D-035b).
+
+---
+
+## D-037d · The history tool is live on the public server; the index travels as a cache, not as a volume
+
+**Status:** decided · 2026-09-10 · container redeployed 03:40, `deploy/compose.yaml` mounts the snapshot corpora into the server
+
+**Facts.** Copying the development Vespa data volume to the container (1.5 GB) failed to start there: the config server's ZooKeeper refused its own copied state ("the current epoch, 1, is older than the last zxid"). Rebuilding from the embedding cache instead took under four minutes for the shipped index plus the eight snapshots (32,543 chunks) with zero embedding calls, because every chunk's embedding was already cached under its content hash. The public server now registers all eight tools, and `mistral_docs_history` answers over the tunnel: the sentence "Email domain authentication is available on Team plans and above", which a Work session quoted last night, first appears in the snapshot of 2026-07-01.
+
+**Decision.** An index is reproduced from the vendored corpus, the manifest and the embedding cache, never moved as a Vespa volume. The deploy script's full mode plus the snapshot ingestion is the documented path, and the cache directory is the one artefact worth backing up beside the repository.
