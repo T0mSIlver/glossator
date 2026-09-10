@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" width="800" height="430" role="img" aria-label="Histogram of documentation page token counts on a logarithmic axis">
+<style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:15px}.s{font-size:12px;opacity:.8}.v{font-size:12px;opacity:.75}</style>
+<text class="t" x="16" y="24">Page sizes in Mistral Medium 3.5 tokens</text>
+<text class="s" x="16" y="44">tokenizer mistral-medium-2604 · tekken.json of mistralai/Mistral-Medium-3.5-128B · 411 pages</text>
+<text class="s" x="776" y="44" text-anchor="end">pages per bin</text>
+<line x1="70" y1="372.0" x2="776" y2="372.0" stroke="currentColor" stroke-opacity=".15"/>
+<text class="v" x="62" y="376.0" text-anchor="end">0</text>
+<line x1="70" y1="297.0" x2="776" y2="297.0" stroke="currentColor" stroke-opacity=".15"/>
+<text class="v" x="62" y="301.0" text-anchor="end">35</text>
+<line x1="70" y1="222.0" x2="776" y2="222.0" stroke="currentColor" stroke-opacity=".15"/>
+<text class="v" x="62" y="226.0" text-anchor="end">70</text>
+<line x1="70" y1="147.0" x2="776" y2="147.0" stroke="currentColor" stroke-opacity=".15"/>
+<text class="v" x="62" y="151.0" text-anchor="end">106</text>
+<line x1="70" y1="72.0" x2="776" y2="72.0" stroke="currentColor" stroke-opacity=".15"/>
+<text class="v" x="62" y="76.0" text-anchor="end">141</text>
+<rect x="164.6" y="367.7" width="46.1" height="4.3" fill="#3b6fd4"/>
+<rect x="258.8" y="365.6" width="46.1" height="6.4" fill="#3b6fd4"/>
+<rect x="305.8" y="361.4" width="46.1" height="10.6" fill="#3b6fd4"/>
+<rect x="352.9" y="355.0" width="46.1" height="17.0" fill="#3b6fd4"/>
+<rect x="400.0" y="240.1" width="46.1" height="131.9" fill="#3b6fd4"/>
+<rect x="447.0" y="72.0" width="46.1" height="300.0" fill="#3b6fd4"/>
+<rect x="494.1" y="125.2" width="46.1" height="246.8" fill="#3b6fd4"/>
+<rect x="541.2" y="269.9" width="46.1" height="102.1" fill="#3b6fd4"/>
+<rect x="588.2" y="331.6" width="46.1" height="40.4" fill="#3b6fd4"/>
+<rect x="635.3" y="365.6" width="46.1" height="6.4" fill="#3b6fd4"/>
+<rect x="682.4" y="365.6" width="46.1" height="6.4" fill="#3b6fd4"/>
+<rect x="729.4" y="369.9" width="46.1" height="2.1" fill="#3b6fd4"/>
+<line x1="578.6" y1="66" x2="578.6" y2="372" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+<text class="v" x="582.6" y="62">4k</text>
+<line x1="621.1" y1="66" x2="621.1" y2="372" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+<text class="v" x="625.1" y="62">8k</text>
+<line x1="663.6" y1="66" x2="663.6" y2="372" stroke="currentColor" stroke-opacity=".6" stroke-dasharray="5 4"/>
+<text class="v" x="667.6" y="62">16k</text>
+<line x1="70" y1="372" x2="776" y2="372" stroke="currentColor" stroke-opacity=".35"/>
+<line x1="70.0" y1="372" x2="70.0" y2="377" stroke="currentColor" stroke-opacity=".35"/>
+<text class="v" x="70.0" y="394" text-anchor="middle">1</text>
+<line x1="211.2" y1="372" x2="211.2" y2="377" stroke="currentColor" stroke-opacity=".35"/>
+<text class="v" x="211.2" y="394" text-anchor="middle">10</text>
+<line x1="352.4" y1="372" x2="352.4" y2="377" stroke="currentColor" stroke-opacity=".35"/>
+<text class="v" x="352.4" y="394" text-anchor="middle">100</text>
+<line x1="493.6" y1="372" x2="493.6" y2="377" stroke="currentColor" stroke-opacity=".35"/>
+<text class="v" x="493.6" y="394" text-anchor="middle">1k</text>
+<line x1="634.8" y1="372" x2="634.8" y2="377" stroke="currentColor" stroke-opacity=".35"/>
+<text class="v" x="634.8" y="394" text-anchor="middle">10k</text>
+<line x1="776.0" y1="372" x2="776.0" y2="377" stroke="currentColor" stroke-opacity=".35"/>
+<text class="v" x="776.0" y="394" text-anchor="middle">100k</text>
+<text class="s" x="423" y="418" text-anchor="middle">page body tokens (log scale)</text>
+<text class="s" x="62" y="66" text-anchor="end">pages</text>
+</svg>

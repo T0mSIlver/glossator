@@ -1,0 +1,178 @@
+{
+  "by_kind": {
+    "api": {
+      "characters": 287113,
+      "chunks": 996,
+      "pages": 49,
+      "token_share": 0.0951,
+      "tokens": 72844
+    },
+    "doc": {
+      "characters": 2522445,
+      "chunks": 2890,
+      "pages": 296,
+      "token_share": 0.85,
+      "tokens": 650801
+    },
+    "model": {
+      "characters": 122084,
+      "chunks": 554,
+      "pages": 66,
+      "token_share": 0.0549,
+      "tokens": 42001
+    }
+  },
+  "config": {
+    "chunks": "sec1024 (section chunker: target 600 / cap 1024 / overlap 60 tokens)",
+    "corpus_commit": "2e094f7bbe1395de4a738a3483def3573143d973",
+    "corpus_dir": "corpus/mistral-docs",
+    "counts": "page body (markdown after the frontmatter)",
+    "kind": "corpus-stats",
+    "tokenizer": {
+      "file": "tekken.json",
+      "model_id": "mistral-medium-2604",
+      "repo": "mistralai/Mistral-Medium-3.5-128B"
+    }
+  },
+  "distribution": {
+    "max": 57179,
+    "mean": 1863,
+    "min": 5,
+    "n": 411,
+    "p50": 942,
+    "p75": 1639,
+    "p90": 3327,
+    "p95": 5629,
+    "p99": 15719
+  },
+  "kind": "corpus-stats",
+  "largest_pages": [
+    {
+      "characters": 190913,
+      "chunks": 101,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 57179,
+      "url": "https://docs.mistral.ai/studio/batch-processing"
+    },
+    {
+      "characters": 112290,
+      "chunks": 80,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 44457,
+      "url": "https://docs.mistral.ai/studio/document-processing/basic_ocr"
+    },
+    {
+      "characters": 101141,
+      "chunks": 50,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 25690,
+      "url": "https://docs.mistral.ai/studio/audio/speech_to_text/offline_transcription"
+    },
+    {
+      "characters": 86409,
+      "chunks": 31,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 22347,
+      "url": "https://docs.mistral.ai/resources/deprecated/native-reasoning"
+    },
+    {
+      "characters": 59965,
+      "chunks": 37,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 15964,
+      "url": "https://docs.mistral.ai/studio/document-processing/annotations"
+    },
+    {
+      "characters": 45226,
+      "chunks": 29,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 13519,
+      "url": "https://docs.mistral.ai/studio/agents/agents-api"
+    },
+    {
+      "characters": 32356,
+      "chunks": 18,
+      "kind": "model",
+      "locale": "en",
+      "tokens": 13462,
+      "url": "https://docs.mistral.ai/models"
+    },
+    {
+      "characters": 43971,
+      "chunks": 44,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 9273,
+      "url": "https://docs.mistral.ai/resources/deprecated/customization"
+    },
+    {
+      "characters": 38556,
+      "chunks": 24,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 9137,
+      "url": "https://docs.mistral.ai/studio/conversations/function-calling"
+    },
+    {
+      "characters": 39008,
+      "chunks": 28,
+      "kind": "doc",
+      "locale": "en",
+      "tokens": 8880,
+      "url": "https://docs.mistral.ai/studio/audio/speech_to_text/realtime_transcription"
+    }
+  ],
+  "read_page_budgets": {
+    "16000": {
+      "budget": 16000,
+      "median_sized_pages_per_call": 16,
+      "pages_fitting_whole": 407,
+      "share_fitting_whole": 0.9903
+    },
+    "8000": {
+      "budget": 8000,
+      "median_sized_pages_per_call": 8,
+      "pages_fitting_whole": 399,
+      "share_fitting_whole": 0.9708
+    }
+  },
+  "shares_under": {
+    "16000": {
+      "pages": 407,
+      "share": 0.9903,
+      "threshold": 16000
+    },
+    "2000": {
+      "pages": 328,
+      "share": 0.7981,
+      "threshold": 2000
+    },
+    "32000": {
+      "pages": 409,
+      "share": 0.9951,
+      "threshold": 32000
+    },
+    "4000": {
+      "pages": 377,
+      "share": 0.9173,
+      "threshold": 4000
+    },
+    "8000": {
+      "pages": 399,
+      "share": 0.9708,
+      "threshold": 8000
+    }
+  },
+  "totals": {
+    "characters": 2931642,
+    "chunks": 4440,
+    "pages": 411,
+    "tokens": 765646
+  }
+}
