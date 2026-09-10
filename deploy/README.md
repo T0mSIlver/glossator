@@ -209,6 +209,49 @@ claude mcp list
 Then ask a question that needs the documentation and watch for a
 `mistral_docs_search` call. `claude mcp remove mistral-docs` undoes it.
 
+## What the key behind the endpoint can spend, and what is served
+
+**Spend.** With the three-tool surface (D-044) the only Mistral API call a
+request can trigger is the embedding of the query: `search` and the `question`
+form of `history` embed once each on `mistral-embed`, about twenty tokens at
+0.10 USD per million, or two millionths of a dollar per call. `read_page` and
+the `text` and `section` forms of `history` read Vespa and call no model. The
+API's `POST /ask` and `POST /cite` are not exposed through the tunnel unless
+`API=1` is passed to `make deploy`; `/ask` is the one route that pays for
+generation and reranking, about 0.006 USD per question on Medium 3.5 (D-017b).
+
+The cap is on the Mistral side, not in this server. Set a **monthly spending
+limit on the Workspace** that owns `MISTRAL_API_KEY`
+(Admin Panel > Administration > Workspaces; the documentation:
+`admin/workspaces/workspaces-in-studio#usage-and-limits`). The documented
+behaviour at the limit: "If a Workspace reaches its monthly spending limit, API
+access for that Workspace is suspended until the next month begins or the limit
+is increased." A dedicated Workspace and key for the public server, with a limit
+of 5 USD, covers about two million searches a month. What this server does when
+the key is suspended: `search` and `history(question=...)` return a tool error
+naming the embedding service, and `read_page` and the other two history forms
+keep answering. `GET /health` runs the embedding probe once per process, so a
+suspension after start shows as those tool errors, not in `/health`, until the
+container restarts; restart it and `/health` reports `degraded`. There is no
+lexical-only fallback for search; that is a known gap, recorded here rather
+than papered over.
+
+**What is served.** The index is rebuilt from the vendored corpus, the snapshot
+manifest and the embedding cache (D-037d); it is never copied as a Vespa volume.
+The corpus under `corpus/mistral-docs` is one commit of
+`mistralai/platform-docs-public`, and `eval/refresh/served.json` names that
+commit, the snapshot date it corresponds to (`2026-09-07` at v1.0, commit
+`2e094f7b`) and the evaluation run that accepted it. The eight dated snapshots
+behind `history` are the same corpus adapter at older commits, listed in
+`eval/snapshots/manifest.json`; the served snapshot is the newest of them and
+reproduces the served index chunk for chunk (D-041a). A newer docs commit
+reaches the served index only through the refresh workflow's gate
+(`.github/workflows/refresh.yml`, D-045): the candidate is evaluated beside the
+served snapshot on the frozen question sets, a pull request moves the pointer
+and re-vendors the corpus on a pass, and `make deploy` after the merge rebuilds
+the index. The workflow runs on manual trigger at v1.0; its weekly schedule is
+commented out and costs about 1 USD per run on the shipped models.
+
 ## What each variable does
 
 `deploy/.env.deploy.example` lists every variable with a comment. The ones that
