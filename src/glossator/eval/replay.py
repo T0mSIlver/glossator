@@ -539,10 +539,17 @@ def import_results(
         run_path = create_run_directory(config["name"], root=runs_root)
         run_dir = RunDirectory.open(run_path, config)
         rebuild_notes: list[str] = []
+        skipped: list[str] = []
         for result in sorted(rows, key=lambda r: r["question_id"]):
             source = records.get(result["question_id"])
-            if source is None:
-                logger.warning("No source record", run=source_name, question=result["question_id"])
+            if source is None or source.trace is None:
+                # The prompt was exported from the call ledger, but the source
+                # run's record for it ended in an error and holds no trace, so
+                # there is nothing to verify the replayed quotes against.
+                logger.warning(
+                    "No source record with a trace", run=source_name, question=result["question_id"]
+                )
+                skipped.append(result["question_id"])
                 continue
             record, notes_for = replay_record(
                 source,
@@ -556,6 +563,15 @@ def import_results(
             rebuild_notes.extend(f"{result['question_id']}: {note}" for note in notes_for)
             run_dir.append_call("replay", _call_row(result, prompts[result["id"]], record))
             run_dir.record(record)
+        if skipped:
+            run_dir.config["notes"].append(
+                f"{len(skipped)} replayed answer(s) not scored because the source record "
+                f"ended in an error and has no trace: {', '.join(skipped)}."
+            )
+            run_dir.config["replay"]["skipped_no_trace"] = skipped
+            (run_path / "config.json").write_text(
+                json.dumps(run_dir.config, indent=2, sort_keys=True) + "\n"
+            )
         (run_path / "rebuild-notes.txt").write_text(
             "\n".join(rebuild_notes) + ("\n" if rebuild_notes else "")
         )

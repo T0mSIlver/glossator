@@ -1196,3 +1196,31 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Facts.** Qwen judged all 120 answers with no parse failure at about 7 s per call on the local server. Its mean correctness (0.90) sits between the strict Ministral (0.85) and the two GLM judges (0.93 and 0.94). Krippendorff's alpha over the four judges is 0.49, pulled down by Ministral (D-021a).
 
 **Decision.** Qwen on the local server is the judge for local-only nights and a third opinion on any run, at no cost; GLM 5.3 remains the reporting judge so the published tables stay on one scale. The judge study now covers four judges and one human.
+
+---
+
+## D-017b · Medium 3.5 measured by replaying the recorded prompts: the generator is not the ceiling
+
+**Status:** decided · 2026-09-10 · `eval/replay/` (exporter, standard-library runner, importer with a rebuild proof); runs `2026-09-10-1615-medium35-replay-{dev60-rerank,fresh60-shipped,mined-shipped,mined-v2-shipped}`; completions produced by Mistral Medium 3.5 (endpoint name `Mistral-Medium-3.5-128B`) through an OpenAI-compatible gateway Tom has access to at work, 288 requests, zero errors, `json_schema` output accepted; judged blind by GLM 5.3 with GLM 5.3 Flash second
+
+**How.** Every answer evaluation records the generator's request verbatim (D-023), and the user message of a `single_pass:grounded_answer` call is the whole assembled context. The 288 single-pass requests of the four reporting runs were exported at the shipped sampling (temperature 0.2, 1,600 completion tokens; mined-v2 had been generated at the local model's own settings, D-038b), sent to Medium from a machine with no access to Vespa or the index, and brought back. The import rebuilds each answer's sources from the recorded context plus a re-chunk of the vendored corpus, verifies the quotes with the answer layer's own verifier, strips markers nothing verified, and keeps the retrieval trace untouched. A check re-verifies each source run's own citations on the rebuilt sources: 286 of 286 answers reproduce the recorded verdicts and chunk ids, and feeding the Ministral completions back through the import reproduces the tuned-60 metrics to the last digit. Retrieval, reranking and context are therefore byte-identical between the two generators; the difference is the generator alone.
+
+| set | correctness | partial | wrong | groundedness | citation relevance | refusal correct | gold URL cited | quote verification | fabricated quotes per answer | output tokens |
+|---|---|---|---|---|---|---|---|---|---|---|
+| tuned 60 | 0.93 → 0.91 | 0.12 → 0.15 | 0.02 → 0.02 | 0.82 → 0.81 | 0.93 → 0.98 | 0.92 → 0.83 | 0.82 → 0.74 | 0.86 → 0.87 | 0.40 → 0.23 | 312 → 205 |
+| fresh 60 | 0.84 → 0.84 | 0.18 → 0.12 | 0.07 → 0.10 | 0.83 → 0.80 | 0.98 → 0.96 | 0.87 → 0.83 | 0.84 → 0.78 | 0.85 → 0.85 | 0.53 → 0.30 | 422 → 241 |
+| mined 85 | 0.76 → 0.80 | 0.24 → 0.26 | 0.12 → 0.07 | 0.88 → 0.89 | 0.96 → 0.95 | 0.92 → 0.94 | 0.86 → 0.85 | 0.85 → 0.92 | 0.59 → 0.17 | 530 → 321 |
+| mined-v2 83 | 0.64 → 0.62 | 0.25 → 0.33 | 0.23 → 0.22 | 0.71 → 0.77 | 0.93 → 0.95 | 0.78 → 0.82 | 0.57 → 0.63 | 0.83 → 0.89 | 0.41 → 0.22 | 387 → 231 |
+
+Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was generated on the local reasoning model; its Medium column is the first API-model number for that set. One mined answer is not scored because its source record ended in an error and has no trace.
+
+**Facts.**
+- Judged correctness does not move: −2, 0, +4 and −2 points on the four sets, every one inside the interval sixty to eighty-five questions allow (about ±0.09). Flash agrees (0.94 → 0.95, 0.83 → 0.84, 0.80 → 0.85). Paired per question, the changes are symmetric: on the mined set Medium is better on 11 and worse on 9, and 13 of the 20 partial answers stay partial. The "one parameter short of the reference" shape that D-042 read as a 14B limit survives the swap to Medium, so it is the prompt and the reference's strictness, not model capacity.
+- Medium is the cleaner writer: fabricated quotes per answer fall by half on every set, dangling markers go to zero, citation relevance rises on the tuned set, and answers are a third shorter.
+- Medium cites fewer sources (1.4 to 1.5 per answer against 1.7 to 2.3) and writes one long quote where the 14B wrote several short ones (156 characters against 91 on the tuned set). When that single quote fails verification, the answer has no verified citation and the refusal rule (D-042) turns a correct answer into a refusal: 7 answers on the tuned set against 3 for the 14B, 5 against 4 on the fresh set, which is the whole gap in the refusal and gold-URL columns. The failed quotes are not inventions. They span list items and table cells, drop Markdown link syntax, or splice with an ellipsis: Medium quotes the page as a reader sees it, and the verifier compares against the Markdown source.
+- Per question at Medium's published prices the replayed answers cost 0.0046 to 0.0062 USD, below the reference column's estimate because Medium writes fewer tokens. Latency is not comparable: the replay measures one gateway call (2.6 to 3.9 s at the median) and the source runs measure the whole pipeline.
+
+**Decisions.**
+1. Medium 3.5 stays the shipped default (D-017); the published tables keep both columns. The claim "the ceiling is the 14B" is withdrawn: the next gains on the answer path are in the prompt (state the exact value or limit before explaining, one marker per list item, prose for factual questions, D-021b), which now can be measured on either model.
+2. The quoting instruction gains an upper bound: one span per claim, one sentence or one table row, no ellipsis, copied from the source's Markdown. This is the rule a stronger model needs; the 14B was already writing short quotes. The verifier is not loosened: link syntax and ellipses are exactly what the resolvability check (D-036b) says the browser cannot highlight either.
+3. The replay path is the way to measure any generator from now on: no index, no reranker, no credits beyond the endpoint's, and a rebuild proof that the comparison is exact. The search loop cannot be replayed, since it is multi-turn; it stays a Ministral number until the quota opens.

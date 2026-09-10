@@ -16,9 +16,11 @@ its own retrieval and asks the server only to verify its quotes. On 60 generated
 development questions the shipped path scores 0.93 judged correctness with
 Ministral 3 14B generating and GLM 5.3 judging; on 85 questions mined from real
 GitHub issues it scores 0.76 under the same models, and the failure analysis
-puts the gap on the 14B generator, not on retrieval. The two models the
-product defaults to, Mistral Medium 3.5 for answers and Mistral Small 4 for
-reranking, have never been run: the key's quota for both is zero (D-017a).
+puts the gap on the 14B generator, not on retrieval. Medium 3.5, the
+product's default answer model, was measured on the single pass by replaying
+the recorded prompts (D-017b): correctness is unchanged within the interval and
+the answers are cleaner. Small 4, the default reranker, has never been run: the
+key's quota for both models is zero (D-017a).
 
 ## The shipped pipeline, stage by stage
 
@@ -178,11 +180,15 @@ credited.
 
 ## What is not measured, and matters for shipping
 
-- **The default models have never answered a question.** `answer` defaults to
-  Mistral Medium 3.5 and the reranker to Mistral Small 4; both return 429 with a
-  zero quota on this key. Every shipped number is Ministral 3 14B's. The same
-  run directories re-run on Medium in one command when the quota opens. Before
-  the Work test, check which model the deployed server is pointed at
+- **Medium 3.5 is now measured on the single pass, by replay** (D-017b, added
+  the evening of 10 September): the recorded prompts of the four reporting runs
+  were sent to Medium through a gateway and scored on identical retrieval and
+  context. Judged correctness does not move (0.93 → 0.91, 0.84 → 0.84,
+  0.76 → 0.80, 0.64 → 0.62 with GLM 5.3), fabricated quotes halve, and the
+  partial-answer shape on real questions survives the swap, so it is the prompt
+  and the references, not the 14B. Still unmeasured: the search loop on Medium,
+  and Small 4 as the reranker. The key's quota for both models is still zero,
+  so before the Work test check which model the deployed server is pointed at
   (`GLOSSATOR_MODEL`, `GLOSSATOR_CHAT_SERVER_URL`), or `mistral_docs_answer`
   will fail on the default.
 - **`mined-v2` is not comparable** with the first mined set (local reasoning

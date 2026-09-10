@@ -272,6 +272,15 @@ the account's quota for it opens.
 Reranked single-pass retrieval closed most of the gap to the search loop, which
 remains available as the thorough mode of `ask`.
 
+Mistral Medium 3.5 was measured on the same single-pass answers by replaying
+the recorded prompts through an OpenAI-compatible endpoint (`eval/replay/`,
+`DECISIONS.md` D-017b), so retrieval and context are byte-identical and only
+the generator changes. Judged correctness is unchanged within the interval
+(0.93 → 0.91 on the tuned sixty, 0.84 → 0.84 on the fresh sixty, 0.76 → 0.80
+on the 85 mined questions, GLM 5.3 blind), fabricated quotes per answer halve,
+and answers are a third shorter; the runs are
+`eval/runs/2026-09-10-1615-medium35-replay-*/`.
+
 Questions in another language are rendered in English for retrieval and answered
 in their own language (`DECISIONS.md` D-008b). On 36 French questions
 (`eval/dev-fr.jsonl`) over the English corpus this took cited-URL match from 0.47
