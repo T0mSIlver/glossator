@@ -1,15 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 148" width="720" height="148" role="img" aria-label="Citation resolvability by arm (links on a corpus page)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 226" width="720" height="226" role="img" aria-label="Citation resolvability by arm (links on a corpus page)">
 <style>text{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:currentColor}.t{font-weight:600;font-size:14px}.v{font-size:12px;opacity:.75}</style>
 <text class="t" x="16" y="22">Citation resolvability by arm (links on a corpus page)</text>
-<text x="240" y="51.0" text-anchor="end">A0</text>
+<text x="240" y="51.0" text-anchor="end">claude-sonnet-low / A0</text>
 <rect x="248" y="39.0" width="147.0" height="15" fill="#3b6fd4"/>
 <text class="v" x="646" y="51.0">0.349405</text>
-<text x="240" y="77.0" text-anchor="end">A1</text>
+<text x="240" y="77.0" text-anchor="end">claude-sonnet-low / A1</text>
 <rect x="248" y="65.0" width="388.0" height="15" fill="#3b6fd4"/>
 <text class="v" x="646" y="77.0">0.922222</text>
-<text x="240" y="103.0" text-anchor="end">A2</text>
-<rect x="248" y="91.0" width="326.1" height="15" fill="#3b6fd4"/>
-<text class="v" x="646" y="103.0">0.775</text>
-<rect x="16" y="131" width="10" height="10" fill="#3b6fd4"/>
-<text class="v" x="30" y="140">share</text>
+<text x="240" y="103.0" text-anchor="end">claude-sonnet-low / A2</text>
+<rect x="248" y="91.0" width="377.2" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="103.0">0.896552</text>
+<text x="240" y="129.0" text-anchor="end">codex-gpt-luna-low / A0</text>
+<rect x="248" y="117.0" width="362.3" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="129.0">0.861111</text>
+<text x="240" y="155.0" text-anchor="end">codex-gpt-luna-low / A1</text>
+<rect x="248" y="143.0" width="357.6" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="155.0">0.85</text>
+<text x="240" y="181.0" text-anchor="end">codex-gpt-luna-low / A2</text>
+<rect x="248" y="169.0" width="340.9" height="15" fill="#3b6fd4"/>
+<text class="v" x="646" y="181.0">0.810345</text>
+<rect x="16" y="209" width="10" height="10" fill="#3b6fd4"/>
+<text class="v" x="30" y="218">share</text>
 </svg>

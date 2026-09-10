@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08871-ac5b-72f3-a202-917a9b976de6"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current Agents API documentation and verify whether agent deletion is supported."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-de90fcb7-7c57-4a1f-88a3-5d0327828a8d","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-de90fcb7-7c57-4a1f-88a3-5d0327828a8d","query":"site:docs.mistral.ai Agents API delete agent Mistral","action":{"type":"search","query":"site:docs.mistral.ai Agents API delete agent Mistral"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Yes. Use:\n\n```http\nDELETE https://api.mistral.ai/v1/agents/{agent_id}\nAuthorization: Bearer YOUR_API_KEY\n```\n\nPython SDK:\n\n```python\nmistral.beta.agents.delete(agent_id=\"<agent_id>\")\n```\n\nSee Mistral’s [Agents API reference](https://docs.mistral.ai/api/endpoint/beta/agents) and [Agents & Conversations guide](https://docs.mistral.ai/studio/agents/agents-api)."}}
+{"type":"turn.completed","usage":{"input_tokens":31031,"cached_input_tokens":19968,"cache_write_input_tokens":0,"output_tokens":215,"reasoning_output_tokens":32}}

@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08886-3565-7343-b100-d1c3edeab9e2"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s official SAML SSO documentation and verify the exact wording around supported identity providers and alternatives."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-de88a55c-78fc-4e09-aa6c-2046743501d1","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-de88a55c-78fc-4e09-aa6c-2046743501d1","query":"site:docs.mistral.ai SAML SSO identity providers commonly supported different one","action":{"type":"search","query":"site:docs.mistral.ai SAML SSO identity providers commonly supported different one"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Mistral AI most commonly supports:\n\n- Microsoft Entra ID (formerly Azure Active Directory)\n- Google Workspace / Google Identity Platform\n- Okta\n\nYes. Mistral states that **any compliant SAML identity provider can work**, so you can use another provider as long as it supports SAML 2.0. OIDC is not supported for Organization SSO. See the [Mistral SAML SSO documentation](https://docs.mistral.ai/admin/set-up-organization/sign-in-method/saml-sso)."}}
+{"type":"turn.completed","usage":{"input_tokens":31110,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":222,"reasoning_output_tokens":23}}

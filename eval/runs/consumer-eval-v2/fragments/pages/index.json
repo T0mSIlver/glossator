@@ -3,6 +3,10 @@
     "file": "4505b0b67437351aa4b42826c0065f9a98a2a8de42748dfc29d029f885b55b0a.html",
     "status_code": 200
   },
+  "https://docs.mistral.ai/studio/agents/handoffs#create-an-agentic-workflow": {
+    "file": "935002825b2c40ca56f38905ecc7b2f8a0c480a51ccdd26f0834b504fbdd9317.html",
+    "status_code": 200
+  },
   "https://docs.mistral.ai/studio/document-processing/annotations#accepted-formats": {
     "file": "43a1e27440c01bc6823b997a9a29b0ac29810df1326d2b385ca1defcf6dd5faa.html",
     "status_code": 200

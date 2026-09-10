@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08870-3baf-70d3-afd5-6689702307f1"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s official transcription API documentation to verify the exact parameter type."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-1005d269-9f3d-42cb-8fee-7679c77bc6b9","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-1005d269-9f3d-42cb-8fee-7679c77bc6b9","query":"site:docs.mistral.ai transcription timestamp_granularities type","action":{"type":"search","query":"site:docs.mistral.ai transcription timestamp_granularities type"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"`timestamp_granularities` takes an array of enum values:\n\n```text\narray<\"segment\" | \"word\">\n```\n\nFor example: `[\"segment\"]` or `[\"word\"]`. ([Mistral API documentation](https://docs.mistral.ai/api/endpoint/audio/transcriptions))"}}
+{"type":"turn.completed","usage":{"input_tokens":31237,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":169,"reasoning_output_tokens":25}}

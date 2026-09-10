@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a08872-9bc6-7d31-97c0-db53984364c5"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s current API reference for that operation so the parameter requirements and query behavior are exact."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-47417c27-6972-4e79-a4a5-337077ca8104","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-47417c27-6972-4e79-a4a5-337077ca8104","query":"site:docs.mistral.ai GET /v1/workflows/deployments/{name} workflow_name","action":{"type":"search","query":"site:docs.mistral.ai GET /v1/workflows/deployments/{name} workflow_name"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-e9135377-c769-4761-be70-f24650b81178","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-e9135377-c769-4761-be70-f24650b81178","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"agent_message","text":"For `GET /v1/workflows/deployments/{name}`:\n\n- Required path parameter: `name` — the deployment name.\n- Required request authentication: an API key in the `Authorization: Bearer ...` header.\n- Optional query parameter: `workflow_name` — limits/scopes the reported serving status to the specified workflow. Omit it to get status for the deployment generally.\n\nNo request body is required. [`GET /v1/workflows/deployments/{name}` documentation](https://docs.mistral.ai/api/endpoint/workflows/deployments)"}}
+{"type":"turn.completed","usage":{"input_tokens":55359,"cached_input_tokens":40192,"cache_write_input_tokens":0,"output_tokens":309,"reasoning_output_tokens":57}}

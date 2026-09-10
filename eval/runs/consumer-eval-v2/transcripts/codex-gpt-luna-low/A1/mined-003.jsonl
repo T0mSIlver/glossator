@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a0887f-e48b-7233-8998-ab89f71cd2df"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll verify this against Mistral’s current OCR API documentation and identify whether ZIP is supported or needs unpacking first."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-a32981fc-9fb8-4260-95a7-9241ce291bc1","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-a32981fc-9fb8-4260-95a7-9241ce291bc1","query":"site:docs.mistral.ai OCR supported file formats maximum file size zip Invalid file format","action":{"type":"search","query":"site:docs.mistral.ai OCR supported file formats maximum file size zip Invalid file format"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"For OCR file uploads, Mistral supports:\n\n- PDF\n- PNG\n- JPG/JPEG\n- TIFF\n- BMP\n- GIF\n- WEBP\n\nThe maximum individual upload size is 512 MB. ZIP archives are not supported, so a `.zip` upload returns `422 Invalid file format`; extract the archive and upload the supported files individually. [Mistral’s known limitations](https://docs.mistral.ai/resources/known-limitations) · [Files API reference](https://docs.mistral.ai/api/endpoint/files)"}}
+{"type":"turn.completed","usage":{"input_tokens":31245,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":320,"reasoning_output_tokens":114}}

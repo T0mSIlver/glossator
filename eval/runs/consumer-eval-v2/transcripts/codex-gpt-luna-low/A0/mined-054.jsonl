@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08870-d0f6-7843-a53b-0518bc16a10c"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s official OCR documentation for the exact range parameter and indexing convention."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-cd5df016-d9c1-44c7-9c61-98466303d7c6","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-cd5df016-d9c1-44c7-9c61-98466303d7c6","query":"site:docs.mistral.ai OCR page range page numbering starts","action":{"type":"search","query":"site:docs.mistral.ai OCR page range page numbering starts"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Use the OCR request’s `pages` parameter. It accepts:\n\n- A list of integers, e.g. `[0, 1, 2]`\n- A comma-separated string, e.g. `\"0,1,2\"`\n- Ranges, e.g. `\"0-5\"` or `\"0,2-4\"`\n\nPage numbering starts at **0**, so the first page is `0`. [Mistral OCR API documentation](https://docs.mistral.ai/api/endpoint/ocr)"}}
+{"type":"turn.completed","usage":{"input_tokens":31194,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":213,"reasoning_output_tokens":28}}

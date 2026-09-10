@@ -1,0 +1,13 @@
+{"type":"thread.started","thread_id":"01a08881-f6a5-7c42-97a2-f6bb5d698a75"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s official documentation for the execution-time limit and the documented behavior when it is exceeded."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-f2be4b32-c417-4c86-9d05-23b3977ab155","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-f2be4b32-c417-4c86-9d05-23b3977ab155","query":"site:docs.mistral.ai code interpreter timeout execution exceeds timeout","action":{"type":"search","query":"site:docs.mistral.ai code interpreter timeout execution exceeds timeout"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-b2e42a27-0687-4f59-9ffa-0db0c197afab","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-b2e42a27-0687-4f59-9ffa-0db0c197afab","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-b619350d-f8d1-4144-8b5b-2aae1791096e","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-b619350d-f8d1-4144-8b5b-2aae1791096e","query":"site:docs.mistral.ai \"code interpreter\" \"timeout\" ...","action":{"type":"search","queries":["site:docs.mistral.ai \"code interpreter\" \"timeout\"","site:docs.mistral.ai \"Code Interpreter executions\" timeout"]}}}
+{"type":"item.started","item":{"id":"item_4","type":"web_search","id":"exec-1143c1c6-a961-4df0-94a7-ee8b2dfc91d6","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_4","type":"web_search","id":"exec-1143c1c6-a961-4df0-94a7-ee8b2dfc91d6","query":"Mistral code interpreter execution timeout limit ...","action":{"type":"search","queries":["Mistral code interpreter execution timeout limit","Mistral Agents code interpreter timeout exceeded"]}}}
+{"type":"item.completed","item":{"id":"item_5","type":"agent_message","text":"Yes. Mistral’s Code Interpreter executions have a timeout limit, although the current Code Interpreter documentation does not specify its duration. If the code exceeds the limit, the execution is terminated and reported as timed out/failed; no completed output is returned.\n\nSee the [Code Interpreter documentation](https://docs.mistral.ai/studio/agents/agent-tools/code_interpreter), which documents execution metadata including `completed_at` and `code_output`."}}
+{"type":"turn.completed","usage":{"input_tokens":100819,"cached_input_tokens":83712,"cache_write_input_tokens":0,"output_tokens":432,"reasoning_output_tokens":90}}

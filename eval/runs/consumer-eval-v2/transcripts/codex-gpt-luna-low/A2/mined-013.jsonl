@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a08885-73c0-7751-afd5-d55d8ce0312c"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current documentation and cite the exact page(s) supporting the format list."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-3d856896-98a7-44fe-8951-12de326e2752","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-3d856896-98a7-44fe-8951-12de326e2752","query":"site:docs.mistral.ai Document Annotations file formats","action":{"type":"search","query":"site:docs.mistral.ai Document Annotations file formats"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-c618c4cf-204b-46fe-bc6b-5d14570fc292","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-c618c4cf-204b-46fe-bc6b-5d14570fc292","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"agent_message","text":"Document Annotations can be run on:\n\n- PDF files\n- Images, including low-quality or handwritten sources\n- Scanned documents\n- DOCX files\n- PPTX files\n\nMistral describes these as supported document formats under [Accepted Formats](https://docs.mistral.ai/studio/document-processing/annotations#accepted-formats)."}}
+{"type":"turn.completed","usage":{"input_tokens":52785,"cached_input_tokens":43264,"cache_write_input_tokens":0,"output_tokens":229,"reasoning_output_tokens":36}}

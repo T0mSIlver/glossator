@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08872-0e6f-71f0-827a-1dacc5c9bf30"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s official API documentation for the exact `list-voices` parameter names and paging behavior."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-a60c748d-b906-457b-85f4-5f675a2921f7","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-a60c748d-b906-457b-85f4-5f675a2921f7","query":"site:docs.mistral.ai list-voices endpoint paging query parameters","action":{"type":"search","query":"site:docs.mistral.ai list-voices endpoint paging query parameters"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"The `GET /v1/audio/voices` list-voices endpoint takes these paging query parameters:\n\n- `limit` — maximum number of voices to return\n- `offset` — pagination offset\n\nIt also accepts `type` (`all`, `custom`, or `preset`) as a filter. [Mistral Audio Voices API documentation](https://docs.mistral.ai/api/endpoint/audio/voices)"}}
+{"type":"turn.completed","usage":{"input_tokens":31111,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":185,"reasoning_output_tokens":15}}

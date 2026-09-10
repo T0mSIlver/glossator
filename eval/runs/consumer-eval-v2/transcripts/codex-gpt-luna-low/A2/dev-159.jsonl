@@ -1,0 +1,11 @@
+{"type":"thread.started","thread_id":"01a08885-9eac-70a1-9991-89a8ce284e4e"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll verify this against Mistral’s current official documentation and link the exact pages."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-41b43362-14a3-42c4-a974-805d9dbdb267","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-41b43362-14a3-42c4-a974-805d9dbdb267","query":"site:docs.mistral.ai Predicted Outputs supported models ...","action":{"type":"search","queries":["site:docs.mistral.ai Predicted Outputs supported models","site:docs.mistral.ai \"Predicted Outputs\" Mistral"]}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-12ea02c0-5717-418f-a352-2f1339fdff90","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-12ea02c0-5717-418f-a352-2f1339fdff90","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-2d805b35-017b-4793-be08-652927ea82c4","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-2d805b35-017b-4793-be08-652927ea82c4","query":"Mistral \"Which model supports predicted outputs\" ...","action":{"type":"search","queries":["Mistral \"Which model supports predicted outputs\"","site:docs.mistral.ai/models \"Predicted Outputs\" \"mistral-large\""]}}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"According to Mistral’s documentation, Predicted Outputs support:\n\n- `codestral-2501`\n- `mistral-large-2411`\n\nThis is stated in the [Predicted Outputs documentation](https://docs.mistral.ai/studio/conversations/advanced/predicted-outputs). Mistral’s model page also confirms support for [`mistral-large-2411`](https://docs.mistral.ai/models/mistral-large-2-1-24-11)."}}
+{"type":"turn.completed","usage":{"input_tokens":77610,"cached_input_tokens":62464,"cache_write_input_tokens":0,"output_tokens":360,"reasoning_output_tokens":48}}

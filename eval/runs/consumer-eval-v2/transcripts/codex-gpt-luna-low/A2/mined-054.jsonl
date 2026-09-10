@@ -1,0 +1,11 @@
+{"type":"thread.started","thread_id":"01a08883-ce21-7d23-ac1d-817462c61728"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s current OCR documentation for the exact parameter and numbering convention."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-1d98bd3d-a1ff-4187-97da-759ebbb3b728","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-1d98bd3d-a1ff-4187-97da-759ebbb3b728","query":"site:docs.mistral.ai OCR page range page numbering starts ...","action":{"type":"search","queries":["site:docs.mistral.ai OCR page range page numbering starts","site:docs.mistral.ai OCR pages parameter range"]}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-aa235161-b95d-4f49-9249-bbb1ea70c4e2","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-aa235161-b95d-4f49-9249-bbb1ea70c4e2","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-35257997-3015-4a80-9511-9e099dc57c9c","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-35257997-3015-4a80-9511-9e099dc57c9c","query":"'pages'","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"Use the OCR request’s `pages` parameter. It accepts either:\n\n- A list of zero-based page indexes, e.g. `[0, 1, 2]`\n- A comma-separated string of numbers and ranges, e.g. `\"0,2-4\"` or `\"0-5\"`\n\nPage numbering starts at `0`, so the first page is page `0`. [Mistral OCR API reference](https://docs.mistral.ai/api/endpoint/ocr)"}}
+{"type":"turn.completed","usage":{"input_tokens":84597,"cached_input_tokens":67584,"cache_write_input_tokens":0,"output_tokens":349,"reasoning_output_tokens":44}}

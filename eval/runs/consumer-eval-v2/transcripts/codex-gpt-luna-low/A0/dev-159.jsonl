@@ -1,0 +1,11 @@
+{"type":"thread.started","thread_id":"01a08872-5526-78e1-878a-aabd1fd7bc26"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current documentation and cite the exact model-support page(s)."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-9ccc1022-df9c-4672-989a-f79aea97c047","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-9ccc1022-df9c-4672-989a-f79aea97c047","query":"site:docs.mistral.ai Predicted Outputs supported models","action":{"type":"search","query":"site:docs.mistral.ai Predicted Outputs supported models"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-17533d74-9608-4797-bdbf-357310e6e9a9","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-17533d74-9608-4797-bdbf-357310e6e9a9","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-850f092a-084e-453b-b3ee-f1d97f9a2f79","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-850f092a-084e-453b-b3ee-f1d97f9a2f79","query":"Mistral \"Which model supports predicted outputs\" ...","action":{"type":"search","queries":["Mistral \"Which model supports predicted outputs\"","site:docs.mistral.ai/models \"Predicted Outputs\" \"Mistral Large 3\""]}}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"Mistral’s documentation states that Predicted Outputs are supported by:\n\n- `codestral-2501`\n- `mistral-large-2411`\n\nSource: [Mistral Predicted Outputs documentation](https://docs.mistral.ai/studio/conversations/advanced/predicted-outputs)."}}
+{"type":"turn.completed","usage":{"input_tokens":89277,"cached_input_tokens":64512,"cache_write_input_tokens":0,"output_tokens":335,"reasoning_output_tokens":71}}

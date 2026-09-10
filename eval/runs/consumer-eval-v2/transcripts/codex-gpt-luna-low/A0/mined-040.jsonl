@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08870-09c6-75a1-8c38-951c68449a6a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current official documentation and point you to the exact capability matrix/page."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-33c1fc1c-6da8-48c5-bee6-f34a2b60cb6e","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-33c1fc1c-6da8-48c5-bee6-f34a2b60cb6e","query":"site:docs.mistral.ai models capabilities support model capabilities","action":{"type":"search","query":"site:docs.mistral.ai models capabilities support model capabilities"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"You can see this in Mistral’s **[Model Selection Guide](https://docs.mistral.ai/getting-started/models/compare)**. Select one or more models to compare their capabilities, specifications, benchmarks, latency, and pricing.\n\nFor a programmatic check, use the **[Models API endpoint](https://docs.mistral.ai/api/endpoint/models)** (`GET /v1/models` or `GET /v1/models/{model_id}`), whose response includes a `capabilities` object such as chat completion, FIM, function calling, fine-tuning, vision, and classification."}}
+{"type":"turn.completed","usage":{"input_tokens":31200,"cached_input_tokens":19968,"cache_write_input_tokens":0,"output_tokens":221,"reasoning_output_tokens":16}}

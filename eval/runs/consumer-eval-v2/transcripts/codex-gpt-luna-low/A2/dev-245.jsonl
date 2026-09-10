@@ -1,0 +1,6 @@
+{"type":"thread.started","thread_id":"01a08886-aa9c-7861-9e26-6b9e1a4ddc7a"}
+{"type":"turn.started"}
+{"type":"item.started","item":{"id":"item_0","type":"web_search","id":"exec-4871e648-28fb-48c5-a829-fbd0df705aad","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_0","type":"web_search","id":"exec-4871e648-28fb-48c5-a829-fbd0df705aad","query":"site:docs.mistral.ai DELETE /v1/models/{model_id} model_id","action":{"type":"search","query":"site:docs.mistral.ai DELETE /v1/models/{model_id} model_id"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"The required parameter is `model_id`, a path parameter representing the ID of the fine-tuned model to delete.\n\n[ Mistral Models API documentation](https://docs.mistral.ai/api/endpoint/models)"}}
+{"type":"turn.completed","usage":{"input_tokens":31005,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":129,"reasoning_output_tokens":26}}

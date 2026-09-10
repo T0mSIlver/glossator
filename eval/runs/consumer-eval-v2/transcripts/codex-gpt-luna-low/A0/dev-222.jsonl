@@ -1,0 +1,11 @@
+{"type":"thread.started","thread_id":"01a08873-1b81-77a0-81da-863ee9550c6e"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll verify this against Mistral’s current Agents API documentation and cite the relevant pages directly."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-9b0bd802-d36b-41df-85a0-580add2e5345","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-9b0bd802-d36b-41df-85a0-580add2e5345","query":"site:docs.mistral.ai Agents API handoffs models limit handoff links","action":{"type":"search","query":"site:docs.mistral.ai Agents API handoffs models limit handoff links"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-610f8423-4a16-435e-8cea-6c441a21d72e","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-610f8423-4a16-435e-8cea-6c441a21d72e","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-a795ce20-5dc9-4e44-91e1-0375c0258946","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-a795ce20-5dc9-4e44-91e1-0375c0258946","query":"site:docs.mistral.ai/studio/agents \"Which models are supported\" ...","action":{"type":"search","queries":["site:docs.mistral.ai/studio/agents \"Which models are supported\"","site:docs.mistral.ai \"Agents API\" \"mistral-large\" \"mistral-small\""]}}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"You can use any Mistral model available for Chat Completions; each agent’s `model` field accepts an available chat-completion model. ([Agents & Conversations documentation](https://docs.mistral.ai/studio/agents/agents-api#creating-an-agent))\n\nThere is no limit on the number of chained handoffs in a workflow. ([Handoffs documentation](https://docs.mistral.ai/studio/agents/handoffs#create-an-agentic-workflow))"}}
+{"type":"turn.completed","usage":{"input_tokens":91783,"cached_input_tokens":69632,"cache_write_input_tokens":0,"output_tokens":464,"reasoning_output_tokens":138}}

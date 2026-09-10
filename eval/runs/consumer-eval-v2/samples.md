@@ -7,7 +7,7 @@ answers side by side with the judge's verdicts.
 
 Which `mistral-vespa` commands do I run to create a migration and deploy it?
 
-### A0 (judge: not judged)
+### A0 (judge: wrong)
 
 I don't have any knowledge of a Mistral tool called `mistral-vespa`, and it doesn't match anything I'm aware of in Mistral's published tooling (their platform docs cover `mistral-common`, `mistralai` Python/TS SDKs, `mistral-inference`, `mistral-finetune`, and La Plateforme's API/CLI, but no `mistral-vespa` package). "Vespa" is a separate open-source vector search engine (vespa.ai), and I'm not aware of an official Mistral integration package by that name either.
 
@@ -18,7 +18,7 @@ I don't want to fabricate command names or a workflow for a tool I can't verify 
 
 If you share a link, I can read it directly and give you the exact commands with a citation.
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Two commands:
 
@@ -39,41 +39,38 @@ Sources:
 [1] [CLI reference > `generate-migration`](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli#generate-migration) — "Create a timestamped migration stub."
 [2] [CLI reference > `migrate`](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli#migrate) — "Build the application from migrations and deploy it. Supports both single-node (localhost) and Kubernetes deployments."
 
-### A2 (judge: not judged)
+### A2 (judge: correct)
 
-Here's the workflow using the `mistral-vespa` CLI to create and deploy a migration:
+To create and deploy a migration with `mistral-vespa`:
 
-**1. Generate a migration stub**
+**1. Create a migration**
 ```bash
 uv run mistral-vespa generate-migration --app-dir ./vespa_app initial_schema
 ```
-This creates a timestamped Python file in `vespa_app/migrations/` with a `VespaMigration` subclass stub, which you then edit to define schemas/fields via `create_schema`, `FieldDefinition`, etc.
+This scaffolds a migration file in `vespa_app/migrations/`, where you fill in a `VespaMigration` subclass defining your schema (e.g. via `create_schema`, `set_app_name`, `FieldDefinition`).
 
-**2. Deploy the migration**
+**2. Deploy it**
 ```bash
 uv run mistral-vespa migrate \
   --app-dir ./vespa_app \
-  --config-server http://localhost:19071 \
-  --query-port 8080
+  --config-server http://localhost:19171 \
+  --query-port 18080
 ```
-This builds the application package (in memory) and deploys it, running any pending migrations in timestamp order.
 
-- For Kubernetes deployments, use `--k8s-namespace` and `--k8s-instance` instead of `--config-server`.
-- Add `--dry-run` to preview changes before applying.
+Notes:
+- Migrations live in `vespa_app/migrations/`, are append-only, and applied in timestamp order.
+- App names must be lowercase letters only (`a-z`).
 
-Migrations are append-only, idempotent, and version-controlled — you add new migration files for changes rather than editing existing ones.
-
-**Sources:**
-- [CLI reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli)
+Sources:
 - [Local development — Step 1: Create your first migration](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development#step-1-create-your-first-migration)
-- [Manage schema — Create and evolve schemas](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations#creating-and-evolving-schemas)
+- [Local development — Step 3: Deploy from migrations](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/local-development#step-3-deploy-from-migrations)
 - [Anatomy of a Vespa application — Migrations](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/anatomy#migrations-building-the-application-package)
 
 ## mined-011 (unanswerable)
 
 Can Document QnA answer questions about an image (.png, .jpg), or does it only take PDFs?
 
-### A0 (judge: not judged)
+### A0 (judge: wrong)
 
 Yes — Document QnA is not limited to PDFs. It works over Mistral's underlying Document AI/OCR pipeline, which explicitly accepts image inputs (PNG, JPEG/JPG, AVIF, etc.) in addition to PDF, PPTX, DOCX, and other document formats — passed as image URLs or base64-encoded images, just as PDFs can be passed as URLs, base64, or uploaded files.
 
@@ -84,7 +81,7 @@ Sources:
 - [OCR Processor | Mistral Docs](https://docs.mistral.ai/capabilities/document_ai/basic_ocr/)
 - [Document Processing | Mistral Docs](https://docs.mistral.ai/studio/document-processing/overview)
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 Not exclusively PDFs — but it's not quite the same feature for images either. Breakdown:
 
@@ -98,13 +95,31 @@ Sources:
 - [Document QnA — Usage](https://docs.mistral.ai/studio/document-processing/document_qna#usage)
 - [Vision — supported image formats](https://docs.mistral.ai/studio/conversations/vision#what-types-of-image-files-are-supported)
 
-### A2: not run
+### A2 (judge: wrong)
+
+Yes — Document QnA is not limited to PDFs. It supports images (`.png`, `.jpg`, etc.) as well, since it runs OCR (via `mistral-ocr-latest`) on the input first to extract text/structure, and that pipeline accepts either an image URL or a Base64-encoded image, in addition to PDFs.
+
+Example:
+```python
+ocr_response = client.ocr.process(
+    model="mistral-ocr-latest",
+    document={
+        "type": "image_url",
+        "image_url": "https://.../receipt.png"
+    },
+    include_image_base64=True
+)
+```
+
+The extracted content then feeds into the LLM so you can ask natural-language questions about it, just as you would with a PDF.
+
+**Source:** [OCR Processor — OCR with images and PDFs](https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-images)
 
 ## mined-058 (single_page)
 
 Can I use `KeywordRetriever` against the Vespa backend? Passing a keyword query to it raises a pydantic ValidationError.
 
-### A0 (judge: not judged)
+### A0 (judge: wrong)
 
 I don't have verified documentation on a `KeywordRetriever` class or Vespa backend as part of Mistral's platform — this doesn't match anything I'm aware of in Mistral's official docs (chat/embeddings/agents/fine-tuning APIs, Le Chat, La Plateforme, etc. at docs.mistral.ai).
 
@@ -115,7 +130,7 @@ This sounds like it might come from a third-party RAG/retrieval framework (e.g.,
 
 Without that I'd be guessing rather than citing a real source, and I don't want to fabricate a Mistral doc link. If you can point me to the repo, I can look at the actual `KeywordRetriever` implementation and pydantic schema to explain why the Vespa backend query validation fails.
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 No — that's expected behavior, not a bug you're hitting by mistake.
 
@@ -128,13 +143,21 @@ What to do instead:
 
 Source: [Retrievers — Keyword Retriever](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers#keyword-retriever)
 
-### A2: not run
+### A2 (judge: correct)
+
+No — that's expected behavior, not a bug.
+
+Mistral's built-in Vespa (and Postgres) backends don't implement `KeywordStoreIndex`, so `KeywordRetriever` requires a custom keyword store client; passing it a Vespa-backed client fails Pydantic validation because the type doesn't match.
+
+For hybrid/keyword-style search against Vespa, use `VectorRetriever` instead — it sends both the query text and its embedding to the backend, so it covers keyword matching too.
+
+Source: [Retrievers > Keyword Retriever](https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers#keyword-retriever)
 
 ## mined-013 (single_page)
 
 Which file formats can Document Annotations be run on?
 
-### A0 (judge: not judged)
+### A0 (judge: correct)
 
 Document Annotations can be run on:
 
@@ -146,19 +169,29 @@ Document Annotations can be run on:
 
 Source: [Document Annotations – Mistral AI Docs](https://docs.mistral.ai/capabilities/document_ai/annotations/)
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Document Annotations can be run on: PDF, images (even low-quality or handwritten sources), scans, DOCX, and PPTX [1].
 
 [1] [Document Annotations > Accepted Formats](https://docs.mistral.ai/studio/document-processing/annotations#accepted-formats:~:text=You%20can%20use%20our%20API,sources.%20%2D%20scans%2C%20DOCX%2C%20PPTX...) — "You can use our API with the following document formats: OCR with pdf, OCR with image (even from low-quality or handwritten sources), scans, DOCX, PPTX..."
 
-### A2: not run
+### A2 (judge: correct)
+
+Document Annotations can be run on:
+
+- **PDFs**
+- **Images** — even low-quality or handwritten ones
+- **Scans**
+- **DOCX**
+- **PPTX**
+
+Source: [Document Annotations](https://docs.mistral.ai/studio/document-processing/annotations#document-annotation-explanation)
 
 ## dev-097 (unanswerable)
 
 What is the maximum number of web pages MistralAI-User may visit for a single user request in Vibe, and is there a per-minute rate limit?
 
-### A0 (judge: not judged)
+### A0 (judge: correct)
 
 Based on my research of Mistral's official documentation, I could not find published numeric limits for this specific question.
 
@@ -175,7 +208,7 @@ Sources:
 - [Limits and lifecycle | Mistral Docs](https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle)
 - [Vibe | Mistral Docs](https://docs.mistral.ai/vibe)
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Documentation doesn't specify any of this — no per-request page-count cap or per-minute rate limit for `MistralAI-User`.
 
@@ -187,13 +220,17 @@ Rate limits: I only found general API rate-limit documentation (requests/second,
 
 If you need an authoritative number for either limit, it isn't published in Mistral's docs — you'd have to ask Mistral directly.
 
-### A2: not run
+### A2 (judge: correct)
+
+Mistral's documentation does not specify a maximum number of web pages the `MistralAI-User` agent may visit per request, nor does it state a per-minute rate limit for that crawler. It does confirm the existence of `MistralAI-User` (used for on-demand fetches triggered by user actions, e.g. in Vibe/Le Chat) as distinct from `MistralAI-Index` (bulk crawling), identifying it by user-agent string and IP ranges — but no numeric caps on pages-per-request or requests-per-minute are documented.
+
+I searched the docs (including a multi-round search) and found no page stating these limits — so I can't cite a source for a specific number. If you have a specific docs page in mind (e.g., a Vibe-specific guide), point me to it and I'll check it directly; otherwise this may only be available from Mistral support/rate-limit dashboards rather than public docs.
 
 ## dev-247 (api_reference)
 
 For the GET /v1/workflows/deployments/{name} operation, which parameters must I provide and what does the optional workflow_name query parameter do?
 
-### A0 (judge: not judged)
+### A0 (judge: wrong)
 
 For `GET /v1/workflows/deployments/{name}`:
 
@@ -206,7 +243,7 @@ Sources:
 - [Deployments | Mistral Docs](https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/deployments)
 - [Workflows | Mistral Docs](https://docs.mistral.ai/studio-api/workflows/building-workflows/workflows)
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 For `GET /v1/workflows/deployments/{name}`:
 
@@ -217,13 +254,20 @@ Response: `200` returns a `DeploymentDetailResponse`; `422` on validation error.
 
 Source: [Workflows Deployments API > Get Deployment](https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-get_deployment_v1_workflows_deployments_name_get)
 
-### A2: not run
+### A2 (judge: correct)
+
+For `GET /v1/workflows/deployments/{name}`:
+
+- **Required:** `name` (string, path parameter) — the name of the deployment to retrieve.
+- **Optional:** `workflow_name` (string or null, query parameter) — when provided, it scopes/filters the deployment's serving status to just that specific workflow within the deployment.
+
+Source: [Get Deployment — Parameters](https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-get_deployment_v1_workflows_deployments_name_get:~:text=Parameters%20%2D%20name%20%28string%2C%20required%2C%20in%20path%29)
 
 ## mined-029 (api_reference)
 
 Is there an endpoint to delete an agent I created with the Agents API?
 
-### A0 (judge: not judged)
+### A0 (judge: partial)
 
 Yes. You can delete an agent with:
 
@@ -238,7 +282,7 @@ Sources:
 - [How do I delete an Agent? – Mistral AI Help Center](https://help.mistral.ai/en/articles/347485-how-do-i-delete-an-agent)
 - [Beta Agents Endpoints – Mistral AI Documentation](https://docs.mistral.ai/api/endpoint/beta/agents)
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Yes. The Agents API has:
 
@@ -250,13 +294,27 @@ There's also a related endpoint to delete just an alias without deleting the age
 
 Source: [Beta Agents API](https://docs.mistral.ai/api/endpoint/beta/agents#operation-agents_api_v1_agents_delete)
 
-### A2: not run
+### A2 (judge: correct)
+
+Yes — the Agents API supports agent deletion:
+
+```
+DELETE /v1/agents/{agent_id}
+```
+
+Just pass the `agent_id` of the agent you want to remove. There's also a related endpoint for deleting a specific agent version alias:
+
+```
+DELETE /v1/agents/{agent_id}/aliases
+```
+
+Docs: [Beta Agents API reference](https://docs.mistral.ai/api/endpoint/beta/agents#operation-agents_api_v1_agents_delete)
 
 ## mined-021 (single_page)
 
 Which models support custom structured outputs? `chat.parse` with a pydantic response format raises a JSON decode error on the model I picked.
 
-### A0 (judge: not judged)
+### A0 (judge: wrong)
 
 Per Mistral's docs, **custom structured outputs** (JSON Schema/Pydantic response formats via `response_format={"type": "json_schema", ...}` or `chat.parse`) are only guaranteed on specific models — not all of them support the strict schema-constrained decoding needed for `chat.parse` to reliably return valid JSON.
 
@@ -269,7 +327,7 @@ As of Mistral's published list, custom structured output (schema-constrained) su
 
 If you tell me which model you're currently using, I can confirm from the docs whether it's on the supported list.
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Custom Structured Outputs are supported by **all currently available Mistral models except `codestral-mamba`** [1]. So if you're pointing `chat.parse` at Codestral Mamba, that's the cause — switch to any other model (e.g. `ministral-8b-latest`, the docs' own example) and it should work.
 
@@ -282,13 +340,24 @@ Sources:
 1. [Which models support custom Structured Outputs?](https://docs.mistral.ai/studio/conversations/structured-output/custom#which-models-support-custom-structured-outputs) — "All currently available models except for `codestral-mamba` are supported."
 2. [Custom Structured Outputs — Start the completion](https://docs.mistral.ai/studio/conversations/structured-output/custom#start-the-completion) — describes `message.parsed` vs `message.content` and the auto-prepended system prompt instruction.
 
-### A2: not run
+### A2 (judge: wrong)
+
+All Mistral models support custom structured outputs (`chat.parse` with a Pydantic `response_format`) **except `codestral-mamba`**.
+
+Source: [Custom Structured Outputs FAQ](https://docs.mistral.ai/studio/conversations/structured-output/custom#which-models-support-custom-structured-outputs) — "All currently available models except for `codestral-mamba` are supported."
+
+If your JSON decode error is happening on a model other than `codestral-mamba`, the cause is likely something else — common culprits:
+- Model output getting truncated (`max_tokens` too low, cutting off the JSON mid-object)
+- Using the plain `chat.complete` + manual JSON parsing instead of `chat.parse` (which handles the parsing/validation for you)
+- A Pydantic schema with types/constructs the structured-output feature doesn't support (e.g. overly nested/recursive models, unsupported field types)
+
+If you tell me which model you're using and paste the error, I can narrow it down further.
 
 ## mined-082 (single_page)
 
 Does the Postgres backend scope queries from the retrieval context the way Vespa does?
 
-### A0 (judge: not judged)
+### A0 (judge: correct)
 
 No — the Postgres backend does not scope queries the way Vespa does.
 
@@ -302,7 +371,7 @@ Sources:
 - [mistralai-search-toolkit-plugins-vespa · PyPI](https://pypi.org/project/mistralai-search-toolkit-plugins-vespa/0.0.13/)
 - [Search index | Mistral Docs](https://docs.mistral.ai/studio-api/search-toolkit/search-index)
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 No — this is called out explicitly as a difference from Vespa.
 
@@ -310,13 +379,20 @@ Both backends accept `IngestContext` and `RetrievalContext` at every entry point
 
 [1] [Postgres — No context-derived filtering](https://docs.mistral.ai/studio/search/search-toolkit/search-index/postgres#notes)
 
-### A2: not run
+### A2 (judge: correct)
+
+No — the Postgres backend does not apply context-derived scoping the way Vespa does.
+
+- **Vespa backend**: automatically derives tenant/query filters from `IngestContext`/`RetrievalContext` via `group_id` or `yql_filter`.
+- **Postgres backend**: propagates those contexts but does **not** derive any filtering from them — every query sees the full collection. Tenant isolation has to be handled manually, either by using separate collections per tenant or by applying your own filtering logic before hitting the store.
+
+Source: [Postgres — Search Toolkit](https://docs.mistral.ai/studio/search/search-toolkit/search-index/postgres#notes:~:text=Unlike%20the%20Vespa%20backend%2C%20it%20doesn%27t%20apply%20group_id%20or%20yql_filter%20for%20tenant%20isolation)
 
 ## dev-277 (post_cutoff)
 
 In Mistral's Work chat, if I want to fetch live data from a connected tool like Gmail, Drive, or Notion, which feature should I use, and how does it differ from using Web Search?
 
-### A0 (judge: not judged)
+### A0 (judge: correct)
 
 ## Use Connectors, not Web Search
 
@@ -340,7 +416,7 @@ Sources:
 - [Search the web | Mistral Docs](https://docs.mistral.ai/le-chat/research-analysis/web-search)
 - [Choose Chat, Work, or Code | Mistral Docs](https://docs.mistral.ai/vibe/choose-chat-work-code)
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 For fetching live data from Gmail, Drive, or Notion, use **Connectors**, not Web Search.
 
@@ -356,4 +432,26 @@ Sources:
 - [Connect tools with Connectors](https://docs.mistral.ai/vibe/work/connectors)
 - [Search the web > Web search](https://docs.mistral.ai/vibe/work/web-search-open-url#web-search)
 
-### A2: not run
+### A2 (judge: correct)
+
+Use **Connectors**, not Web Search.
+
+## Connectors — for live data from your connected tools
+Connectors are secure integrations that let Work read/act on data in apps like Gmail, Drive, and Notion.
+
+1. In the chat window, click the `+` icon or type `/`.
+2. Select **Tools** and enable the Connector you want (Gmail, Drive, Notion, etc.). Work handles authentication and will ask for approval before sensitive actions.
+3. Just describe the task in natural language — Work figures out which Connector to call:
+   - *"Check my unread emails from the legal team and summarize them."*
+   - *"Find the latest Q3 revenue deck in Google Drive and prepare a one-page summary."*
+
+Every tool call (e.g., `Gmail: List Messages`) is shown transparently in the chat with its inputs/outputs.
+
+## How it differs from Web Search
+- **Connectors** pull data from **specific apps you're authenticated into** — your own emails, files, and docs. Best for structured tasks tied to your private/organizational data.
+- **Web Search** retrieves up-to-date **public web** information. Best for general research or facts not tied to any connected account.
+
+Sources:
+- [Connect tools with Connectors](https://docs.mistral.ai/vibe/work/connectors#using-connectors)
+- [Get started with Work](https://docs.mistral.ai/vibe/work/get-started#give-work-context)
+- [Safety and approvals — tool-call transparency](https://docs.mistral.ai/vibe/work/safety-and-approvals#tool-transparency)

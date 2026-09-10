@@ -10,19 +10,26 @@
     "A2"
   ],
   "consumer_harnesses": {
-    "claude-sonnet-low": "claude"
+    "claude-sonnet-low": "claude",
+    "codex-gpt-luna-low": "codex"
   },
   "consumer_models": {
-    "claude-sonnet-low": "sonnet"
+    "claude-sonnet-low": "sonnet",
+    "codex-gpt-luna-low": "gpt-5.6-luna"
   },
   "consumer_variants": {
-    "claude-sonnet-low": "low"
+    "claude-sonnet-low": "low",
+    "codex-gpt-luna-low": "low"
   },
   "consumers": [
-    "claude-sonnet-low"
+    "claude-sonnet-low",
+    "codex-gpt-luna-low"
   ],
   "fresh_count": 10,
-  "judge_model": null,
+  "judge_model": "zai:glm-5.3",
+  "judge_models": [
+    "zai:glm-5.3"
+  ],
   "judge_prompt_hashes": {
     "judge_citation": "d1565f592953cb68",
     "judge_system": "3b300bf0bcd8ea7f",
@@ -37,6 +44,10 @@
   },
   "mined_count": 20,
   "name": "consumer-eval-v2",
+  "notes": [
+    "The answer arm, and every search that asked for the reranker, ran against Ministral 3 14B Reasoning on the local server from 01:10 on 2026-09-10, with the sampling its model card asks for.",
+    "The A0 and A1 cells were collected before that swap: on the A1 searches where the consumer asked for the reranker, the reranker was the instruct model."
+  ],
   "prompt_lead": "You are helping a developer with Mistral's platform. Answer precisely and cite the documentation pages you used with links.",
   "question_count": 30,
   "questions": [

@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a08883-fa4e-7073-b7ee-d3d22566d6db"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current retrieval/backend documentation and compare the Postgres and Vespa behavior directly."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-6aec576a-c855-4c88-acc0-84d3f81d7bff","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-6aec576a-c855-4c88-acc0-84d3f81d7bff","query":"site:docs.mistral.ai Postgres backend retrieval context Vespa scope queries ...","action":{"type":"search","queries":["site:docs.mistral.ai Postgres backend retrieval context Vespa scope queries","site:docs.mistral.ai retrieval context Vespa Postgres"]}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-ff3c6c16-9397-4b7e-8208-f891c1f6e9c2","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-ff3c6c16-9397-4b7e-8208-f891c1f6e9c2","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"agent_message","text":"No. Although Postgres accepts and propagates `IngestContext` and `RetrievalContext`, it does not derive query scope from them. Unlike Vespa, it does not apply `group_id` or `yql_filter`; queries can see the full collection. citeturn1view0\n\nFor tenant isolation, use separate collections/tables or apply filtering before querying the Postgres store. The backends share pipeline interfaces, but their query-scoping behavior differs. [Postgres backend documentation](https://docs.mistral.ai/studio/search/search-toolkit/search-index/postgres)"}}
+{"type":"turn.completed","usage":{"input_tokens":54890,"cached_input_tokens":43264,"cache_write_input_tokens":0,"output_tokens":346,"reasoning_output_tokens":49}}

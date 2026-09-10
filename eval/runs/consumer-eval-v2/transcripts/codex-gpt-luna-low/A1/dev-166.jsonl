@@ -1,0 +1,11 @@
+{"type":"thread.started","thread_id":"01a08882-8a42-7090-b554-8cbe33391da0"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s current official documentation for the exact model list and FIM support wording."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-f3522ead-91e8-4d24-b030-8ce2a6f93bf4","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-f3522ead-91e8-4d24-b030-8ce2a6f93bf4","query":"site:docs.mistral.ai FIM fill-in-the-middle models Mistral","action":{"type":"search","query":"site:docs.mistral.ai FIM fill-in-the-middle models Mistral"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-8d01afb1-41e2-4e6c-b882-b92ff01dd811","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-8d01afb1-41e2-4e6c-b882-b92ff01dd811","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-707f8dc4-36f2-4aee-90da-dfe66dad8b8e","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-707f8dc4-36f2-4aee-90da-dfe66dad8b8e","query":"site:docs.mistral.ai/models \"FIM\" \"Codestral\" ...","action":{"type":"search","queries":["site:docs.mistral.ai/models \"FIM\" \"Codestral\"","site:docs.mistral.ai/inference/model-selection-guide \"FIM\""]}}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"Mistral’s current model supporting FIM is:\n\n- **Codestral** — API model ID: `codestral-2508` (use `codestral-latest` for the latest alias). Its model page lists the **FIM** endpoint: `/v1/fim/completions`. [Codestral documentation](https://docs.mistral.ai/models/codestral-25-08)\n\nOlder retired Codestral versions—`codestral-2501` and `codestral-2405`—also supported FIM, but Mistral recommends using the current Codestral model. [FIM API documentation](https://docs.mistral.ai/api/endpoint/fim)"}}
+{"type":"turn.completed","usage":{"input_tokens":92399,"cached_input_tokens":69632,"cache_write_input_tokens":0,"output_tokens":524,"reasoning_output_tokens":160}}

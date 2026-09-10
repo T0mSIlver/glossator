@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08885-e3d9-7bd2-badb-1ebb768e4456"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s official API documentation for that operation and its parameter definitions."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-c2d1f27a-eeb9-41e9-9235-4b76c9e8cdb0","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-c2d1f27a-eeb9-41e9-9235-4b76c9e8cdb0","query":"site:docs.mistral.ai GET /v1/workflows/deployments/{name} workflow_name","action":{"type":"search","query":"site:docs.mistral.ai GET /v1/workflows/deployments/{name} workflow_name"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"For `GET /v1/workflows/deployments/{name}`:\n\n- `name` — required path parameter identifying the deployment.\n- `workflow_name` — optional query parameter. When provided, it scopes the deployment’s serving status to that specific workflow.\n\nYou must also authenticate the request with a Mistral API key via a Bearer token. [Mistral API documentation](https://docs.mistral.ai/api/endpoint/workflows/deployments)"}}
+{"type":"turn.completed","usage":{"input_tokens":31162,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":261,"reasoning_output_tokens":77}}

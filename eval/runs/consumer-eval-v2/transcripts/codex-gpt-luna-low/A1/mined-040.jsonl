@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a0887f-6cca-7b93-992a-ff8b863036c1"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current documentation and point you to the exact model-capabilities reference."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-ed5ae0c2-e239-45a4-b5c6-18b5ca8d243e","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-ed5ae0c2-e239-45a4-b5c6-18b5ca8d243e","query":"site:docs.mistral.ai models capabilities supported capabilities model overview","action":{"type":"search","query":"site:docs.mistral.ai models capabilities supported capabilities model overview"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"You can see this in Mistral’s **Model Selection Guide**, which compares each model’s capabilities, including function calling, structured outputs, OCR, embeddings, transcription, and more:\n\n[Compare Mistral model capabilities](https://docs.mistral.ai/getting-started/models/compare)\n\nYou can also inspect the capabilities returned for a specific API model using the [Models API endpoint](https://docs.mistral.ai/api/endpoint/models)."}}
+{"type":"turn.completed","usage":{"input_tokens":32957,"cached_input_tokens":24064,"cache_write_input_tokens":0,"output_tokens":189,"reasoning_output_tokens":16}}

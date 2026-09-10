@@ -11,17 +11,25 @@ arm, so the comparison is between whole agents.
 - Questions: 30 fixed rows (20 stratified from eval/mined.jsonl and 10 from eval/dev-fresh60.jsonl, seed 0), identical in every arm and for every consumer.
 - The prompt is one fixed sentence plus the question; nothing says
   evaluation and nothing names the tools.
-- Consumers: claude-sonnet-low.
-- Judge: not yet run (answer-judge/v2); citation passages shown to the judge are the verified
+- Consumers: claude-sonnet-low, codex-gpt-luna-low.
+- Judge: zai:glm-5.3 (answer-judge/v2); citation passages shown to the judge are the verified
   quotes themselves, since a consumer answer keeps no served context.
+
+## Notes
+
+- The answer arm, and every search that asked for the reranker, ran against Ministral 3 14B Reasoning on the local server from 01:10 on 2026-09-10, with the sampling its model card asks for.
+- The A0 and A1 cells were collected before that swap: on the A1 searches where the consumer asked for the reranker, the reranker was the instruct model.
 
 ## Cells
 
 | cell | n | correctness | refusal | links resolve | on gold | mcp called | rerank asked | cite verified | tool calls | bad params | p50 s |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-sonnet-low / A0 | 30 | -- | 0.70 | 0.35 | 0.48 | 0.00 | 0.00 | 0.00 | 3.93 | 0.00 | 22.14 |
-| claude-sonnet-low / A1 | 30 | -- | 0.80 | 0.92 | 0.83 | 1.00 | 0.23 | 0.93 | 5.23 | 0.00 | 21.49 |
-| claude-sonnet-low / A2 | 2 | -- | 1.00 | 0.78 | 0.50 | 1.00 | 0.00 | 0.00 | 2.00 | 0.00 | 51.79 |
+| claude-sonnet-low / A0 | 30 | 0.50 | 0.70 | 0.35 | 0.48 | 0.00 | 0.00 | 0.00 | 3.93 | 0.00 | 22.14 |
+| claude-sonnet-low / A1 | 30 | 0.77 | 0.80 | 0.92 | 0.83 | 1.00 | 0.23 | 0.93 | 5.23 | 0.00 | 21.49 |
+| claude-sonnet-low / A2 | 30 | 0.78 | 0.80 | 0.90 | 0.78 | 1.00 | 0.00 | 0.00 | 2.33 | 0.00 | 74.37 |
+| codex-gpt-luna-low / A0 | 30 | 0.58 | 0.80 | 0.86 | 0.87 | 0.00 | 0.00 | 0.00 | 2.03 | 0.00 | 14.68 |
+| codex-gpt-luna-low / A1 | 30 | 0.52 | 0.80 | 0.85 | 0.78 | 0.00 | 0.00 | 0.00 | 2.20 | 0.00 | 13.58 |
+| codex-gpt-luna-low / A2 | 30 | 0.58 | 0.83 | 0.81 | 0.74 | 0.00 | 0.00 | 0.00 | 2.23 | 0.00 | 14.58 |
 
 Correctness is the blind judge's 1 / 0.5 / 0 mean where judged, else `--`.
 `rerank asked` is the share of cells where the consumer asked search to
@@ -33,7 +41,7 @@ heuristic over the answer text (declines for lack of documentation).
 
 ## Fragments
 
-0 of 1 sampled fragment links found their text on the live page (seed 0).
+1 of 1 sampled fragment links found their text on the live page (seed 0).
 
 ## Files
 
@@ -49,6 +57,6 @@ heuristic over the answer text (declines for lack of documentation).
   `transcript`.
 - `calls.jsonl`: the judge's calls, verbatim. The consumers' own model
   calls are their harnesses', not this server's.
-- `records-a2-upstream-outage.jsonl`: rows collected while the answer server
-  could not reach its model. They are out of the metrics, and the
-  cells behind them are collected again once it can.
+- `records-a2-set-aside.jsonl`: answer-arm rows this run does not report,
+  collected while the server could not reach its model or against a
+  model since replaced. Their cells were collected again.

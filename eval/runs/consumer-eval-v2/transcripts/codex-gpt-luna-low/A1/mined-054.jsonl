@@ -1,0 +1,13 @@
+{"type":"thread.started","thread_id":"01a08880-0e41-7843-8a70-6c5ac7eb892d"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s current OCR documentation so the page-range syntax and indexing details are exact."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-3ed42f87-e317-4d2b-962a-147dd7f1cde4","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-3ed42f87-e317-4d2b-962a-147dd7f1cde4","query":"site:docs.mistral.ai OCR page_range page numbering starts","action":{"type":"search","query":"site:docs.mistral.ai OCR page_range page numbering starts"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-5978acfd-b94c-409e-813d-d04088c128a7","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-5978acfd-b94c-409e-813d-d04088c128a7","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-240bbfbd-3894-4659-a7fc-24fcd73a1d2c","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-240bbfbd-3894-4659-a7fc-24fcd73a1d2c","query":"site:docs.mistral.ai/api/endpoint/ocr \"pages\" \"page range\" OCR ...","action":{"type":"search","queries":["site:docs.mistral.ai/api/endpoint/ocr \"pages\" \"page range\" OCR","site:docs.mistral.ai \"page_range\" Mistral OCR"]}}}
+{"type":"item.started","item":{"id":"item_4","type":"web_search","id":"exec-6c157a09-094b-4d0a-b4ee-3306d1218adc","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_4","type":"web_search","id":"exec-6c157a09-094b-4d0a-b4ee-3306d1218adc","query":"'pages'","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_5","type":"agent_message","text":"Use the OCR request’s `pages` parameter. It accepts either:\n\n- An integer array, e.g. `[0, 1, 2]`\n- A comma-separated string of page numbers and ranges, e.g. `\"0,1,2\"`, `\"0-5\"`, or `\"0,2-4\"`\n\nPage numbering is zero-based: the first page is page `0`. See Mistral’s [OCR API documentation](https://docs.mistral.ai/api/endpoint/ocr#pages)."}}
+{"type":"turn.completed","usage":{"input_tokens":141563,"cached_input_tokens":107008,"cache_write_input_tokens":0,"output_tokens":518,"reasoning_output_tokens":89}}

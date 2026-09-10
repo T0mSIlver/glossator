@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08883-228d-7b01-860c-674a425b1e88"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s current documentation for the exact `mistral-vespa` CLI syntax and deployment sequence."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-f0894c42-e1a2-4554-86b8-443817353cc2","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-f0894c42-e1a2-4554-86b8-443817353cc2","query":"site:docs.mistral.ai mistral-vespa migration deploy","action":{"type":"search","query":"site:docs.mistral.ai mistral-vespa migration deploy"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Run:\n\n```bash\nuv run mistral-vespa generate-migration <name> --app-dir ./vespa_app\n```\n\nEdit the generated migration, then deploy it:\n\n```bash\nuv run mistral-vespa migrate \\\n  --app-dir ./vespa_app \\\n  --config-server http://localhost:19071 \\\n  --query-port 8080\n```\n\n`migrate` builds the application from the migrations, uploads it, and waits for the app to become ready. See the [CLI reference](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/cli) and [schema migration guide](https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations)."}}
+{"type":"turn.completed","usage":{"input_tokens":31228,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":255,"reasoning_output_tokens":14}}

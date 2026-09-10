@@ -1,0 +1,11 @@
+{"type":"thread.started","thread_id":"01a08886-3d58-7183-a4cd-0c4336e09822"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking Mistral’s official Agents API documentation for the supported model constraint and any handoff-chain limit."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-93eb96ae-9d15-4157-909b-4a38c20a8d7b","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-93eb96ae-9d15-4157-909b-4a38c20a8d7b","query":"site:docs.mistral.ai Agents API handoffs models limit handoff links","action":{"type":"search","query":"site:docs.mistral.ai Agents API handoffs models limit handoff links"}}}
+{"type":"item.started","item":{"id":"item_2","type":"web_search","id":"exec-cb5933d2-45ba-46d3-8db5-0fc292cde606","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"web_search","id":"exec-cb5933d2-45ba-46d3-8db5-0fc292cde606","query":"","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_3","type":"web_search","id":"exec-c1390728-f6e0-4b32-82cf-55795cdb5f0b","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_3","type":"web_search","id":"exec-c1390728-f6e0-4b32-82cf-55795cdb5f0b","query":"site:docs.mistral.ai/studio/agents \"Which models are supported\"","action":{"type":"search","query":"site:docs.mistral.ai/studio/agents \"Which models are supported\""}}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"You can use any Mistral model available for chat completions; each agent’s `model` is selected from the available chat-completion models. Agents may use different models from one another. [Mistral Agents & Conversations documentation](https://docs.mistral.ai/studio/agents/agents-api)\n\nThere is no limit on the number of chained handoffs in a workflow. [Mistral Handoffs documentation](https://docs.mistral.ai/studio/agents/handoffs)"}}
+{"type":"turn.completed","usage":{"input_tokens":86280,"cached_input_tokens":62464,"cache_write_input_tokens":0,"output_tokens":406,"reasoning_output_tokens":101}}

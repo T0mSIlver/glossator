@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a08884-d71e-7da0-a3d9-b8a863646cf1"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll check Mistral’s current official documentation for the Agents API and verify whether agent deletion is supported."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-b5ba2551-15f5-4966-a820-dc139bbf6d2e","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-b5ba2551-15f5-4966-a820-dc139bbf6d2e","query":"site:docs.mistral.ai Agents API delete agent Mistral","action":{"type":"search","query":"site:docs.mistral.ai Agents API delete agent Mistral"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Yes. Use:\n\n```http\nDELETE https://api.mistral.ai/v1/agents/{agent_id}\n```\n\nExample:\n\n```bash\ncurl https://api.mistral.ai/v1/agents/{agent_id} \\\n  -X DELETE \\\n  -H \"Authorization: Bearer YOUR_API_KEY\"\n```\n\nThe SDK equivalent is `mistral.beta.agents.delete(agent_id=\"<id>\")`. See Mistral’s [Agents API documentation](https://docs.mistral.ai/api/endpoint/beta/agents)."}}
+{"type":"turn.completed","usage":{"input_tokens":31017,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":210,"reasoning_output_tokens":15}}

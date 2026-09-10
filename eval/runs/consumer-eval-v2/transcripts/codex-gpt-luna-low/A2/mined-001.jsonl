@@ -1,0 +1,8 @@
+{"type":"thread.started","thread_id":"01a08884-6b8e-7602-bf07-40eed729c8ad"}
+{"type":"turn.started"}
+{"type":"item.started","item":{"id":"item_0","type":"web_search","id":"exec-23fc5ad7-dca4-45cd-b70e-5e2d46e4ffe2","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_0","type":"web_search","id":"exec-23fc5ad7-dca4-45cd-b70e-5e2d46e4ffe2","query":"site:docs.mistral.ai files upload purpose ocr fine-tune batch ...","action":{"type":"search","queries":["site:docs.mistral.ai files upload purpose ocr fine-tune batch","Mistral API file upload purpose accepted values"]}}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-ec578e27-66f0-4e69-af77-aa371cec1a0c","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-ec578e27-66f0-4e69-af77-aa371cec1a0c","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"The file upload endpoint accepts exactly:\n\n- `\"fine-tune\"`\n- `\"batch\"`\n- `\"ocr\"`\n\nThe current API reference declares `purpose` as `\"fine-tune\"|\"batch\"|\"ocr\"` and includes an OCR upload example. Your type checker is likely using an outdated Mistral SDK or generated types. Update the SDK/types, or temporarily apply a narrow type override.\n\n[ Mistral Files API reference](https://docs.mistral.ai/api/endpoint/files)"}}
+{"type":"turn.completed","usage":{"input_tokens":57545,"cached_input_tokens":40192,"cache_write_input_tokens":0,"output_tokens":263,"reasoning_output_tokens":53}}
