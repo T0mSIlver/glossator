@@ -10,15 +10,12 @@ just-in-time half.
 
 - For any question about Mistral models, the API, SDKs, pricing, limits, Studio, Work, Vibe
   or La Plateforme, call `mistral_docs_search` before answering, even when the answer seems
-  known.
-- Quote only text a tool printed, and cite the `url#anchor` exactly as printed; never
-  reconstruct a documentation URL.
-- Before showing quotes, pass the draft and its quotes to `mistral_docs_verify_quotes` and
-  drop every marker it did not verify.
+  known, then `mistral_docs_read_page` on the best hit.
+- Link the `url#anchor` a hit printed next to each claim; never reconstruct a documentation URL.
 - When the search does not find the answer, say the documentation does not cover it rather
   than answering from memory.
 ```
 
-Four sentences and no more: this text sits in every prompt of the session, so it has to earn
+Three sentences and no more: this text sits in every prompt of the session, so it has to earn
 its place. The same rules, for Mistral Work, live in `SKILL.md` and `custom-instructions.md`
 beside this file.

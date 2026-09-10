@@ -1,10 +1,12 @@
 # glossator
 
-glossator answers technical questions over [docs.mistral.ai](https://docs.mistral.ai)
-with cited sources. It returns Markdown with `[n]` markers and checks each cited
-quote against the retrieved chunk before returning it. FastAPI and MCP use the
-same `glossator.answer.service.ask` function and build their engines with
-`RetrievalConfig.shipped()`.
+glossator gives agents Mistral's documentation: an MCP server with three
+read-only tools over the 411 pages of [docs.mistral.ai](https://docs.mistral.ai)
+at a pinned commit, a search that returns sections addressed by their
+`url#anchor`, whole-page reads, and a history of what changed across dated
+snapshots. The agent does the research and writes the answer. A FastAPI
+service keeps the generated-answer path, with `[n]` markers and quotes checked
+against the retrieved chunks, as the evaluated baseline.
 
 ## Architecture in ten lines
 
@@ -104,50 +106,34 @@ curl -s http://127.0.0.1:8080/ask \
 uv run python -m entrypoints.mcp_server
 ```
 
-The server is named `mistral-docs` and every tool is namespaced by the corpus it
-reads, so a model choosing tools sees the domain in the name.
+The server is named `mistral-docs` and exposes three read-only tools. The agent
+calling them does the research and writes the answer; nothing generates text
+inside the server (`DECISIONS.md` D-044).
 
 | Tool | Purpose |
 |---|---|
-| `mistral_docs_search(query, max_hits=5, rerank=False, response_format, kinds, locales, exclude_ids)` | Find citable sections by meaning or keywords. |
-| `mistral_docs_open_section(chunk_id, window=2, response_format)` | Read a hit with nearby chunks in page order. |
-| `mistral_docs_step(chunk_id, direction, steps=1)` | Step forward or backward through a page. |
-| `mistral_docs_read_page(page_url, start_offset, end_offset, max_chunks=8, response_format)` | Read a known page range without ranking it again. |
-| `mistral_docs_find_on_page(page_url, pattern, mode="phrase", max_matches=5, response_format)` | Match a phrase or terms inside one page. |
-| `mistral_docs_answer(question, strategy="single_pass")` | Generate an answer and print only verified citations as links. |
-| `mistral_docs_verify_quotes(draft, quotes)` | Verify your own quotes against the chunks they name; keep only verified quotes. |
-| `mistral_docs_history(text \| section \| question)` | Track a phrase, a section or a question across the stored dated snapshots. No model runs inside it. |
+| `mistral_docs_search(q, max_hits=5, kind)` | The sections that state something: one hit per section with its `url#anchor`, heading path and snippet. |
+| `mistral_docs_read_page(page_url, section)` | A whole page in reading order, or one section of a large page with its neighbours. |
+| `mistral_docs_history(text \| section \| question)` | When a phrase appeared, how a section changed across the dated snapshots, or what a question retrieved on each date. |
 
-`search`, `open_section`, `read_page` and `find_on_page` take
-`response_format="concise"` (the default: citation, heading path, snippet and
-chunk id) or `"detailed"` (scores, offsets, counts, untruncated text and the
-paginated re-search call). `search` ranks with the index alone unless
-`rerank=True`, which reorders the candidates with a model for about five
-seconds; `mistral_docs_answer` always reranks.
-
-Every tool is annotated read-only, idempotent and closed-world, so a client
-knows it can call one without asking. Every tool response ends with `next:`. The
-server announces clamps, rejects unknown parameters with `E_BAD_PARAM`, ignores
-host-supplied arguments whose name starts with an underscore (naming them in a
-`note:` line), and prints a citation URL on each hit.
-The MCP tools clamp out-of-range values to their published ranges (a `note:`
-line names the move, and `glossator://context` publishes the ranges), while the
-HTTP API validates and rejects out-of-range values with `E_BAD_PARAM` and
-documents them in `/openapi.json`. It exposes exactly three resources:
-
-- `glossator://guide` contains the tool flow and shared rules.
-- `glossator://index` lists every page as URL, title, and kind.
-- `glossator://context` reports limits, ID formats, corpus commit, counts, and model IDs.
+Every hit and every section is addressed by its `url#anchor` on
+docs.mistral.ai, which is also the citation; there is no other identifier for a
+model to carry. 97% of pages fit one `read_page` call whole
+(`eval/corpus-stats/`); a hit on one of the dozen larger pages names the
+section to pass. Every tool is annotated read-only, idempotent and
+closed-world, so a host can call one without asking (D-037b, D-037c). Unknown
+parameters are rejected with `E_BAD_PARAM` naming the likely one, and
+host-supplied arguments whose name starts with an underscore are dropped.
 
 The MCP server cannot ingest or delete content. Corpus changes go through the
-adapter, manifest checks, and ingestion command.
+adapter, manifest checks, and ingestion command. `GLOSSATOR_MCP_TOOLS` names a
+subset of the three tools to register, which the consumer evaluation uses to
+serve one arm per deployment.
 
-Set `GLOSSATOR_MCP_TOOLS` to a comma-separated subset of tool names to register
-only those tools (unset means every tool). The names the tools had before they
-were namespaced (`search`, `open`, `navigate`, `read`, `grep`, `ask`, `cite`,
-`history`) are still accepted and translated. The server instructions, the
-`glossator://guide` resource, every `DO NOT USE` clause, and `GET /health` then
-cover only the registered tools.
+The generated answer with verified quotes, the listwise reranker and the search
+loop remain in the package and the HTTP API (`POST /ask`, `POST /cite`) as the
+measured context-injection baseline the agent path is compared against
+(D-040b, D-017b); they are not on the MCP surface.
 
 ## Mistral Work
 
@@ -174,27 +160,21 @@ Authentication, again in the page's exact words:
 Set `GLOSSATOR_MCP_TOKEN` on the server. Every MCP HTTP request must then
 carry `Authorization: Bearer <token>`; requests without it get a 401 naming
 the missing header. Work detects "bearer" automatically when registering the
-Connector. Pre-authorize the read functions (`search`, `ask`, `cite`) per
-Connector so they run without approval prompts, and keep write functions on
-manual approval; the server exposes no write functions. `GET /health` needs no
-header and reports the served variant, the chunk count, whether the embedding
-probe passed, and the registered tool names, so the Connectors Debugger and
-the tunnel can check the server.
+Connector. Pre-authorize the three read functions per Connector so they run
+without approval prompts; the server exposes no write functions. `GET /health`
+needs no header and reports the served variant, the page and chunk counts,
+whether the embedding probe passed, and the registered tool names, so the
+Connectors Debugger and the tunnel can check the server. `GET /` is a landing
+page and `/favicon.svg` the icon, both open.
 
 `skills/mistral-docs/SKILL.md` is a workspace Skill for documentation
-questions: search first with the mistral-docs connector, open or read the
-sections relied on, write the answer with `[n]` markers and verbatim quotes,
-call `mistral_docs_verify_quotes`, drop any marker that did not verify, paste
-the Sources block, never answer from memory, and say when the documentation
-does not answer. Its
-`README.md` explains how to add it as a workspace Skill, and
-`custom-instructions.md` holds three sentences a workspace admin can paste into
-`Context` > `Instructions`.
-
-Custom MCP Connectors do not support MCP resources yet, so the three
-`glossator://` resources are unreadable from Work; the shared rules reach the
-model through the tool descriptions and the workspace Skill. Clients that do
-support resources, such as Claude Code, read them normally.
+questions: search first with the mistral-docs connector, read the page behind
+the best hit, link the section behind each claim, use the history tool for
+"when did this change" questions, and say when the documentation does not
+answer. Its `README.md` explains how to add it as a workspace Skill, and
+`custom-instructions.md` holds two sentences a workspace admin can paste into
+`Context` > `Instructions`. Custom MCP Connectors do not read MCP resources or
+prompts, so the rules reach Work through the tool descriptions and the Skill.
 
 ## Deployment
 

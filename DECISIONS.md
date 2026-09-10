@@ -1224,3 +1224,66 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 1. Medium 3.5 stays the shipped default (D-017); the published tables keep both columns. The claim "the ceiling is the 14B" is withdrawn: the next gains on the answer path are in the prompt (state the exact value or limit before explaining, one marker per list item, prose for factual questions, D-021b), which now can be measured on either model.
 2. The quoting instruction gains an upper bound: one span per claim, one sentence or one table row, no ellipsis, copied from the source's Markdown. This is the rule a stronger model needs; the 14B was already writing short quotes. The verifier is not loosened: link syntax and ellipses are exactly what the resolvability check (D-036b) says the browser cannot highlight either.
 3. The replay path is the way to measure any generator from now on: no index, no reranker, no credits beyond the endpoint's, and a rebuild proof that the comparison is exact. The search loop cannot be replayed, since it is multi-turn; it stays a Ministral number until the quota opens.
+
+---
+
+## D-043 · Page sizes in Medium 3.5 tokens
+
+**Status:** open · 2026-09-10 · measured by `glossator.eval.corpus_stats`, outputs in `eval/corpus-stats/`
+
+**Facts.** All 411 pages of the vendored corpus (commit `2e094f7`), page body counted with the tokenizer Mistral Medium 3.5 actually tokenizes with: model id `mistral-medium-2604`, the `tekken.json` of `mistralai/Mistral-Medium-3.5-128B` through `MistralTokenizer.from_hf_hub`. The answer layer's `count_mistral_tokens` is **not** this tokenizer: it pins `MistralTokenizer.v1()` so context budgets stay comparable with the chunker's (D-010a), and this run does not reuse it. Chunk counts are the shipped `sec1024` chunking's (and reproduce the index's 4,440 chunks exactly).
+
+| pages | min | p50 | p75 | p90 | p95 | p99 | max | mean |
+|---|---|---|---|---|---|---|---|---|
+| 411 | 5 | 942 | 1,639 | 3,327 | 5,629 | 15,719 | 57,179 | 1,863 |
+
+| under (tokens) | 2,000 | 4,000 | 8,000 | 16,000 | 32,000 |
+|---|---|---|---|---|---|
+| pages | 328 | 377 | 399 | 407 | 409 |
+| share | 0.798 | 0.917 | 0.971 | 0.990 | 0.995 |
+
+| budget (tokens) | pages fitting whole | share | median-sized pages per call |
+|---|---|---|---|
+| 8,000 | 399 | 0.971 | 8 |
+| 16,000 | 407 | 0.990 | 16 |
+
+| kind | pages | tokens | token share | characters | chunks |
+|---|---|---|---|---|---|
+| doc | 296 | 650,801 | 0.850 | 2,522,445 | 2,890 |
+| api | 49 | 72,844 | 0.095 | 287,113 | 996 |
+| model | 66 | 42,001 | 0.055 | 122,084 | 554 |
+
+| # | page | kind | tokens | chunks |
+|---|---|---|---|---|
+| 1 | `/studio/batch-processing` | doc | 57,179 | 101 |
+| 2 | `/studio/document-processing/basic_ocr` | doc | 44,457 | 80 |
+| 3 | `/studio/audio/speech_to_text/offline_transcription` | doc | 25,690 | 50 |
+| 4 | `/resources/deprecated/native-reasoning` | doc | 22,347 | 31 |
+| 5 | `/studio/document-processing/annotations` | doc | 15,964 | 37 |
+| 6 | `/studio/agents/agents-api` | doc | 13,519 | 29 |
+| 7 | `/models` | model | 13,462 | 18 |
+| 8 | `/resources/deprecated/customization` | doc | 9,273 | 44 |
+| 9 | `/studio/conversations/function-calling` | doc | 9,137 | 24 |
+| 10 | `/studio/audio/speech_to_text/realtime_transcription` | doc | 8,880 | 28 |
+
+**Decision.** Pages are read whole by default and by section when a page is large (D-044): 97% of pages fit one call under 8,000 tokens, and the twelve that do not are named in the table.
+
+---
+
+## D-044 · The MCP surface is three tools: search, read a page, history
+
+**Status:** decided by Tom · 2026-09-10 · replaces the eight-tool surface of D-029a; `src/entrypoints/mcp_server.py`, `tests/test_mcp_tools.py`, `skills/mistral-docs/`; evidence: Tom's Work session of 2026-09-10 21:27 (two questions, export in the worktree), D-043, D-040b, D-017b, D-015b
+
+**Facts.**
+- In the Work session the model ran ten calls for two questions: six searches, three section opens, one page read. It never called `verify_quotes` or `answer`, and its final answer carried one page link and no markers. Work rendered every tool result in the chat, including the chunk ids and the `note: index ranking only; rerank=true reorders with a model (about 5 s)` line.
+- 97% of pages fit one call under 8,000 Medium 3.5 tokens; the median page is 942 tokens and twelve pages exceed 10,000 (D-043). Reading a page is the normal move; sectioning is the exception for a dozen pages.
+- The reranker buys rank-1 precision an agent does not need, since it reads several hits and searches again (D-015b), and it was the only model call on the surface. The `answer` tool reaches the same correctness as the tools arm for a capable consumer (0.78 against 0.77 for Sonnet) at three times the latency and with a second model in the loop (D-040b); Medium 3.5 as that model changes nothing (D-017b).
+- `verify_quotes` was called by Sonnet on 14 of 30 questions unprompted and by Work on 0 of 3. Its product is the sentence-highlight link, about 170 percent-encoded characters; most sections are short enough that the section anchor lands a reader on the sentence. Tom's ruling: no sentence-level highlighting on the agent surface, and no model should have to emit such a link.
+- Chunk ids were a second identifier beside the URL. With whole-page reads the model never needs one: a section is addressed by the `url#anchor` a hit printed, or by its heading text on the pages whose headings carry no anchor (D-003a). `open_section`, `step` and `find_on_page` were three ways to move inside a page that `read_page` with an optional `section` covers.
+
+**Decision.**
+1. Tools: `mistral_docs_search(q, max_hits, kind)`, `mistral_docs_read_page(page_url, section)`, `mistral_docs_history(text | section | question)`. No ids, no response formats, no rerank, no exclusions, no locales. Search collapses the chunks of one section into one hit at its best rank and marks a hit on a large page with the section to pass to `read_page`.
+2. Model-facing text names no time, cost, token or budget figure. Descriptions are under 120 words; the instructions carry the corpus scope, the citation rule (link the printed `url#anchor` next to each claim) and the refusal rule.
+3. `answer`, the reranker, the search loop and `cite` stay in the package and the HTTP API as the measured context-injection baseline (`POST /ask`, `POST /cite`); the MCP surface is the agent path. The argument for the agent path is the evidence above: equal correctness, one fewer model, a third of the latency, and the consumer keeps its own reasoning and can reformulate, which is where the loop won on badly worded questions (D-035b).
+4. The Work Skill, the custom instructions and the CLAUDE.md block describe the three-tool flow; the consumer evaluation's arms are `no tools` and `tools` from now on, with `answer` measured through the API.
+5. The server serves an unauthenticated landing page and favicon on the subdomain beside `/health`.

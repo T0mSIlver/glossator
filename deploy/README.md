@@ -151,11 +151,9 @@ Then pre-authorize the functions you use, again in the page's words:
 Every glossator tool is a read function; the server exposes nothing that writes,
 and every tool declares it (`readOnlyHint`, `idempotentHint`, no open world), so
 a host does not have to assume the worst and confirm each call.
-`mistral_docs_search`, `mistral_docs_open_section`, `mistral_docs_read_page`,
-`mistral_docs_find_on_page`, `mistral_docs_verify_quotes` and
-`mistral_docs_answer` are the ones worth pre-authorizing. Name the Connector
-`mistral_docs` and describe it as "Searches docs.mistral.ai at a pinned commit
-and verifies quoted sentences.".
+Pre-authorize all three (`mistral_docs_search`, `mistral_docs_read_page`,
+`mistral_docs_history`). Name the Connector `mistral_docs` and describe it as
+"Searches docs.mistral.ai at a pinned commit and shows what changed.".
 
 `skills/mistral-docs/` in this repository is the workspace Skill that tells Work
 when to reach for the Connector.
@@ -220,11 +218,11 @@ change per deployment:
 |---|---|
 | `MISTRAL_API_KEY` | embeddings, and generation unless a chat server is set |
 | `GLOSSATOR_MCP_TOKEN` | the bearer token every MCP request must carry |
-| `GLOSSATOR_MCP_TOOLS` | comma-separated subset of the tools to register; blank means all. The pre-namespace names are still accepted |
+| `GLOSSATOR_MCP_TOOLS` | comma-separated subset of the three tools to register; blank means all |
 | `VESPA_ENDPOINT` | the index to serve; blank in full mode |
 | `GLOSSATOR_VARIANT` | `page128`, `sec128` or `sec1024` |
 | `GLOSSATOR_PUBLIC_HOSTNAME` | the tunnel hostname, used in the printed commands and the Connector URL |
-| `GLOSSATOR_CHAT_SERVER_URL` | optional local generation server for `mistral_docs_answer` |
+| `GLOSSATOR_CHAT_SERVER_URL` | optional local generation server for the API's `POST /ask` |
 | `MCP_PORT`, `API_PORT`, `VESPA_QUERY_PORT` | published ports on the host |
 | `MCP_BIND_ADDRESS` | `127.0.0.1` so only the tunnel reaches the server |
 

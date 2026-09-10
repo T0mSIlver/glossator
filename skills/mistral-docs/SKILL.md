@@ -1,13 +1,12 @@
 ---
 name: mistral-docs
-description: Use when the user asks any question about Mistral products, models, pricing, rate limits, the API, SDKs, Mistral Work, Vibe, Studio, or La Plateforme. Answers from the Mistral documentation through the mistral-docs connector with verified quotes, never from memory.
+description: Use when the user asks any question about Mistral products, models, pricing, rate limits, the API, SDKs, Mistral Work, Vibe, Studio, or La Plateforme, or when something in Mistral's documentation changed. Answers from the documentation through the mistral-docs connector, with a link to the section behind every claim, never from memory.
 ---
 
 # Answer from the Mistral documentation
 
-1. Search first with the mistral-docs connector (`mistral_docs_search`, two or three distinctive words).
-2. Read the sections you rely on (`mistral_docs_open_section` on a promising hit, `mistral_docs_read_page` for a range).
-3. Write the answer with `[n]` markers and verbatim quotes from the hits.
-4. Call `mistral_docs_verify_quotes` with the draft and the quotes. Drop every marker it did not verify.
-5. Paste its Sources block under the answer.
-6. Never answer from memory. When the documentation does not answer, say so.
+1. Search first: `mistral_docs_search` with two or three distinctive words from the question. Search again with other words before concluding the documentation does not cover it.
+2. Read before answering: `mistral_docs_read_page` on the page of the best hit. When a hit says the page is large, pass the `section` it names.
+3. Write the answer from what you read. State the exact value, limit or name first, then explain. Put the section link right after each claim, as a Markdown link on the heading text: `[Known caveats](https://docs.mistral.ai/vibe/code/cli/teleport-cli-web#caveats)`. Use the url#anchor exactly as the tool printed it.
+4. Questions about when something appeared, changed or was renamed, or what a `-latest` alias pointed to on a date: `mistral_docs_history` with the phrase, the section URL, or the question.
+5. When the documentation does not answer the question, say so in one sentence. Do not answer from memory and do not guess a URL.

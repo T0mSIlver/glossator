@@ -1,140 +1,85 @@
-"""MCP tool, resource, response, and error-contract tests."""
+"""MCP tool, response and error-contract tests for the three-tool surface."""
 
 import asyncio
-import dataclasses
 import importlib
-import json
 from typing import Any
 
 import pytest
 from fastmcp.exceptions import ToolError
-from fastmcp.exceptions import ValidationError as FastMcpValidationError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import SourceNotFoundError
 
-from glossator.answer.citations import Answer, Citation, Trace, TracedSource
-from glossator.answer.context import count_mistral_tokens
-from glossator.answer.llm import TokenUsage
-from glossator.retrieval.engine import Hit, SearchTrace
+from glossator.retrieval.engine import Hit
 
-TOOLS = {
-    "mistral_docs_search",
-    "mistral_docs_open_section",
-    "mistral_docs_step",
-    "mistral_docs_read_page",
-    "mistral_docs_find_on_page",
-    "mistral_docs_answer",
-    "mistral_docs_verify_quotes",
-    "mistral_docs_history",
-}
+TOOLS = {"mistral_docs_search", "mistral_docs_read_page", "mistral_docs_history"}
+PAGE = "https://docs.mistral.ai/page"
 
 
 def _reload_with(monkeypatch: pytest.MonkeyPatch, **env: str) -> Any:
-    """Reload the server with extra environment set (allowlist, token)."""
+    """Reload the server offline with a placeholder key, the fixture corpus, and extra env."""
     import dotenv
 
     monkeypatch.setattr(dotenv, "load_dotenv", lambda *args, **kwargs: False)
     monkeypatch.setenv("MISTRAL_API_KEY", "test-key-not-used")
     monkeypatch.setenv("GLOSSATOR_CORPUS_DIR", "tests/fixtures/corpus")
+    monkeypatch.delenv("GLOSSATOR_MCP_TOOLS", raising=False)
     for key, value in env.items():
         monkeypatch.setenv(key, value)
-
     import entrypoints.mcp_server as module
 
     return importlib.reload(module)
 
 
 @pytest.fixture
-def mcp_server(monkeypatch: pytest.MonkeyPatch, tmp_path: Any) -> Any:
-    """Import `entrypoints.mcp_server` offline, with a placeholder key and dotenv disabled.
-
-    The corpus directory points at the test fixture so the resources read real
-    pages without the vendored corpus being present.
-    """
-    import dotenv
-
-    monkeypatch.setattr(dotenv, "load_dotenv", lambda *args, **kwargs: False)
-    monkeypatch.setenv("MISTRAL_API_KEY", "test-key-not-used")
-    monkeypatch.setenv("GLOSSATOR_CORPUS_DIR", "tests/fixtures/corpus")
-
-    import entrypoints.mcp_server as module
-
-    return importlib.reload(module)
+def mcp_server(monkeypatch: pytest.MonkeyPatch) -> Any:
+    return _reload_with(monkeypatch)
 
 
-def _hit(chunk_id: str, content: str, *, anchor: str | None = "a-section") -> Hit:
+def _hit(
+    chunk_id: str,
+    content: str,
+    *,
+    anchor: str | None = "a-section",
+    heading: str = "A section",
+    url: str = PAGE,
+) -> Hit:
     return Hit(
         chunk_id=chunk_id,
         score=0.5,
-        url="https://docs.mistral.ai/page",
+        url=url,
         anchor=anchor,
-        heading_path=("Page", "A section"),
+        heading_path=("Page", heading),
         page_title="Page",
         kind="doc",
         locale="en",
         section_index=1,
-        content=content,
-        source_id="https://docs.mistral.ai/page",
+        content=f"Page > {heading}\n\n{content}",
+        source_id=url,
         start_offset=10,
         end_offset=20,
     )
 
 
 class FakeNavigation:
-    def __init__(
-        self,
-        hits: list[Hit],
-        *,
-        missing: bool = False,
-        previous_hits: list[Hit] | None = None,
-    ) -> None:
+    def __init__(self, hits: list[Hit], *, missing: bool = False) -> None:
         self.hits = hits
         self.missing = missing
-        self.previous_hits: list[Hit] | None = previous_hits
-
-    def _require_page(self) -> None:
-        if self.missing:
-            raise SourceNotFoundError("https://docs.mistral.ai/nope")
-
-    async def around(self, window: int = 2) -> list[Hit]:
-        self._require_page()
-        return self.hits
-
-    async def next(self, top_k: int = 1) -> list[Hit]:
-        self._require_page()
-        return self.hits[:top_k]
-
-    async def previous(self, top_k: int = 1) -> list[Hit]:
-        self._require_page()
-        if self.previous_hits is None:
-            return []
-        return self.previous_hits[:top_k]
 
     async def read(
         self, start: int | None = None, end: int | None = None, top_k: int = 20
     ) -> list[Hit]:
-        self._require_page()
-        return self.hits[:top_k]
-
-    async def grep(self, pattern: str, mode: Any = None, top_k: int = 5) -> list[Hit]:
-        self._require_page()
+        if self.missing:
+            raise SourceNotFoundError("https://docs.mistral.ai/nope")
         return self.hits[:top_k]
 
 
 class FakeEngine:
-    """One page, two chunks; records what the tools forwarded."""
-
     def __init__(
-        self,
-        hits: list[Hit] | None = None,
-        empty: bool = False,
-        missing_page: bool = False,
-        previous_hits: list[Hit] | None = None,
+        self, hits: list[Hit] | None = None, *, empty: bool = False, missing_page: bool = False
     ) -> None:
         self.hits = hits if hits is not None else [_hit("c1", "alpha content"), _hit("c2", "beta")]
         self.empty = empty
         self.missing_page = missing_page
-        self.previous_hits = previous_hits
         self.search_calls: list[dict[str, Any]] = []
 
     async def search(
@@ -146,55 +91,11 @@ class FakeEngine:
         kinds: frozenset[str] | None = None,
         locales: frozenset[str] | None = None,
     ) -> list[Hit]:
-        self.search_calls.append(
-            {
-                "query": query,
-                "exclude_ids": exclude_ids,
-                "top_k": top_k,
-                "rerank": rerank,
-                "kinds": kinds,
-                "locales": locales,
-            }
-        )
+        self.search_calls.append({"query": query, "top_k": top_k, "rerank": rerank, "kinds": kinds})
         return [] if self.empty else self.hits[: top_k or 5]
 
-    async def search_with_trace(
-        self,
-        query: str,
-        exclude_ids: set[str] | None = None,
-        top_k: int | None = None,
-        *,
-        rerank: bool | None = None,
-        kinds: frozenset[str] | None = None,
-        locales: frozenset[str] | None = None,
-    ) -> tuple[list[Hit], SearchTrace]:
-        hits = await self.search(query, exclude_ids, top_k, rerank, kinds, locales)
-        return hits, SearchTrace(
-            query=query,
-            variant="sec1024",
-            considered=len(hits),
-            kept=len(hits),
-            latency_ms=1.0,
-        )
-
-    async def get_chunk(self, chunk_id: str) -> Hit | None:
-        for hit in self.hits:
-            if hit.chunk_id == chunk_id:
-                anchor = _hit(chunk_id, hit.content)
-                return dataclasses.replace(
-                    anchor,
-                    navigation=FakeNavigation(  # type: ignore[arg-type]
-                        self.hits, previous_hits=self.previous_hits
-                    ),
-                )
-        return None
-
     def navigation_at(self, page_url: str, start: int = 0, end: int = 0) -> FakeNavigation:
-        return FakeNavigation(
-            [] if self.empty else self.hits,
-            missing=self.missing_page,
-            previous_hits=self.previous_hits,
-        )
+        return FakeNavigation([] if self.empty else self.hits, missing=self.missing_page)
 
     async def document_count(self) -> int:
         return 4430
@@ -211,1217 +112,460 @@ def _call_error(server: Any, name: str, arguments: dict[str, Any]) -> str:
     return str(excinfo.value)
 
 
-def test_the_tool_set_includes_history_and_the_existing_read_tools(mcp_server: Any) -> None:
-    tools = asyncio.run(mcp_server.mcp.list_tools())
-
-    assert {tool.name for tool in tools} == TOOLS
-    # No write tool ever ships: the corpus is vendored and hash-checked (D-026).
-    assert not {"ingest", "delete", "index"} & {tool.name for tool in tools}
+def _tools(server: Any) -> dict[str, Any]:
+    return {tool.name: tool for tool in asyncio.run(server.mcp.list_tools())}
 
 
-def test_descriptions_are_bounded_with_a_complete_first_line(mcp_server: Any) -> None:
-    tools = asyncio.run(mcp_server.mcp.list_tools())
+# --------------------------------------------------------------------------- #
+# Surface
+# --------------------------------------------------------------------------- #
 
-    for tool in tools:
-        words = len(tool.description.split())
-        first_line = tool.description.splitlines()[0]
-        assert words < 120, f"{tool.name}: {words} words"
-        assert len(first_line) < 80, f"{tool.name}: first line {len(first_line)} chars"
-        assert first_line.rstrip().endswith((".", "!", "?")), f"{tool.name}: not a clause"
-        lowered = tool.description.lower()
-        assert "use when" in lowered and "do not use" in lowered, tool.name
-        assert "start with" in lowered, tool.name
+
+def test_exactly_three_tools_are_registered(mcp_server: Any) -> None:
+    assert set(_tools(mcp_server)) == TOOLS
 
 
 def test_every_tool_is_annotated_read_only(mcp_server: Any) -> None:
-    """A host with no hints asks the user to approve every call."""
-    tools = asyncio.run(mcp_server.mcp.list_tools())
-
-    for tool in tools:
+    for tool in _tools(mcp_server).values():
         annotations = tool.annotations
-        assert annotations is not None, tool.name
-        assert annotations.readOnlyHint is True, tool.name
-        assert annotations.destructiveHint is False, tool.name
-        assert annotations.idempotentHint is True, tool.name
-        assert annotations.openWorldHint is False, tool.name
+        assert annotations is not None
+        assert annotations.readOnlyHint is True
+        assert annotations.destructiveHint is False
+        assert annotations.idempotentHint is True
+        assert annotations.openWorldHint is False
 
 
-def test_every_parameter_carries_a_description(mcp_server: Any) -> None:
-    tools = asyncio.run(mcp_server.mcp.list_tools())
-
-    for tool in tools:
-        for param, spec in tool.parameters["properties"].items():
-            assert spec.get("description"), f"{tool.name}.{param} has no description"
-
-
-def test_instructions_carry_the_corpus_the_flow_and_the_rules(mcp_server: Any) -> None:
-    """Work reads no resources (D-037a), so the instructions are the whole surface."""
-    instructions = mcp_server.mcp.instructions
-
-    assert "docs.mistral.ai" in instructions
-    assert "Start with mistral_docs_search" in instructions
-    assert "Never fabricate a URL, anchor or id" in instructions
-    assert "never answer from memory" in instructions
-    assert "`next:`" in instructions
-    assert count_mistral_tokens(instructions) <= 250
+def test_descriptions_are_short_and_name_no_time_cost_or_ids(mcp_server: Any) -> None:
+    banned = ("second", " ms", "cost", "USD", "price of", "chunk id", "rerank", "budget")
+    for name, tool in _tools(mcp_server).items():
+        description = tool.description or ""
+        assert len(description.split()) <= 120, name
+        assert description.splitlines()[0].rstrip().endswith("."), name
+        for word in banned:
+            assert word not in description, (name, word)
 
 
-def test_every_description_starts_with_what_it_reads(mcp_server: Any) -> None:
-    tools = asyncio.run(mcp_server.mcp.list_tools())
-
-    for tool in tools:
-        assert tool.name.startswith("mistral_docs_"), tool.name
-        assert tool.title, tool.name
-        first_line = tool.description.splitlines()[0].lower()
-        assert "mistral" in first_line, tool.name
+def test_search_parameters_are_q_max_hits_and_kind(mcp_server: Any) -> None:
+    schema = _tools(mcp_server)["mistral_docs_search"].parameters
+    assert set(schema["properties"]) == {"q", "max_hits", "kind"}
+    assert schema.get("additionalProperties") is False
 
 
-def test_no_description_names_a_tool_the_allowlist_turned_off(
+def test_read_page_parameters_are_page_url_and_section(mcp_server: Any) -> None:
+    schema = _tools(mcp_server)["mistral_docs_read_page"].parameters
+    assert set(schema["properties"]) == {"page_url", "section"}
+
+
+def test_instructions_carry_the_scope_the_citation_rule_and_the_refusal_rule(
+    mcp_server: Any,
+) -> None:
+    text = mcp_server._instructions()
+    assert "pages of Mistral's documentation" in text
+    assert "mistral_docs_search" in text
+    assert "url#anchor" in text
+    assert "say so" in text
+    for word in ("second", "cost", "chunk id", "rerank"):
+        assert word not in text
+
+
+def test_the_allowlist_registers_only_the_named_tools(monkeypatch: pytest.MonkeyPatch) -> None:
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search")
+    assert set(_tools(server)) == {"mistral_docs_search"}
+    assert "mistral_docs_read_page" not in server._instructions()
+
+
+def test_the_allowlist_rejects_an_unknown_tool_and_requires_search(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A DO NOT USE clause is routed through the same check as a next: hint."""
-    server = _reload_with(
-        monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,mistral_docs_verify_quotes"
-    )
-    tools = asyncio.run(server.mcp.list_tools())
-    registered = {tool.name for tool in tools}
-
-    for tool in tools:
-        for other in server._TOOL_ORDER:
-            if other not in registered:
-                assert other not in tool.description, f"{tool.name} names {other}"
+    with pytest.raises(RuntimeError, match="unknown tools"):
+        _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_answer")
+    with pytest.raises(RuntimeError, match="must include mistral_docs_search"):
+        _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_history")
 
 
-def test_search_forwards_the_locale_filter(mcp_server: Any) -> None:
+# --------------------------------------------------------------------------- #
+# search
+# --------------------------------------------------------------------------- #
+
+
+def test_search_prints_url_anchor_heading_snippet_and_next(mcp_server: Any) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_search",
-        {"query": "streaming", "kinds": ["doc"], "locales": ["en"]},
+    text = _call(mcp_server, "mistral_docs_search", {"q": "alpha"})
+    assert 'q: "alpha"' in text
+    assert f"[1] {PAGE}#a-section" in text
+    assert "Page > A section" in text
+    assert "alpha content" in text
+    assert "chunk id" not in text
+    assert "rerank" not in text
+    assert text.rstrip().endswith(
+        f'next: mistral_docs_read_page(page_url="{PAGE}") to read hit 1 on its page'
     )
-
-    call = engine.search_calls[0]
-    assert call["kinds"] == frozenset({"doc"})
-    assert call["locales"] == frozenset({"en"})
-    assert "note: filtered to kinds=['doc'] locales=['en']" in out
-
-
-def test_search_happy_path_carries_per_unit_citations_and_next(mcp_server: Any) -> None:
-    engine = FakeEngine()
-    mcp_server._engine = engine
-
-    out = _call(mcp_server, "mistral_docs_search", {"query": "how do I stream"})
-
-    assert "[1] https://docs.mistral.ai/page#a-section" in out
-    assert "Page > A section" in out
-    assert 'chunk id "c1"' in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-    assert "mistral_docs_answer(question=" in out
-    # The concise rendering drops the retrieval apparatus (audit, item 4).
-    assert "score " not in out
-    assert "offsets " not in out
-    assert "hybrid bm25+vector" not in out
-
-
-def test_search_detailed_restores_scores_offsets_and_the_deeper_call(
-    mcp_server: Any,
-) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_search",
-        {"query": "streaming", "max_hits": 2, "response_format": "detailed"},
-    )
-
-    assert "score 0.500" in out
-    assert "offsets 10..20" in out
-    assert "hybrid bm25+vector" in out
-    assert "go deeper, copy-paste:" in out
-    assert 'mistral_docs_search(query="streaming", exclude_ids=["c1", "c2"])' in out
-
-
-def test_search_rejects_an_unknown_response_format(mcp_server: Any) -> None:
-    text = _call_error(
-        mcp_server, "mistral_docs_search", {"query": "x", "response_format": "verbose"}
-    )
-
-    assert "E_BAD_PARAM" in text
-    assert "concise" in text and "detailed" in text
-
-
-def test_search_does_not_rerank_by_default_and_says_so(mcp_server: Any) -> None:
-    """An agent searches several times; the reranker is charged per query."""
-    engine = FakeEngine()
-    mcp_server._engine = engine
-
-    out = _call(mcp_server, "mistral_docs_search", {"query": "streaming"})
-
     assert engine.search_calls[0]["rerank"] is False
-    assert "note: index ranking only" in out
 
 
-def test_search_reranks_on_request_without_the_note(mcp_server: Any) -> None:
-    engine = FakeEngine()
-    mcp_server._engine = engine
-
-    out = _call(mcp_server, "mistral_docs_search", {"query": "streaming", "rerank": True})
-
-    assert engine.search_calls[0]["rerank"] is True
-    assert "note: index ranking only" not in out
-
-
-def test_a_host_argument_is_dropped_and_announced(mcp_server: Any) -> None:
-    """Work sends _confirmationReason on the call that asks for approval."""
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_search",
-        {"query": "streaming", "_confirmationReason": "The user asked about streaming"},
+def test_search_collapses_chunks_of_one_section_into_one_hit(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(
+        [
+            _hit("c1", "first half"),
+            _hit("c2", "second half"),
+            _hit("c3", "elsewhere", anchor="other", heading="Other"),
+        ]
     )
+    text = _call(mcp_server, "mistral_docs_search", {"q": "half", "max_hits": 5})
+    assert text.count(f"[1] {PAGE}#a-section") == 1
+    assert f"[2] {PAGE}#other" in text
+    assert "[3]" not in text
+    assert "Results: 2 hits" in text
 
-    assert "[1] https://docs.mistral.ai/page#a-section" in out
-    assert "note: ignored host argument _confirmationReason" in out
-    assert "E_BAD_PARAM" not in out
 
-
-def test_a_host_argument_beside_an_unknown_one_still_reports_the_unknown(
+def test_search_asks_the_engine_for_more_than_it_shows_so_sections_stay_distinct(
     mcp_server: Any,
 ) -> None:
-    mcp_server._engine = FakeEngine()
-
-    text = _call_error(
-        mcp_server,
-        "mistral_docs_search",
-        {"query": "streaming", "_confirmationReason": "why", "limit": 3},
-    )
-
-    assert "E_BAD_PARAM" in text
-    assert "limit=" in text
-    assert "_confirmationReason" not in text
-
-
-def test_search_truncation_is_one_line_naming_one_tool(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(hits=[_hit("c1", "word " * 400), _hit("c2", "word " * 400)])
-
-    out = _call(mcp_server, "mistral_docs_search", {"query": "streaming"})
-
-    assert out.count("…[truncated]") == 2
-    assert out.count("note: snippets clamped server-side") == 1
-    assert "mistral_docs_open_section" in out
-
-
-def test_search_full_page_prints_a_copy_pasteable_deeper_call(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_search",
-        {"query": "streaming", "max_hits": 2, "response_format": "detailed"},
-    )
-
-    assert "Results: 2/2 kept/considered" in out
-    assert 'exclude_ids=["c1", "c2"]' in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_search_clamps_and_announces_and_bounds_the_engine_call(mcp_server: Any) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
-
-    out = _call(mcp_server, "mistral_docs_search", {"query": "streaming", "max_hits": 500})
-
-    assert "note: clamped server-side: max_hits=500 → 50" in out
-    # The clamp bounds the query itself, so 500 never reaches the engine.
-    assert engine.search_calls[0]["top_k"] == 50
+    _call(mcp_server, "mistral_docs_search", {"q": "alpha", "max_hits": 4})
+    assert engine.search_calls[0]["top_k"] == 12
 
 
-def test_search_pagination_keeps_filters_and_prior_exclusions(mcp_server: Any) -> None:
+def test_search_clamps_max_hits_silently_to_the_ceiling(mcp_server: Any) -> None:
+    engine = FakeEngine()
+    mcp_server._engine = engine
+    _call(mcp_server, "mistral_docs_search", {"q": "alpha", "max_hits": 999})
+    assert engine.search_calls[0]["top_k"] == mcp_server.MAX_HITS * 3
+
+
+def test_search_snippet_drops_the_heading_line_the_path_already_shows(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine([_hit("c1", "## A section {#a-section}\n\nbody text")])
+    text = _call(mcp_server, "mistral_docs_search", {"q": "body"})
+    assert "{#a-section}" not in text
+    assert "body text" in text
+
+
+def test_search_marks_a_hit_on_a_large_page_with_the_section_to_read(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_search",
-        {
-            "query": "streaming",
-            "max_hits": 2,
-            "kinds": ["doc"],
-            "locales": ["en"],
-            "exclude_ids": ["old"],
-            "response_format": "detailed",
-        },
+    mcp_server._PAGE_SIZES[PAGE] = mcp_server.LARGE_PAGE_CHARS
+    text = _call(mcp_server, "mistral_docs_search", {"q": "alpha"})
+    assert f'large page: mistral_docs_read_page(page_url="{PAGE}", section="a-section")' in text
+    assert text.rstrip().endswith(
+        f'next: mistral_docs_read_page(page_url="{PAGE}", section="a-section") '
+        "to read hit 1 on its page"
     )
 
-    assert 'exclude_ids=["old", "c1", "c2"]' in out
-    assert 'kinds=["doc"]' in out
-    assert 'locales=["en"]' in out
 
-
-def test_search_empty_says_which_kind_and_echoes_the_query(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(empty=True)
-
-    out = _call(mcp_server, "mistral_docs_search", {"query": "quantum cookies"})
-
-    assert 'Results: 0 sections matched for query "quantum cookies"' in out
-    assert "corpus may lack the topic" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
+def test_search_forwards_the_kind_filter(mcp_server: Any) -> None:
+    engine = FakeEngine()
+    mcp_server._engine = engine
+    text = _call(mcp_server, "mistral_docs_search", {"q": "alpha", "kind": "api"})
+    assert engine.search_calls[0]["kinds"] == frozenset({"api"})
+    assert "kind: api" in text
 
 
 def test_search_rejects_an_unknown_kind(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_search", {"query": "x", "kinds": ["tutorial"]})
-
+    text = _call_error(mcp_server, "mistral_docs_search", {"q": "alpha", "kind": "blog"})
     assert "E_BAD_PARAM" in text
-    assert "tutorial" in text
-    assert "next:" in text
+    assert '"doc", "api" or "model"' in text
 
 
 def test_search_rejects_an_empty_query(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_search", {"query": "   "})
+    text = _call_error(mcp_server, "mistral_docs_search", {"q": "   "})
+    assert "E_BAD_PARAM" in text
+    assert "q is empty" in text
 
-    assert "E_EMPTY_QUERY" in text
-    assert "next:" in text
+
+def test_search_empty_says_the_documentation_may_not_cover_it(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(empty=True)
+    text = _call(mcp_server, "mistral_docs_search", {"q": "nothing"})
+    assert "Results: no section matched." in text
+    assert "does not cover it" in text
 
 
 def test_unknown_parameters_are_rejected_naming_the_right_one(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_search", {"query": "x", "limit": 3})
-
+    mcp_server._engine = FakeEngine()
+    text = _call_error(mcp_server, "mistral_docs_search", {"q": "alpha", "max_hit": 3})
     assert "E_BAD_PARAM" in text
-    assert "limit=" in text
-    assert "did you mean limit= → max_hits=?" in text
-    assert "mistral_docs_search accepts:" in text
+    assert "max_hit" in text
+    assert "did you mean max_hit= → max_hits=" in text
+    assert "accepts: kind, max_hits, q" in text
 
 
-def test_unknown_parameters_with_no_close_match_list_the_schema(mcp_server: Any) -> None:
-    text = _call_error(
-        mcp_server, "mistral_docs_find_on_page", {"page_url": "s", "pattern": "p", "banana": 1}
-    )
-
-    assert "E_BAD_PARAM" in text
-    assert "banana=" in text
-    assert "mistral_docs_find_on_page accepts:" in text
-
-
-def test_open_windows_around_the_chunk_and_marks_it(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(mcp_server, "mistral_docs_open_section", {"chunk_id": "c1", "window": 1})
-
-    assert "[1]* https://docs.mistral.ai/page#a-section" in out
-    assert out.count("https://docs.mistral.ai/page#a-section") >= 2
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_open_clamps_the_window_and_announces_it(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(mcp_server, "mistral_docs_open_section", {"chunk_id": "c1", "window": 99})
-
-    assert "note: clamped server-side: window=99 → 10" in out
-
-
-def test_open_detailed_returns_the_untruncated_chunk(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(hits=[_hit("c1", "x" * 1500)])
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_open_section",
-        {"chunk_id": "c1", "response_format": "detailed"},
-    )
-
-    assert "x" * 1500 in out
-    assert "…[truncated]" not in out
-    assert "offsets 10..20" in out
-
-
-def test_open_unknown_chunk_is_a_typed_error(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    text = _call_error(mcp_server, "mistral_docs_open_section", {"chunk_id": "nope"})
-
-    assert "E_UNKNOWN_CHUNK" in text
-    assert '"nope"' in text
-    assert "exactly as a search or open result printed it" in text
-    assert "next:" in text
-
-
-def test_step_walks_forward_from_a_chunk_id(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_step",
-        {"chunk_id": "c1", "direction": "next"},
-    )
-
-    assert 'next 1 chunk(s) from chunk "c1"' in out
-    assert "(steps=1 was full; more may exist)" in out
-    assert "https://docs.mistral.ai/page#a-section" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_step_at_the_end_of_a_page_says_so(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_step",
-        {"chunk_id": "c1", "direction": "previous"},
-    )
-
-    assert "Results: 0 chunks previous" in out
-    assert "nothing further in that direction" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_step_rejects_a_chunk_id_the_index_does_not_have(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    text = _call_error(mcp_server, "mistral_docs_step", {"chunk_id": "nope", "direction": "next"})
-
-    assert "E_UNKNOWN_CHUNK" in text
-
-
-def test_step_previous_walks_backward_with_results(mcp_server: Any) -> None:
-    earlier = _hit("c0", "chunk before the anchor")
-    mcp_server._engine = FakeEngine(hits=[earlier], previous_hits=[earlier])
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_step",
-        {"chunk_id": "c0", "direction": "previous", "steps": 2},
-    )
-
-    assert "previous 1 chunk(s)" in out
-    assert "(every chunk in this direction)" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_step_rejects_a_bad_direction(mcp_server: Any) -> None:
-    text = _call_error(
-        mcp_server,
-        "mistral_docs_step",
-        {"chunk_id": "c1", "direction": "sideways"},
-    )
-
-    assert "E_BAD_PARAM" in text
-    assert "next" in text
-
-
-def test_read_returns_the_page_with_next(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(mcp_server, "mistral_docs_read_page", {"page_url": "https://docs.mistral.ai/page"})
-
-    assert "page: https://docs.mistral.ai/page" in out
-    assert "Results: 2 chunks (the whole requested range; none dropped)" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_read_defaults_to_eight_chunks(mcp_server: Any) -> None:
-    """The old default returned whole pages: 10,516 tokens for one call."""
-    engine = FakeEngine(hits=[_hit(f"c{i}", f"chunk {i}") for i in range(20)])
+def test_a_host_argument_is_dropped_before_validation(mcp_server: Any) -> None:
+    engine = FakeEngine()
     mcp_server._engine = engine
-
-    out = _call(mcp_server, "mistral_docs_read_page", {"page_url": "https://docs.mistral.ai/page"})
-
-    assert "Results: 8 chunks (the page has more)" in out
-    assert "start_offset=20" in out
-
-
-def test_read_stops_at_the_per_call_character_budget(mcp_server: Any) -> None:
-    long_chunk = "word " * 2000
-    engine = FakeEngine(hits=[_hit(f"c{i}", long_chunk) for i in range(8)])
-    mcp_server._engine = engine
-
-    out = _call(mcp_server, "mistral_docs_read_page", {"page_url": "https://docs.mistral.ai/page"})
-
-    assert "note: clamped server-side:" in out
-    assert f"{mcp_server.READ_MAX_CHARS}-character per-call budget" in out
-    assert len(out) < mcp_server.READ_MAX_CHARS * 2
-
-
-def test_read_continues_from_the_last_end_offset(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_read_page",
-        {"page_url": "https://docs.mistral.ai/page", "max_chunks": 1},
+    text = _call(
+        mcp_server, "mistral_docs_search", {"q": "alpha", "_confirmationReason": "user asked"}
     )
-
-    assert "Results: 1 chunks (the page has more)" in out
-    assert (
-        'next: mistral_docs_read_page(page_url="https://docs.mistral.ai/page", '
-        "start_offset=20, max_chunks=1) to continue after this page of chunks" in out
-    )
-
-
-def test_read_returns_long_chunk_content_without_truncating_it(mcp_server: Any) -> None:
-    content = "first line\n" + "x" * 1400 + "\nlast line"
-    mcp_server._engine = FakeEngine(hits=[_hit("c1", content)])
-
-    out = _call(mcp_server, "mistral_docs_read_page", {"page_url": "https://docs.mistral.ai/page"})
-
-    assert content in out
-    assert "[truncated" not in out
-
-
-def test_read_unknown_page_is_a_typed_error(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(missing_page=True)
-
-    text = _call_error(
-        mcp_server, "mistral_docs_read_page", {"page_url": "https://docs.mistral.ai/nope"}
-    )
-
-    assert "E_UNKNOWN_PAGE" in text
-    assert "glossator://index" in text
-
-
-def test_find_on_page_matches_with_next(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_find_on_page",
-        {"page_url": "https://docs.mistral.ai/page", "pattern": "alpha"},
-    )
-
-    assert 'matches for "alpha" (mode=phrase)' in out
-    assert "Results: 2 chunks matched (every match on this page)" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_find_on_page_full_page_names_the_cap(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_find_on_page",
-        {"page_url": "https://docs.mistral.ai/page", "pattern": "alpha", "max_matches": 2},
-    )
-
-    assert "Results: 2 chunks matched (max_matches=2 was full; more matches may exist)" in out
-
-
-def test_find_on_page_empty_names_the_kind_of_empty(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(empty=True)
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_find_on_page",
-        {"page_url": "https://docs.mistral.ai/page", "pattern": "alpha"},
-    )
-
-    assert 'Results: 0 chunks on this page contain the phrase "alpha"' in out
-    assert "The page is indexed; the words are not on it" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_find_on_page_rejects_a_bad_mode(mcp_server: Any) -> None:
-    text = _call_error(
-        mcp_server, "mistral_docs_find_on_page", {"page_url": "s", "pattern": "p", "mode": "fuzzy"}
-    )
-
-    assert "E_BAD_PARAM" in text
-    assert '"phrase"' in text and '"term"' in text
-
-
-def test_find_on_page_rejects_an_empty_pattern(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_find_on_page", {"page_url": "s", "pattern": ""})
-
-    assert "E_EMPTY_QUERY" in text
-
-
-def test_find_on_page_unknown_page_is_a_typed_error(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine(missing_page=True)
-
-    text = _call_error(
-        mcp_server,
-        "mistral_docs_find_on_page",
-        {"page_url": "https://docs.mistral.ai/nope", "pattern": "alpha"},
-    )
-
-    assert "E_UNKNOWN_PAGE" in text
-    assert "next:" in text
-
-
-def _fake_answer(insufficient: bool = False) -> Answer:
-    rejected = Citation(
-        n=3,
-        url="https://docs.mistral.ai/page",
-        anchor="invented",
-        quote="a paraphrase, not a quote",
-        verified=False,
-        reason="quote is not in the cited source",
-    )
-    trace = Trace(
-        strategy="single_pass",
-        variant="sec1024",
-        prompt_version="v1",
-        sources=(
-            []
-            if insufficient
-            else [
-                TracedSource(
-                    n=1,
-                    citation_url="https://docs.mistral.ai/page#a-section",
-                    heading_path=["Page", "A section"],
-                    chunk_ids=["c1"],
-                    tokens=100,
-                )
-            ]
-        ),
-        unverified_citations=[] if insufficient else [rejected],
-    )
-    return Answer(
-        question="how do I stream?",
-        strategy="single_pass",
-        model="mistral-medium-2604",
-        answer_markdown="Use server-sent events [1] and set stream=true [3].",
-        citations=(
-            []
-            if insufficient
-            else [
-                Citation(
-                    n=1,
-                    url="https://docs.mistral.ai/page",
-                    anchor="a-section",
-                    chunk_id="c1",
-                    quote="alpha content",
-                    verified=True,
-                    fragment_url=("https://docs.mistral.ai/page#a-section:~:text=alpha%20content"),
-                )
-            ]
-        ),
-        insufficient_evidence=insufficient,
-        trace=trace,
-        usage=TokenUsage(prompt_tokens=500, completion_tokens=80),
-        latency_ms=2400.0,
-        cost_usd=0.0013,
-    )
-
-
-def test_ask_prints_sources_verification_and_next(mcp_server: Any, monkeypatch: Any) -> None:
-    mcp_server._engine = FakeEngine()
-    seen: list[dict[str, Any]] = []
-
-    async def fake_ask(question: str, **kwargs: Any) -> Answer:
-        seen.append({"question": question, **kwargs})
-        return _fake_answer()
-
-    monkeypatch.setattr(mcp_server.answer_service, "ask", fake_ask)
-
-    out = _call(mcp_server, "mistral_docs_answer", {"question": "how do I stream?"})
-
-    assert "Use server-sent events [1]" in out
-    assert "Sources (1 verified):" in out
-    # One Markdown link per source: its text is the section path, its href the
-    # fragment that scrolls a supporting browser to the quoted sentence.
-    assert (
-        "[1] [Page > A section]"
-        "(https://docs.mistral.ai/page#a-section:~:text=alpha%20content)"
-        ' — "alpha content"' in out
-    )
-    assert "citations verified: 1/2" in out
-    assert 'next: mistral_docs_open_section(chunk_id="c1")' in out
-    # The rejected citation is a plain drop, never a link.
-    assert "[3] dropped, no link" in out
-    assert "https://docs.mistral.ai/page#invented" not in out
-    # The server's engine is reused, not rebuilt per question.
-    assert seen[0]["engine"] is mcp_server._engine
-
-
-def test_ask_insufficient_evidence_points_at_the_next_strategy(
-    mcp_server: Any, monkeypatch: Any
-) -> None:
-    mcp_server._engine = FakeEngine()
-
-    async def fake_ask(question: str, **kwargs: Any) -> Answer:
-        return _fake_answer(insufficient=True)
-
-    monkeypatch.setattr(mcp_server.answer_service, "ask", fake_ask)
-
-    out = _call(mcp_server, "mistral_docs_answer", {"question": "what is the tool-call cap?"})
-
-    assert "insufficient evidence" in out
-    assert "(none)" in out
-    assert 'strategy="search_loop"' in out
-    assert "no citations were proposed" in out
-
-
-def test_ask_rejects_an_unknown_strategy(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_answer", {"question": "q", "strategy": "vibes"})
-
-    assert "E_BAD_PARAM" in text
-    assert "single_pass" in text
-    assert "next:" in text
-
-
-def test_ask_reports_a_bad_model_env_as_a_bad_param(mcp_server: Any, monkeypatch: Any) -> None:
-    # A bad GLOSSATOR_MODEL is deterministic misconfiguration; E_UPSTREAM's
-    # "retry the identical call" would loop forever.
-    monkeypatch.setenv("GLOSSATOR_MODEL", "not-a-priced-model")
-    server: Any = importlib.reload(mcp_server)
-    server._engine = FakeEngine()
-
-    async def fake_ask(question: str, **kwargs: Any) -> Answer:
-        raise AssertionError("the route must fail before calling the service")
-
-    monkeypatch.setattr(server.answer_service, "ask", fake_ask)
-    text = _call_error(server, "mistral_docs_answer", {"question": "how do I stream?"})
-
-    assert "E_BAD_PARAM" in text
-    assert "GLOSSATOR_MODEL" in text
-    assert "ministral-14b-2512" in text
-    assert "E_UPSTREAM" not in text
-
-
-def test_ask_maps_service_failures_to_upstream(mcp_server: Any, monkeypatch: Any) -> None:
-    mcp_server._engine = FakeEngine()
-
-    async def failing(question: str, **kwargs: Any) -> Answer:
-        raise RuntimeError("generation failed after retries")
-
-    monkeypatch.setattr(mcp_server.answer_service, "ask", failing)
-
-    text = _call_error(mcp_server, "mistral_docs_answer", {"question": "how do I stream?"})
-
-    assert "E_UPSTREAM" in text
-    assert "generation failed" in text
-    assert "retry the identical call" in text
-
-
-def test_a_known_parameter_with_a_wrong_type_fails_framework_validation(
-    mcp_server: Any,
-) -> None:
-    # The guard only inspects names; a wrong-typed known name passes it and is
-    # rejected by the framework's own validation, naming the field.
-    with pytest.raises(FastMcpValidationError) as excinfo:
-        asyncio.run(
-            mcp_server.mcp.call_tool("mistral_docs_search", {"query": "x", "max_hits": "many"})
-        )
-
-    assert "max_hits" in str(excinfo.value)
+    assert "Results: 1 hits" in text
+    assert engine.search_calls[0]["query"] == "alpha"
 
 
 def test_busy_tells_the_caller_to_retry_the_identical_call(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
+    slots = mcp_server._ADMISSION_SLOTS
 
-    async def fill() -> None:
-        for _ in range(mcp_server._ADMISSION_SLOTS):
+    async def fill_and_call() -> str:
+        for _ in range(slots):
             await mcp_server._admission.acquire()
+        try:
+            with pytest.raises(ToolError) as excinfo:
+                await mcp_server.mcp.call_tool("mistral_docs_search", {"q": "alpha"})
+            return str(excinfo.value)
+        finally:
+            for _ in range(slots):
+                mcp_server._admission.release()
 
-    asyncio.run(fill())
-    try:
-        text = _call_error(mcp_server, "mistral_docs_search", {"query": "x"})
-    finally:
-        for _ in range(mcp_server._ADMISSION_SLOTS):
-            mcp_server._admission.release()
-
+    text = asyncio.run(fill_and_call())
     assert "E_BUSY" in text
-    assert "IDENTICAL" in text
-    assert "do not reformulate" in text
-
-
-def test_upstream_failure_is_typed_with_a_retry_hint(mcp_server: Any) -> None:
-    class ExplodingEngine:
-        config: Any = None
-
-        async def search_with_trace(
-            self, query: str, **kwargs: Any
-        ) -> tuple[list[Hit], SearchTrace]:
-            raise RetrieverException("vespa down")
-
-    mcp_server._engine = ExplodingEngine()
-
-    text = _call_error(mcp_server, "mistral_docs_search", {"query": "x"})
-
-    assert "E_UPSTREAM" in text
     assert "retry the identical call" in text
 
 
-def test_a_failed_call_releases_its_admission_slot(mcp_server: Any) -> None:
-    class ExplodingEngine:
-        config: Any = None
-
-        async def search_with_trace(
-            self, query: str, **kwargs: Any
-        ) -> tuple[list[Hit], SearchTrace]:
+def test_upstream_failure_is_typed_with_a_retry_hint(mcp_server: Any) -> None:
+    class Broken(FakeEngine):
+        async def search(self, *args: Any, **kwargs: Any) -> list[Hit]:
             raise RetrieverException("vespa down")
 
-    mcp_server._engine = ExplodingEngine()
-    first = _call_error(mcp_server, "mistral_docs_search", {"query": "x"})
-    assert "E_UPSTREAM" in first
-
-    mcp_server._engine = FakeEngine()
-    second = _call(mcp_server, "mistral_docs_search", {"query": "x"})
-
-    assert "E_BUSY" not in second
-    assert "https://docs.mistral.ai/page#a-section" in second
+    mcp_server._engine = Broken()
+    text = _call_error(mcp_server, "mistral_docs_search", {"q": "alpha"})
+    assert "E_UPSTREAM" in text
+    assert "vespa down" in text
+    assert "retry the identical call" in text
+    assert not mcp_server._admission.locked()
 
 
-def test_multiple_unknown_parameters_use_the_plural_grammar(mcp_server: Any) -> None:
-    text = _call_error(
-        mcp_server, "mistral_docs_search", {"query": "x", "limit": 3, "lang": ["en"]}
+# --------------------------------------------------------------------------- #
+# read_page
+# --------------------------------------------------------------------------- #
+
+
+def test_read_page_returns_the_whole_page_with_section_headers(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(
+        [_hit("c1", "alpha content"), _hit("c2", "beta", anchor="b", heading="B")]
     )
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
+    assert text.startswith(f'page: {PAGE} | "Page"')
+    assert f"## {PAGE}#a-section" in text
+    assert f"## {PAGE}#b" in text
+    assert "alpha content" in text and "beta" in text
+    assert "chunk id" not in text
+    assert text.rstrip().endswith("Results: 2 sections, the whole page.")
 
+
+def test_read_page_strips_an_anchor_from_the_url(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": f"{PAGE}#a-section"})
+    assert text.startswith(f'page: {PAGE} | "Page"')
+
+
+def test_read_page_prints_one_header_per_section_not_per_chunk(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine([_hit("c1", "first half"), _hit("c2", "second half")])
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
+    assert text.count(f"## {PAGE}#a-section") == 1
+    assert "first half" in text and "second half" in text
+
+
+def test_read_page_stops_at_the_budget_and_names_the_remaining_sections(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    hits = [_hit(f"c{i}", "x" * 300, anchor=f"s{i}", heading=f"S{i}") for i in range(1, 6)]
+    mcp_server._engine = FakeEngine(hits)
+    monkeypatch.setattr(mcp_server, "READ_MAX_CHARS", 800)
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
+    assert "Results: 2 of 5 sections; the page continues." in text
+    assert f'next: mistral_docs_read_page(page_url="{PAGE}", section="s3")' in text
+    assert "remaining sections: s3, s4, s5" in text
+
+
+def test_read_page_section_returns_it_with_its_neighbours(mcp_server: Any) -> None:
+    hits = [_hit(f"c{i}", f"text {i}", anchor=f"s{i}", heading=f"S{i}") for i in range(1, 6)]
+    mcp_server._engine = FakeEngine(hits)
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "s3"})
+    assert "| section: s3" in text
+    assert "text 2" in text and "text 3" in text and "text 4" in text
+    assert "text 1" not in text and "text 5" not in text
+    assert text.rstrip().endswith("Results: 3 sections, the whole section.")
+
+
+def test_read_page_section_matches_a_heading_when_the_page_has_no_anchors(
+    mcp_server: Any,
+) -> None:
+    hits = [
+        _hit("c1", "intro", anchor=None, heading="Intro"),
+        _hit("c2", "the batch rows", anchor=None, heading="Batch"),
+    ]
+    mcp_server._engine = FakeEngine(hits)
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "batch"})
+    assert "the batch rows" in text
+    assert f"## {PAGE}\n    Page > Batch" in text
+
+
+def test_read_page_unknown_section_lists_the_sections_the_page_has(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(
+        [_hit("c1", "alpha"), _hit("c2", "beta", anchor="b", heading="B")]
+    )
+    text = _call_error(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "zzz"})
     assert "E_BAD_PARAM" in text
-    assert "unknown parameters for mistral_docs_search: limit=, lang=" in text
-    assert "they were rejected, not applied" in text
-    assert "did you mean limit= → max_hits=, lang= → locales=?" in text
-    assert "mistral_docs_search accepts:" in text
+    assert 'no section "zzz"' in text
+    assert "sections on this page: a-section, b" in text
 
 
-def _read_resource(server: Any, uri: str) -> str:
-    result = asyncio.run(server.mcp.read_resource(uri))
-    raw = result.contents[0]
-    return str(raw.content)
+def test_read_page_unknown_page_is_a_typed_error(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine(missing_page=True)
+    text = _call_error(
+        mcp_server, "mistral_docs_read_page", {"page_url": "https://docs.mistral.ai/nope"}
+    )
+    assert "E_UNKNOWN_PAGE" in text
+    assert "exactly as a mistral_docs_search hit printed it" in text
 
 
-def test_exactly_three_resources_exist(mcp_server: Any) -> None:
-    resources = asyncio.run(mcp_server.mcp.list_resources())
+def test_read_page_asks_the_index_for_the_whole_page_under_the_vespa_limit(mcp_server: Any) -> None:
+    calls: list[int] = []
 
-    assert {str(resource.uri) for resource in resources} == {
-        "glossator://guide",
-        "glossator://index",
-        "glossator://context",
-    }
+    class Recording(FakeNavigation):
+        async def read(self, start: Any = None, end: Any = None, top_k: int = 20) -> list[Hit]:
+            calls.append(top_k)
+            return await super().read(start, end, top_k)
 
-
-def test_the_guide_states_the_flow_the_limits_and_no_other_uris(mcp_server: Any) -> None:
-    guide = _read_resource(mcp_server, "glossator://guide")
-
-    assert "Never fabricate documentation URLs or anchors" in guide
-    assert "There are no other URIs" in guide
-    assert "glossator://index" in guide and "glossator://context" in guide
-    assert "| `mistral_docs_search.max_hits` | 1-50 | 5 |" in guide
-    assert "E_BAD_PARAM" in guide
+    engine = FakeEngine()
+    engine.navigation_at = lambda url, start=0, end=0: Recording(engine.hits)  # type: ignore[method-assign]
+    mcp_server._engine = engine
+    _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
+    assert calls == [mcp_server.READ_TOP_K]
+    assert mcp_server.READ_TOP_K <= 400
 
 
-def test_the_guide_limits_table_matches_the_published_limits(mcp_server: Any) -> None:
-    guide = _read_resource(mcp_server, "glossator://guide")
-
-    for name, (low, high, default) in mcp_server.LIMITS.items():
-        assert f"| `{name}` | {low}-{high} | {default} |" in guide, name
+# --------------------------------------------------------------------------- #
+# history
+# --------------------------------------------------------------------------- #
 
 
-def test_the_index_resource_lists_pages_one_per_line(mcp_server: Any) -> None:
-    index = _read_resource(mcp_server, "glossator://index")
-
-    lines = index.splitlines()
-    assert lines[1] == "url\ttitle\tkind"
-    assert "https://docs.mistral.ai/agents/conversations\tConversations\tdoc" in lines
-    assert "# the url column is the page_url the tools take" in lines
+def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
+    text = _call_error(mcp_server, "mistral_docs_history", {})
+    assert "exactly one of text, section or question" in text
+    text = _call_error(mcp_server, "mistral_docs_history", {"text": "a", "section": "b"})
+    assert "exactly one of" in text
 
 
-def test_the_context_resource_publishes_limits_formats_and_counts(mcp_server: Any) -> None:
+def test_history_text_prints_first_last_and_count(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(text: str, manifest: Any) -> dict[str, Any]:
+        return {
+            "form": "text",
+            "text": text,
+            "first": {"snapshot": "2026-06-01", "page": PAGE, "fragment_url": PAGE},
+            "last": {"snapshot": "2026-09-07", "page": PAGE, "fragment_url": PAGE},
+            "snapshots_found": 8,
+        }
+
+    monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
+    text = _call(mcp_server, "mistral_docs_history", {"text": "a phrase"})
+    assert f"first: 2026-06-01 | {PAGE}" in text
+    assert f"last: 2026-09-07 | {PAGE}" in text
+    assert "Results: present in 8 snapshots" in text
+
+
+def test_history_section_renders_states_and_diffs(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(section: str, manifest: Any) -> dict[str, Any]:
+        return {
+            "form": "section",
+            "section": section,
+            "states": [
+                {"snapshot": "2026-06-01", "state": "same", "page": PAGE, "anchor": "a"},
+                {
+                    "snapshot": "2026-06-15",
+                    "state": "changed",
+                    "page": PAGE,
+                    "anchor": "a",
+                    "diff": "-old\n+new",
+                    "diff_truncated": False,
+                },
+            ],
+        }
+
+    monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
+    text = _call(mcp_server, "mistral_docs_history", {"section": f"{PAGE}#a"})
+    assert f"2026-06-01: same | {PAGE}#a" in text
+    assert "```diff\n-old\n+new\n```" in text
+    assert "Results: 2 of 2 stored snapshots" in text
+
+
+def test_history_stops_at_its_budget_and_names_the_next_call(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(section: str, manifest: Any) -> dict[str, Any]:
+        return {
+            "form": "section",
+            "section": section,
+            "states": [
+                {"snapshot": f"2026-0{i}-01", "state": "changed", "page": PAGE, "diff": "x" * 500}
+                for i in range(1, 6)
+            ],
+        }
+
+    monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
+    monkeypatch.setattr(mcp_server, "HISTORY_MAX_CHARS", 1200)
+    text = _call(mcp_server, "mistral_docs_history", {"section": PAGE})
+    assert "Results: 2 of 5 stored snapshots" in text
+    assert "after 2026-02-01 were not rendered" in text
+
+
+def test_history_question_runs_without_the_reranker(mcp_server: Any) -> None:
+    config = mcp_server.RetrievalConfig.shipped(variant="snap1024", snapshot="2026-06-01", top_k=1)
+    assert config.rerank is True
+    engine = mcp_server._snapshot_engine(config)
+    assert engine.config.rerank is False
+
+
+# --------------------------------------------------------------------------- #
+# HTTP transport
+# --------------------------------------------------------------------------- #
+
+
+def test_health_lists_pages_chunks_and_the_three_tools(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from starlette.testclient import TestClient
+
     mcp_server._engine = FakeEngine()
 
-    context = json.loads(_read_resource(mcp_server, "glossator://context"))
+    class Probe:
+        def as_dict(self) -> dict[str, Any]:
+            return {"variant": "sec1024"}
 
-    assert context["corpus"]["source_commit"] == "2e094f7"
-    assert context["corpus"]["pages"] == 9
-    assert context["variant_served"] == "sec1024"
-    assert context["variants"]["sec1024"]["documents"] == 4430
-    assert context["limits"]["mistral_docs_search.max_hits"] == [1, 50]
-    assert "chunk_id" in context["id_formats"]
-    assert context["models"]["generation_default"] == "mistral-medium-2604"
-    assert "ministral-14b-2512" in context["models"]["generation_available"]
-    assert context["resources"] == [
-        "glossator://guide",
-        "glossator://index",
-        "glossator://context",
+    async def fake_probe(variant: str) -> Probe:
+        return Probe()
+
+    monkeypatch.setattr(mcp_server, "check_embedding_once", fake_probe)
+    with TestClient(mcp_server.build_http_app()) as client:
+        body = client.get("/health").json()
+    assert body["status"] == "ok"
+    assert body["chunks"] == 4430
+    assert body["pages"] == len(mcp_server._PAGE_SIZES) > 0
+    assert body["tools"] == [
+        "mistral_docs_search",
+        "mistral_docs_read_page",
+        "mistral_docs_history",
     ]
 
 
-def test_resources_survive_a_missing_manifest(
-    mcp_server: Any, monkeypatch: Any, tmp_path: Any
-) -> None:
-    monkeypatch.setenv("GLOSSATOR_CORPUS_DIR", str(tmp_path / "nowhere"))
-    server: Any = importlib.reload(mcp_server)
-    server._engine = FakeEngine()
-
-    index = _read_resource(server, "glossator://index")
-    assert index.splitlines()[0].endswith("0 pages · docs commit 0 commits")
-    assert "url\ttitle\tkind" in index
-
-    context = json.loads(_read_resource(server, "glossator://context"))
-    assert context["corpus"]["pages"] == 0
-    assert context["corpus"]["source_commit"] is None
-    assert context["models"]["generation_default"] == "mistral-medium-2604"
-
-
-def test_cite_verifies_a_chunk_quote_and_prints_the_source_list(
-    mcp_server: Any,
-) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_verify_quotes",
-        {
-            "draft": "Alpha says the thing [1].",
-            "quotes": [{"n": 1, "chunk_id": "c1", "quote": "alpha content"}],
-        },
-    )
-
-    assert "verified: 1 of 1 quotes ([1])" in out
-    assert "Sources (1 verified):" in out
-    assert "[1] [Page > A section](https://docs.mistral.ai/page#a-section:~:text=" in out
-    # The fragment link is printed once, in the block, not again per quote.
-    assert out.count(":~:text=") == 1
-    assert "markers with no verified quote" not in out
-    assert "paste the Sources block as-is" in out
-    assert out.rstrip().splitlines()[-1].startswith("next:")
-
-
-def test_cite_verifies_through_a_page_url_and_rejects_a_fabrication(
-    mcp_server: Any,
-) -> None:
-    mcp_server._engine = FakeEngine()
-
-    out = _call(
-        mcp_server,
-        "mistral_docs_verify_quotes",
-        {
-            "draft": "Alpha [1] and pixels [2] plus memory [3].",
-            "quotes": [
-                {
-                    "n": 1,
-                    "url": "https://docs.mistral.ai/page#a-section",
-                    "quote": "alpha content",
-                },
-                {"n": 2, "chunk_id": "c1", "quote": "pixels are delicious"},
-            ],
-        },
-    )
-
-    assert "verified: 1 of 2 quotes ([1])" in out
-    assert "[2] NOT verified: quote is not in the cited source — " in out
-    assert "markers with no verified quote: [2], [3]" in out
-
-
-def test_cite_rejects_a_quote_naming_neither_chunk_nor_url(
-    mcp_server: Any,
-) -> None:
-    text = _call_error(
-        mcp_server,
-        "mistral_docs_verify_quotes",
-        {"draft": "Alpha [1].", "quotes": [{"n": 1, "quote": "alpha content"}]},
-    )
-
-    assert "E_BAD_PARAM" in text
-    assert "chunk_id" in text
-    assert "next:" in text
-
-
-def test_cite_rejects_an_empty_draft(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_verify_quotes", {"draft": "   ", "quotes": []})
-
-    assert "E_BAD_PARAM" in text
-
-
-def test_cite_announces_its_clamps(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
-    quotes = [{"n": n, "chunk_id": "c1", "quote": "alpha content"} for n in range(1, 26)]
-
-    out = _call(mcp_server, "mistral_docs_verify_quotes", {"draft": "Alpha [1].", "quotes": quotes})
-
-    assert "note: clamped server-side: quotes=25 → 20" in out
-
-
-def test_ask_prints_one_entry_per_source(mcp_server: Any, monkeypatch: Any) -> None:
-    """Two markers on one source collapse to one entry (D-027b)."""
-    mcp_server._engine = FakeEngine()
-    answer = _fake_answer()
-    doubled = answer.model_copy(
-        update={
-            "answer_markdown": "Use server-sent events [1] and again [2].",
-            "citations": [
-                answer.citations[0],
-                answer.citations[0].model_copy(update={"n": 2}),
-            ],
-            "trace": answer.trace.model_copy(
-                update={
-                    "sources": [
-                        TracedSource(
-                            n=1,
-                            citation_url="https://docs.mistral.ai/page#a-section",
-                            heading_path=["Page", "A section"],
-                            chunk_ids=["c1"],
-                            tokens=100,
-                        ),
-                        TracedSource(
-                            n=2,
-                            citation_url="https://docs.mistral.ai/page#a-section",
-                            heading_path=["Page", "A section"],
-                            chunk_ids=["c1"],
-                            tokens=100,
-                        ),
-                    ]
-                }
-            ),
-        }
-    )
-
-    async def fake_ask(question: str, **kwargs: Any) -> Answer:
-        return doubled
-
-    monkeypatch.setattr(mcp_server.answer_service, "ask", fake_ask)
-
-    out = _call(mcp_server, "mistral_docs_answer", {"question": "how do I stream?"})
-
-    assert "[1][2] [Page > A section](" in out
-    assert out.count("Page > A section") == 1
-
-
-def test_the_allowlist_registers_only_the_named_tools(
+def test_landing_and_favicon_need_no_token_but_the_endpoint_does(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    server = _reload_with(
-        monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,mistral_docs_verify_quotes"
-    )
-    tools = asyncio.run(server.mcp.list_tools())
-
-    assert {tool.name for tool in tools} == {"mistral_docs_search", "mistral_docs_verify_quotes"}
-    assert "mistral_docs_verify_quotes" in server.mcp.instructions
-    assert "mistral_docs_answer" not in server.mcp.instructions
-
-
-def test_the_allowlist_still_takes_the_names_the_tools_had_before(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """A deployment's .env.deploy keeps working across the rename."""
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,open,navigate,read,grep,cite")
-    tools = asyncio.run(server.mcp.list_tools())
-
-    assert {tool.name for tool in tools} == {
-        "mistral_docs_search",
-        "mistral_docs_open_section",
-        "mistral_docs_step",
-        "mistral_docs_read_page",
-        "mistral_docs_find_on_page",
-        "mistral_docs_verify_quotes",
-    }
-
-
-def test_the_allowlist_mixes_old_and_new_names(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="search,mistral_docs_answer")
-    tools = asyncio.run(server.mcp.list_tools())
-
-    assert {tool.name for tool in tools} == {"mistral_docs_search", "mistral_docs_answer"}
-
-
-def test_the_allowlist_scopes_the_guide_to_registered_tools(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(
-        monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,mistral_docs_verify_quotes"
-    )
-
-    guide = _read_resource(server, "glossator://guide")
-
-    assert "| mistral_docs_verify_quotes |" in guide
-    assert "| mistral_docs_answer |" not in guide
-    assert "`mistral_docs_verify_quotes.quotes`" in guide
-
-
-def test_the_allowlist_ignores_unknown_names_with_a_warning(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,bogus")
-    tools = asyncio.run(server.mcp.list_tools())
-
-    assert {tool.name for tool in tools} == {"mistral_docs_search"}
-
-
-def _health_via_http(server: Any, headers: dict[str, str] | None = None) -> Any:
-    """GET /health through the real HTTP app, lifespan included."""
     from starlette.testclient import TestClient
 
+    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret")
+    server._engine = FakeEngine()
     with TestClient(server.build_http_app()) as client:
-        return client.get("/health", headers=headers)
-
-
-class _ProbeForHealth:
-    def as_dict(self) -> dict[str, Any]:
-        return {"variant": "sec1024", "model": "m", "dimensions": 128}
-
-
-def _fake_probe(server: Any, monkeypatch: pytest.MonkeyPatch) -> None:
-    async def probe(variant: str) -> _ProbeForHealth:
-        return _ProbeForHealth()
-
-    monkeypatch.setattr(server, "check_embedding_once", probe)
-
-
-def test_health_reports_variant_chunks_probe_and_tools(
-    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    mcp_server._engine = FakeEngine()
-    _fake_probe(mcp_server, monkeypatch)
-
-    response = _health_via_http(mcp_server)
-
-    assert response.status_code == 200
-    body = response.json()
-    assert body["variant"] == "sec1024"
-    assert body["chunks"] == 4430
-    assert body["embedding_probe"]["passed"] is True
-    assert body["tools"] == sorted(TOOLS)
-
-
-def test_health_lists_only_allowlisted_tools(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(
-        monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,mistral_docs_verify_quotes"
-    )
-    server._engine = FakeEngine()
-    _fake_probe(server, monkeypatch)
-
-    body = _health_via_http(server).json()
-
-    assert body["tools"] == ["mistral_docs_search", "mistral_docs_verify_quotes"]
-    assert body["name"] == "mistral-docs"
-    assert body["title"] == "Mistral documentation search"
-
-
-def _mcp_post_via_http(
-    server: Any, payload: dict[str, Any], headers: dict[str, str] | None = None
-) -> Any:
-    from starlette.testclient import TestClient
-
-    with TestClient(server.build_http_app()) as client:
-        return client.post("/mcp", json=payload, headers=headers)
-
-
-def test_bearer_token_is_required_on_the_http_transport(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
-    server._engine = FakeEngine()
-
-    denied = _mcp_post_via_http(server, {"jsonrpc": "2.0", "id": 1, "method": "ping"})
-
-    assert denied.status_code == 401
-    assert "Authorization" in denied.json()["error"]["message"]
-
-    # Health stays unauthenticated so the Debugger and the tunnel can check it.
-    assert _health_via_http(server).status_code == 200
-
-    allowed = _mcp_post_via_http(
-        server,
-        {"jsonrpc": "2.0", "id": 1, "method": "ping"},
-        headers={"Authorization": "Bearer secret-token"},
-    )
-    assert allowed.status_code != 401
-
-
-def test_a_wrong_bearer_token_is_rejected(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
-    server._engine = FakeEngine()
-
-    response = _mcp_post_via_http(
-        server,
-        {"jsonrpc": "2.0", "id": 1, "method": "ping"},
-        headers={"Authorization": "Bearer wrong-token"},
-    )
-
-    assert response.status_code == 401
-
-
-def test_the_token_is_compared_in_constant_time(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """A byte-by-byte comparison leaks the token's prefix to anyone who can
-    time the 401, so the check must go through `hmac.compare_digest`."""
-    import hmac
-
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
-    server._engine = FakeEngine()
-    seen: list[tuple[str, str]] = []
-    real = hmac.compare_digest
-
-    def spy(left: str, right: str) -> bool:
-        seen.append((left, right))
-        return real(left, right)
-
-    monkeypatch.setattr(server.hmac, "compare_digest", spy)
-    _mcp_post_via_http(
-        server,
-        {"jsonrpc": "2.0", "id": 1, "method": "ping"},
-        headers={"Authorization": "Bearer secret-token"},
-    )
-
-    assert ("Bearer secret-token", "Bearer secret-token") in seen
-
-
-def test_a_non_http_connection_does_not_bypass_the_token(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Startup passes through; anything else carries no header to check and is
-    closed rather than handed to the app unauthenticated."""
-    server = _reload_with(monkeypatch, GLOSSATOR_MCP_TOKEN="secret-token")
-    reached: list[str] = []
-    sent: list[dict[str, Any]] = []
-
-    async def app(scope: Any, receive: Any, send: Any) -> None:
-        reached.append(scope["type"])
-
-    async def send(message: dict[str, Any]) -> None:
-        sent.append(message)
-
-    guard = server._BearerAuthMiddleware(app, "secret-token")
-    asyncio.run(guard({"type": "websocket", "path": "/mcp", "headers": []}, None, send))
-
-    assert reached == []
-    assert sent == [{"type": "websocket.close", "code": 1008}]
-
-    asyncio.run(guard({"type": "lifespan"}, None, send))
-    assert reached == ["lifespan"]
-
-
-def test_hints_never_name_a_tool_the_allowlist_turned_off(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """A `next:` line naming an unregistered tool is the same trap as one
-    naming a parameter the tool lacks (D-029): the call fails with "unknown
-    tool" and the model has nothing to act on."""
-    server = _reload_with(
-        monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,mistral_docs_verify_quotes"
-    )
-    server._engine = FakeEngine()
-
-    out = _call(server, "mistral_docs_search", {"query": "streaming", "max_hits": 2})
-
-    hints = [line for line in out.splitlines() if line.startswith("next:")]
-    assert hints
-    for line in hints:
-        assert "mistral_docs_open_section(" not in line
-        assert "mistral_docs_answer(" not in line
-        assert "mistral_docs_read_page(" not in line
-    assert "mistral_docs_verify_quotes(" in hints[-1]
-
-
-def test_a_truncation_note_names_a_registered_tool(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    server = _reload_with(
-        monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_search,mistral_docs_read_page"
-    )
-    server._engine = FakeEngine(hits=[_hit("chunk-long", "word " * 400)])
-
-    out = _call(server, "mistral_docs_search", {"query": "streaming"})
-
-    note = [line for line in out.splitlines() if line.startswith("note: snippets clamped")]
-    assert note
-    assert "mistral_docs_open_section(" not in note[0]
-    assert "mistral_docs_read_page(" in note[0]
+        landing = client.get("/")
+        assert landing.status_code == 200
+        assert "Mistral documentation search" in landing.text
+        assert "/favicon.svg" in landing.text
+        icon = client.get("/favicon.svg")
+        assert icon.status_code == 200
+        assert icon.headers["content-type"].startswith("image/svg+xml")
+        assert client.get("/favicon.ico").status_code == 200
+        denied = client.post("/mcp", json={})
+        assert denied.status_code == 401
+        assert denied.json()["error"]["code"] == "E_UNAUTHORIZED"

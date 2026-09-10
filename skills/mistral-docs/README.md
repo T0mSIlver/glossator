@@ -1,7 +1,7 @@
 # mistral-docs workspace Skill
 
-Answers questions about Mistral products from the documentation, with verified
-quotes, through the `mistral-docs` connector.
+Answers questions about Mistral products from the documentation, with a link to
+the section behind every claim, through the `mistral-docs` connector.
 
 ## Add it as a workspace Skill
 
@@ -18,4 +18,4 @@ quotes, through the `mistral-docs` connector.
    entire workspace.
 
 Workspace admins can **force-enable** the Skill for the whole workspace so every
-member answers documentation questions from verified sources.
+member answers documentation questions from the documentation.
