@@ -48,6 +48,11 @@ services:
       # insists on it rather than letting a tunnel publish an open server.
       GLOSSATOR_MCP_TOKEN: ${GLOSSATOR_MCP_TOKEN:?GLOSSATOR_MCP_TOKEN is not set; generate one with `openssl rand -hex 32`}
       GLOSSATOR_MCP_TOOLS: ${GLOSSATOR_MCP_TOOLS:-}
+    volumes:
+      # The dated snapshot corpora the history tool reads (D-041), at the path
+      # the snapshot manifest names inside the container. Empty when unset,
+      # which leaves the history tool answering that no snapshots are stored.
+      - ${SNAPSHOTS_DIR:-./snapshots}:/home/glossator/.cache/glossator/snapshots:ro
     ports:
       # The tunnel runs on this host and reaches the server over the loopback
       # address, so the published port stays off the LAN by default.
