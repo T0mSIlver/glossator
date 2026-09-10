@@ -6,7 +6,6 @@ from glossator.retrieval.engine import (
     Navigation,
     SearchEngine,
     SearchTrace,
-    get_chunk,
     search,
 )
 from glossator.retrieval.probe import EmbeddingProbeError, ProbeResult, probe_embedding
@@ -23,7 +22,6 @@ __all__ = [
     "SearchEngine",
     "SearchTrace",
     "Vocabulary",
-    "get_chunk",
     "load_vocabulary",
     "probe_embedding",
     "search",

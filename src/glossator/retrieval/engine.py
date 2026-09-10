@@ -1,10 +1,4 @@
-"""Search: a query and a configuration in, citable hits out.
-
-A ``Hit`` is what the rest of the product quotes and cites, so it carries the
-citation target (url plus anchor), the span it occupies in the page body, and a
-handle on the index's navigation operations -- reading around a hit within its
-own page is how the answer layer gets context without a second global search.
-"""
+"""Search one configured index and return citable, navigable hits."""
 
 import time
 from dataclasses import dataclass, field, replace
@@ -515,20 +509,11 @@ def _hit(
     )
 
 
-async def get_chunk(chunk_id: str, config: RetrievalConfig) -> Hit | None:
-    """Resolve an opaque chunk id back to a hit, for an agent that kept only the id."""
-    index = as_navigable(get_index(config.index_variant))
-    context = restrict_to(config.index_variant.schema_name)
-    result = await index.get_chunk(chunk_id, context=context)
-    return _hit(result, index, context) if result is not None else None
-
-
 __all__ = [
     "CONTENT_PREVIEW_CHARS",
     "Hit",
     "Navigation",
     "SearchEngine",
     "SearchTrace",
-    "get_chunk",
     "search",
 ]

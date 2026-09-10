@@ -1,16 +1,4 @@
-"""The model picks pages from the site map, then reads them whole.
-
-Search finds passages that look like the question; a table of contents finds the
-page that is *about* it. That is the difference this strategy exists to measure:
-for a question whose answer is spread over a page ("how do I set up X"), reading
-the page beats reading its five best-matching paragraphs.
-
-The outline is built from the corpus manifest, which is the same hash-checked file
-the index was ingested from, so a page in the outline is a page in the index. API
-reference pages are included only for API-shaped questions, with their endpoint
-slug beside the title. Pages are read back through the index by their url, which
-is the chunks' ``source_id``, so no corpus file is opened at answer time.
-"""
+"""Pick pages from the corpus manifest and read them from the index for an answer."""
 
 import json
 import re

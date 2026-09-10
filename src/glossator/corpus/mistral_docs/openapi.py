@@ -20,7 +20,7 @@ import structlog
 import yaml
 
 from . import SITE_ORIGIN
-from .fences import fence_opening
+from .fences import fence_opening, trim_blank_edges
 
 log = structlog.get_logger(__name__)
 
@@ -498,7 +498,7 @@ def _description_block(text: str, indent: str) -> tuple[str, list[str]]:
     start, so anything past the first paragraph is kept as list-item continuation.
     """
     normalized = str(text).replace("\r\n", "\n").replace("\r", "\n")
-    lines = _trim_blank_edges(normalized.split("\n"))
+    lines = trim_blank_edges(normalized.split("\n"))
     if not lines:
         return "", []
     head: list[str] = []
@@ -507,21 +507,12 @@ def _description_block(text: str, indent: str) -> tuple[str, list[str]]:
         head.append(lines[cursor])
         cursor += 1
     summary = _one_line(" ".join(head))
-    rest = _trim_blank_edges(lines[cursor:])
+    rest = trim_blank_edges(lines[cursor:])
     if not rest:
         return summary, []
     body_indent = indent + "  "
     continuation = [f"{body_indent}{line}".rstrip() for line in _dedent(rest)]
     return summary, ["", *continuation, ""]
-
-
-def _trim_blank_edges(lines: list[str]) -> list[str]:
-    start, end = 0, len(lines)
-    while start < end and not lines[start].strip():
-        start += 1
-    while end > start and not lines[end - 1].strip():
-        end -= 1
-    return lines[start:end]
 
 
 def _dedent(lines: list[str]) -> list[str]:

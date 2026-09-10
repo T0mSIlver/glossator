@@ -18,7 +18,7 @@ import structlog
 
 from . import SITE_ORIGIN
 from .anchors import AnchorAllocator, faq_slugify, section_tab_level
-from .fences import collapse_blank_lines, iter_lines, map_outside_fences
+from .fences import collapse_blank_lines, iter_lines, map_outside_fences, trim_blank_edges
 from .frontmatter import split as split_frontmatter
 from .jsx import Element, Fence, Node, Text, parse
 
@@ -611,18 +611,9 @@ def _apply_directives(markdown: str) -> str:
             body.append(inner)
             index += 1
         quoted = [f"> **{label}**", ">"]
-        quoted += [f"> {entry}".rstrip() for entry in _trim_blank_edges(body)]
+        quoted += [f"> {entry}".rstrip() for entry in trim_blank_edges(body)]
         out.extend(["", *quoted, ""])
     return "\n".join(out)
-
-
-def _trim_blank_edges(lines: list[str]) -> list[str]:
-    start, end = 0, len(lines)
-    while start < end and not lines[start].strip():
-        start += 1
-    while end > start and not lines[end - 1].strip():
-        end -= 1
-    return lines[start:end]
 
 
 def _ensure_h1(markdown: str, title: str | None) -> str:

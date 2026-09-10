@@ -1,30 +1,7 @@
-"""Blind consumer evaluation: weak models answer documentation questions over MCP.
+"""Run, resume and score blind consumer evaluations through isolated CLI agents.
 
-An ordinary agent, on a weak model at low reasoning, that is not told it is
-being evaluated, answers Mistral documentation questions while connected to
-glossator's MCP server over the same HTTP transport the Work Connector uses.
-Three tool surfaces (arms) are compared:
-
-- **A0, no tools**: the consumer answers from memory. The floor.
-- **A1, retrieval tools plus ``cite``**: search, open, navigate, read, grep, cite.
-- **A2, ``ask`` only**: the server writes the answer.
-
-Every consumer runs from a scratch directory outside the repository with no
-repository files visible, so it cannot read the corpus from disk. Shell tools
-stay available in every arm: the comparison is between whole agents.
-
-Three harnesses are driven headless -- opencode, claude and codex -- each from
-the cell's own directory, with the arm's MCP server declared in a file that
-directory holds and the machine's own settings, servers and plugins switched
-off, so what a cell can reach is exactly what its arm gives it. Their event
-streams are parsed into one record shape, and each stream is copied into the
-run directory beside the row it produced.
-
-Subcommands (``run`` collects answers, ``judge`` grades them, ``score``
-reports) are resumable independently: ``run`` skips (consumer, arm, question)
-cells that already have a record, and ``judge`` skips rows the requested judge
-already graded. The judge step is a separate subcommand on purpose: when the
-judge provider's quota window is exhausted, collection still proceeds.
+Parsers retain retired MCP tool names so runs recorded before D-044 remain
+readable; the live MCP server now has three tools.
 """
 
 from __future__ import annotations
@@ -33,7 +10,6 @@ import argparse
 import asyncio
 import contextlib
 import json
-import math
 import os
 import random
 import re
@@ -72,6 +48,7 @@ from glossator.eval.answer_eval import (
 from glossator.eval.charts import bar_chart
 from glossator.eval.datasets import EvalQuestion, read_jsonl, stratified_subset
 from glossator.eval.fragments import PageCache, visible_text
+from glossator.eval.percentiles import nearest_rank_percentile
 from glossator.eval.providers import (
     OpenAICompatibleProvider,
     ProviderCallError,
@@ -90,9 +67,7 @@ PROMPT_LEAD = (
     "You are helping a developer with Mistral's platform. "
     "Answer precisely and cite the documentation pages you used with links."
 )
-"""The one fixed sentence before every question. Nothing says evaluation,
-nothing names the tools; the MCP server's own instructions are the only
-guidance in A1 and A2."""
+"""Fixed prompt text that does not reveal the evaluation or name its tools."""
 
 ARMS = ("A0", "A1", "A2")
 
@@ -164,12 +139,7 @@ def is_verify_tool(name: str) -> bool:
 
 
 def asked_for_rerank(call: ToolCallRecord) -> bool:
-    """Whether one search call asked for the listwise reranker.
-
-    Search ranks with the index alone unless the consumer asks otherwise, so
-    the retrieval arm costs no generation except on the calls where it did
-    (D-015b); the share of cells that asked is what says how often that
-    happened."""
+    """Whether a recorded pre-D-044 search requested the listwise reranker."""
     return is_server_tool(call.name) and call.arguments.get("rerank", "").casefold() == "true"
 
 
@@ -1186,10 +1156,6 @@ def append_record(path: Path, record: ConsumerRecord) -> None:
         handle.write(record.model_dump_json() + "\n")
 
 
-def cell_dir_for(scratch_root: Path, run_name: str, record: ConsumerRecord) -> Path:
-    return scratch_root / run_name / record.consumer / record.arm / record.question_id
-
-
 def copy_transcript(
     run_dir: Path, source: Path, *, consumer: str, arm: str, question_id: str
 ) -> str:
@@ -1523,16 +1489,6 @@ def _mean(values: Sequence[float | None]) -> float | None:
     return statistics.fmean(kept) if kept else None
 
 
-def _percentile(values: Sequence[float], fraction: float) -> float | None:
-    """Nearest-rank percentile, like the answer eval: a dozen questions per
-    cell is too few for an interpolated percentile to mean anything."""
-    if not values:
-        return None
-    ordered = sorted(values)
-    index = min(len(ordered) - 1, max(0, math.ceil(fraction * len(ordered)) - 1))
-    return ordered[index]
-
-
 CELL_METRICS = (
     "correctness",
     "refusal_correct",
@@ -1562,7 +1518,7 @@ def aggregate(records: Sequence[ConsumerRecord], corpus_urls: set[str]) -> dict[
             "n": len(rows),
             "errors": int(sum(r["errors"] or 0 for r in rows)),
             **{metric: _mean([r[metric] for r in rows]) for metric in CELL_METRICS},
-            "latency_p50": _percentile(
+            "latency_p50": nearest_rank_percentile(
                 [float(r["wall_seconds"] or 0) for r in rows],
                 0.5,
             ),

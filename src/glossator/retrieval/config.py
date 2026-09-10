@@ -1,8 +1,4 @@
-"""What one retrieval call is configured with.
-
-Everything that an eval row varies lives here, so a grid is a list of these and
-nothing else in the retrieval path has to be reconfigured.
-"""
+"""Configuration for one retrieval run."""
 
 import os
 import re

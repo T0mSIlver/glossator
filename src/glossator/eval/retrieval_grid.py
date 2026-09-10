@@ -35,6 +35,7 @@ from glossator.eval.datasets import (
     QuestionType,
     read_jsonl,
 )
+from glossator.eval.percentiles import rounded_index_percentile
 from glossator.eval.retrieval_metrics import (
     Matching,
     aggregate,
@@ -540,7 +541,9 @@ def _operational(records: Sequence[GridRecord]) -> dict[str, Any]:
         "questions_run": len(records),
         "errors": sum(1 for record in records if record.error),
         "median_latency_ms": round(_median(latencies), 1) if latencies else None,
-        "p90_latency_ms": round(_percentile(latencies, 0.9), 1) if latencies else None,
+        "p90_latency_ms": (
+            round(rounded_index_percentile(latencies, 0.9), 1) if latencies else None
+        ),
         "rerank_applied": reranked,
         "rerank_billed_calls": sum(1 for record in records if record.rerank_attempted),
         "rerank_fallbacks": sum(
@@ -699,14 +702,7 @@ def _sha256(path: Path) -> str:
 
 
 def _median(values: Sequence[float]) -> float:
-    return _percentile(values, 0.5)
-
-
-def _percentile(values: Sequence[float], fraction: float) -> float:
-    if not values:
-        return 0.0
-    index = min(len(values) - 1, max(0, round(fraction * (len(values) - 1))))
-    return values[index]
+    return rounded_index_percentile(values, 0.5)
 
 
 def select(entries: Sequence[GridEntry], names: Iterable[str] | None) -> list[GridEntry]:

@@ -1,22 +1,7 @@
-"""The question's language, the wording retrieval is run with, and where it came from.
+"""Detect question language and prepare English wording for retrieval.
 
-The index holds English pages, so a French question meets a hybrid ranking whose
-BM25 half has no term in common with any page, and a reranker reading French
-against English (D-008a). Rendering the question in English before retrieval
-fixes the query side without touching the index; the answer is still generated
-from the original question, so it comes back in the language it was asked in.
-
-Detection is deterministic and free: an English question must not pay a model
-call to learn that it is English. The rendering is one short structured call,
-recorded like every other call in the run.
-
-The rewrite is the second, optional step over the same seam. Every generated dev
-question was written from the section that answers it, so it already uses the
-documentation's words and a rewrite has nothing to fix (D-035); a question typed
-by a user does not, and reformulating it is the one thing the search loop does
-that a single pass cannot. The two steps compose in the order a badly worded
-French question needs them: render into English first, then reword into the
-documentation's vocabulary.
+Non-English questions are rendered before optional vocabulary rewriting; answer
+generation still receives the original question (D-008a, D-035).
 """
 
 import re

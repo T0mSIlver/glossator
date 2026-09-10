@@ -1,10 +1,7 @@
-"""A retriever that can carry ranking weights, filters and exclusions at once.
+"""Retrieve with ranking weights, filters and exclusions in one Vespa query.
 
-The toolkit's ``VectorRetriever`` builds a plain ``VectorSearchQuery``, which has
-no seam for a per-query filter or for ranking weights; and a named Vespa query
-profile, the other way to set weights, makes ``exclude_ids`` and
-``extra_yql_filter`` raise (D-014). So retrieval goes through the query-builder
-path with a ``VespaSearchQuery`` of our own.
+The toolkit query-builder path is required because named profiles reject
+``exclude_ids`` and ``extra_yql_filter`` (D-014).
 """
 
 import re

@@ -1,18 +1,7 @@
-"""Query parameters every request to this application must carry.
+"""Attach Vespa's schema restriction to each retrieval request.
 
-One Vespa application holds all three index variants, and two of them embed at
-different sizes. Vespa resolves the type of a ranking input across every rank
-profile in the application, so a query that supplies ``query(embedding)`` without
-saying which schema it is for is rejected:
-
-    Conflicting input type declarations for 'query(embedding)':
-    declared as tensor<float>(x[128]) in rank profile 'weighted-rank2' in schema
-    'docs_section_lowdim', and as tensor<float>(x[1024]) in schema
-    'docs_section_fulldim'
-
-Naming the schema in the YQL ``from`` clause is not enough -- the input types are
-resolved before source selection. ``model.restrict`` is, and the toolkit has one
-seam that reaches the request body: query params riding on the retrieval context.
+The application contains embedding tensors of different sizes, so
+``model.restrict`` must select a schema before Vespa resolves ranking input types.
 """
 
 from typing import Any

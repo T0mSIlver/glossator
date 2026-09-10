@@ -1,11 +1,4 @@
-"""The serving path's chat client: one call in, a recorded call out.
-
-Everything the answer layer sends to a model goes through :meth:`MistralLLM.complete`,
-which is also the only place a request is turned into an ``LLMCall`` record. D-023
-requires that every request and response survive a run verbatim, so recording is
-not the caller's job: it happens per HTTP attempt, including the attempts that
-fail, and the record carries usage, latency and the USD the call cost.
-"""
+"""Send serving-path chat requests and record every HTTP attempt with usage and cost."""
 
 import asyncio
 import json

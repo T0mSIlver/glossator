@@ -1,10 +1,4 @@
-"""What one answer run is configured with, and what a token of it costs.
-
-Model identifiers are pinned to the dated ids rather than the ``-latest`` aliases:
-a run recorded under ``mistral-medium-latest`` stops being reproducible the day
-the alias moves, and D-023 wants every number traceable to the model that
-produced it.
-"""
+"""Answer settings and model prices, with dated model IDs for reproducible runs."""
 
 from collections.abc import Mapping
 from typing import Annotated, Literal

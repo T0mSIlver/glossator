@@ -1,10 +1,4 @@
-"""The one call the API, the MCP server and the eval grid all make.
-
-Everything above this line is a question, a strategy name and a variant;
-everything below is retrieval, generation and verification. Keeping the seam here
-means a caller never has to build an engine, a client or a config to ask a
-question, and an evaluation varies exactly the arguments a user could vary.
-"""
+"""Run a named answer strategy for the HTTP API, CLI and evaluations."""
 
 import structlog
 

@@ -1,18 +1,9 @@
-"""Name suggestions for unknown request parameters, shared by both surfaces.
-
-D-029 requires an unknown parameter to be rejected with ``E_BAD_PARAM`` naming
-the right one. The alias table covers the names callers reach for by habit;
-``difflib`` covers the near misses. Both the API's body validation and the MCP
-server's tool-argument guard resolve their suggestions through this one module,
-so the two surfaces never disagree about what a caller meant.
-"""
+"""Suggest valid API fields and MCP tool arguments for misspelled names."""
 
 import difflib
 from collections.abc import Iterable
 
 _COUNTS = ("max_hits", "max_chunks", "max_matches", "steps", "top_k")
-"""How many results to return, named per tool. The first name the tool actually
-takes wins, so one alias covers every count parameter on either surface."""
 
 ALIASES: dict[str, tuple[str, ...]] = {
     "q": ("query",),
@@ -57,7 +48,7 @@ def suggest_field(name: str, known: Iterable[str]) -> str | None:
 
 
 def suggest_fields(unknown: list[str], known: Iterable[str]) -> list[str]:
-    """One suggestion line per unknown name, in the caller's own order."""
+    """Suggest a replacement for each name in input order."""
     return [
         f"{wrong}= → {right}=" if right else f"{wrong}= (no close match)"
         for wrong, right in ((wrong, suggest_field(wrong, known)) for wrong in unknown)

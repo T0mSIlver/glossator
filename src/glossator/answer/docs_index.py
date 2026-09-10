@@ -1,10 +1,4 @@
-"""The slice of retrieval the answer layer depends on.
-
-Strategies need search plus in-page navigation and nothing else. Stating that as
-a protocol keeps the dependency one-way -- the answer layer does not reach into
-``SearchEngine``'s embedder, index or Vespa context -- and lets a test drive a
-whole strategy with a hand-written index and no network.
-"""
+"""Protocols for the search and page-reading operations used by answer strategies."""
 
 from typing import Protocol
 
@@ -15,7 +9,7 @@ from glossator.retrieval.engine import Hit
 
 
 class PageReader(Protocol):
-    """Navigation bound to one page: what `open`, `grep` and `read` are built on."""
+    """Page operations available to the internal answer search loop."""
 
     async def around(self, window: int = 2) -> list[Hit]: ...
 

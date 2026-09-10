@@ -93,6 +93,16 @@ def strip_inline_code(text: str) -> str:
     return _INLINE_CODE.sub("", text)
 
 
+def trim_blank_edges(lines: list[str]) -> list[str]:
+    """Remove blank lines from both ends of a list."""
+    start, end = 0, len(lines)
+    while start < end and not lines[start].strip():
+        start += 1
+    while end > start and not lines[end - 1].strip():
+        end -= 1
+    return lines[start:end]
+
+
 def collapse_blank_lines(text: str) -> str:
     """Collapse runs of blank lines outside fences to a single blank line."""
     out: list[str] = []

@@ -1,10 +1,4 @@
-"""The step every strategy ends with: hits in, a verified answer out.
-
-The three strategies differ only in how they find chunks. Once they have them,
-assembly, the grounded prompt, the structured call and the citation check are the
-same code, so a difference in an evaluation is a difference in retrieval and not
-in how the answer was written.
-"""
+"""Assemble retrieved hits, generate a grounded answer and verify its citations."""
 
 import time
 from dataclasses import dataclass, field

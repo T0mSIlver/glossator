@@ -1,15 +1,8 @@
-"""The model does its own retrieval, then answers from everything it gathered.
+"""Run answer generation with an internal search, open, grep and read tool loop.
 
-Four tools over the same index the MCP server exposes: `search` across pages,
-`open`/`read` to pull more of a page it already landed in, `grep` to find an exact
-phrase in one. Two things keep the loop from running away: chunks it has already
-seen are excluded at query time, so a repeated search returns nothing and wastes
-only a round, and tool results are previews -- the loop decides where to look, the
-final generation reads the full chunks through context assembly.
-
-The tool surface follows D-029. Nothing fails silently: a clamp prints the note
-that says what it clamped, an empty result says which kind of empty it is, and an
-error names the next call to make rather than ending the run.
+The loop sees previews and excludes chunks already collected; final generation
+reads the full collected chunks through context assembly. These are model tools
+inside the HTTP answer path, not MCP tools (D-044).
 """
 
 import json

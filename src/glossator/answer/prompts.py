@@ -1,12 +1,4 @@
-"""Prompts, versioned and hashable.
-
-A prompt is a parameter of a run (D-023), so each one carries a version string
-and a content hash that a run's ``config.json`` can record. Every prompt here is
-written for Mistral Medium 3.5: short, concrete, no chain-of-thought theatre, and
-each instruction states the observable behaviour rather than a disposition.
-"""
-
-import hashlib
+"""Versioned prompts for Mistral Medium 3.5."""
 
 GROUNDED_ANSWER_VERSION = "grounded-answer/v2"
 
@@ -162,11 +154,6 @@ code fence, no commentary.
 """
 
 
-def prompt_hash(prompt: str) -> str:
-    """Short content hash, so a run's config can name the exact prompt text used."""
-    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:12]
-
-
 __all__ = [
     "GROUNDED_ANSWER_SYSTEM",
     "GROUNDED_ANSWER_USER",
@@ -184,5 +171,4 @@ __all__ = [
     "SEARCH_LOOP_SEED_USER",
     "SEARCH_LOOP_SYSTEM",
     "SEARCH_LOOP_VERSION",
-    "prompt_hash",
 ]

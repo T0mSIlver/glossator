@@ -1,14 +1,7 @@
-"""Does the corpus contain any of the words the question is made of?
+"""Check whether a query has content words in the indexed corpus.
 
-With k-nearest-neighbour search there is no such thing as no result: every query
-lands somewhere, and "feline hyperthyroidism" comes back with a confident page
-about something else (D-030). A vector score cannot say "not covered" on its own,
-because it is only meaningful relative to other scores from the same model. A
-word can: if no content word of the question occurs anywhere in the corpus, the
-corpus does not discuss the subject, and the engine can say so.
-
-The vocabulary is built once from the same section text ingestion embeds, so it
-answers for the corpus that was indexed rather than for the pages on the site.
+Nearest-neighbour search always returns a result, so this lexical check detects
+subjects absent from the documentation (D-030).
 """
 
 import re

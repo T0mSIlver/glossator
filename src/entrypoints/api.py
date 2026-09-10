@@ -5,9 +5,8 @@ import json
 import os
 import time
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
@@ -19,9 +18,11 @@ from fastapi.responses import JSONResponse
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from starlette.responses import Response
 
 from entrypoints.param_suggestions import suggest_fields
 from glossator import history as history_service
+from glossator import package_version
 from glossator.answer import cite as cite_engine
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer
@@ -43,7 +44,7 @@ from glossator.answer.llm import CALL_ERRORS
 from glossator.corpus.snapshots import configured_manifest
 from glossator.index.variants import VARIANTS, get_variant
 from glossator.retrieval.config import KINDS, RetrievalConfig
-from glossator.retrieval.engine import SearchEngine
+from glossator.retrieval.engine import Hit, SearchEngine
 from glossator.retrieval.probe import check_embedding_once
 
 load_dotenv()
@@ -53,14 +54,7 @@ logger = structlog.get_logger(__name__)
 PAGE_SECTION_CAP = 100
 
 
-def _package_version() -> str:
-    try:
-        return version("glossator")
-    except PackageNotFoundError:  # running from a source tree without metadata
-        return "0.0.0+unknown"
-
-
-PACKAGE_VERSION = _package_version()
+PACKAGE_VERSION = package_version()
 
 
 def _corpus_dir() -> Path:
@@ -159,7 +153,6 @@ _BODY_MODELS: dict[str, type[BaseModel]] = {
     "/search": SearchRequest,
     "/cite": CiteRequest,
 }
-"""Route path -> its request model, so validation errors can suggest field names."""
 
 
 class HitOut(BaseModel):
@@ -269,7 +262,9 @@ app.state.engines = registry
 
 
 @app.middleware("http")
-async def request_id_middleware(request: Request, call_next: Any) -> Any:
+async def request_id_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Echo or mint an X-Request-Id; it rides the logs and every response."""
     request_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:16]
     request.state.request_id = request_id
@@ -413,8 +408,6 @@ async def ask(body: AskRequest, request: Request) -> dict[str, Any]:
             citation["citation_url"] = _citation_url(citation["url"], citation["anchor"])
     entries = _deduped_sources(answer)
     payload["sources"] = [entry.model_dump() for entry in entries]
-    # The same block the MCP answer prints, so a consumer of either surface
-    # pastes the identical sources under the identical answer.
     payload["sources_markdown"] = sources_markdown(entries)
     payload["trace_summary"] = answer.trace.summary()
     payload["request_id"] = request.state.request_id
@@ -467,7 +460,7 @@ def _citation_url(url: str, anchor: str | None) -> str:
     return f"{url}#{anchor}" if anchor else url
 
 
-def _hit_out(hit: Any) -> HitOut:
+def _hit_out(hit: Hit) -> HitOut:
     return HitOut(
         chunk_id=hit.chunk_id,
         score=hit.score,

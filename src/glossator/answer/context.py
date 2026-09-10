@@ -1,15 +1,7 @@
-"""Hits in, one numbered context block out.
+"""Build token-bounded answer context from overlapping retrieval hits.
 
-Retrieval returns overlapping slices of pages in relevance order, which is the
-wrong shape to read: the same chunk can arrive twice, two hits can be halves of
-one paragraph, and the section that explains a snippet can rank below it. This
-module puts a page back together -- de-duplicated, merged where the offsets touch,
-in reading order -- and cuts it to a token budget, so what the model sees is a
-short document rather than a pile of search results.
-
-Every source keeps the pieces it was merged from, with the character range each
-one occupies in the merged text. That is what lets citation verification say
-*which* chunk a quote came from even when the quote straddles a merge.
+Adjacent chunks are merged in page order while retaining the ranges needed to
+attribute a verified quote to its original chunk.
 """
 
 from dataclasses import dataclass

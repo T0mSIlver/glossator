@@ -85,11 +85,9 @@ class FakeEngine:
     async def search(
         self,
         query: str,
-        exclude_ids: set[str] | None = None,
         top_k: int | None = None,
         rerank: bool | None = None,
         kinds: frozenset[str] | None = None,
-        locales: frozenset[str] | None = None,
     ) -> list[Hit]:
         self.search_calls.append({"query": query, "top_k": top_k, "rerank": rerank, "kinds": kinds})
         return [] if self.empty else self.hits[: top_k or 5]
@@ -114,11 +112,6 @@ def _call_error(server: Any, name: str, arguments: dict[str, Any]) -> str:
 
 def _tools(server: Any) -> dict[str, Any]:
     return {tool.name: tool for tool in asyncio.run(server.mcp.list_tools())}
-
-
-# --------------------------------------------------------------------------- #
-# Surface
-# --------------------------------------------------------------------------- #
 
 
 def test_exactly_three_tools_are_registered(mcp_server: Any) -> None:
@@ -178,14 +171,9 @@ def test_the_allowlist_rejects_an_unknown_tool_and_requires_search(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     with pytest.raises(RuntimeError, match="unknown tools"):
-        _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_answer")
+        _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="not_a_tool")
     with pytest.raises(RuntimeError, match="must include mistral_docs_search"):
         _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_history")
-
-
-# --------------------------------------------------------------------------- #
-# search
-# --------------------------------------------------------------------------- #
 
 
 def test_search_prints_url_anchor_heading_snippet_and_next(mcp_server: Any) -> None:
@@ -332,11 +320,6 @@ def test_upstream_failure_is_typed_with_a_retry_hint(mcp_server: Any) -> None:
     assert not mcp_server._admission.locked()
 
 
-# --------------------------------------------------------------------------- #
-# read_page
-# --------------------------------------------------------------------------- #
-
-
 def test_read_page_returns_the_whole_page_with_section_headers(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine(
         [_hit("c1", "alpha content"), _hit("c2", "beta", anchor="b", heading="B")]
@@ -425,17 +408,15 @@ def test_read_page_asks_the_index_for_the_whole_page_under_the_vespa_limit(mcp_s
             calls.append(top_k)
             return await super().read(start, end, top_k)
 
-    engine = FakeEngine()
-    engine.navigation_at = lambda url, start=0, end=0: Recording(engine.hits)  # type: ignore[method-assign]
+    class RecordingEngine(FakeEngine):
+        def navigation_at(self, page_url: str, start: int = 0, end: int = 0) -> FakeNavigation:
+            return Recording(self.hits)
+
+    engine = RecordingEngine()
     mcp_server._engine = engine
     _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
     assert calls == [mcp_server.READ_TOP_K]
     assert mcp_server.READ_TOP_K <= 400
-
-
-# --------------------------------------------------------------------------- #
-# history
-# --------------------------------------------------------------------------- #
 
 
 def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
@@ -516,11 +497,6 @@ def test_history_question_runs_without_the_reranker(mcp_server: Any) -> None:
     assert config.rerank is True
     engine = mcp_server._snapshot_engine(config)
     assert engine.config.rerank is False
-
-
-# --------------------------------------------------------------------------- #
-# HTTP transport
-# --------------------------------------------------------------------------- #
 
 
 def test_health_lists_pages_chunks_and_the_three_tools(

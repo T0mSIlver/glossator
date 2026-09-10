@@ -22,7 +22,6 @@ import asyncio
 import contextlib
 import hashlib
 import json
-import math
 import os
 import re
 import statistics
@@ -73,6 +72,7 @@ from glossator.eval.datasets import (
     read_jsonl,
     stratified_subset,
 )
+from glossator.eval.percentiles import nearest_rank_percentile
 from glossator.eval.providers import (
     OpenAICompatibleProvider,
     ProviderCallError,
@@ -630,20 +630,6 @@ def _mean(values: Sequence[float]) -> float | None:
     return statistics.fmean(values) if values else None
 
 
-def _percentile(values: Sequence[float], fraction: float) -> float | None:
-    """Nearest-rank percentile: the smallest value at or above the fraction.
-
-    Not interpolated. A dozen questions per cell is too few for an interpolated
-    percentile to mean anything more than the value it sits between, and a
-    reported p95 that no answer actually took is worse than a blunt one.
-    """
-    if not values:
-        return None
-    ordered = sorted(values)
-    index = min(len(ordered) - 1, max(0, math.ceil(fraction * len(ordered)) - 1))
-    return ordered[index]
-
-
 def cell(records: Sequence[QuestionRecord]) -> dict[str, Any]:
     """Every aggregate number for one group of records."""
     per_question = [question_metrics(record) for record in records]
@@ -664,8 +650,12 @@ def cell(records: Sequence[QuestionRecord]) -> dict[str, Any]:
         "cosmetic_per_answer": _mean(column("citations_cosmetic")),
         "verified_after_normalization": int(sum(column("citations_normalized"))),
         "gold_relaxed_matches": int(sum(column("gold_relaxed_matches"))),
-        "latency_p50_s": (None if not latencies else (_percentile(latencies, 0.5) or 0.0) / 1000),
-        "latency_p95_s": (None if not latencies else (_percentile(latencies, 0.95) or 0.0) / 1000),
+        "latency_p50_s": (
+            None if not latencies else (nearest_rank_percentile(latencies, 0.5) or 0.0) / 1000
+        ),
+        "latency_p95_s": (
+            None if not latencies else (nearest_rank_percentile(latencies, 0.95) or 0.0) / 1000
+        ),
         "judged": sum(1 for row in per_question if row["correctness"] is not None),
     }
     for name in MEAN_METRICS:

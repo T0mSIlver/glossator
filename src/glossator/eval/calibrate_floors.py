@@ -33,6 +33,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from glossator.eval.charts import line_chart
 from glossator.eval.datasets import QuestionType, read_jsonl
+from glossator.eval.percentiles import rounded_index_percentile
 from glossator.eval.run_records import create_run_directory
 from glossator.retrieval.config import DEFAULT_CORPUS_DIR, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
@@ -262,19 +263,12 @@ def _distribution(rows: Sequence[QuerySimilarities]) -> dict[str, Any]:
         per_depth[str(depth)] = {
             "n": len(values),
             "min": round(values[0], 4) if values else None,
-            "p10": round(_percentile(values, 0.10), 4) if values else None,
-            "median": round(_percentile(values, 0.50), 4) if values else None,
-            "p90": round(_percentile(values, 0.90), 4) if values else None,
+            "p10": round(rounded_index_percentile(values, 0.10), 4) if values else None,
+            "median": round(rounded_index_percentile(values, 0.50), 4) if values else None,
+            "p90": round(rounded_index_percentile(values, 0.90), 4) if values else None,
             "max": round(values[-1], 4) if values else None,
         }
     return {"queries": len(rows), "scored": len(scored), "at_depth": per_depth}
-
-
-def _percentile(values: Sequence[float], fraction: float) -> float:
-    if not values:
-        return 0.0
-    index = min(len(values) - 1, max(0, round(fraction * (len(values) - 1))))
-    return values[index]
 
 
 def recompute(run_dir: Path) -> dict[str, Any]:

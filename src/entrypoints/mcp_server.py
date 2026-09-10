@@ -1,12 +1,7 @@
-"""Three read-only MCP tools over Mistral's documentation: search, read a page,
-and track what changed across dated snapshots.
+"""Three read-only MCP tools for searching, reading and tracking Mistral's documentation.
 
-The agent calling the tools does the research and writes the answer. Every hit
-and every section is addressed by its `url#anchor` on docs.mistral.ai, which is
-also the citation; there is no other identifier for a model to carry (D-029a,
-D-044). The answer layer that generates cited answers inside the server stays
-in the package and the HTTP API as the evaluated baseline (D-017b, D-040b), not
-on this surface.
+Tools identify sections only by their docs.mistral.ai ``url#anchor``. Answer
+generation and citation verification remain in the package and HTTP API (D-044).
 """
 
 import argparse
@@ -14,22 +9,28 @@ import asyncio
 import hmac
 import json
 import os
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 
+import mcp.types as mt
 import structlog
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
-from fastmcp.server.middleware import Middleware
+from fastmcp.server.middleware import CallNext, Middleware, MiddlewareContext
+from fastmcp.tools.base import ToolResult
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
+from starlette.applications import Starlette
 from starlette.middleware import Middleware as StarletteMiddleware
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from entrypoints.param_suggestions import suggest_fields
 from glossator import history as history_service
+from glossator import package_version
 from glossator.answer.config import DEFAULT_VARIANT
 from glossator.answer.context import chunk_body
 from glossator.corpus.snapshots import configured_manifest
@@ -109,11 +110,6 @@ HISTORY_MAX_CHARS = 12_000
 DIFF_LIMIT_NOTE = f"note: diff cut at {history_service.DIFF_MAX_CHARS} characters"
 
 
-# --------------------------------------------------------------------------- #
-# Corpus facts
-# --------------------------------------------------------------------------- #
-
-
 def _page_sizes() -> dict[str, int]:
     """Characters of markdown per page URL, from the vendored corpus."""
     sizes: dict[str, int] = {}
@@ -130,11 +126,6 @@ _PAGE_SIZES = _page_sizes()
 
 def _is_large(url: str) -> bool:
     return _PAGE_SIZES.get(url, 0) >= LARGE_PAGE_CHARS
-
-
-# --------------------------------------------------------------------------- #
-# Errors: one code, one sentence, one next step
-# --------------------------------------------------------------------------- #
 
 
 def _error(code: str, message: str, next_hint: str) -> ToolError:
@@ -180,11 +171,6 @@ class _admission_or_busy:
         _admission.release()
 
 
-# --------------------------------------------------------------------------- #
-# Server, instructions, middleware
-# --------------------------------------------------------------------------- #
-
-
 def _instructions() -> str:
     """The rules for a host that reads nothing but this string (D-037a)."""
     pages = len(_PAGE_SIZES)
@@ -219,7 +205,11 @@ class _ParamGuard(Middleware):
     def __init__(self, server: FastMCP) -> None:
         self.server = server
 
-    async def on_call_tool(self, context: Any, call_next: Any) -> Any:
+    async def on_call_tool(
+        self,
+        context: MiddlewareContext[mt.CallToolRequestParams],
+        call_next: CallNext[mt.CallToolRequestParams, ToolResult],
+    ) -> ToolResult:
         name = context.message.name
         arguments = dict(context.message.arguments or {})
         tool = await self.server.get_tool(name)
@@ -241,11 +231,6 @@ class _ParamGuard(Middleware):
 
 
 mcp.add_middleware(_ParamGuard(mcp))
-
-
-# --------------------------------------------------------------------------- #
-# Rendering
-# --------------------------------------------------------------------------- #
 
 
 def _section_header(hit: Hit, n: int | None = None) -> list[str]:
@@ -302,11 +287,6 @@ def _large_page_line(hit: Hit) -> str:
     key = _section_key(hit)
     section = f', section="{key}"' if key else ""
     return f'    large page: {READ_PAGE}(page_url="{hit.url}"{section}) reads this section'
-
-
-# --------------------------------------------------------------------------- #
-# Tools
-# --------------------------------------------------------------------------- #
 
 
 def _search_description() -> str:
@@ -545,12 +525,12 @@ def _snapshot_engine(config: RetrievalConfig) -> SearchEngine:
     return SearchEngine(config.model_copy(update={"rerank": False}))
 
 
-_TOOL_IMPLS: dict[str, Any] = {
+_TOOL_IMPLS: dict[str, Callable[..., Awaitable[str]]] = {
     SEARCH: mistral_docs_search,
     READ_PAGE: mistral_docs_read_page,
     HISTORY: mistral_docs_history,
 }
-_DESCRIPTIONS: dict[str, Any] = {
+_DESCRIPTIONS: dict[str, Callable[[], str]] = {
     SEARCH: _search_description,
     READ_PAGE: _read_page_description,
     HISTORY: _history_description,
@@ -572,10 +552,6 @@ for _tool_name in _TOOL_ORDER:
         mcp.tool(title=_TOOL_TITLES[_tool_name], annotations=TOOL_ANNOTATIONS)(_impl)
 
 
-# --------------------------------------------------------------------------- #
-# HTTP transport: bearer auth, health, landing page, favicon
-# --------------------------------------------------------------------------- #
-
 _PUBLIC_PATHS = frozenset({"/", "/health", "/favicon.ico", "/favicon.svg"})
 
 FAVICON_SVG = (
@@ -593,11 +569,11 @@ class _BearerAuthMiddleware:
     """One shared secret on the HTTP transport (D-037). The landing page, the
     health check and the favicon need no token."""
 
-    def __init__(self, app: Any, token: str) -> None:
+    def __init__(self, app: ASGIApp, token: str) -> None:
         self.app = app
         self.token = token
 
-    async def __call__(self, scope: Any, receive: Any, send: Any) -> None:
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] == "lifespan":
             await self.app(scope, receive, send)
             return
@@ -628,15 +604,6 @@ class _BearerAuthMiddleware:
         await self.app(scope, receive, send)
 
 
-def _package_version() -> str:
-    try:
-        from importlib.metadata import PackageNotFoundError, version
-
-        return version("glossator")
-    except PackageNotFoundError:
-        return "0.0.0+unknown"
-
-
 @mcp.custom_route("/health", methods=["GET"])
 async def _mcp_health(request: Request) -> Response:
     """Unauthenticated, for the Connectors Debugger and the tunnel (D-037)."""
@@ -662,7 +629,7 @@ async def _mcp_health(request: Request) -> Response:
             "chunks": chunks,
             "embedding_probe": {"passed": probe_passed, **probe_detail},
             "tools": [name for name in _TOOL_ORDER if name in _ENABLED_TOOLS],
-            "version": _package_version(),
+            "version": package_version(),
         }
     )
 
@@ -705,7 +672,7 @@ def http_middleware() -> list[StarletteMiddleware]:
     return [StarletteMiddleware(_BearerAuthMiddleware, token=_MCP_TOKEN)]
 
 
-def build_http_app() -> Any:
+def build_http_app() -> Starlette:
     """The Starlette app the HTTP transport serves, with auth when configured."""
     return mcp.http_app(middleware=http_middleware())
 

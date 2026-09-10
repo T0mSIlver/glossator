@@ -1,22 +1,7 @@
-"""Does the embedding model still mean anything?
+"""Check embedding semantics and compatibility with vectors stored in Vespa.
 
-Every shape check an embedding pipeline normally runs -- the model name, the
-dimension count, a non-zero norm -- passes just as well when the weights are
-random, and search over random vectors still returns plausible-looking results
-(D-031). The only check that fails is a semantic one: embed text whose answer is
-known and assert the geometry knows it too.
-
-Two questions are asked here, because they fail differently:
-
-- Is the *model* real? Five question/passage pairs written in this corpus's
-  vocabulary, plus two passages about something else. Each question must be
-  closest to its own passage, and by a margin over the unrelated ones.
-- Is the *index* the model's? One stored chunk is re-embedded and compared with
-  the vector Vespa holds for it. A model swapped under a built index passes the
-  first check and fails this one.
-
-Thresholds are constants with the number measured on the real corpus written
-beside them, so a reviewer can see how much headroom each one has.
+Shape checks cannot detect random weights or a model swapped after indexing, so
+the probe tests known semantic pairs and re-embeds one stored chunk (D-031).
 """
 
 import math
@@ -27,6 +12,7 @@ import structlog
 from mistralai.client import Mistral
 from mistralai.search.toolkit.embedding import Embedder, MistralEmbedder
 from mistralai.search.toolkit.plugins.vespa.search.query import VespaSearchQuery
+from mistralai.search.toolkit.search import SearchResultChunk
 
 from glossator.clients import embedding_client
 from glossator.index import get_index, get_variant
@@ -247,7 +233,7 @@ async def _round_trip(variant: IndexVariant, embedder: Embedder) -> float | None
     return cosine(vector, fresh)
 
 
-def _stored_vector(chunk: Any) -> list[float] | None:
+def _stored_vector(chunk: SearchResultChunk) -> list[float] | None:
     """The chunk's indexed embedding, as Vespa's document API returns it.
 
     ``SearchResultChunk`` allows extra fields, and ``get_chunk`` promotes every

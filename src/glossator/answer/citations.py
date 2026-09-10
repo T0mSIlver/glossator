@@ -1,11 +1,4 @@
-"""The answer contract (D-027) and the check that makes it worth something.
-
-A citation that only names a source cannot be verified without another model. A
-citation that carries a quote can be checked in code: normalize the whitespace,
-look for the span in the chunk it claims to come from, and drop it when it is not
-there. That check is the project's citation-correctness number, so it lives next
-to the types rather than in a strategy.
-"""
+"""Define answer records and verify quoted citations against assembled sources."""
 
 import re
 import urllib.parse

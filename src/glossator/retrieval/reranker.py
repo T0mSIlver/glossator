@@ -1,16 +1,7 @@
-"""One model call that reads every candidate at once and puts them in order.
+"""Rerank all retrieval candidates in one model call.
 
-Hybrid retrieval decides relevance from a lexical overlap and a vector distance,
-neither of which can tell that a section titled "Streaming" is about server-sent
-events for the chat API and not about streaming a file upload. A model reading
-twenty candidates side by side can, and it costs one round trip: the toolkit's own
-``LLMReRanker`` scores each candidate in its own sequential call and never writes
-the score back onto the result (D-015).
-
-Listwise, not pointwise, for the same reason a person ranks a shortlist rather
-than grading each entry blind: the comparison is the judgement. The model returns
-positions, not scores, because a model's absolute score is not comparable across
-queries while its ordering is.
+The model returns a relative ordering because absolute scores are not comparable
+across queries (D-015).
 """
 
 import time

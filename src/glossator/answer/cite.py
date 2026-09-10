@@ -1,18 +1,8 @@
-"""Quote verification for answers the consumer wrote itself (D-040).
+"""Verify quotes in consumer-written answers without rewriting or calling a model.
 
-A consumer model that can call tools gathers context through ``search``,
-``open``, ``read`` and ``grep``; what it cannot do is verify its own quotes,
-because checking a quoted span needs the chunk text only the server has. This
-module does that check and nothing else: it never rewrites the answer and never
-calls a model.
-
-The consumer sends its draft (with ``[n]`` markers) and the quotes it relied
-on, each naming either a chunk id from an earlier tool result or a page URL
-with an optional ``#anchor``. A URL reference resolves to the page's chunks,
-merged the way the answer layer merges them, so a quote spanning two adjacent
-chunks still verifies. Each quote is checked with the same verifier the
-answer layer uses, and the draft's markers are reconciled against the verified
-quotes.
+The HTTP request identifies each source by a chunk from ``POST /search`` or a
+page URL with an optional anchor. Page chunks are merged before verification so
+a quote may span adjacent chunks (D-040, D-044).
 """
 
 import structlog
@@ -115,7 +105,7 @@ class SourceEntry(BaseModel):
 
 
 class CiteResult(BaseModel):
-    """Everything one ``cite`` call verified, ready for either surface."""
+    """The verified result returned by ``POST /cite``."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -132,7 +122,7 @@ class CiteResult(BaseModel):
 
 
 class CiteInputError(ValueError):
-    """A malformed ``cite`` call. Both surfaces answer it with ``E_BAD_PARAM``."""
+    """A malformed ``POST /cite`` request, reported as ``E_BAD_PARAM``."""
 
 
 def split_url_anchor(url: str) -> tuple[str, str | None]:
