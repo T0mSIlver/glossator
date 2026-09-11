@@ -1410,7 +1410,7 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 
 ## D-047 · Every section has a key, every hit prints the link to cite, and `kind` is gone
 
-**Status:** decided by Tom · 2026-09-11 · `src/glossator/citing.py`, `src/entrypoints/mcp_server.py`, `tests/test_citing.py`, `tests/test_mcp_tools.py`, `eval/corpus-map/` (the generator of the corpus map Tom read), `eval/runs/2026-09-11-2130-consumer-haiku/` (collected, not judged); evidence: the Work session of 2026-09-11 20:36 (export deleted from history, its reading below), the live docs.mistral.ai page and stylesheets fetched at 22:35, D-036, D-036b, D-043, D-044, D-044a to D-046
+**Status:** decided by Tom · 2026-09-11, deployed to the public server at 23:34 (the first deploy at 23:28 crash-looped on a stale `GLOSSATOR_MCP_TOOLS` in the deploy env file, which still named the eight retired tools; the public endpoint returned 502 for six minutes) · `src/glossator/citing.py`, `src/entrypoints/mcp_server.py`, `tests/test_citing.py`, `tests/test_mcp_tools.py`, `eval/corpus-map/` (the generator of the corpus map Tom read), `eval/runs/2026-09-11-2130-consumer-haiku/` (collected, not judged); evidence: the Work session of 2026-09-11 20:36 (export deleted from history, its reading below), the live docs.mistral.ai page and stylesheets fetched at 22:35, D-036, D-036b, D-043, D-044, D-044a to D-046
 
 **Terms.** These words are used with one meaning each from here on.
 
