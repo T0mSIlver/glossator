@@ -1387,7 +1387,7 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 
 ## D-046 · What ships: the agent path with an explicit `under` argument, the answer path stays the API baseline
 
-**Status:** proposed for Tom to decide · 2026-09-11 · evidence: D-017b, D-033, D-035b, D-038a, D-040b, D-044, D-044a to D-044c, a quota probe at 15:30 today, and a dated survey of MCP design guidance (sources inline)
+**Status:** decided by Tom · 2026-09-11, points 2 and 4 implemented and deployed the same day · evidence: D-017b, D-033, D-035b, D-038a, D-040b, D-044, D-044a to D-044c, a quota probe at 15:30 today, and a dated survey of MCP design guidance (sources inline)
 
 **The question.** Three Work sessions on a Mistral model over the three-tool surface: a plain question took two searches and a clean answer; the same question before the stop rules took thirteen searches and an invented section; a follow-up on an absent page took fourteen searches and borrowed a separate product as the answer. The model calls the server, over-searches when the corpus is silent, and over-reaches at the write-up. Is the agent path the wrong product for a mid-tier host, and should the context-injection path (`POST /ask`) be the product instead?
 

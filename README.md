@@ -31,7 +31,7 @@ variant, the index counts and the embedding probe.
 
 | Tool | Purpose |
 |---|---|
-| `mistral_docs_search(q, max_hits=5, kind)` | The sections that state something: one hit per section with its `url#anchor`, heading path and snippet. A page URL as `q` lists the pages under it instead. |
+| `mistral_docs_search(q, max_hits=5, kind, under)` | The sections that state something: one hit per section with its `url#anchor`, heading path and snippet. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
 | `mistral_docs_read_page(page_url, section)` | A whole page in reading order, or one section of a large page with its neighbours. |
 | `mistral_docs_history(text \| section \| question)` | When a phrase appeared, how a section changed across the dated snapshots, or what a question retrieved on each date. |
 

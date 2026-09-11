@@ -126,7 +126,9 @@ _PAGE_SIZES: dict[str, int] = {url: size for url, (size, _title, _kind) in _PAGE
 
 SITE = "https://docs.mistral.ai"
 PREFIX_LIST_MAX = 40
-"""Pages a URL-prefix listing prints before asking for a narrower prefix."""
+"""Pages a listing prints before asking for a narrower ``under``."""
+SCOPED_HITS = 60
+"""Sections a scoped search ranks before keeping the ones under the prefix."""
 
 
 def _is_large(url: str) -> bool:
@@ -306,32 +308,29 @@ def _search_description() -> str:
     DO NOT USE: to read a page you already hold a hit on ({READ_PAGE}).
 
     Args:
-        q: Two or three distinctive words, or a page URL to list the pages under it.
+        q: What you want to find, in one sentence. Empty with under: list its pages.
         max_hits: Hits to return, 1-{MAX_HITS}.
         kind: Keep only "doc", "api" or "model" pages. Omit for all.
+        under: A page URL. Keeps hits to the pages under it; lists them when q is empty.
     """
 
 
-def _prefix_query(q: str) -> str | None:
-    """The page URL a query names, or None when it is words.
+def _prefix_from(under: str) -> str:
+    """The page URL ``under`` names, whatever form the model wrote it in.
 
-    A model that wants to know whether a page exists writes the URL, a
-    ``site:`` form of it, or a bare path; a Work session tried all three
-    (D-044a). Words never start with the site or a slash.
+    Models write the URL, a ``site:`` form of it, the bare host, or a bare
+    path; a Work session used three of the four (D-044a, D-046).
     """
-    text = q.strip()
+    text = under.strip()
     if text.startswith("site:"):
         text = text[len("site:") :].strip()
-    for lead in (SITE, "http://docs.mistral.ai", "docs.mistral.ai", ""):
-        if lead and text.startswith(lead):
-            path = text[len(lead) :]
+    for lead in (SITE, "http://docs.mistral.ai", "docs.mistral.ai"):
+        if text.startswith(lead):
+            text = text[len(lead) :]
             break
-        if not lead and text.startswith("/"):
-            path = text
-            break
-    else:
-        return None
-    path = path.split("#", 1)[0].split("?", 1)[0].strip()
+    path = text.split("#", 1)[0].split("?", 1)[0].strip()
+    if path and not path.startswith("/"):
+        path = "/" + path
     return SITE + path.rstrip("/")
 
 
@@ -363,7 +362,7 @@ def _list_pages_under(prefix: str, kind: str | None) -> str:
         lines.append(f"Results: no page under {prefix} at this commit.")
         parent = _nearest_parent_with_pages(prefix)
         if parent:
-            lines.append(f'next: {SEARCH}(q="{parent}") lists the pages that do exist there.')
+            lines.append(f'next: {SEARCH}(under="{parent}") lists the pages that do exist there.')
         else:
             lines.append("next: search with words from the question instead of a URL.")
         return "\n".join(lines)
@@ -384,32 +383,56 @@ def _list_pages_under(prefix: str, kind: str | None) -> str:
     return "\n".join(lines)
 
 
-async def mistral_docs_search(q: str, max_hits: int = 5, kind: str | None = None) -> str:
-    if not q.strip():
-        raise _bad_param("q is empty.", "send two or three distinctive words in q.")
+async def mistral_docs_search(
+    q: str = "", max_hits: int = 5, kind: str | None = None, under: str | None = None
+) -> str:
     if kind is not None and kind not in KINDS:
         raise _bad_param(
             f'unknown kind "{kind}".', 'kind is "doc", "api" or "model"; omit it for all pages.'
         )
-    prefix = _prefix_query(q)
-    if prefix is not None:
+    prefix = _prefix_from(under) if under and under.strip() else None
+    if not q.strip():
+        if prefix is None:
+            raise _bad_param(
+                "q is empty.", "say what you want to find in one sentence, or set under."
+            )
+        return _list_pages_under(prefix, kind)
+    if prefix is not None and not _pages_under(prefix, None):
         return _list_pages_under(prefix, kind)
     top_k = max(1, min(MAX_HITS, max_hits))
+    # A scoped search filters after ranking, since the index has no URL-prefix
+    # clause; asking for more hits keeps a small subtree from ranking out.
+    ask_for = top_k * 3 if prefix is None else max(top_k * 3, SCOPED_HITS)
     async with _admission_or_busy():
         try:
             ranked = await _engine.search(
-                q, top_k=top_k * 3, rerank=False, kinds=frozenset({kind}) if kind else None
+                q, top_k=ask_for, rerank=False, kinds=frozenset({kind}) if kind else None
             )
         except RetrieverException as exc:
             raise _upstream(f"search({q!r})", exc) from exc
+    if prefix is not None:
+        ranked = [hit for hit in ranked if hit.url == prefix or hit.url.startswith(prefix + "/")]
     hits = _distinct_sections(ranked)[:top_k]
-    lines = [f"q: {json.dumps(q)}" + (f" | kind: {kind}" if kind else ""), ""]
+    lines = [
+        f"q: {json.dumps(q)}"
+        + (f" | kind: {kind}" if kind else "")
+        + (f" | under: {prefix}" if prefix else ""),
+        "",
+    ]
     for n, hit in enumerate(hits, 1):
         lines.extend(_section_header(hit, n))
         lines.append(f"    {_snippet(hit)}")
         if _is_large(hit.url):
             lines.append(_large_page_line(hit))
         lines.append("")
+    if not hits and prefix is not None:
+        count = len(_pages_under(prefix, kind))
+        lines.append(f"Results: no section under {prefix} matched; {count} pages exist there.")
+        lines.append(
+            f'next: {SEARCH}(under="{prefix}") lists them; a page not listed does not exist '
+            "at this commit."
+        )
+        return "\n".join(lines)
     if not hits:
         lines.append("Results: no section matched.")
         lines.append(

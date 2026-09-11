@@ -140,7 +140,7 @@ def test_descriptions_are_short_and_name_no_time_cost_or_ids(mcp_server: Any) ->
 
 def test_search_parameters_are_q_max_hits_and_kind(mcp_server: Any) -> None:
     schema = _tools(mcp_server)["mistral_docs_search"].parameters
-    assert set(schema["properties"]) == {"q", "max_hits", "kind"}
+    assert set(schema["properties"]) == {"q", "max_hits", "kind", "under"}
     assert schema.get("additionalProperties") is False
 
 
@@ -270,12 +270,14 @@ def test_search_empty_says_the_documentation_may_not_cover_it(mcp_server: Any) -
     assert "does not cover it" in text
 
 
-def test_search_with_a_page_url_lists_the_pages_under_it_without_the_index(
+def test_search_with_under_and_no_words_lists_the_pages_without_the_index(
     mcp_server: Any,
 ) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
-    text = _call(mcp_server, "mistral_docs_search", {"q": "https://docs.mistral.ai/capabilities"})
+    text = _call(
+        mcp_server, "mistral_docs_search", {"under": "https://docs.mistral.ai/capabilities"}
+    )
     assert text.startswith("pages under https://docs.mistral.ai/capabilities")
     assert "- https://docs.mistral.ai/capabilities/embeddings\n    Embeddings" in text
     assert "- https://docs.mistral.ai/capabilities/function-calling" in text
@@ -288,39 +290,80 @@ def test_search_with_a_page_url_lists_the_pages_under_it_without_the_index(
     assert engine.search_calls == []
 
 
-def test_search_accepts_site_and_bare_path_forms_and_keeps_the_kind_filter(
+def test_under_accepts_site_host_and_bare_path_forms_and_keeps_the_kind_filter(
     mcp_server: Any,
 ) -> None:
     mcp_server._engine = FakeEngine()
-    for q in ("site:docs.mistral.ai/models", "/models/", "https://docs.mistral.ai/models#x"):
-        text = _call(mcp_server, "mistral_docs_search", {"q": q})
+    for under in (
+        "site:docs.mistral.ai/models",
+        "/models/",
+        "models",
+        "https://docs.mistral.ai/models#x",
+    ):
+        text = _call(mcp_server, "mistral_docs_search", {"q": "", "under": under})
         assert "- https://docs.mistral.ai/models\n    Model capability matrix" in text
         assert "- https://docs.mistral.ai/models/mistral-medium" in text
         assert "Results: 2 pages" in text
-    text = _call(mcp_server, "mistral_docs_search", {"q": "/models", "kind": "doc"})
+    text = _call(mcp_server, "mistral_docs_search", {"under": "/models", "kind": "doc"})
     assert "Results: no page under https://docs.mistral.ai/models at this commit." in text
 
 
-def test_search_with_a_prefix_no_page_has_names_the_nearest_parent(mcp_server: Any) -> None:
-    mcp_server._engine = FakeEngine()
+def test_under_with_no_page_names_the_nearest_parent_even_with_words(mcp_server: Any) -> None:
+    engine = FakeEngine()
+    mcp_server._engine = engine
     text = _call(
         mcp_server,
         "mistral_docs_search",
-        {"q": "https://docs.mistral.ai/capabilities/evaluation/metrics"},
+        {"q": "evaluation metrics", "under": "https://docs.mistral.ai/capabilities/evaluation"},
     )
-    assert "Results: no page under https://docs.mistral.ai/capabilities/evaluation/metrics" in text
+    assert "Results: no page under https://docs.mistral.ai/capabilities/evaluation" in text
     assert text.rstrip().endswith(
-        'next: mistral_docs_search(q="https://docs.mistral.ai/capabilities") lists the pages '
-        "that do exist there."
+        'next: mistral_docs_search(under="https://docs.mistral.ai/capabilities") lists the '
+        "pages that do exist there."
     )
-    text = _call(mcp_server, "mistral_docs_search", {"q": "https://docs.mistral.ai/nowhere"})
+    assert engine.search_calls == []
+    text = _call(mcp_server, "mistral_docs_search", {"under": "https://docs.mistral.ai/nowhere"})
     assert "next: search with words from the question instead of a URL." in text
 
 
-def test_search_with_words_still_reaches_the_index(mcp_server: Any) -> None:
+def test_under_with_words_keeps_only_hits_on_pages_under_it(mcp_server: Any) -> None:
+    embeddings = "https://docs.mistral.ai/capabilities/embeddings"
+    engine = FakeEngine(
+        [
+            _hit("c1", "alpha content", url=embeddings),
+            _hit("c2", "beta", url="https://docs.mistral.ai/models"),
+        ]
+    )
+    mcp_server._engine = engine
+    text = _call(
+        mcp_server,
+        "mistral_docs_search",
+        {"q": "alpha content", "under": "https://docs.mistral.ai/capabilities"},
+    )
+    assert "| under: https://docs.mistral.ai/capabilities" in text
+    assert f"[1] {embeddings}#a-section" in text
+    assert "docs.mistral.ai/models" not in text.split("Results:")[0]
+    assert "Results: 1 hits" in text
+    assert engine.search_calls[0]["top_k"] == mcp_server.SCOPED_HITS
+    text = _call(
+        mcp_server,
+        "mistral_docs_search",
+        {"q": "alpha content", "under": "https://docs.mistral.ai/getting-started"},
+    )
+    assert (
+        "Results: no section under https://docs.mistral.ai/getting-started matched; 1 pages "
+        "exist there." in text
+    )
+    assert (
+        'next: mistral_docs_search(under="https://docs.mistral.ai/getting-started") lists them'
+        in text
+    )
+
+
+def test_a_url_in_q_is_searched_as_words_not_parsed(mcp_server: Any) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
-    _call(mcp_server, "mistral_docs_search", {"q": "capabilities embeddings"})
+    _call(mcp_server, "mistral_docs_search", {"q": "https://docs.mistral.ai/capabilities"})
     assert len(engine.search_calls) == 1
 
 
@@ -330,7 +373,7 @@ def test_unknown_parameters_are_rejected_naming_the_right_one(mcp_server: Any) -
     assert "E_BAD_PARAM" in text
     assert "max_hit" in text
     assert "did you mean max_hit= → max_hits=" in text
-    assert "accepts: kind, max_hits, q" in text
+    assert "accepts: kind, max_hits, q, under" in text
 
 
 def test_a_host_argument_is_dropped_before_validation(mcp_server: Any) -> None:

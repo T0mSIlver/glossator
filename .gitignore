@@ -32,3 +32,6 @@ venv/
 deploy/.env.deploy
 deploy/embedding-cache/
 .agent-runs/
+
+# Work session exports dropped into the checkout for analysis
+/*.html
