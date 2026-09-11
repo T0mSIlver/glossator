@@ -110,18 +110,23 @@ HISTORY_MAX_CHARS = 12_000
 DIFF_LIMIT_NOTE = f"note: diff cut at {history_service.DIFF_MAX_CHARS} characters"
 
 
-def _page_sizes() -> dict[str, int]:
-    """Characters of markdown per page URL, from the vendored corpus."""
-    sizes: dict[str, int] = {}
+def _load_pages() -> dict[str, tuple[int, str, str]]:
+    """Per page URL from the vendored corpus: characters of markdown, title, kind."""
+    pages: dict[str, tuple[int, str, str]] = {}
     if not CORPUS_DIR.is_dir():
-        return sizes
+        return pages
     for path in iter_page_paths(CORPUS_DIR):
         page = load_page(path)
-        sizes[page.url] = len(page.body)
-    return sizes
+        pages[page.url] = (len(page.body), page.title, page.kind)
+    return pages
 
 
-_PAGE_SIZES = _page_sizes()
+_PAGES = _load_pages()
+_PAGE_SIZES: dict[str, int] = {url: size for url, (size, _title, _kind) in _PAGES.items()}
+
+SITE = "https://docs.mistral.ai"
+PREFIX_LIST_MAX = 40
+"""Pages a URL-prefix listing prints before asking for a narrower prefix."""
 
 
 def _is_large(url: str) -> bool:
@@ -301,10 +306,82 @@ def _search_description() -> str:
     DO NOT USE: to read a page you already hold a hit on ({READ_PAGE}).
 
     Args:
-        q: Two or three distinctive words.
+        q: Two or three distinctive words, or a page URL to list the pages under it.
         max_hits: Hits to return, 1-{MAX_HITS}.
         kind: Keep only "doc", "api" or "model" pages. Omit for all.
     """
+
+
+def _prefix_query(q: str) -> str | None:
+    """The page URL a query names, or None when it is words.
+
+    A model that wants to know whether a page exists writes the URL, a
+    ``site:`` form of it, or a bare path; a Work session tried all three
+    (D-044a). Words never start with the site or a slash.
+    """
+    text = q.strip()
+    if text.startswith("site:"):
+        text = text[len("site:") :].strip()
+    for lead in (SITE, "http://docs.mistral.ai", "docs.mistral.ai", ""):
+        if lead and text.startswith(lead):
+            path = text[len(lead) :]
+            break
+        if not lead and text.startswith("/"):
+            path = text
+            break
+    else:
+        return None
+    path = path.split("#", 1)[0].split("?", 1)[0].strip()
+    return SITE + path.rstrip("/")
+
+
+def _pages_under(prefix: str, kind: str | None) -> list[tuple[str, str]]:
+    return sorted(
+        (url, title)
+        for url, (_size, title, page_kind) in _PAGES.items()
+        if (url == prefix or url.startswith(prefix + "/")) and (kind is None or page_kind == kind)
+    )
+
+
+def _nearest_parent_with_pages(prefix: str) -> str | None:
+    """The longest ancestor path that has pages, never the site root: a listing
+    of every page is not an answer to "does this page exist"."""
+    parent = prefix
+    while parent.startswith(SITE + "/"):
+        parent = parent.rsplit("/", 1)[0]
+        if parent == SITE:
+            return None
+        if _pages_under(parent, None):
+            return parent
+    return None
+
+
+def _list_pages_under(prefix: str, kind: str | None) -> str:
+    pages = _pages_under(prefix, kind)
+    lines = [f"pages under {prefix}" + (f" | kind: {kind}" if kind else ""), ""]
+    if not pages:
+        lines.append(f"Results: no page under {prefix} at this commit.")
+        parent = _nearest_parent_with_pages(prefix)
+        if parent:
+            lines.append(f'next: {SEARCH}(q="{parent}") lists the pages that do exist there.')
+        else:
+            lines.append("next: search with words from the question instead of a URL.")
+        return "\n".join(lines)
+    for url, title in pages[:PREFIX_LIST_MAX]:
+        lines.append(f"- {url}")
+        lines.append(f"    {title}")
+    lines.append("")
+    if len(pages) > PREFIX_LIST_MAX:
+        lines.append(
+            f"Results: {len(pages)} pages, the first {PREFIX_LIST_MAX} listed; narrow the prefix."
+        )
+    else:
+        lines.append(
+            f"Results: {len(pages)} pages; a page not listed does not exist at this commit."
+        )
+    if READ_PAGE in _ENABLED_TOOLS:
+        lines.append(f'next: {READ_PAGE}(page_url="{pages[0][0]}") reads the first one.')
+    return "\n".join(lines)
 
 
 async def mistral_docs_search(q: str, max_hits: int = 5, kind: str | None = None) -> str:
@@ -314,6 +391,9 @@ async def mistral_docs_search(q: str, max_hits: int = 5, kind: str | None = None
         raise _bad_param(
             f'unknown kind "{kind}".', 'kind is "doc", "api" or "model"; omit it for all pages.'
         )
+    prefix = _prefix_query(q)
+    if prefix is not None:
+        return _list_pages_under(prefix, kind)
     top_k = max(1, min(MAX_HITS, max_hits))
     async with _admission_or_busy():
         try:

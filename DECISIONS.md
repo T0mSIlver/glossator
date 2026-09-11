@@ -1361,3 +1361,13 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 1. The instructions gain two sentences: a search that returns the pages already read means the corpus has nothing more on it, and an unknown page URL means the page does not exist at this commit and is not retried. No tool, parameter or result text changes.
 2. The missing page is upstream row 16, with the session as evidence. The question the session could not answer is `mined2-084`, typed `unanswerable`, so the over-reach is measured from now on.
 3. A URL-prefix form of search (a `q` that is a page URL lists the pages under it) is the candidate answer to the two listing attempts. It is not the `outline` strategy of D-033, which handed the model the whole site outline instead of retrieval; it would be a scoped listing after a search has named the neighbourhood. Tom decides whether it ships; nothing is built until then.
+
+---
+
+## D-044b · A page URL in `q` lists the pages under it
+
+**Status:** decided by Tom · 2026-09-11 · `src/entrypoints/mcp_server.py` (`_prefix_query`, `_list_pages_under`), `tests/test_mcp_tools.py`; deployed the same day
+
+**Facts.** The Work session of D-044a asked the server for a listing twice, as `site:docs.mistral.ai/studio/search/search-toolkit` and as `search-toolkit/evaluation`, and guessed a page URL twice; the three-tool surface (D-044) has no way to answer "does this page exist". The `outline` strategy of D-033 is not that: it handed the model the whole site outline (411 titles, about 9k tokens) before any retrieval and lost on eight of eleven metrics because titles carry little signal and its page budget overflowed. A listing scoped to a path, asked for after a search hit has named the neighbourhood, is a different operation: twenty lines, no ranking replaced. The server already loads every page's URL, title and kind from the vendored corpus at startup.
+
+**Decision.** `mistral_docs_search` keeps its three arguments. When `q` is a page URL, a `site:` form of one, or a bare path, the tool lists the pages whose URL starts with that path, sorted, one line for the URL and one for the title, from the loaded corpus and without a Vespa call; `kind` still filters. Forty pages at most, then "narrow the prefix"; zero pages prints the nearest ancestor path that has pages, never the site root, or says to search with words. The `q` description gains one clause, "or a page URL to list the pages under it". Words never start with the site or a slash, so no word query changes behaviour.
