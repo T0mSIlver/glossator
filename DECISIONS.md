@@ -1319,3 +1319,28 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 5. **Cost of one run**, at the published prices, evaluating the fresh sixty on both snapshots (120 answers) and labelling the fresh sixty plus the mined eighty-five: two ingestions on a cold runner, 2 × 1.2 M embedding tokens, 0.24 USD (cents once the embedding cache is restored on the runner, the named follow-up); the reranker on Mistral Small 4, 120 calls, 0.11 USD; generation on Mistral Medium 3.5, 120 calls, 0.70 USD; labelling and judging on GLM through z.ai, 0 USD against the Mistral budget. About **1.05 USD per run on the shipped model**, 0.40 USD with Ministral 3 14B generating, and about forty runner minutes. Weekly on Medium is 4.5 USD a month; the 20 USD of credits are nineteen runs.
 6. **Cron: proposed off at v1.0, manual trigger on.** Two reasons, both facts today: the key's quota for Medium 3.5 and Small 4 is zero (D-017a), so a scheduled run would fail at the reranker until the account is provisioned; and a run is a real dollar against twenty. The README states the schedule is off, the cost of a run, and that turning it on is uncommenting two lines once the first manual run has passed on a provisioned key. Tom confirms or overturns.
 7. The mined set is labelled on every run but not yet answered, since no judged run on it exists at any snapshot; adding it to the answered set doubles the generation cost to about 1.9 USD per run and is the next extension of the gate.
+
+---
+
+## D-045a · The gate's second review: an API-only runner, the verdict read before accepting, symmetric errors are not an outage
+
+**Status:** decided · 2026-09-11 · reviewed by Codex (gpt-5.6-sol) and opencode on GLM 5.3 in Herdr panes, fixes applied by GLM 5.3 and checked here; `tests/eval/test_snapshots.py`, `tests/eval/test_gate.py`, `tests/corpus/test_refresh.py`
+
+**Facts.**
+- The answering step required `GLOSSATOR_CHAT_SERVER_URL` and the workflow ran it unconditionally, so a runner holding the Mistral and z.ai keys alone failed every run; the 1.05 USD figure in D-045 assumes Medium 3.5 on the API, which the code could not select.
+- After an upstream failure the issue step built its directory from an empty step output and ran `mkdir -p /gate`, so the one thing it promises on a crash, an issue, was never opened.
+- `_openapi_path` checked two file names where the snapshot builder checks three, so a spec moved to `public/openapi.yaml` would have been replaced by a live download and recorded as exact, the case D-045 point 4 rules out.
+- `accept` took the gate directory and never read it. A second passing run on the same day could not push `refresh/<date>`, and an artifact name without the attempt number fails "re-run all jobs".
+- The unscored count included questions erroring on both sides: seven shared 429s on sixty questions gave 11.7% and `inconclusive`. The verdict order in the code was `inconclusive` before `regression`, the reverse of point 3.
+- The accepted snapshot's manifest row names a runner path; on the server the snapshot corpora are mounted from `SNAPSHOTS_DIR` and the eight dates were ingested by hand (D-037d), so the history tool does not gain the accepted date on its own.
+- mypy failed with three errors on the branch, and the CLI test of `refresh` passed only inside the full suite, where an earlier test had configured logging.
+
+**Decision.**
+1. Generation falls back to the Mistral API on the shipped model when no local server is configured; `GLOSSATOR_CHAT_MODEL` still overrides, and a configured server still generates on the Ministral it serves. The unit test covers the three cases.
+2. The issue step resolves its directory once, falling back to the runner's temporary directory, so a crash before the gate still opens an issue.
+3. The candidate builder uses the snapshot builder's list of OpenAPI file names.
+4. `accept` reads `gate.json` and refuses any verdict but `pass`; the workflow's exit-code check is no longer the only guard.
+5. An outage is a baseline question with usable data whose candidate counterpart has none; questions failing on both sides and candidate-only cells do not count, and the share is over the baseline's usable questions. `regression` outranks `inconclusive`, as point 3 says.
+6. The PR branch carries the run id and the artifact name the attempt number.
+7. The deploy README and the generated PR body state the operator's two steps after merging an accepted refresh: `make deploy` for the served index, and copying the vendored corpus into `SNAPSHOTS_DIR/<date>` plus a `snap1024` ingestion for the history tool. A deploy-script change is deferred until a refresh has actually been accepted.
+8. The weekly schedule stays off and the manual trigger on: Tom confirmed on 2026-09-11 that the refresh should work end to end but not run on its own yet.

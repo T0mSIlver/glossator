@@ -226,21 +226,24 @@ def compare(
 ) -> dict[str, Any]:
     """The gate's verdict: ``pass``, ``regression`` or ``inconclusive``."""
     candidate_cells = list(candidate.values())
-    # A question the baseline answered and the candidate did not, or one the
-    # baseline judged and the candidate did not, is an outage on the candidate
-    # side and counts as unscored; both sides unjudged is a deterministic-only
-    # gate and counts as nothing.
+    # D-045: an outage is a baseline question with usable data whose candidate
+    # counterpart has no answer, label or verdict. A question erroring on both
+    # sides is symmetric churn, and a candidate-only cell is not a loss of what
+    # the baseline had, so neither counts.
     judged_baseline = any(cell.verdict for cell in baseline.values())
-    unscored = {cell.question_id for cell in candidate_cells if not cell.scored}
-    unscored |= {q for q in baseline if q not in candidate}
-    if judged_baseline:
-        unscored |= {
-            q
-            for q, cell in candidate.items()
-            if q in baseline and baseline[q].verdict and not cell.verdict and cell.scored
-        }
-    denominator = len(set(candidate) | set(baseline))
-    unscored_share = len(unscored) / denominator if denominator else 1.0
+    usable = {
+        q
+        for q, cell in baseline.items()
+        if cell.scored and (not judged_baseline or cell.verdict is not None)
+    }
+    unscored = {
+        q
+        for q in usable
+        if q not in candidate
+        or not candidate[q].scored
+        or (judged_baseline and candidate[q].verdict is None)
+    }
+    unscored_share = len(unscored) / len(usable) if usable else 1.0
 
     common = sorted(baseline.keys() & candidate.keys())
     answerable = [
@@ -268,10 +271,10 @@ def compare(
         _compare_verdict(answerable, share=share, floor=floor),
     ]
     regressed = [s.name for s in signals if s.regressed]
-    if unscored_share > max_unscored_share or len(answerable) < min_paired:
-        verdict = "inconclusive"
-    elif regressed:
+    if regressed:
         verdict = "regression"
+    elif unscored_share > max_unscored_share or len(answerable) < min_paired:
+        verdict = "inconclusive"
     else:
         verdict = "pass"
     return {

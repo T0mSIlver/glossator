@@ -129,7 +129,7 @@ jobs:
         if: steps.candidate.outputs.changed == 'true' && !cancelled()
         uses: actions/upload-artifact@v4
         with:
-          name: refresh-${{ steps.candidate.outputs.date }}-${{ github.run_id }}
+          name: refresh-${{ steps.candidate.outputs.date }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             candidate.json
             eval/snapshots/manifest.json
@@ -144,7 +144,11 @@ jobs:
       - name: Open an issue for the regression
         if: steps.candidate.outputs.changed == 'true' && !cancelled() && steps.gate.outputs.code != '0'
         run: |
-          gate="${{ steps.eval.outputs.path }}/gate"
+          if [ -n "${{ steps.eval.outputs.path }}" ]; then
+            gate="${{ steps.eval.outputs.path }}/gate"
+          else
+            gate="$RUNNER_TEMP/gate"
+          fi
           if [ -f "$gate/gate.json" ]; then
             verdict=$(jq -r '.verdict' "$gate/gate.json")
           else
@@ -157,7 +161,7 @@ jobs:
             echo "Docs commit \`${{ steps.candidate.outputs.commit }}\` was evaluated against the served snapshot and not accepted."
             echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo
-            cat "${{ steps.eval.outputs.path }}/gate/gate.md"
+            cat "$gate/gate.md"
           } > issue.md
           gh issue create --title "$title" --body-file issue.md --label refresh
 
@@ -176,7 +180,7 @@ jobs:
           sed -i 's/^PINNED_REF = ".*"/PINNED_REF = "${{ steps.candidate.outputs.commit }}"/' \
             src/glossator/corpus/mistral_docs/__init__.py
           sed -i 's/^CORPUS_REF := $(or $(REF),.*)/CORPUS_REF := $(or $(REF),${{ steps.candidate.outputs.commit }})/' Makefile
-          branch="refresh/${{ steps.candidate.outputs.date }}"
+          branch="refresh/${{ steps.candidate.outputs.date }}-${{ github.run_id }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
@@ -187,7 +191,8 @@ jobs:
           git push origin "$branch"
           {
             echo "Docs commit \`${{ steps.candidate.outputs.commit }}\` passed the refresh gate against the served snapshot ${{ steps.candidate.outputs.served_snapshot }}."
-            echo "Merging moves the served pointer and re-vendors the corpus; \`make deploy\` then rebuilds the index from the embedding cache (D-037d)."
+            echo "Merging moves the served pointer and re-vendors the corpus; \`make deploy\` after the merge rebuilds the served index from the embedding cache (D-037d)."
+            echo "The \`history\` tool gains the new date only after the operator copies \`corpus/mistral-docs\` into \`SNAPSHOTS_DIR/<date>\` on the deployment host and ingests it with \`python -m glossator.ingest --variant snap1024 --snapshot <date> --corpus <that path>\`, the same steps as for the existing eight dates."
             echo
             cat "${{ steps.eval.outputs.path }}/gate/gate.md"
           } > pr.md

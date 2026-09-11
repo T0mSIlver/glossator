@@ -39,6 +39,13 @@ def _record(date: str, commit: str) -> SnapshotRecord:
     )
 
 
+def _gate(tmp_path: Path, verdict: str = "pass") -> str:
+    gate = tmp_path / "gate"
+    gate.mkdir(exist_ok=True)
+    (gate / "gate.json").write_text(json.dumps({"verdict": verdict}))
+    return str(gate)
+
+
 @dataclass
 class _Checkout:
     path: Path
@@ -184,12 +191,13 @@ def test_build_refuses_when_the_served_snapshot_is_missing_from_the_manifest(
 def test_accept_moves_the_served_pointer_to_a_manifest_snapshot(tmp_path: Path) -> None:
     manifest = _manifest(tmp_path, _record("2026-09-07", "abc"), _record("2026-09-14", "def"))
     served = _served(tmp_path, "2026-09-07", "abc")
+    gate = _gate(tmp_path)
     payload = refresh.accept(
         date="2026-09-14",
         commit="def",
         run="eval/runs/x-refresh-eval",
         labels="eval/runs/x-refresh-labels/labels.jsonl",
-        gate="eval/runs/x-refresh-eval/gate",
+        gate=gate,
         manifest_path=manifest,
         served_path=served,
     )
@@ -202,10 +210,27 @@ def test_accept_moves_the_served_pointer_to_a_manifest_snapshot(tmp_path: Path) 
             commit="ghi",
             run="r",
             labels="l",
-            gate="g",
+            gate=gate,
             manifest_path=manifest,
             served_path=served,
         )
+
+
+def test_accept_refuses_a_gate_that_did_not_pass(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path, _record("2026-09-07", "abc"), _record("2026-09-14", "def"))
+    served = _served(tmp_path, "2026-09-07", "abc")
+    with pytest.raises(ValueError, match="regression"):
+        refresh.accept(
+            date="2026-09-14",
+            commit="def",
+            run="eval/runs/x-refresh-eval",
+            labels="eval/runs/x-refresh-labels/labels.jsonl",
+            gate=_gate(tmp_path, verdict="regression"),
+            manifest_path=manifest,
+            served_path=served,
+        )
+    stored = refresh.read_served(served)
+    assert stored["snapshot"] == "2026-09-07" and stored["commit"] == "abc"
 
 
 def test_served_pointer_in_the_repository_names_a_manifest_snapshot() -> None:

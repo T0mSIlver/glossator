@@ -32,6 +32,7 @@ from glossator.corpus.mistral_docs.source import DEFAULT_CACHE_DIR, fetch_docs_r
 from glossator.corpus.snapshots import (
     DEFAULT_MANIFEST,
     DEFAULT_SNAPSHOT_ROOT,
+    OPENAPI_CANDIDATES,
     SnapshotRecord,
     corpus_digest,
     read_snapshot_manifest,
@@ -47,7 +48,8 @@ DOCS_HEAD = "main"
 
 
 def read_served(path: Path = SERVED_POINTER) -> dict[str, Any]:
-    return json.loads(path.read_text())
+    payload: dict[str, Any] = json.loads(path.read_text())
+    return payload
 
 
 def write_served(path: Path, payload: dict[str, Any]) -> None:
@@ -64,7 +66,7 @@ def _portable(path: Path) -> str:
 
 
 def _openapi_path(checkout_path: Path) -> Path | None:
-    for relative in ("openapi-public-doc.yaml", "openapi.yaml"):
+    for relative in OPENAPI_CANDIDATES:
         candidate = checkout_path / relative
         if candidate.is_file():
             return candidate
@@ -167,6 +169,10 @@ def accept(
     served_path: Path = SERVED_POINTER,
 ) -> dict[str, Any]:
     """Point the served pointer at a candidate the gate passed."""
+    gate_payload: dict[str, Any] = json.loads((Path(gate) / "gate.json").read_text())
+    verdict = gate_payload.get("verdict")
+    if verdict != "pass":
+        raise ValueError(f"gate verdict for {date} is {verdict!r}, not 'pass'")
     if not any(
         r.date == date and r.commit == commit for r in read_snapshot_manifest(manifest_path)
     ):
@@ -204,10 +210,9 @@ def main(argv: list[str] | None = None) -> int:
     acc.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     acc.add_argument("--served", type=Path, default=SERVED_POINTER)
     args = parser.parse_args(argv)
-    if __name__ == "__main__":
-        # Logs go to stderr so stdout is the JSON alone; the same lazy stream
-        # the corpus CLI uses, so a host that replaces stderr keeps working.
-        _configure_logging(False)
+    # Logs go to stderr so stdout is the JSON alone; the same lazy stream the
+    # corpus CLI uses, so a host that replaces stderr keeps working.
+    _configure_logging(False)
     if args.command == "build":
         result = build_candidate(
             ref=args.ref,

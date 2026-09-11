@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -95,6 +96,18 @@ def test_net_loss_at_threshold_passes() -> None:
     assert compare(baseline, candidate)["verdict"] == "pass"
 
 
+def test_a_regressed_signal_outranks_a_candidate_outage() -> None:
+    baseline = population(60)
+    candidate = population(60)
+    for q in ("q0", "q1", "q2", "q3", "q4"):
+        candidate[q] = cell(q, cited=False)
+    for i in range(10, 17):
+        candidate[f"q{i}"] = cell(f"q{i}", error="HTTP 429", verdict=None)
+    result = compare(baseline, candidate)
+    assert result["candidate_unscored_share"] > 0.10
+    assert result["verdict"] == "regression"
+
+
 def test_only_questions_present_in_both_snapshots_are_paired() -> None:
     baseline = population(30)
     candidate = population(30)
@@ -135,6 +148,17 @@ def test_too_many_unscored_cells_is_inconclusive_not_a_pass() -> None:
     assert result["candidate_unscored"] == 3
 
 
+def test_symmetric_errors_are_not_a_candidate_outage() -> None:
+    baseline = population(60)
+    candidate = population(60)
+    for i in range(7):
+        baseline[f"q{i}"] = cell(f"q{i}", error="HTTP 429", verdict=None)
+        candidate[f"q{i}"] = cell(f"q{i}", error="HTTP 429", verdict=None)
+    result = compare(baseline, candidate)
+    assert result["verdict"] == "pass"
+    assert result["candidate_unscored"] == 0
+
+
 def test_unjudged_runs_gate_on_the_deterministic_signals() -> None:
     baseline = population(30, verdict=None)
     candidate = population(30, verdict=None)
@@ -168,7 +192,7 @@ def test_too_few_paired_questions_is_inconclusive() -> None:
     assert result["paired_answerable"] == 10
 
 
-def _write_run(tmp_path: Path, name: str, rows: list[dict]) -> Path:
+def _write_run(tmp_path: Path, name: str, rows: list[dict[str, Any]]) -> Path:
     run = tmp_path / name
     run.mkdir()
     (run / "records.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
@@ -185,7 +209,7 @@ def _record(
     refused: bool = False,
     verdict: str | None = "correct",
     label: str = "present",
-) -> dict:
+) -> dict[str, Any]:
     return {
         "question_id": question_id,
         "snapshot": snapshot,

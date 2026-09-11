@@ -22,7 +22,7 @@ from pydantic import BaseModel, ConfigDict
 from glossator.answer.citations import contains_span
 from glossator.answer.config import LOCAL_MINISTRAL_3_14B, AnswerConfig
 from glossator.answer.llm import MistralLLM
-from glossator.clients import chat_client, chat_reasoning_effort
+from glossator.clients import chat_client, chat_reasoning_effort, chat_server_url
 from glossator.corpus.snapshots import DEFAULT_MANIFEST, SnapshotRecord, read_snapshot_manifest
 from glossator.eval.agreement import agreement_report
 from glossator.eval.answer_eval import (
@@ -634,6 +634,22 @@ snapshots. `figures/correctness.svg` is generated from `metrics.json`.
 """
 
 
+def generation_target() -> tuple[str, str | None]:
+    """The model and server snapshot generation runs on.
+
+    ``GLOSSATOR_CHAT_MODEL`` wins when set. Otherwise a configured local server
+    generates on the Ministral it serves, and the Mistral API generates on the
+    shipped model, so the run works on a runner without the server too.
+    """
+    server = chat_server_url()
+    model = os.environ.get("GLOSSATOR_CHAT_MODEL", "").strip()
+    if model:
+        return model, server
+    if server is not None:
+        return LOCAL_MINISTRAL_3_14B, server
+    return AnswerConfig().model, None
+
+
 async def run_snapshot_eval(
     dataset: Path,
     *,
@@ -645,21 +661,21 @@ async def run_snapshot_eval(
 ) -> tuple[Path, dict[str, Any]]:
     """Answer one dataset against every snapshot partition.
 
-    Generation always goes to ``GLOSSATOR_CHAT_SERVER_URL`` (never the Mistral
-    API). With ``skip_judge`` the answers are recorded and scored later: rows
-    carry no judge verdict, so correctness and refusal stay ``None``.
+    Generation goes to the local server when ``GLOSSATOR_CHAT_SERVER_URL`` is
+    set (probed first) and to the Mistral API otherwise, on the model
+    :func:`generation_target` picks. With ``skip_judge`` the answers are
+    recorded and scored later: rows carry no judge verdict, so correctness and
+    refusal stay ``None``.
     """
-    server_url = os.environ.get("GLOSSATOR_CHAT_SERVER_URL")
-    if not server_url:
-        raise RuntimeError("GLOSSATOR_CHAT_SERVER_URL is not set; snapshot generation was not run")
-    async with httpx.AsyncClient(timeout=5.0) as client:
-        response = await client.get(server_url.rstrip("/") + "/v1/models")
-        response.raise_for_status()
+    generation_model, server_url = generation_target()
+    if server_url is not None:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(server_url.rstrip("/") + "/v1/models")
+            response.raise_for_status()
     questions = read_jsonl(dataset)
     snapshots = _built_snapshots(manifest_path)
     labels = _labels_by_key(labels_path)
     run_path = _run_path(name, runs_root)
-    generation_model = os.environ.get("GLOSSATOR_CHAT_MODEL", LOCAL_MINISTRAL_3_14B)
     config = {
         "kind": "snapshot_eval",
         "name": name,
