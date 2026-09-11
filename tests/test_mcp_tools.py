@@ -138,9 +138,9 @@ def test_descriptions_are_short_and_name_no_time_cost_or_ids(mcp_server: Any) ->
             assert word not in description, (name, word)
 
 
-def test_search_parameters_are_q_max_hits_and_kind(mcp_server: Any) -> None:
+def test_search_parameters_are_q_max_hits_and_under(mcp_server: Any) -> None:
     schema = _tools(mcp_server)["mistral_docs_search"].parameters
-    assert set(schema["properties"]) == {"q", "max_hits", "kind", "under"}
+    assert set(schema["properties"]) == {"q", "max_hits", "under"}
     assert schema.get("additionalProperties") is False
 
 
@@ -155,7 +155,7 @@ def test_instructions_carry_the_scope_the_citation_rule_and_the_refusal_rule(
     text = mcp_server._instructions()
     assert "pages of Mistral's documentation" in text
     assert "mistral_docs_search" in text
-    assert "url#anchor" in text
+    assert "Cite the cite: link printed beside the text you used" in text
     assert "say so" in text
     assert "nothing more" in text
     assert "do not retry" in text
@@ -178,14 +178,15 @@ def test_the_allowlist_rejects_an_unknown_tool_and_requires_search(
         _reload_with(monkeypatch, GLOSSATOR_MCP_TOOLS="mistral_docs_history")
 
 
-def test_search_prints_url_anchor_heading_snippet_and_next(mcp_server: Any) -> None:
+def test_search_prints_key_heading_snippet_cite_and_next(mcp_server: Any) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
     text = _call(mcp_server, "mistral_docs_search", {"q": "alpha"})
     assert 'q: "alpha"' in text
-    assert f"[1] {PAGE}#a-section" in text
+    assert f"[1] {PAGE} | section: a-section" in text
     assert "Page > A section" in text
     assert "alpha content" in text
+    assert f"    cite: {PAGE}#a-section" in text
     assert "chunk id" not in text
     assert "rerank" not in text
     assert text.rstrip().endswith(
@@ -203,8 +204,8 @@ def test_search_collapses_chunks_of_one_section_into_one_hit(mcp_server: Any) ->
         ]
     )
     text = _call(mcp_server, "mistral_docs_search", {"q": "half", "max_hits": 5})
-    assert text.count(f"[1] {PAGE}#a-section") == 1
-    assert f"[2] {PAGE}#other" in text
+    assert text.count(f"[1] {PAGE} | section: a-section") == 1
+    assert f"[2] {PAGE} | section: other" in text
     assert "[3]" not in text
     assert "Results: 2 hits" in text
 
@@ -243,18 +244,18 @@ def test_search_marks_a_hit_on_a_large_page_with_the_section_to_read(mcp_server:
     )
 
 
-def test_search_forwards_the_kind_filter(mcp_server: Any) -> None:
+def test_search_ranks_every_kind_of_page(mcp_server: Any) -> None:
     engine = FakeEngine()
     mcp_server._engine = engine
-    text = _call(mcp_server, "mistral_docs_search", {"q": "alpha", "kind": "api"})
-    assert engine.search_calls[0]["kinds"] == frozenset({"api"})
-    assert "kind: api" in text
+    text = _call(mcp_server, "mistral_docs_search", {"q": "alpha"})
+    assert engine.search_calls[0]["kinds"] is None
+    assert "kind" not in text
 
 
-def test_search_rejects_an_unknown_kind(mcp_server: Any) -> None:
-    text = _call_error(mcp_server, "mistral_docs_search", {"q": "alpha", "kind": "blog"})
+def test_search_rejects_the_retired_kind_argument(mcp_server: Any) -> None:
+    text = _call_error(mcp_server, "mistral_docs_search", {"q": "alpha", "kind": "api"})
     assert "E_BAD_PARAM" in text
-    assert '"doc", "api" or "model"' in text
+    assert "accepts: max_hits, q, under" in text
 
 
 def test_search_rejects_an_empty_query(mcp_server: Any) -> None:
@@ -290,9 +291,7 @@ def test_search_with_under_and_no_words_lists_the_pages_without_the_index(
     assert engine.search_calls == []
 
 
-def test_under_accepts_site_host_and_bare_path_forms_and_keeps_the_kind_filter(
-    mcp_server: Any,
-) -> None:
+def test_under_accepts_site_host_and_bare_path_forms(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
     for under in (
         "site:docs.mistral.ai/models",
@@ -304,8 +303,6 @@ def test_under_accepts_site_host_and_bare_path_forms_and_keeps_the_kind_filter(
         assert "- https://docs.mistral.ai/models\n    Model capability matrix" in text
         assert "- https://docs.mistral.ai/models/mistral-medium" in text
         assert "Results: 2 pages" in text
-    text = _call(mcp_server, "mistral_docs_search", {"under": "/models", "kind": "doc"})
-    assert "Results: no page under https://docs.mistral.ai/models at this commit." in text
 
 
 def test_under_with_no_page_names_the_nearest_parent_even_with_words(mcp_server: Any) -> None:
@@ -341,7 +338,9 @@ def test_under_with_words_keeps_only_hits_on_pages_under_it(mcp_server: Any) -> 
         {"q": "alpha content", "under": "https://docs.mistral.ai/capabilities"},
     )
     assert "| under: https://docs.mistral.ai/capabilities" in text
-    assert f"[1] {embeddings}#a-section" in text
+    # A vendored page names sections by its own keys: section 1 of the fixture
+    # page is "The models {#the-models}", whatever anchor the fake hit carries.
+    assert f"[1] {embeddings} | section: the-models" in text
     assert "docs.mistral.ai/models" not in text.split("Results:")[0]
     assert "Results: 1 hits" in text
     assert engine.search_calls[0]["top_k"] == mcp_server.SCOPED_HITS
@@ -373,7 +372,7 @@ def test_unknown_parameters_are_rejected_naming_the_right_one(mcp_server: Any) -
     assert "E_BAD_PARAM" in text
     assert "max_hit" in text
     assert "did you mean max_hit= → max_hits=" in text
-    assert "accepts: kind, max_hits, q, under" in text
+    assert "accepts: max_hits, q, under" in text
 
 
 def test_a_host_argument_is_dropped_before_validation(mcp_server: Any) -> None:
@@ -425,8 +424,8 @@ def test_read_page_returns_the_whole_page_with_section_headers(mcp_server: Any) 
     )
     text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
     assert text.startswith(f'page: {PAGE} | "Page"')
-    assert f"## {PAGE}#a-section" in text
-    assert f"## {PAGE}#b" in text
+    assert f"## section: a-section\n    Page > A section\n    cite: {PAGE}#a-section" in text
+    assert f"## section: b\n    Page > B\n    cite: {PAGE}#b" in text
     assert "alpha content" in text and "beta" in text
     assert "chunk id" not in text
     assert text.rstrip().endswith("Results: 2 sections, the whole page.")
@@ -441,7 +440,7 @@ def test_read_page_strips_an_anchor_from_the_url(mcp_server: Any) -> None:
 def test_read_page_prints_one_header_per_section_not_per_chunk(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine([_hit("c1", "first half"), _hit("c2", "second half")])
     text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
-    assert text.count(f"## {PAGE}#a-section") == 1
+    assert text.count("## section: a-section") == 1
     assert "first half" in text and "second half" in text
 
 
@@ -457,14 +456,33 @@ def test_read_page_stops_at_the_budget_and_names_the_remaining_sections(
     assert "remaining sections: s3, s4, s5" in text
 
 
-def test_read_page_section_returns_it_with_its_neighbours(mcp_server: Any) -> None:
+def test_read_page_section_returns_that_section_and_names_the_next(mcp_server: Any) -> None:
     hits = [_hit(f"c{i}", f"text {i}", anchor=f"s{i}", heading=f"S{i}") for i in range(1, 6)]
     mcp_server._engine = FakeEngine(hits)
     text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "s3"})
     assert "| section: s3" in text
-    assert "text 2" in text and "text 3" in text and "text 4" in text
-    assert "text 1" not in text and "text 5" not in text
-    assert text.rstrip().endswith("Results: 3 sections, the whole section.")
+    assert "text 3" in text
+    for other in ("text 1", "text 2", "text 4", "text 5"):
+        assert other not in text
+    assert "Results: the whole section." in text
+    assert text.rstrip().endswith(
+        f'next: mistral_docs_read_page(page_url="{PAGE}", section="s4") for the section after it'
+    )
+
+
+def test_read_page_continues_inside_a_section_that_overflows(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    hits = [_hit(f"c{i}", "x" * 300) for i in range(1, 6)]
+    mcp_server._engine = FakeEngine(hits)
+    monkeypatch.setattr(mcp_server, "READ_MAX_CHARS", 800)
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "a-section"})
+    assert text.count("## section: a-section") == 1
+    assert "Results: 0 of 1 sections; the page continues." in text
+    assert f'next: mistral_docs_read_page(page_url="{PAGE}", section="a-section:3")' in text
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "a-section:3"})
+    assert "| section: a-section | from chunk 3" in text
+    assert 'section="a-section:5")' in text
 
 
 def test_read_page_section_matches_a_heading_when_the_page_has_no_anchors(
@@ -477,7 +495,7 @@ def test_read_page_section_matches_a_heading_when_the_page_has_no_anchors(
     mcp_server._engine = FakeEngine(hits)
     text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "section": "batch"})
     assert "the batch rows" in text
-    assert f"## {PAGE}\n    Page > Batch" in text
+    assert f"## section: Batch\n    Page > Batch\n    cite: {PAGE}" in text
 
 
 def test_read_page_unknown_section_lists_the_sections_the_page_has(mcp_server: Any) -> None:
@@ -644,3 +662,47 @@ def test_landing_and_favicon_need_no_token_but_the_endpoint_does(
         denied = client.post("/mcp", json={})
         assert denied.status_code == 401
         assert denied.json()["error"]["code"] == "E_UNAUTHORIZED"
+
+
+def test_a_vendored_page_gets_generated_keys_and_fragment_links(mcp_server: Any) -> None:
+    """The fixture page has no anchors: keys are heading slugs, and a chunk far
+    below the page top cites a text fragment (D-047)."""
+    from pathlib import Path
+
+    from glossator.citing import FRAGMENT_MIN_DISTANCE
+    from glossator.ingest.pages import load_page
+    from glossator.ingest.sections import parse_sections
+
+    page = load_page(Path("tests/fixtures/corpus/agents-conversations.md"))
+    sections = parse_sections(page.body, page_title=page.title)
+    by_heading = {s.heading: s for s in sections}
+    outputs = by_heading["Outputs"]
+    choosing = by_heading["Choosing between the APIs"]
+    hits = [
+        Hit(
+            chunk_id=section.heading,
+            score=0.5,
+            url=page.url,
+            anchor=None,
+            heading_path=section.heading_path,
+            page_title=page.title,
+            kind="doc",
+            locale="en",
+            section_index=section.index,
+            content=" > ".join(section.heading_path) + "\n\n" + section.text,
+            source_id=page.url,
+            start_offset=section.start_offset,
+            end_offset=section.end_offset,
+        )
+        for section in (outputs, choosing)
+    ]
+    mcp_server._engine = FakeEngine(hits)
+    text = _call(mcp_server, "mistral_docs_search", {"q": "outputs"})
+    assert f"[1] {page.url} | section: outputs" in text
+    assert f"    cite: {page.url}\n" in text
+    assert f"[2] {page.url} | section: choosing-between-the-apis" in text
+    assert choosing.start_offset > FRAGMENT_MIN_DISTANCE
+    assert f"    cite: {page.url}#:~:text=" in text
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": page.url, "section": "outputs"})
+    assert "## section: outputs" in text
+    assert 'section="choosing-between-the-apis") for the section after it' in text

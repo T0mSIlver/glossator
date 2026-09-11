@@ -11,7 +11,7 @@ just-in-time half.
 - For any question about Mistral models, the API, SDKs, pricing, limits, Studio, Work, Vibe
   or La Plateforme, call `mistral_docs_search` before answering, even when the answer seems
   known, then `mistral_docs_read_page` on the best hit.
-- Link the `url#anchor` a hit printed next to each claim; never reconstruct a documentation URL.
+- Link the `cite:` link printed beside the text you used next to each claim; never reconstruct a documentation URL.
 - When the search does not find the answer, say the documentation does not cover it rather
   than answering from memory.
 ```

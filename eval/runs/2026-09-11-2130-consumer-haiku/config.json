@@ -1,0 +1,78 @@
+{
+  "arm_tools": {
+    "A0": null,
+    "A1": "mistral_docs_search,mistral_docs_read_page"
+  },
+  "arms": [
+    "A0",
+    "A1"
+  ],
+  "consumer_harnesses": {
+    "claude-haiku-low": "claude"
+  },
+  "consumer_models": {
+    "claude-haiku-low": "haiku"
+  },
+  "consumer_variants": {
+    "claude-haiku-low": "low"
+  },
+  "consumers": [
+    "claude-haiku-low"
+  ],
+  "fresh_count": 10,
+  "judge_model": null,
+  "judge_prompt_hashes": {
+    "judge_citation": "d1565f592953cb68",
+    "judge_system": "3b300bf0bcd8ea7f",
+    "judge_user": "4e976b80283c7257"
+  },
+  "judge_prompt_version": "answer-judge/v2",
+  "kind": "consumer_eval",
+  "mcp_server_name": "mistral-docs",
+  "mcp_urls": {
+    "A1": "https://glossator.tomvaucourt.com/mcp"
+  },
+  "mined_count": 20,
+  "name": "2026-09-11-2130-consumer-haiku",
+  "notes": [
+    "Haiku 4.5 at low effort through headless claude, as the closest stand-in for Mistral Medium 3.5; the A1 arm reaches the public three-tool server (search with under, read_page, history) over the Cloudflare tunnel; no answer arm, the surface has no answer tool since D-044",
+    "Questions: seed-0 sample of eval/mined-v2.jsonl plus dev-fresh60, so mined2-084 (the Search Toolkit evaluation question of D-044a) is in the set"
+  ],
+  "prompt_lead": "You are helping a developer with Mistral's platform. Answer precisely and cite the documentation pages you used with links.",
+  "question_count": 30,
+  "questions": [
+    "mined2-062",
+    "mined2-049",
+    "mined2-069",
+    "mined2-083",
+    "mined2-070",
+    "mined2-073",
+    "mined2-027",
+    "mined2-037",
+    "mined2-078",
+    "mined2-052",
+    "mined2-084",
+    "mined2-072",
+    "mined2-023",
+    "mined2-011",
+    "mined2-008",
+    "mined2-039",
+    "mined2-024",
+    "mined2-015",
+    "mined2-004",
+    "mined2-029",
+    "dev-044",
+    "dev-159",
+    "dev-196",
+    "dev-247",
+    "dev-277",
+    "dev-215",
+    "dev-222",
+    "dev-166",
+    "dev-097",
+    "dev-245"
+  ],
+  "run_dir": "eval/runs/2026-09-11-2130-consumer-haiku",
+  "scratch_root": "/tmp/claude-1000/-home-dev-work-glossator/a214d92f-ee47-44a3-8f07-510f875101fd/scratchpad/consumer-scratch",
+  "unanswerable_count": 7
+}

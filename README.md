@@ -2,8 +2,9 @@
 
 glossator gives agents Mistral's documentation through a Model Context Protocol
 (MCP) server. It exposes three read-only tools over 411 pages from a pinned
-[docs.mistral.ai](https://docs.mistral.ai) commit. Search results use the page's
-`url#anchor`; the other tools read whole pages and compare dated snapshots.
+[docs.mistral.ai](https://docs.mistral.ai) commit. Search results name sections by
+key and print the link to cite; the other tools read pages by key and compare
+dated snapshots.
 The calling agent researches and writes the answer.
 
 A separate FastAPI service retains the evaluated generated-answer baseline. It
@@ -31,7 +32,7 @@ variant, the index counts and the embedding probe.
 
 | Tool | Purpose |
 |---|---|
-| `mistral_docs_search(q, max_hits=5, kind, under)` | The sections that state something: one hit per section with its `url#anchor`, heading path and snippet. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
+| `mistral_docs_search(q, max_hits=5, under)` | The sections that state something: one hit per section with its key, heading path, snippet and the link to cite. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
 | `mistral_docs_read_page(page_url, section)` | A whole page in reading order, or one section of a large page with its neighbours. |
 | `mistral_docs_history(text \| section \| question)` | When a phrase appeared, how a section changed across the dated snapshots, or what a question retrieved on each date. |
 
@@ -44,8 +45,8 @@ often live elsewhere.
 
 This gap appears in `eval/mined.jsonl`. Of its 85 real questions, 54 came from
 GitHub issues opened by SDK users (`DECISIONS.md` D-038, D-039). The server
-provides documentation from a pinned commit and returns the same `url#anchor`
-that a reader opens. Snapshot search also shows when a fact changed.
+provides documentation from a pinned commit and prints, beside every section,
+the link a reader opens. Snapshot search also shows when a fact changed.
 
 Every choice is in `DECISIONS.md` with the run that decided it. The ones that
 shaped the product:
@@ -58,7 +59,8 @@ shaped the product:
 | The agent writes the answer; nothing generates inside the server | with retrieval tools a capable agent scored 0.77, against 0.78 for server-side generation at three times the latency and with a second model | D-040b, D-044 |
 | No reranker on the agent path | it accounted for 91% of search latency and mainly improved which result ranked first, which an agent that reads several hits does not need | D-015b |
 | Medium 3.5 as the answer model | replay changed correctness by -2, 0, +4 and -2 points across four sets | D-017b |
-| Three tools, addressed by `url#anchor`, no ids | 97% of pages fit one read under 8,000 tokens; the Work session never used the other five tools | D-043, D-044 |
+| Three tools, no ids | 97% of pages fit one read under 8,000 tokens; the Work session never used the other five tools | D-043, D-044 |
+| Every section has a key, and the link to cite is printed beside it | 1,823 of 4,016 headings have no anchor on the live site, so anchors alone collapse sibling sections and land a click far from the text; a text fragment is printed only when it moves the landing | D-047 |
 | Read-only tool annotations | without them Work asks for approval on every call and a headless consumer never calls at all | D-037b, D-037c |
 | A time axis: eight biweekly snapshots and a history tool | the docs renamed their API section in August; `-latest` aliases moved under users' feet | D-041, D-041a |
 | GLM 5.3 as the primary judge | four judges were compared; the primary agreed with 35 of 40 labels by the author | D-021a, D-021b, D-021c |

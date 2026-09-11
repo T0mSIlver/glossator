@@ -10,6 +10,7 @@ import hmac
 import json
 import os
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -33,10 +34,12 @@ from glossator import history as history_service
 from glossator import package_version
 from glossator.answer.config import DEFAULT_VARIANT
 from glossator.answer.context import chunk_body
+from glossator.citing import SectionKey, citation_link, page_search_text, section_keys
 from glossator.corpus.snapshots import configured_manifest
 from glossator.index.variants import VARIANTS
 from glossator.ingest.pages import iter_page_paths, load_page
-from glossator.retrieval.config import KINDS, RetrievalConfig
+from glossator.ingest.sections import parse_sections
+from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.engine import Hit, SearchEngine
 from glossator.retrieval.probe import check_embedding_once
 
@@ -110,19 +113,38 @@ HISTORY_MAX_CHARS = 12_000
 DIFF_LIMIT_NOTE = f"note: diff cut at {history_service.DIFF_MAX_CHARS} characters"
 
 
-def _load_pages() -> dict[str, tuple[int, str, str]]:
-    """Per page URL from the vendored corpus: characters of markdown, title, kind."""
-    pages: dict[str, tuple[int, str, str]] = {}
+@dataclass(frozen=True, slots=True)
+class _Page:
+    """What the tools know about a vendored page without touching the index."""
+
+    size: int
+    title: str
+    kind: str
+    keys: list[SectionKey]
+    """One entry per section, index-aligned with the chunker's ``section_index``."""
+    haystack: str
+    """The page text as ``citing.page_search_text`` renders it, for phrase uniqueness."""
+
+
+def _load_pages() -> dict[str, _Page]:
+    pages: dict[str, _Page] = {}
     if not CORPUS_DIR.is_dir():
         return pages
     for path in iter_page_paths(CORPUS_DIR):
         page = load_page(path)
-        pages[page.url] = (len(page.body), page.title, page.kind)
+        sections = parse_sections(page.body, page_title=page.title)
+        pages[page.url] = _Page(
+            size=len(page.body),
+            title=page.title,
+            kind=page.kind,
+            keys=section_keys(sections),
+            haystack=page_search_text(page.body),
+        )
     return pages
 
 
 _PAGES = _load_pages()
-_PAGE_SIZES: dict[str, int] = {url: size for url, (size, _title, _kind) in _PAGES.items()}
+_PAGE_SIZES: dict[str, int] = {url: page.size for url, page in _PAGES.items()}
 
 SITE = "https://docs.mistral.ai"
 PREFIX_LIST_MAX = 40
@@ -192,8 +214,9 @@ def _instructions() -> str:
         "pinned commit. Use it for any question about Mistral models, the API, SDKs, "
         "pricing, limits, Studio, Work, Vibe or La Plateforme.\n\n"
         f"{'; '.join(steps)}.\n\n"
-        "Cite the url#anchor a hit printed, as a Markdown link, next to each claim it "
-        "supports. Never write a docs.mistral.ai URL from memory. When the documentation "
+        "Cite the cite: link printed beside the text you used, as a Markdown link, next to "
+        "each claim it supports. Never write a docs.mistral.ai URL from memory. When the "
+        "documentation "
         "does not answer the question, say so instead of answering from memory. If a "
         "search returns the pages you already read, the corpus has nothing more on it. "
         "An unknown page URL means the page does not exist at this commit; do not retry it."
@@ -242,9 +265,45 @@ class _ParamGuard(Middleware):
 mcp.add_middleware(_ParamGuard(mcp))
 
 
+def _section_info(hit: Hit) -> SectionKey | None:
+    page = _PAGES.get(hit.url)
+    if page is None or hit.section_index is None or hit.section_index >= len(page.keys):
+        return None
+    return page.keys[hit.section_index]
+
+
+def _section_key(hit: Hit) -> str:
+    """The key the tools name this chunk's section by (D-047): from the vendored
+    corpus when the page is known, else the anchor or the heading text."""
+    info = _section_info(hit)
+    if info is not None:
+        return info.key
+    if hit.anchor:
+        return hit.anchor
+    return hit.heading_path[-1] if hit.heading_path else "top"
+
+
+def _cite(hit: Hit) -> str:
+    """The link to cite this chunk by: the anchor link, plus a text fragment when
+    the chunk sits more than a screen below where that link lands (D-047)."""
+    info = _section_info(hit)
+    page = _PAGES.get(hit.url)
+    if info is None or page is None or hit.start_offset is None:
+        return hit.citation_url
+    return citation_link(
+        hit.url,
+        info.anchor,
+        landing=info.anchor_start,
+        text_start=hit.start_offset,
+        text=chunk_body(hit),
+        haystack=page.haystack,
+    )
+
+
 def _section_header(hit: Hit, n: int | None = None) -> list[str]:
-    prefix = f"[{n}] " if n is not None else "## "
-    lines = [f"{prefix}{hit.citation_url}"]
+    key = _section_key(hit)
+    first = f"[{n}] {hit.url} | section: {key}" if n is not None else f"## section: {key}"
+    lines = [first]
     if hit.heading_line:
         lines.append(f"    {hit.heading_line}")
     return lines
@@ -266,10 +325,10 @@ def _distinct_sections(hits: list[Hit]) -> list[Hit]:
     """One hit per section, at its best rank. A long section is several chunks
     and they crowd the top of the ranking (D-012a); the model reads the section
     once either way."""
-    seen: set[str] = set()
+    seen: set[tuple[str, str]] = set()
     kept: list[Hit] = []
     for hit in hits:
-        key = hit.citation_url
+        key = (hit.url, _section_key(hit))
         if key in seen:
             continue
         seen.add(key)
@@ -277,30 +336,33 @@ def _distinct_sections(hits: list[Hit]) -> list[Hit]:
     return kept
 
 
-def _section_key(hit: Hit) -> str | None:
-    """What read_page's `section` accepts for this chunk: its anchor, or the
-    heading text when the page's headings carry no anchor (D-003a)."""
-    if hit.anchor:
-        return hit.anchor
-    return hit.heading_path[-1] if hit.heading_path else None
-
-
 def _section_matches(hit: Hit, wanted: str) -> bool:
-    key = _section_key(hit)
-    if key is None:
-        return False
-    return key.casefold() == wanted.casefold()
+    """A section is addressed by its key; the heading text still works for a page
+    outside the vendored corpus, whose sections have no generated key."""
+    wanted = wanted.casefold()
+    if _section_key(hit).casefold() == wanted:
+        return True
+    return bool(hit.heading_path) and hit.heading_path[-1].casefold() == wanted
+
+
+def _split_part(section: str) -> tuple[str, int]:
+    """``key:3`` names the third chunk of a section, the form a ``next:`` line
+    prints when one section alone overflows a read; anything else is a key."""
+    text = section.strip().lstrip("#")
+    head, sep, tail = text.rpartition(":")
+    if sep and head and tail.isdigit():
+        return head, max(1, int(tail))
+    return text, 1
 
 
 def _large_page_line(hit: Hit) -> str:
     key = _section_key(hit)
-    section = f', section="{key}"' if key else ""
-    return f'    large page: {READ_PAGE}(page_url="{hit.url}"{section}) reads this section'
+    return f'    large page: {READ_PAGE}(page_url="{hit.url}", section="{key}") reads this section'
 
 
 def _search_description() -> str:
     return f"""Search Mistral's documentation for the sections that state something.
-    Each hit prints its url#anchor, its heading path and a snippet.
+    Each hit prints its section key, its heading path, a snippet and the link to cite.
 
     USE WHEN: the question is about a Mistral model, parameter, limit, price,
     error or product feature.
@@ -310,7 +372,6 @@ def _search_description() -> str:
     Args:
         q: What you want to find, in one sentence. Empty with under: list its pages.
         max_hits: Hits to return, 1-{MAX_HITS}.
-        kind: Keep only "doc", "api" or "model" pages. Omit for all.
         under: A page URL. Keeps hits to the pages under it; lists them when q is empty.
     """
 
@@ -334,11 +395,11 @@ def _prefix_from(under: str) -> str:
     return SITE + path.rstrip("/")
 
 
-def _pages_under(prefix: str, kind: str | None) -> list[tuple[str, str]]:
+def _pages_under(prefix: str) -> list[tuple[str, str]]:
     return sorted(
-        (url, title)
-        for url, (_size, title, page_kind) in _PAGES.items()
-        if (url == prefix or url.startswith(prefix + "/")) and (kind is None or page_kind == kind)
+        (url, page.title)
+        for url, page in _PAGES.items()
+        if url == prefix or url.startswith(prefix + "/")
     )
 
 
@@ -350,14 +411,14 @@ def _nearest_parent_with_pages(prefix: str) -> str | None:
         parent = parent.rsplit("/", 1)[0]
         if parent == SITE:
             return None
-        if _pages_under(parent, None):
+        if _pages_under(parent):
             return parent
     return None
 
 
-def _list_pages_under(prefix: str, kind: str | None) -> str:
-    pages = _pages_under(prefix, kind)
-    lines = [f"pages under {prefix}" + (f" | kind: {kind}" if kind else ""), ""]
+def _list_pages_under(prefix: str) -> str:
+    pages = _pages_under(prefix)
+    lines = [f"pages under {prefix}", ""]
     if not pages:
         lines.append(f"Results: no page under {prefix} at this commit.")
         parent = _nearest_parent_with_pages(prefix)
@@ -383,50 +444,38 @@ def _list_pages_under(prefix: str, kind: str | None) -> str:
     return "\n".join(lines)
 
 
-async def mistral_docs_search(
-    q: str = "", max_hits: int = 5, kind: str | None = None, under: str | None = None
-) -> str:
-    if kind is not None and kind not in KINDS:
-        raise _bad_param(
-            f'unknown kind "{kind}".', 'kind is "doc", "api" or "model"; omit it for all pages.'
-        )
+async def mistral_docs_search(q: str = "", max_hits: int = 5, under: str | None = None) -> str:
     prefix = _prefix_from(under) if under and under.strip() else None
     if not q.strip():
         if prefix is None:
             raise _bad_param(
                 "q is empty.", "say what you want to find in one sentence, or set under."
             )
-        return _list_pages_under(prefix, kind)
-    if prefix is not None and not _pages_under(prefix, None):
-        return _list_pages_under(prefix, kind)
+        return _list_pages_under(prefix)
+    if prefix is not None and not _pages_under(prefix):
+        return _list_pages_under(prefix)
     top_k = max(1, min(MAX_HITS, max_hits))
     # A scoped search filters after ranking, since the index has no URL-prefix
     # clause; asking for more hits keeps a small subtree from ranking out.
     ask_for = top_k * 3 if prefix is None else max(top_k * 3, SCOPED_HITS)
     async with _admission_or_busy():
         try:
-            ranked = await _engine.search(
-                q, top_k=ask_for, rerank=False, kinds=frozenset({kind}) if kind else None
-            )
+            ranked = await _engine.search(q, top_k=ask_for, rerank=False)
         except RetrieverException as exc:
             raise _upstream(f"search({q!r})", exc) from exc
     if prefix is not None:
         ranked = [hit for hit in ranked if hit.url == prefix or hit.url.startswith(prefix + "/")]
     hits = _distinct_sections(ranked)[:top_k]
-    lines = [
-        f"q: {json.dumps(q)}"
-        + (f" | kind: {kind}" if kind else "")
-        + (f" | under: {prefix}" if prefix else ""),
-        "",
-    ]
+    lines = [f"q: {json.dumps(q)}" + (f" | under: {prefix}" if prefix else ""), ""]
     for n, hit in enumerate(hits, 1):
         lines.extend(_section_header(hit, n))
         lines.append(f"    {_snippet(hit)}")
+        lines.append(f"    cite: {_cite(hit)}")
         if _is_large(hit.url):
             lines.append(_large_page_line(hit))
         lines.append("")
     if not hits and prefix is not None:
-        count = len(_pages_under(prefix, kind))
+        count = len(_pages_under(prefix))
         lines.append(f"Results: no section under {prefix} matched; {count} pages exist there.")
         lines.append(
             f'next: {SEARCH}(under="{prefix}") lists them; a page not listed does not exist '
@@ -444,9 +493,8 @@ async def mistral_docs_search(
     if READ_PAGE in _ENABLED_TOOLS:
         first = hits[0]
         target = f'page_url="{first.url}"'
-        key = _section_key(first)
-        if _is_large(first.url) and key:
-            target += f', section="{key}"'
+        if _is_large(first.url):
+            target += f', section="{_section_key(first)}"'
         lines.append(f"next: {READ_PAGE}({target}) to read hit 1 on its page")
     return "\n".join(lines)
 
@@ -454,15 +502,15 @@ async def mistral_docs_search(
 def _read_page_description() -> str:
     return f"""Read one Mistral documentation page in reading order, or one section of it.
 
-    USE WHEN: a search hit names the page and you need the surrounding text,
+    USE WHEN: a search hit names the section and you need the surrounding text,
     a table, or a code block before answering.
 
     DO NOT USE: to find where something is said ({SEARCH}).
 
     Args:
-        page_url: The page URL exactly as a hit printed it, without the #anchor.
-        section: An anchor from a hit's url#anchor, to read that section and its
-            neighbours instead of the whole page.
+        page_url: The page URL exactly as a hit printed it.
+        section: A section key exactly as a hit or a next: line printed it, to
+            read that section instead of the whole page.
     """
 
 
@@ -481,32 +529,35 @@ async def mistral_docs_read_page(page_url: str, section: str | None = None) -> s
     if not chunks:
         raise _unknown_page(page_url)
     title = chunks[0].page_title
+    keys = [_section_key(hit) for hit in chunks]
+    order = list(dict.fromkeys(keys))
     if section is not None:
-        wanted = section.strip().lstrip("#")
+        wanted, part = _split_part(section)
         positions = [i for i, hit in enumerate(chunks) if _section_matches(hit, wanted)]
         if not positions:
-            keys = list(dict.fromkeys(k for k in map(_section_key, chunks) if k))
             raise _bad_param(
                 f'page {page_url} has no section "{wanted}".',
-                f"sections on this page: {', '.join(keys) or '(none)'}; "
-                "omit section to read the whole page.",
+                f"sections on this page: {', '.join(order)}; omit section to read the whole page.",
             )
-        start = max(0, positions[0] - 1)
-        stop = min(len(chunks), positions[-1] + 2)
-        selected = chunks[start:stop]
+        start = positions[0] + min(part - 1, len(positions) - 1)
+        stop = positions[-1] + 1
         heading = f'page: {page_url} | "{title}" | section: {wanted}'
+        if start > positions[0]:
+            heading += f" | from chunk {start - positions[0] + 1}"
     else:
-        selected = chunks
+        start, stop = 0, len(chunks)
         heading = f'page: {page_url} | "{title}"'
     lines = [heading, ""]
     spent = 0
     shown = 0
-    last_key: str | None = None
-    for hit in selected:
+    last_key: str | None = keys[start - 1] if start > 0 and section is not None else None
+    for index in range(start, stop):
+        hit = chunks[index]
         block: list[str] = []
-        if _section_key(hit) != last_key or shown == 0:
+        if keys[index] != last_key:
             block.extend(_section_header(hit))
-            last_key = _section_key(hit)
+            block.append(f"    cite: {_cite(hit)}")
+            last_key = keys[index]
         block.append(chunk_body(hit).rstrip())
         block.append("")
         size = sum(len(line) + 1 for line in block)
@@ -515,17 +566,34 @@ async def mistral_docs_read_page(page_url: str, section: str | None = None) -> s
         spent += size
         shown += 1
         lines.extend(block)
-    remaining = selected[shown:]
-    if remaining:
-        rest = list(dict.fromkeys(k for k in map(_section_key, remaining) if k))
-        lines.append(f"Results: {shown} of {len(selected)} sections; the page continues.")
-        if rest:
+    cut = start + shown
+    if cut < stop:
+        # The read stopped early. Continue at the next section, or inside the one
+        # that was cut, at the chunk after the last one shown.
+        next_key = keys[cut]
+        if next_key == keys[cut - 1]:
+            first = keys.index(next_key)
+            target = f'section="{next_key}:{cut - first + 1}"'
+        else:
+            target = f'section="{next_key}"'
+        complete = len(dict.fromkeys(keys[start:cut])) - (1 if next_key == keys[cut - 1] else 0)
+        total = len(dict.fromkeys(keys[start:stop]))
+        rest = list(dict.fromkeys(keys[cut:stop]))
+        lines.append(f"Results: {complete} of {total} sections; the page continues.")
+        lines.append(
+            f'next: {READ_PAGE}(page_url="{page_url}", {target}) continues; '
+            f"remaining sections: {', '.join(rest[:PREFIX_LIST_MAX])}"
+        )
+    elif section is not None:
+        lines.append("Results: the whole section.")
+        following = order.index(keys[stop - 1]) + 1
+        if following < len(order):
             lines.append(
-                f'next: {READ_PAGE}(page_url="{page_url}", section="{rest[0]}") for the next '
-                f"section; remaining sections: {', '.join(rest)}"
+                f'next: {READ_PAGE}(page_url="{page_url}", section="{order[following]}") '
+                "for the section after it"
             )
     else:
-        lines.append(f"Results: {shown} sections, the whole {'section' if section else 'page'}.")
+        lines.append(f"Results: {len(order)} sections, the whole page.")
     return "\n".join(lines).rstrip()
 
 

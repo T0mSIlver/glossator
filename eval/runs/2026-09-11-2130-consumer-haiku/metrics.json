@@ -1,0 +1,53 @@
+{
+  "cells": {
+    "claude-haiku-low / A0": {
+      "bad_param_errors": 0.0,
+      "cite_called": 0.0,
+      "cite_rejected": 0.0,
+      "cite_verified": 0.0,
+      "clamps": 0.0,
+      "correctness": null,
+      "errors": 0,
+      "latency_p50": 30.70545613404829,
+      "links_on_gold": 0.43478260869565216,
+      "links_resolve": 0.43500881834215166,
+      "mcp_called": 0.0,
+      "n": 30,
+      "refusal_correct": 0.7666666666666667,
+      "rerank_asked": 0.0,
+      "tokens_total": 155857.06666666668,
+      "tool_calls": 6.3
+    },
+    "claude-haiku-low / A1": {
+      "bad_param_errors": 0.06666666666666667,
+      "cite_called": 0.0,
+      "cite_rejected": 0.0,
+      "cite_verified": 0.0,
+      "clamps": 0.0,
+      "correctness": null,
+      "errors": 0,
+      "latency_p50": 15.684809754020534,
+      "links_on_gold": 0.782608695652174,
+      "links_resolve": 0.8925396825396825,
+      "mcp_called": 1.0,
+      "n": 30,
+      "refusal_correct": 0.8,
+      "rerank_asked": 0.0,
+      "tokens_total": 150482.96666666667,
+      "tool_calls": 4.9
+    }
+  },
+  "correctness_cost": {
+    "claude-haiku-low / A0": null,
+    "claude-haiku-low / A1": null
+  },
+  "fragments": {
+    "fragment_links": 0,
+    "fragments_found": 0,
+    "links_checked": 60,
+    "seed": 0,
+    "share_found": null
+  },
+  "judged": 0,
+  "records": 60
+}

@@ -35,3 +35,7 @@ deploy/embedding-cache/
 
 # Work session exports dropped into the checkout for analysis
 /*.html
+
+# Generated corpus map (D-047), rebuilt by eval/corpus-map/build.py
+eval/corpus-map/corpus.json
+eval/corpus-map/corpus-map.html

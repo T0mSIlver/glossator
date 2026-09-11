@@ -218,6 +218,12 @@ CONSUMERS: tuple[ConsumerSpec, ...] = (
         model="sonnet",
         variant="low",
     ),
+    ConsumerSpec(
+        name="claude-haiku-low",
+        harness="claude",
+        model="haiku",
+        variant="low",
+    ),
 )
 """Every weak consumer. The muse consumer is first: it is the contributor-free
 model with quota while the z.ai window and the codex quota are exhausted."""

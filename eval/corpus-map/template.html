@@ -1,0 +1,518 @@
+<title>Mistral Docs Corpus Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f2f4f7;--surface:#ffffff;--surface-2:#e9edf2;--surface-3:#dfe4eb;--line:#d4dae3;--line-strong:#b9c2ce;
+  --text:#1b2230;--muted:#5b6474;--faint:#8a93a3;
+  --accent:#0f766e;--accent-bg:#d9f1ee;
+  --folder:#8a6d1f;--folder-bg:#f3e7c3;
+  --page:#1d4ed8;--page-bg:#dbe6fb;
+  --chunk:#6b5bd6;--chunk-bg:#e6e2fa;
+  --warn:#b45309;--warn-bg:#fdefd9;
+  --crit:#b42318;--crit-bg:#fbe3e0;
+  --sel:#e3f0ff;--sel-line:#8fb6e8;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161c;--surface:#1a1f27;--surface-2:#222833;--surface-3:#2a3140;--line:#2e3644;--line-strong:#414b5c;
+    --text:#e6e9ee;--muted:#9aa3b2;--faint:#6f7887;
+    --accent:#2fc4b2;--accent-bg:#123a37;
+    --folder:#d9b75a;--folder-bg:#3a3117;
+    --page:#7fa8f5;--page-bg:#1c2b4a;
+    --chunk:#a99bf0;--chunk-bg:#2a2547;
+    --warn:#f0a44a;--warn-bg:#3b2a12;
+    --crit:#f27e70;--crit-bg:#41201c;
+    --sel:#1f3350;--sel-line:#3e6aa3;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161c;--surface:#1a1f27;--surface-2:#222833;--surface-3:#2a3140;--line:#2e3644;--line-strong:#414b5c;
+  --text:#e6e9ee;--muted:#9aa3b2;--faint:#6f7887;
+  --accent:#2fc4b2;--accent-bg:#123a37;
+  --folder:#d9b75a;--folder-bg:#3a3117;
+  --page:#7fa8f5;--page-bg:#1c2b4a;
+  --chunk:#a99bf0;--chunk-bg:#2a2547;
+  --warn:#f0a44a;--warn-bg:#3b2a12;
+  --crit:#f27e70;--crit-bg:#41201c;
+  --sel:#1f3350;--sel-line:#3e6aa3;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:0 24px}
+h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+h1{font-size:20px;letter-spacing:-.01em}
+h2{font-size:15px}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+code,.mono{font-family:var(--mono);font-size:12.5px}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sel-line);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 20px;padding-block:18px 12px;border-bottom:1px solid var(--line)}
+header .meta{color:var(--muted)}
+header .meta b{color:var(--text);font-weight:500}
+.views{display:inline-flex;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;margin-left:auto}
+.views label{padding:4px 10px;cursor:pointer;color:var(--muted);background:var(--surface)}
+.views label:has(input:checked){background:var(--text);color:var(--bg)}
+.views input{position:absolute;opacity:0;width:0;height:0}
+
+.glossary{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px;padding-block:14px;border-bottom:1px solid var(--line);margin:0}
+.glossary div{display:grid;grid-template-columns:auto 1fr;gap:0 10px;align-items:baseline}
+.glossary dt{font-weight:600;white-space:nowrap}
+.glossary dd{margin:0;color:var(--muted)}
+.glossary dd code{color:var(--text)}
+
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters input[type=search]{flex:1 1 160px;min-width:0;padding:6px 8px;border:1px solid var(--line-strong);border-radius:4px;background:var(--surface);color:var(--text);font:inherit}
+.toggle{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--line-strong);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--muted);white-space:nowrap}
+.toggle input{margin:0}
+.toggle:has(input:checked){color:var(--text);border-color:var(--text)}
+.count{color:var(--muted);padding-inline:2px}
+
+.chip{display:inline-block;padding:0 6px;border-radius:3px;font-family:var(--mono);font-size:11px;line-height:18px;border:1px solid var(--line-strong);color:var(--muted)}
+.chip.kind-api{border-color:var(--accent);color:var(--accent)}
+.chip.kind-model{border-style:dashed}
+.chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.chip.crit{background:var(--crit-bg);color:var(--crit);border-color:transparent}
+.chip.acc{background:var(--accent-bg);color:var(--accent);border-color:transparent}
+
+/* ---------- table view ---------- */
+.app{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:20px;margin-top:16px;align-items:start}
+@media (max-width:860px){.app{grid-template-columns:1fr}}
+.list{position:sticky;top:0;max-height:100vh;display:flex;flex-direction:column;gap:8px}
+@media (max-width:860px){.list{position:static;max-height:none}}
+.tree{overflow:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface);min-height:200px}
+.group{border-top:1px solid var(--line)}
+.group:first-child{border-top:0}
+.group>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 10px;background:var(--surface-2);position:sticky;top:0;z-index:1}
+.group>summary::-webkit-details-marker{display:none}
+.group>summary .mono{color:var(--text)}
+.group>summary .count{font-size:12px}
+.page{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;text-align:left;padding:5px 10px 5px 14px;border:0;border-left:3px solid transparent;background:none;cursor:pointer}
+.page:hover{background:var(--surface-2)}
+.page[aria-current="true"]{background:var(--sel);border-left-color:var(--sel-line)}
+.page .path{color:var(--text);word-break:break-all}
+.page .title{color:var(--muted);font-size:12.5px;grid-column:1}
+.page .stats{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:11.5px;color:var(--muted)}
+.detail{min-width:0}
+.detail .head{display:flex;flex-direction:column;gap:6px;padding-block:4px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.detail .url{word-break:break-all}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted)}
+.facts b{color:var(--text);font-weight:500}
+.crumbs{color:var(--muted)}
+.empty-state{color:var(--muted);padding:40px 0}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:860px}
+th{text-align:left;font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line-strong);background:var(--surface-2);position:sticky;top:0}
+td{padding:5px 10px;border-top:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right}
+tr.empty td{color:var(--faint)}
+tr.shared td.key{background:var(--warn-bg)}
+tr.nokey td.key{color:var(--faint);font-style:italic}
+tr.noisy td.noise{color:var(--crit)}
+td.heading{white-space:nowrap}
+.lvl{display:inline-block;width:2.2em;color:var(--faint);font-family:var(--mono);font-size:11px}
+.indent-0 .heading-text,.indent-1 .heading-text{font-weight:600}
+.indent-2 .heading-text{padding-left:1.2em}
+.indent-3 .heading-text{padding-left:2.4em}
+.indent-4 .heading-text{padding-left:3.6em}
+.inherit{color:var(--faint)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:12.5px;margin:10px 0 0}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line-strong)}
+.legend .l-shared::before{background:var(--warn-bg)}
+.legend .l-empty::before{background:var(--surface);opacity:.5}
+.legend .l-nokey::before{background:var(--surface-2)}
+
+/* ---------- tree view ---------- */
+.treeview{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.legend-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:0 40px;margin:0;padding-inline:0;padding-block:12px;list-style:none;border-bottom:1px solid var(--line)}
+@media (max-width:900px){.legend-top{grid-template-columns:1fr}}
+.legend-top li{display:grid;grid-template-columns:150px minmax(0,1fr);grid-template-rows:auto auto;gap:0 12px;align-items:start;padding:7px 0;border-top:1px solid var(--line)}
+.legend-top li:first-child{border-top:0}
+.legend-top .l-mark{grid-row:1/3;display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:22px;padding-top:2px}
+.legend-top .l-name{font-weight:600;line-height:1.3}
+.legend-top .l-name b{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums;margin-left:6px}
+.legend-top .l-d{color:var(--muted);font-size:12.5px;line-height:1.4}
+.legend-top .l-d code{color:var(--text)}
+.codebar{display:inline-block;width:60px;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden;vertical-align:1px}
+.codebar i{display:block;height:100%;background:var(--muted)}
+.g-shared{font-family:var(--mono);font-size:11px;padding:0 5px;border-radius:3px;border:1.5px solid transparent;background:var(--warn-bg);color:var(--warn)}
+.g-none{font-family:var(--mono);font-size:11px;color:var(--faint);font-style:italic}
+.g-noise{color:var(--crit);font-family:var(--mono);font-size:11px}
+
+.g{display:inline-block;flex:none;vertical-align:-2px}
+.g-folder{width:14px;height:11px;border:1.5px solid var(--folder);border-radius:2px;background:var(--folder-bg);position:relative}
+.g-folder::before{content:"";position:absolute;left:-1.5px;top:-4px;width:6px;height:3px;border:1.5px solid var(--folder);border-bottom:0;border-radius:2px 2px 0 0;background:var(--folder-bg)}
+.g-page{width:11px;height:14px;border:1.5px solid var(--page);border-radius:1px;background:var(--page-bg);position:relative}
+.g-page::after{content:"";position:absolute;right:-1.5px;top:-1.5px;width:4px;height:4px;background:var(--surface);border-left:1.5px solid var(--page);border-bottom:1.5px solid var(--page)}
+.g-section{font-family:var(--mono);font-size:10px;line-height:14px;padding:0 4px;border:1px solid var(--muted);border-radius:2px;color:var(--muted);background:var(--surface)}
+.g-chunk{width:9px;height:9px;background:var(--chunk);border-radius:1px}
+.g-frag{font-family:var(--mono);font-size:11px;padding:0 5px;border-radius:3px;border:1.5px solid var(--accent);color:var(--accent);background:var(--accent-bg)}
+.g-inh{font-family:var(--mono);font-size:11px;padding:0 5px;border-radius:3px;border:1.5px dashed var(--line-strong);color:var(--muted)}
+
+.tv{border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:6px 10px;overflow-x:auto;font-size:13px}
+.tv details{margin:0}
+.tv summary{list-style:none;cursor:pointer}
+.tv summary::-webkit-details-marker{display:none}
+.tv .row{display:flex;align-items:center;gap:8px;padding:2px 6px;border-radius:3px;white-space:nowrap;min-height:24px}
+.tv summary>.row::before{content:"▸";display:inline-block;width:1em;color:var(--faint);font-size:11px}
+.tv details[open]>summary>.row::before{content:"▾"}
+.tv .leaf>.row::before{content:"";display:inline-block;width:1em}
+.tv summary:hover>.row{background:var(--surface-2)}
+.tv .kids{padding-left:16px;margin-left:12px;border-left:1px solid var(--line)}
+.tv .kids.of-page{border-left:2px solid var(--page)}
+.tv .kids.of-section{border-left:1px dotted var(--line-strong)}
+
+.tv .row.t-folder .seg{font-family:var(--mono);color:var(--folder);font-weight:500}
+.tv .row.t-folder .seg::after{content:"/";color:var(--faint)}
+.tv .row.t-page,.tv .row.t-folderpage{background:var(--page-bg);border:1px solid transparent}
+.tv summary:hover>.row.t-page,.tv summary:hover>.row.t-folderpage{border-color:var(--page)}
+.tv .row.t-page .seg,.tv .row.t-folderpage .seg{font-family:var(--mono);color:var(--page);font-weight:600}
+.tv .row.t-folderpage .seg::after{content:"/";color:var(--faint)}
+.tv .ptitle{color:var(--text)}
+.tv .pstats,.tv .sstats,.tv .cstats{color:var(--faint);font-size:11.5px;font-variant-numeric:tabular-nums}
+.tv .row.t-section .hd{color:var(--text)}
+.tv .row.t-section.empty .hd{color:var(--faint)}
+.tv .row.t-section.noisy .g-section{border-color:var(--crit);color:var(--crit)}
+.tv .nokey{font-family:var(--mono);font-size:11px;color:var(--faint);font-style:italic}
+.tv .shared{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.tv .row.t-chunk{color:var(--muted);font-family:var(--mono);font-size:11.5px;min-height:20px}
+.tv .row.t-chunk .cn{color:var(--chunk);font-weight:500}
+.tv .noise{color:var(--crit);font-family:var(--mono);font-size:11px}
+.tv .codebar{display:inline-block;width:60px;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden;vertical-align:1px}
+.tv .codebar i{display:block;height:100%;background:var(--muted)}
+.tv .open-page{font-size:11.5px;color:var(--accent);background:none;border:0;cursor:pointer;padding:0 4px}
+.tv .open-page:hover{text-decoration:underline}
+.tv .nomatch{color:var(--muted);padding:12px 4px}
+.tvlegend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:12.5px;margin:0}
+.tvlegend span{display:inline-flex;align-items:center;gap:6px}
+</style>
+
+<header>
+  <h1>Mistral Docs Corpus Map</h1>
+  <span class="meta">docs.mistral.ai at commit <b class="mono" id="commit"></b></span>
+  <span class="meta"><b id="n-pages" class="num"></b> pages · <b id="n-sections" class="num"></b> sections · <b id="n-chunks" class="num"></b> chunks · <b id="n-tokens" class="num"></b> tokens · <b id="code-share" class="num"></b> of characters inside code fences</span>
+  <div class="views" role="group" aria-label="View">
+    <label><input type="radio" name="view" id="view-tree" value="tree" checked>Tree</label>
+    <label><input type="radio" name="view" id="view-table" value="table">Table</label>
+  </div>
+</header>
+
+<ul class="legend-top" id="legend"></ul>
+
+<section class="treeview" id="treeview">
+  <div class="filters">
+    <input type="search" id="tq" placeholder="filter by path, title or heading" aria-label="Filter tree">
+    <label class="toggle"><input type="checkbox" id="t-sections" checked>sections</label>
+    <label class="toggle"><input type="checkbox" id="t-chunks">chunks</label>
+    <label class="toggle"><input type="checkbox" id="t-frag">only headings with a fragment</label>
+    <label class="toggle"><input type="checkbox" id="t-noisy">only noisy</label>
+    <button class="toggle" type="button" id="t-expand">expand all</button>
+    <button class="toggle" type="button" id="t-collapse">collapse all</button>
+    <span class="count" id="tshown"></span>
+  </div>
+  <div class="tv" id="tv"></div>
+</section>
+
+<div class="app" id="app" hidden>
+  <aside class="list">
+    <div class="filters">
+      <input type="search" id="q" placeholder="filter by path, title or heading" aria-label="Filter pages">
+      <label class="toggle"><input type="checkbox" id="f-budget">over budget</label>
+      <label class="toggle"><input type="checkbox" id="f-shared">shared keys</label>
+      <label class="toggle"><input type="checkbox" id="f-noisy">noisy</label>
+      <span class="count" id="shown"></span>
+    </div>
+    <div class="tree" id="tree" role="list"></div>
+  </aside>
+  <main class="detail" id="detail">
+    <p class="empty-state">Pick a page on the left.</p>
+  </main>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+  var DATA = JSON.parse(document.getElementById('data').textContent);
+  var pages = DATA.pages;
+  var byPath = {};
+  pages.forEach(function(p){ byPath[p.path] = p; });
+
+  pages.forEach(function(p){
+    var seen = {};
+    p.sharedKeys = 0; p.noisySections = 0; p.fragHeadings = 0;
+    p.sections.forEach(function(s){
+      s.shared = false;
+      if (s.own_anchor) p.fragHeadings++;
+      if (s.noisy) p.noisySections++;
+      if (s.empty) return;
+      if (seen[s.key]) { s.shared = true; seen[s.key].shared = true; p.sharedKeys++; }
+      else seen[s.key] = s;
+    });
+    p.hay = (p.path + ' ' + p.title + ' ' + p.sections.map(function(s){ return s.heading; }).join(' ')).toLowerCase();
+  });
+
+  var fmt = function(n){ return n.toLocaleString('en-US'); };
+  var pct = function(a, b){ return b ? Math.round(100 * a / b) + '%' : '0%'; };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+
+  var totalChars = pages.reduce(function(a,p){ return a + p.chars; }, 0);
+  var totalCode = pages.reduce(function(a,p){ return a + p.code_chars; }, 0);
+  document.getElementById('commit').textContent = (DATA.commit || '').slice(0, 7) || 'unknown';
+  document.getElementById('n-pages').textContent = fmt(pages.length);
+  document.getElementById('n-sections').textContent = fmt(pages.reduce(function(a,p){ return a + p.sections.length; }, 0));
+  document.getElementById('n-chunks').textContent = fmt(pages.reduce(function(a,p){ return a + p.chunks; }, 0));
+  document.getElementById('n-tokens').textContent = fmt(pages.reduce(function(a,p){ return a + p.tokens; }, 0));
+  document.getElementById('code-share').textContent = pct(totalCode, totalChars);
+
+  function flags(p){
+    var out = '';
+    if (p.large) out += '<span class="chip crit">large</span>';
+    else if (p.over_budget) out += '<span class="chip warn">over budget</span>';
+    if (p.sharedKeys) out += '<span class="chip warn" title="headings that share one section key">' + p.sharedKeys + ' shared</span>';
+    if (p.noisySections) out += '<span class="chip crit" title="sections with float vectors or very long lines">' + p.noisySections + ' noisy</span>';
+    return out;
+  }
+  function codebar(part, whole){
+    return '<span class="codebar" title="' + pct(part, whole) + ' of characters inside code fences"><i style="width:' + pct(part, whole) + '"></i></span>';
+  }
+
+  // ---------- site tree ----------
+  function buildSiteTree(list){
+    var root = { name: '', kids: {}, order: [], page: null };
+    list.forEach(function(p){
+      var node = root;
+      p.path.split('/').filter(Boolean).forEach(function(seg){
+        if (!node.kids[seg]) { node.kids[seg] = { name: seg, kids: {}, order: [], page: null }; node.order.push(seg); }
+        node = node.kids[seg];
+      });
+      node.page = p;
+    });
+    return root;
+  }
+  function countTiers(root){
+    var c = { folder: 0, folderpage: 0, page: 0 };
+    (function walk(n){
+      n.order.forEach(function(k){
+        var kid = n.kids[k];
+        var hasDir = kid.order.length > 0;
+        if (kid.page && hasDir) c.folderpage++; else if (kid.page) c.page++; else c.folder++;
+        walk(kid);
+      });
+    })(root);
+    return c;
+  }
+  function renderLegend(){
+    var t = countTiers(buildSiteTree(pages));
+    var sections = 0, frag = 0, inh = 0, none = 0, empty = 0, shared = 0, chunks = 0, noisy = 0;
+    pages.forEach(function(p){ p.sections.forEach(function(s){
+      sections++; if (s.own_anchor) frag++; else if (s.anchor) inh++; else none++;
+      if (s.empty) empty++; if (s.noisy) noisy++; if (s.shared) shared++; chunks += s.chunks.length;
+    }); });
+    function li(mark, name, n, d){ return '<li><span class="l-mark">' + mark + '</span><span class="l-name">' + name + (n == null ? '' : '<b>' + fmt(n) + '</b>') + '</span><span class="l-d">' + d + '</span></li>'; }
+    document.getElementById('legend').innerHTML =
+      li('<span class="g g-folder"></span>', 'path', t.folder, 'a URL folder with no page of its own. The site\'s only hierarchy.') +
+      li('<span class="g g-folder"></span><span class="g g-page"></span>', 'path + page', t.folderpage, 'a page that also has pages under it, such as <code>/studio/search/search-toolkit</code>.') +
+      li('<span class="g g-page"></span>', 'page', t.page, 'a leaf page: one markdown file, one URL. What <code>read_page(page_url)</code> reads.') +
+      li('<span class="g-section">h2</span>', 'section', sections, 'one markdown heading and the text under it, up to the next heading of any level. The tag is the heading level; ' + fmt(empty) + ' are heading only, with no text and no chunk.') +
+      li('<span class="g-frag">#anchor</span>', 'own fragment', frag, 'the heading carries <code>{#anchor}</code> in the source, so <code>url#anchor</code> deep-links to it.') +
+      li('<span class="g-inh">#anchor</span>', 'inherited fragment', inh, 'the heading has none; it is cited to the nearest ancestor that has one.') +
+      li('<span class="g-none">no fragment</span>', 'no fragment', none, 'nothing above it has one either; the section key is the heading text.') +
+      li('<span class="g-shared">#anchor</span>', 'shared fragment', shared, 'several headings on the page resolve to this same anchor, so <code>read_page(section=…)</code> cannot tell them apart. Batch Processing has six.') +
+      li('<span class="g g-chunk"></span>', 'chunk', chunks, 'what the index ranks: a section under the token budget, or a piece of one. Never spans two headings.') +
+      li('<span class="codebar"><i style="width:50%"></i></span>', 'code share', null, 'the share of characters inside code fences, for a page, section or chunk.') +
+      li('<span class="g-noise">174 floats</span>', 'noise', noisy, 'sections with 20 or more float literals or a line over 1,500 characters: embedding vectors and pasted responses.') +
+      li('<span class="chip warn">over budget</span><span class="chip crit">large</span>', 'page size', null, 'over budget: longer than ' + fmt(DATA.read_max_chars) + ' characters, a whole-page read stops early. Large: ' + fmt(DATA.large_page_chars) + ' or more, hits tell the model to read by section.');
+  }
+  renderLegend();
+
+  function anchorChip(s){
+    if (s.own_anchor) return '<span class="g-frag' + (s.shared ? ' shared' : '') + '">#' + esc(s.own_anchor) + '</span>';
+    if (s.anchor) return '<span class="g-inh' + (s.shared ? ' shared' : '') + '">#' + esc(s.anchor) + '</span>';
+    return '<span class="nokey">no fragment · key = heading text</span>';
+  }
+  function noiseTag(x){
+    var bits = [];
+    if (x.floats >= 20) bits.push(x.floats + ' floats');
+    if (x.long_lines) bits.push(x.long_lines + ' line' + (x.long_lines > 1 ? 's' : '') + ' >1.5k');
+    return bits.length ? '<span class="noise">' + bits.join(' · ') + '</span>' : '';
+  }
+  function chunkRows(s){
+    return s.chunks.map(function(c){
+      return '<div class="leaf"><div class="row t-chunk"><span class="g g-chunk"></span><span class="cn">chunk ' + c.n + '</span>' +
+        '<span class="cstats">' + fmt(c.tokens) + ' tokens · ' + fmt(c.chars) + ' chars</span>' + codebar(c.code_chars, c.chars) + noiseTag(c) + '</div></div>';
+    }).join('');
+  }
+  function sectionRow(s){
+    return '<span class="g-section">' + (s.level ? 'h' + s.level : 'pre') + '</span>' +
+      '<span class="hd" title="' + esc(s.heading_path.join(' > ')) + '">' + esc(s.heading) + '</span>' + anchorChip(s) +
+      (s.empty ? '<span class="sstats">heading only</span>' :
+        '<span class="sstats">' + s.chunks.length + ' chunk' + (s.chunks.length === 1 ? '' : 's') + ' · ' + fmt(s.chars) + ' chars</span>' + codebar(s.code_chars, s.chars) + noiseTag(s));
+  }
+  function headingTree(p, opts){
+    var secs = p.sections.filter(function(s){
+      if (opts.fragOnly && !s.own_anchor) return false;
+      if (opts.noisyOnly && !s.noisy) return false;
+      return true;
+    });
+    var flat = opts.fragOnly || opts.noisyOnly;
+    var out = '';
+    var stack = [];
+    secs.forEach(function(s, i){
+      var next = secs[i + 1];
+      var hasKids = !flat && next && next.level > s.level && s.level > 0;
+      var cls = 'row t-section' + (s.empty ? ' empty' : '') + (s.noisy ? ' noisy' : '');
+      while (stack.length && stack[stack.length - 1] >= s.level) { out += '</div></details>'; stack.pop(); }
+      var inner = opts.chunks && !s.empty ? '<div class="kids of-section">' + chunkRows(s) + '</div>' : '';
+      if (hasKids) { out += '<details open><summary><div class="' + cls + '">' + sectionRow(s) + '</div></summary>' + inner + '<div class="kids of-section">'; stack.push(s.level); }
+      else if (inner) out += '<details' + (opts.chunks ? ' open' : '') + '><summary><div class="' + cls + '">' + sectionRow(s) + '</div></summary>' + inner + '</details>';
+      else out += '<div class="leaf"><div class="' + cls + '">' + sectionRow(s) + '</div></div>';
+    });
+    while (stack.length) { out += '</div></details>'; stack.pop(); }
+    return out;
+  }
+  function renderNode(node, depth, opts){
+    var p = node.page;
+    var hasDir = node.order.length > 0;
+    var kidsHtml = node.order.map(function(k){ return renderNode(node.kids[k], depth + 1, opts); }).join('');
+    var tier = p ? (hasDir ? 't-folderpage' : 't-page') : 't-folder';
+    var glyph = (hasDir || !p ? '<span class="g g-folder"></span>' : '') + (p ? '<span class="g g-page"></span>' : '');
+    var label = glyph + '<span class="seg">' + esc(node.name) + '</span>';
+    if (p) label += '<span class="ptitle">' + esc(p.title) + '</span><span class="chip kind-' + esc(p.kind) + '">' + esc(p.kind) + '</span>' +
+      '<span class="pstats">' + fmt(p.tokens) + ' tokens · ' + p.sections.length + ' sections · ' + p.chunks + ' chunks</span>' + codebar(p.code_chars, p.chars) + flags(p) +
+      '<button class="open-page" type="button" data-path="' + esc(p.path) + '">table</button>';
+    var inner = '';
+    if (p && opts.sections) inner += '<div class="kids of-page">' + headingTree(p, opts) + '</div>';
+    if (hasDir) inner += '<div class="kids">' + kidsHtml + '</div>';
+    if (!inner) return '<div class="leaf"><div class="row ' + tier + '">' + label + '</div></div>';
+    var open = opts.forceOpen || depth < 1 || (hasDir && !p) || (hasDir && p && !opts.sections);
+    return '<details' + (open ? ' open' : '') + '><summary><div class="row ' + tier + '">' + label + '</div></summary>' + inner + '</details>';
+  }
+
+  var tv = document.getElementById('tv');
+  var tq = document.getElementById('tq');
+  var tSections = document.getElementById('t-sections');
+  var tChunks = document.getElementById('t-chunks');
+  var tFrag = document.getElementById('t-frag');
+  var tNoisy = document.getElementById('t-noisy');
+  var tshown = document.getElementById('tshown');
+  function renderSiteTree(){
+    var term = tq.value.trim().toLowerCase();
+    var opts = { sections: tSections.checked, chunks: tChunks.checked, fragOnly: tFrag.checked, noisyOnly: tNoisy.checked, forceOpen: !!term || tNoisy.checked };
+    var list = pages.filter(function(p){
+      if (term && p.hay.indexOf(term) < 0) return false;
+      if (opts.noisyOnly && !p.noisySections) return false;
+      return true;
+    });
+    tshown.textContent = list.length + ' of ' + pages.length + ' pages';
+    var root = buildSiteTree(list);
+    var html = root.order.map(function(k){ return renderNode(root.kids[k], 0, opts); }).join('');
+    tv.innerHTML = html || '<p class="nomatch">No page matches.</p>';
+  }
+  tv.addEventListener('click', function(ev){
+    var b = ev.target.closest('button.open-page');
+    if (b) { ev.preventDefault(); ev.stopPropagation(); setView('table'); select(b.getAttribute('data-path'), true); }
+  });
+  [tq, tSections, tChunks, tFrag, tNoisy].forEach(function(el){ el.addEventListener('input', renderSiteTree); });
+  document.getElementById('t-expand').addEventListener('click', function(){ tv.querySelectorAll('details').forEach(function(d){ d.open = true; }); });
+  document.getElementById('t-collapse').addEventListener('click', function(){ tv.querySelectorAll('details').forEach(function(d){ d.open = false; }); });
+
+  // ---------- table view ----------
+  var q = document.getElementById('q');
+  var fBudget = document.getElementById('f-budget');
+  var fShared = document.getElementById('f-shared');
+  var fNoisy = document.getElementById('f-noisy');
+  var tree = document.getElementById('tree');
+  var detail = document.getElementById('detail');
+  var shown = document.getElementById('shown');
+  var current = null;
+  var openGroups = {};
+  function groupOf(p){ var seg = p.path.split('/')[1] || ''; return seg ? '/' + seg : '/'; }
+  function renderTree(){
+    var term = q.value.trim().toLowerCase();
+    var list = pages.filter(function(p){
+      if (fBudget.checked && !p.over_budget) return false;
+      if (fShared.checked && !p.sharedKeys) return false;
+      if (fNoisy.checked && !p.noisySections) return false;
+      if (term && p.hay.indexOf(term) < 0) return false;
+      return true;
+    });
+    shown.textContent = list.length + ' of ' + pages.length;
+    var groups = {}, order = [];
+    list.forEach(function(p){ var g = groupOf(p); if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(p); });
+    var filtering = term || fBudget.checked || fShared.checked || fNoisy.checked;
+    tree.innerHTML = order.map(function(g){
+      var open = filtering || openGroups[g] || (current && groupOf(current) === g);
+      return '<details class="group"' + (open ? ' open' : '') + ' data-g="' + esc(g) + '"><summary><span class="mono">' + esc(g) + '</span><span class="count num">' + groups[g].length + '</span></summary>' +
+        groups[g].map(function(p){
+          return '<button class="page" role="listitem" data-path="' + esc(p.path) + '"' + (current === p ? ' aria-current="true"' : '') + '>' +
+            '<span class="path mono">' + esc(p.path) + '</span><span class="title">' + esc(p.title) + '</span>' +
+            '<span class="stats"><span><span class="chip kind-' + esc(p.kind) + '">' + esc(p.kind) + '</span> ' + flags(p) + '</span><span class="num">' + fmt(p.tokens) + ' tokens · ' + p.chunks + ' chunks</span></span></button>';
+        }).join('') + '</details>';
+    }).join('') || '<p class="empty-state" style="padding:20px">No page matches.</p>';
+  }
+  function renderDetail(p){
+    var rows = p.sections.map(function(s){
+      var cls = ['indent-' + Math.min(s.level, 4)];
+      if (s.empty) cls.push('empty'); if (s.shared) cls.push('shared'); if (!s.anchor) cls.push('nokey'); if (s.noisy) cls.push('noisy');
+      var own = s.own_anchor ? '<code>#' + esc(s.own_anchor) + '</code>' : '<span class="inherit">none</span>';
+      var anchor = s.anchor ? '<code>#' + esc(s.anchor) + '</code>' + (s.own_anchor ? '' : ' <span class="inherit">inherited</span>') : '<span class="inherit">none</span>';
+      var key = s.empty ? '<span class="inherit">no chunk</span>' : '<code>' + esc(s.key) + '</code>';
+      var noise = s.noisy ? (s.floats >= 20 ? s.floats + ' floats ' : '') + (s.long_lines ? s.long_lines + ' long line' + (s.long_lines > 1 ? 's' : '') : '') : '';
+      return '<tr class="' + cls.join(' ') + '" title="' + esc(s.heading_path.join(' > ')) + '">' +
+        '<td class="heading"><span class="lvl">' + (s.level ? 'h' + s.level : 'pre') + '</span><span class="heading-text">' + esc(s.heading) + '</span></td>' +
+        '<td>' + own + '</td><td>' + anchor + '</td><td class="key">' + key + '</td>' +
+        '<td class="r num">' + (s.empty ? '' : s.chunks.length) + '</td><td class="r num">' + fmt(s.chars) + '</td>' +
+        '<td class="r num">' + (s.empty ? '' : pct(s.code_chars, s.chars)) + '</td><td class="noise">' + noise + '</td></tr>';
+    }).join('');
+    detail.innerHTML =
+      '<div class="head"><h2>' + esc(p.title) + '</h2>' +
+        '<a class="url mono" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.url) + '</a>' +
+        (p.breadcrumbs && p.breadcrumbs.length ? '<div class="crumbs">' + esc(p.breadcrumbs.join(' › ')) + '</div>' : '') +
+        '<div class="facts"><span><span class="chip kind-' + esc(p.kind) + '">' + esc(p.kind) + '</span> ' + flags(p) + '</span>' +
+          '<span><b class="num">' + fmt(p.chars) + '</b> characters</span><span><b class="num">' + fmt(p.tokens) + '</b> tokens</span>' +
+          '<span><b class="num">' + p.sections.length + '</b> sections</span><span><b class="num">' + p.chunks + '</b> chunks</span>' +
+          '<span><b class="num">' + pct(p.code_chars, p.chars) + '</b> in code fences</span>' +
+          '<span><b class="num">' + Math.max(1, Math.ceil(p.chars / DATA.read_max_chars)) + '</b> whole-page reads at the budget</span></div></div>' +
+      '<div class="tablewrap"><table><thead><tr><th>heading</th><th>own fragment</th><th>anchor used</th><th>section key</th><th class="r">chunks</th><th class="r">chars</th><th class="r">code</th><th>noise</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '';
+  }
+  function select(path, push){
+    var p = byPath[path]; if (!p) return;
+    current = p; openGroups[groupOf(p)] = true;
+    renderTree(); renderDetail(p);
+    if (push) { try { history.replaceState(null, '', '#' + path); } catch (e) {} }
+    var el = tree.querySelector('[aria-current="true"]');
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+  }
+  tree.addEventListener('click', function(ev){ var b = ev.target.closest('button.page'); if (b) select(b.getAttribute('data-path'), true); });
+  tree.addEventListener('toggle', function(ev){ var d = ev.target; if (d && d.classList && d.classList.contains('group')) openGroups[d.getAttribute('data-g')] = d.open; }, true);
+  [q, fBudget, fShared, fNoisy].forEach(function(el){ el.addEventListener('input', renderTree); });
+
+  // ---------- views ----------
+  var treeview = document.getElementById('treeview');
+  var app = document.getElementById('app');
+  var treeRendered = false;
+  function setView(v){
+    document.getElementById('view-' + v).checked = true;
+    var isTree = v === 'tree';
+    treeview.hidden = !isTree; app.hidden = isTree;
+    if (isTree && !treeRendered) { renderSiteTree(); treeRendered = true; }
+    try { localStorage.setItem('corpus-map-view', v); } catch (e) {}
+  }
+  document.querySelectorAll('input[name="view"]').forEach(function(r){ r.addEventListener('change', function(){ setView(r.value); }); });
+
+  renderTree();
+  var hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && byPath[hash]) select(hash, false); else select('/studio/batch-processing', false);
+  var savedView = null;
+  try { savedView = localStorage.getItem('corpus-map-view'); } catch (e) {}
+  setView(savedView === 'table' ? 'table' : 'tree');
+})();
+</script>
