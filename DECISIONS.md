@@ -262,7 +262,7 @@ The listwise reranker (D-015) is part of the serving path, so its shipped config
 
 Datasets in `eval/` carry the generator run that produced them. Charts are rendered from `metrics.json` by a script so they can be regenerated.
 
-**Facts.** The numbers are the argument in the review and the talk; a number that cannot be traced back to raw model output cannot be defended. Runs cost real credits and GLM calls, and re-running to recover lost detail wastes both. Estimated size: a 600-judgement run is a few MB, acceptable in git.
+**Facts.** The numbers are the argument; a number that cannot be traced back to raw model output cannot be defended. Runs cost real credits and GLM calls, and re-running to recover lost detail wastes both. Estimated size: a 600-judgement run is a few MB, acceptable in git.
 
 ---
 
@@ -765,7 +765,7 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 - The commonest stumble classes: a parameter present on the endpoint but absent from the caller's SDK build (14), formats and limits nobody could find (13), constraints discovered only by hitting them (11), a quickstart that does not run (8), rate limits and error bodies (5), deprecation drift (5).
 - Search Toolkit and Vespa questions (29 of 85) exist only in transcripts, because the toolkit has no public issue tracker (D-018). Other Claude Code projects on this machine (159 directories, five mentioning Mistral) held no usable stumble.
 
-**Decision.** `eval/mined.jsonl` is the second reporting set beside the generated dev set: never used for tuning, run with every answer evaluation from now on, and the set the talk leads with, since these are the questions users actually had. Tom validates the rows from `.local/runs/t4/mined-validation.md` before the numbers are quoted.
+**Decision.** `eval/mined.jsonl` is the second reporting set beside the generated dev set: never used for tuning, run with every answer evaluation from now on, and the set the reported numbers lead with, since these are the questions users actually had. Tom validates the rows from `.local/runs/t4/mined-validation.md` before the numbers are quoted.
 
 ---
 
@@ -824,7 +824,7 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 | correctness on the 9 mined unanswerables | 0.67 | 0.69 | (0.9 on generated ones) |
 | latency p50 | 12.0 s | 36.8 s | 7.2 s |
 
-Real questions are found as well as generated ones (URL match 0.86) but answered less precisely: a quarter of the answers are partial, because these questions ask for one exact parameter, format or limit and the answer stops short of it or adds an unsupported detail. The mined unanswerables are the hardest cell, as D-038 predicted: relevant context exists and the model over-reaches from it. The search loop buys 6 points here at three times the latency. These are the numbers the talk leads with, and the ones the next product changes are measured against.
+Real questions are found as well as generated ones (URL match 0.86) but answered less precisely: a quarter of the answers are partial, because these questions ask for one exact parameter, format or limit and the answer stops short of it or adds an unsupported detail. The mined unanswerables are the hardest cell, as D-038 predicted: relevant context exists and the model over-reaches from it. The search loop buys 6 points here at three times the latency. These are the headline numbers, and the ones the next product changes are measured against.
 
 ---
 
@@ -859,7 +859,7 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - The field, checked 2026-09-09: Context7, Mintlify hosted MCP, GitMCP, llms.txt, the GitHub MCP server, DeepWiki, and the Cloudflare, Stripe, Vercel and Supabase documentation servers all return passages for the calling agent to interpret (DeepWiki also generates an answer); citations stop at the page for all of them; only Context7 and Mintlify pin a version; none publishes a retrieval or answer evaluation; none documents quote verification or text-fragment links. Mistral's own `llms.txt` still lists 75 legacy `/docs/*.md` paths that return 404, and Mistral's official MCP server exposes Studio Skills, not documentation search.
 - The one published study close to "grep versus docs server" (510 sessions, 9 August 2026, menges.dev) found agents never called a merely available code-context server and did as well with repository tools on grep-shaped questions; it recommends comparing whole agents, verifying the tool was actually called, repeating trials, and reporting cost per successful task.
 
-**Decision.** The product is grounded documentation for agents that cannot grep and for product questions the source does not contain, with the evaluation pipeline as a second deliverable: run on every documentation version, it is a documentation-quality tool (D-041). The differentiators the README and the talk claim are the ones the field lacks: a commit-pinned corpus, tested section anchors, verified quotes with text-fragment links, a refusal path, and a published evaluation. Exact-symbol questions are conceded to grep. The consumer evaluation (D-040) follows the study's recommendations: shell tools available in every arm, tool calls verified, cost per correct answer reported.
+**Decision.** The product is grounded documentation for agents that cannot grep and for product questions the source does not contain, with the evaluation pipeline as a second deliverable: run on every documentation version, it is a documentation-quality tool (D-041). The differentiators the README claims are the ones the field lacks: a commit-pinned corpus, tested section anchors, verified quotes with text-fragment links, a refusal path, and a published evaluation. Exact-symbol questions are conceded to grep. The consumer evaluation (D-040) follows the study's recommendations: shell tools available in every arm, tool calls verified, cost per correct answer reported.
 
 ---
 
@@ -1290,10 +1290,10 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 
 ---
 
-## D-018a · The upstream list is written; nothing is sent before the review
+## D-018a · The upstream list is written; nothing is sent yet
 
 **Status:** decided by Tom · 2026-09-10 · `docs/upstream.md`
 
 **Facts.** Fifteen defects across the toolkit, its Vespa plugin, the starter app and the documentation repository are reproduced with package lines in `docs/search-toolkit.md` and `docs/mistral-stack.md`. The toolkit still has no public repository; the starter app and the docs repository accept pull requests.
 
-**Decision.** `docs/upstream.md` ranks them by what a fix saves the next person and names where each goes. Reports and pull requests are sent after the review, so the review is on the work; the three ranking defects that produce a plausible wrong order rather than an error go first.
+**Decision.** `docs/upstream.md` ranks them by what a fix saves the next person and names where each goes. Reports and pull requests go out once the work here is finished, so what reaches upstream is the final form; the three ranking defects that produce a plausible wrong order rather than an error go first.
