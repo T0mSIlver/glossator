@@ -1467,4 +1467,20 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 
 **Facts.** At 23:49 Tom asked how to generate the follow-up answer after a tool call in function calling: one search, two reads by key (`five-steps/generate-followup-answer`, then `five-steps`), and an answer with the tool message shape, both code samples and the recursive case, citing the one link `…/function-calling#five-steps:~:text=We%20can%20now`, the text fragment the hit printed for a section 18,000 characters below its anchor. At 23:50 he asked which endpoints a batch job can target and how many requests a batch file holds: one search, three reads by key on the 190,913-character Batch Processing page, never the whole page, and an answer with the nine endpoints and the one-million limit citing `#batch-creation`, `#file-batching` and `#whats-the-max-number-of-requests-in-a-batch`. Every claim in both answers is on the cited section. Seven calls for two questions.
 
-**Reading.** The three mechanisms of D-047 were each exercised once by a Work model and each did what it was built for: keys named the sections to read, `read_page` by key returned one section of a large page, and the `cite:` line was copied into the answer, text fragment included. Whether the fragment lands on the sentence in Tom's browser is still unrecorded. The unanswerable question of D-047a stays the cell where the host model over-reaches.
+**Reading.** The three mechanisms of D-047 were each exercised once by a Work model and each did what it was built for: keys named the sections to read, `read_page` by key returned one section of a large page, and the `cite:` line was copied into the answer, text fragment included. The unanswerable question of D-047a stays the cell where the host model over-reaches.
+
+---
+
+## D-047c · Open: keep text fragments in citation links, or turn them off
+
+**Status:** open · 2026-09-12 · to be decided by Tom after one check
+
+**Facts.**
+- Tom clicked the D-047b link `…/function-calling#five-steps:~:text=We%20can%20now` from Work in Brave: the page opened at the `five-steps` anchor with no highlight. Pasted into a new tab, the same link scrolled to the sentence and highlighted it.
+- Work renders the link as the specification asks: `target="_blank"` with `rel="nofollow noopener noreferrer external"` (the export of the 23:49 session). The site's root scroll padding and the absence of any `::target-text` rule were checked on 2026-09-11 (D-047).
+- Browsers honour a `:~:text=` directive only on navigations they consider safe from cross-site attacks: address bar, bookmarks, or a user-activated click into a fresh top-level context with no opener. Which clicks count is decided per browser engine, and a click routed through a script handler can fail the test. Brave is Chromium-based and adds its own link-privacy layers; whether the drop is Chromium's gate, Brave's, or Work's click path is not known from one observation.
+- The fragment is printed on 310 of 4,440 chunk links, about 7%; the other links are unaffected. When a browser drops the directive the link still lands on the anchor, which is the D-044 behaviour. The cost of a fragment is about 50 characters on a `cite:` line the model copies.
+
+**The choice.** A feature that helps on paste and on some hosts, and is silently ignored on others, may cost more in confusion than it returns: a reader who sees the highlight once expects it every time. The alternative is to turn fragments off and keep `url#anchor` only, accepting that 1,823 headings without an anchor land a click on their parent or the page top.
+
+**The check before deciding.** Click the same link from Work in Chrome. If Chrome highlights, the drop is Brave's and the feature stands for other browsers; if Chrome does not, Work's click path drops the directive for every Chromium browser and the fragment only helps on paste, which argues for turning it off until the host changes. Either result goes in this entry with the decision.
