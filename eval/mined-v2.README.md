@@ -12,21 +12,26 @@ per stumble with the verbatim excerpt and the question, issue or session it came
 link on one line each for review. Every question carries its stumble's identifier and
 reference in `generator`, so a row can always be traced back to that evidence.
 
-- Questions: 83 (single_page 55, unanswerable 13, cross_page 11, api_reference 4);
-  languages: {'en': 83}
-- sha256: `1e19ef8f8f12dc7e923c4e196bf3111c386c92e46992d2a3dac8b9600fdfecb2`
-- Sources: `github_issue` 55, `transcript` 10, `stack_overflow` 9, `hacker_news` 9
+- Questions: 84 (single_page 55, unanswerable 14, cross_page 11, api_reference 4);
+  languages: {'en': 84}
+- sha256: `d889b81d02bb13d98d3be27e0ec9de09456643375494df9507da6813ab0ffd61`
+- Sources: `github_issue` 55, `transcript` 11, `stack_overflow` 9, `hacker_news` 9
 - Issues by repository: `mistralai/mistral-vibe` 31, `mistralai/client-ts` 20,
   `mistralai/mistral-inference` 3, `mistralai/mistral-finetune` 1
 - Product areas: vibe 30, document_ai 10, agents 7, structured_output 5, deployment 4,
   errors 3, fine_tuning 3, models 3, security 3, platform 3, and two each of
-  chat_completions, sdk, rate_limits, audio, workflows, plus tokenization and admin
+  chat_completions, sdk, rate_limits, audio, workflows, plus tokenization, admin and
+  search_toolkit
 - Corpus: `corpus/mistral-docs`, validated with `validate_against_corpus`; zero issues
 
-Thirteen questions are `unanswerable`: the stumble was real, the corpus does not cover it,
+Fourteen questions are `unanswerable`: the stumble was real, the corpus does not cover it,
 and the reference answer says what is missing — the crawler's per-request page cap, a Code
 Interpreter execution timeout, the `x-ratelimit-*` response headers, HTTP 411, an MCP tool
 ceiling, `AGENTS.md` includes, the chat template `mistral-common` builds, and others.
+`mined2-084` is the one row whose evidence is committed: a Mistral Work session over the
+deployed server (`eval/runs/2026-09-11-1410-work-session-search-toolkit/`) that searched
+thirteen times for the Search Toolkit evaluation page the landing page implies and no
+page documents.
 
 The shape of this set differs from the first: the Vibe products (CLI, VS Code extension,
 Vibe Code Web, admin config) are 30 of 83 questions, because the CLI repository is where

@@ -157,6 +157,8 @@ def test_instructions_carry_the_scope_the_citation_rule_and_the_refusal_rule(
     assert "mistral_docs_search" in text
     assert "url#anchor" in text
     assert "say so" in text
+    assert "nothing more" in text
+    assert "do not retry" in text
     for word in ("second", "cost", "chunk id", "rerank"):
         assert word not in text
 

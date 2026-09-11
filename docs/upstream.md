@@ -1,6 +1,6 @@
 # What goes upstream
 
-Fifteen reproducible defects affect Mistral's packages, starter template or
+Sixteen reproducible defects affect Mistral's packages, starter template or
 documentation. `search-toolkit.md`, `mistral-stack.md` and `DECISIONS.md` contain
 the evidence. The list is ordered by expected impact (D-018a).
 
@@ -26,7 +26,8 @@ Documentation fixes belong in `mistralai/platform-docs-public`.
 | 13 | toolkit | `__version__` says 0.1.0 while the distribution is 0.0.13 | `__init__.py:34` | read the version from package metadata |
 | 14 | docs repo | `llms.txt` lists 75 links that all return 404 and `llms-full.txt` predates Vibe, the Search Toolkit and Medium 3.5, because the generator reads a directory that no longer exists | `llms_txt/generate_llms_txt.py`; D-001 | point the generator at the current content tree |
 | 15 | docs repo | The Work Connectors page does not mention the `_confirmationReason` argument Work adds to a call that asks for approval; a server with a strict schema rejects it | D-037b | one paragraph on the Connectors page |
+| 16 | docs repo | The Search Toolkit landing page names evaluation as one of its three components, and no page documents it; the package ships `mistralai.search.toolkit.evals` (`RetrieverEvaluator`, `MetricsCalculator`, `EvaluationDataset`, `RetrievalMetrics`). A Work session searched thirteen times for the page, then invented an evaluation section from the semantic cache's counters | `evals/`; `eval/runs/2026-09-11-1410-work-session-search-toolkit/`; D-044a | an evaluation page under `search-toolkit`, or drop the word from the landing page |
 
 Rows 1 to 3 have the highest impact. Each produced plausible but wrong rankings
-instead of an error. Rows 11 to 15 need only small template or documentation
+instead of an error. Rows 11 to 16 need only small template or documentation
 changes.

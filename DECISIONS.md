@@ -1344,3 +1344,20 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 6. The PR branch carries the run id and the artifact name the attempt number.
 7. The deploy README and the generated PR body state the operator's two steps after merging an accepted refresh: `make deploy` for the served index, and copying the vendored corpus into `SNAPSHOTS_DIR/<date>` plus a `snap1024` ingestion for the history tool. A deploy-script change is deferred until a refresh has actually been accepted.
 8. The weekly schedule stays off and the manual trigger on: Tom confirmed on 2026-09-11 that the refresh should work end to end but not run on its own yet.
+
+---
+
+## D-044a · Two stop rules in the instructions, from a Work session that searched thirteen times for a page that does not exist
+
+**Status:** decided · 2026-09-11 · `eval/runs/2026-09-11-1410-work-session-search-toolkit/` (the reduced transcript and its reading), `docs/upstream.md` row 16, `eval/mined-v2.jsonl` row `mined2-084`
+
+**Facts.**
+- Asked "what are the main features in the new Mistral search toolkit", the Work model made 13 searches and 4 page reads in about a minute over the deployed three-tool server. Eight searches returned the same five sections of the Search Toolkit landing page; two reads guessed the URL `search-toolkit/evaluation` and got `E_UNKNOWN_PAGE` both times.
+- The cause is a documentation claim with nothing behind it: the landing page says the toolkit "provides components for ingestion, retrieval, and evaluation", ingestion and retrieval each have a page tree, and evaluation has no page in the pinned corpus or on the live site. The package does ship `mistralai.search.toolkit.evals` (`RetrieverEvaluator`, `MetricsCalculator`, `EvaluationDataset`, `RetrievalMetrics`), which no page mentions.
+- The model's draft said the evaluation details were not documented; the answer it sent replaced that with an "Evaluation" section built from the semantic cache's hit-rate counter, cited to the cache page. The refusal rule held for twelve calls and broke at the write-up, the over-reach cell of D-038.
+- The server was correct on every call and stateless, so it could not tell the model that the results repeated. The model asked for a listing twice (`site:` and a path as `q`), which no tool provides since D-044 cut `navigate`.
+
+**Decision.**
+1. The instructions gain two sentences: a search that returns the pages already read means the corpus has nothing more on it, and an unknown page URL means the page does not exist at this commit and is not retried. No tool, parameter or result text changes.
+2. The missing page is upstream row 16, with the session as evidence. The question the session could not answer is `mined2-084`, typed `unanswerable`, so the over-reach is measured from now on.
+3. A URL-prefix form of search (a `q` that is a page URL lists the pages under it) is the candidate answer to the two listing attempts. It is not the `outline` strategy of D-033, which handed the model the whole site outline instead of retrieval; it would be a scoped listing after a search has named the neighbourhood. Tom decides whether it ships; nothing is built until then.

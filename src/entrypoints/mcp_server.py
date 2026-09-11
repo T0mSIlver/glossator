@@ -187,7 +187,9 @@ def _instructions() -> str:
         f"{'; '.join(steps)}.\n\n"
         "Cite the url#anchor a hit printed, as a Markdown link, next to each claim it "
         "supports. Never write a docs.mistral.ai URL from memory. When the documentation "
-        "does not answer the question, say so instead of answering from memory."
+        "does not answer the question, say so instead of answering from memory. If a "
+        "search returns the pages you already read, the corpus has nothing more on it. "
+        "An unknown page URL means the page does not exist at this commit; do not retry it."
     )
 
 

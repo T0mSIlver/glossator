@@ -22,7 +22,7 @@ retrieval. A balanced 60-question slice had not appeared in an answer evaluation
 before the fresh run. The reporting data also includes 85 questions from real
 GitHub issues. Of those, 54 came from SDK users (D-038, D-039).
 
-Another 83 questions came from Vibe CLI, client-ts and Stack Overflow issues.
+Another 84 questions came from Vibe CLI, client-ts and Stack Overflow issues, and one Work session.
 They await hand validation (D-038b). There are also 36 French translations and
 105 degraded versions of a 120-question development subset.
 
