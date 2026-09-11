@@ -1448,3 +1448,13 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 6. The Haiku run is judged when the z.ai key is at hand; its unjudged cells stand as the baseline the design above is measured against, with `mined2-084` in the set.
 
 **Not decided.** The 403 far chunks without a fragment are a measured gap: a longer phrase, or a `start,end` range, would close part of it. The content normalization the map argues for, response bodies and float arrays first, is a separate entry once measured on the paired gate.
+
+---
+
+## D-047a · The same question six minutes after D-047 went live: no invented section, a hedged over-reach, no `cite:` link copied
+
+**Status:** recorded · 2026-09-11 · `eval/runs/2026-09-11-2340-work-session-after-d047/`
+
+**Facts.** Tom asked the 20:36 question again in Work at 23:40. 26 calls: 16 word searches, 2 listings, 8 reads, one of them a guessed URL that the server refused and the model did not retry. Twelve of sixteen queries were keyword strings and five returned the landing-page sections already read, as at 20:36. The answer opens by saying the evaluation documentation is not published and names no metric the tools did not print. It then lists precision, recall, F1, hit rate and MRR as toolkit capabilities and states that the toolkit "integrates with" the Observability Evaluation SDK; the model's last thought calls these "standard metrics that would be relevant" and features that "likely integrate". No page says either. The answer links two bare page URLs; none of the eight `cite:` lines in the tool results was copied.
+
+**Reading.** Three things moved between 20:36 and 23:40 on the same question, one of them from D-047: the unknown-page rule held, the listings were read as proof, and no section was invented. The write-up still fills the gap by inference, in a hedged form, which is the D-038 cell and not a tool problem. The `cite:` line was not taken up on a question where the model had no fact to cite; a question with an answer is the test of it. Two Work transcripts on one question remain two samples; the Haiku run is the counted measure.
