@@ -966,6 +966,7 @@ async def test_retry_errors_regenerates_error_rows_and_keeps_answered_rows(
         pass
 
     monkeypatch.setattr("glossator.eval.answer_eval.SearchEngine", lambda *a, **k: FakeEngine())
+    monkeypatch.setattr("glossator.eval.answer_eval.chat_client", lambda: object())
     monkeypatch.setattr("glossator.eval.answer_eval.MistralLLM", lambda *a, **k: object())
     monkeypatch.setattr("glossator.eval.answer_eval.answer_one", fake_answer_one)
 
