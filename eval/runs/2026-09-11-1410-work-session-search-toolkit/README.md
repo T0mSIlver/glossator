@@ -47,3 +47,27 @@ write-up, which is the over-reach cell D-038 and D-038b measure.
   not answer, typed `unanswerable`, with the reference answer stating what the
   documentation does and does not say.
 - `docs/upstream.md` row 16.
+
+## The same question after the stop rules
+
+`transcript-after.md`: the same question, asked again in Work at 14:59, eight
+minutes after the redeployed server came up with the two stop rules in its
+instructions and the listing form in the `q` description. The Skill had been
+loaded in both sessions.
+
+| calls | before (14:10) | after (14:59) |
+|---|---|---|
+| `mistral_docs_search` | 13 | 2 |
+| `mistral_docs_read_page` | 4, two on a guessed URL | 1 |
+| invented section | one ("Evaluation") | none |
+
+The second search, `search toolkit evaluation`, returned the landing page
+again; the model wrote "I have enough information now" and answered. The
+answer keeps to the two documented pillars and the components table, and
+names no evaluation feature. One distortion remains: the landing page's
+"LLMs are not trained on your private data", a statement about why retrieval
+is needed, became the design principle "Private by design". The listing form
+was not used; nothing in this question needed it.
+
+One session each way is an observation, not a measurement; `mined2-084` is
+where the over-reach is counted from now on.

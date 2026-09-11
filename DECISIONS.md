@@ -1371,3 +1371,13 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 **Facts.** The Work session of D-044a asked the server for a listing twice, as `site:docs.mistral.ai/studio/search/search-toolkit` and as `search-toolkit/evaluation`, and guessed a page URL twice; the three-tool surface (D-044) has no way to answer "does this page exist". The `outline` strategy of D-033 is not that: it handed the model the whole site outline (411 titles, about 9k tokens) before any retrieval and lost on eight of eleven metrics because titles carry little signal and its page budget overflowed. A listing scoped to a path, asked for after a search hit has named the neighbourhood, is a different operation: twenty lines, no ranking replaced. The server already loads every page's URL, title and kind from the vendored corpus at startup.
 
 **Decision.** `mistral_docs_search` keeps its three arguments. When `q` is a page URL, a `site:` form of one, or a bare path, the tool lists the pages whose URL starts with that path, sorted, one line for the URL and one for the title, from the loaded corpus and without a Vespa call; `kind` still filters. Forty pages at most, then "narrow the prefix"; zero pages prints the nearest ancestor path that has pages, never the site root, or says to search with words. The `q` description gains one clause, "or a page URL to list the pages under it". Words never start with the site or a slash, so no word query changes behaviour.
+
+---
+
+## D-044c · The same question after the stop rules: two searches, one read, no invented section
+
+**Status:** recorded · 2026-09-11 · `eval/runs/2026-09-11-1410-work-session-search-toolkit/transcript-after.md`
+
+**Facts.** Tom asked the D-044a question again in Work at 14:59, eight minutes after the redeployed server came up with the two stop rules and the listing form. The model searched twice, read the landing page once, and answered from it: the two documented pillars, the components table, the extras. When its second search returned the landing page again it wrote "I have enough information now" and stopped. No evaluation section, no guessed URL, no retry. One distortion stays: the landing page's "LLMs are not trained on your private data" became a design principle "Private by design". The listing form was not called; the question did not need it.
+
+**Reading.** One session each way is an observation; the counted measure is `mined2-084` in every answer evaluation from now on (D-044a).
