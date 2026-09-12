@@ -39,6 +39,90 @@ therefore the only reference, which is why `AGENTS.md` forbids guessing a class
 or parameter. The package also disagrees with itself about its own version:
 `__init__.py:34` sets `__version__ = "0.1.0"` while the distribution is 0.0.13.
 
+## Why not the toolkit end to end
+
+The short answer, for anyone who asks: the toolkit is a retrieval framework and
+the product is a documentation surface for agents. Retrieval is one of its five
+layers, and it is the layer where the toolkit is the spine. Measured on the
+source tree at commit `145cebd`:
+
+| Layer | Lines | Toolkit's part |
+|---|---:|---|
+| Corpus adapter (`corpus/`): docs repo at a commit to normalized pages, URLs, anchors, redirects, snapshots | 4,226 | none; the extractors drop heading ids (D-002, D-003) |
+| Ingest and index (`ingest/`, `index/`): sections, chunks with heading metadata, embeddings, Vespa schema | 1,973 | `Pipeline`, `Document`, `MistralEmbedder`, migrations and `DOCUMENT_PER_CHUNK` as is; the splitter replaced |
+| Retrieval (`retrieval/`): hybrid query, weights, filters, reranker, page navigation, embedding probe | 1,835 | `VespaSearchQuery`, `exclude_ids`, `extra_yql_filter`, `NavigableIndex` as is; `VectorRetriever` and `LLMReRanker` replaced |
+| Answer and citations (`answer/`, `citing.py`) | 3,860 | none; the package has no answer, citation or groundedness type (D-016) |
+| Time axis (`history.py`, `changelog.py`): eight snapshots, section identity across dates, the changelog | 753 | none; reads the snapshot corpora as files (D-048) |
+| Containment (`containing.py`): one language tab, no repeated sample, outputs cut | 387 | none (D-050) |
+| MCP server and API (`entrypoints/`): three tools, keys, `cite:` lines, budgets, bearer auth | 1,827 | FastMCP as the starter uses it; the starter's seven tools replaced by three (D-044) |
+| Evaluation (`eval/`): datasets, mining, judges, consumer and Work-proxy runs, snapshot labels, corpus map | 17,131 | `MetricsCalculator` and `RetrieverEvaluator` behind a wrapper (D-016a); nothing for answers |
+
+Twenty-one of the 102 source files import the toolkit; the index package is the
+one place every file does. Three reasons follow from the table.
+
+**The toolkit stops where the product starts.** It has no notion of an answer,
+a citation, a section anchor, a dated snapshot or an answer-quality metric. A
+documentation server for agents is judged on exactly those: does the link land
+on the sentence, does the claim hold, when did the fact change, how often is the
+answer right. Each had to be built, and each is measured in `eval/runs/`.
+
+**Where it reaches, four defects sit on the path a documentation product needs**,
+each reproduced below with package line numbers: the generated ranking profile
+switches the vector term off in phase 1 (D-012); a named query profile, the
+starter's only way to set weights, disables `exclude_ids` and every filter
+(D-014); per-query weights are silently ignored without a suffix nothing
+validates (D-025); the LLM reranker runs one call per candidate and discards
+its own score (D-015). The replacements are small (a 139-line retriever, a
+336-line listwise reranker) and the reranker alone was the largest measured
+retrieval gain (section recall@1 0.732 to 0.873).
+
+**What is good is used unchanged.** The migrations and schema generator with
+custom root fields, `DOCUMENT_PER_CHUNK`, the builder-path query with exclusions
+and filters, the positional operations, the embedder, the ingestion pipeline,
+the retrieval metrics. `read_page` is the plugin's `read` operation under a URL
+and a section key instead of a source id and byte offsets; the search tool is
+the plugin's hybrid query with the weights set. Nothing that works was rewritten
+for its own sake, and the recap at the end says which is which.
+
+### The starter's seven tools against glossator's three
+
+The toolkit's agentic path, documented on the Agentic Search page since the
+1 September snapshot, gives the model seven tools: `search(query, top_k,
+exclude_ids)`, `open`, `navigate`, `read` and `grep` addressed by `source_id`
+and byte offsets, plus `ingest` and `delete`. glossator started there (the
+first server commit had eight tools built on those operations) and cut to three
+on evidence:
+
+- In Tom's Work session of 10 September the model ran ten calls for two
+  questions and never used the section, step or find-on-page tools; Work
+  rendered every chunk id it was given (D-044).
+- 97% of pages fit one read under 8,000 Medium 3.5 tokens, so a whole-page read
+  is the normal move and offset navigation is the exception (D-043).
+- A model should carry a citation URL and nothing else: a chunk id is a second
+  identifier the answer cannot use. Every section has a key and every hit prints
+  the link to cite (D-047).
+- `ingest` and `delete` write chunks no citation can reach and have no place on
+  a read-only surface (D-026, D-037b).
+
+So `mistral_docs_search(q, max_hits, under)`, `mistral_docs_read_page(page_url,
+section, lang)` and `mistral_docs_history(text | page_url + section | under +
+since)`: a model addresses everything by the URL it will cite, and the toolkit's
+positional operation is still what runs underneath `read_page`. What the tool
+prints is then contained (D-050): tool results were 82% of a Work session's
+tokens, and a read now prints one language tab, one copy of a repeated sample and
+the head of a pasted output, 36% fewer characters per read at unchanged
+correctness (D-050a).
+
+### Since this assessment was first written
+
+The tables and reproductions below date from 9 September. Four decisions since
+change how the toolkit is used, not what was found: the surface is three tools
+(D-044); sections are addressed by key and every hit carries its `cite:` link
+(D-047); the history tool reads the snapshot corpora and a precomputed changelog
+as files, so the dated `snap1024` index the plugin held is no longer needed on
+the host (D-048); and page reads are contained at render time on top of the
+plugin's `read` (D-050).
+
 ## Feature table
 
 Status: **as is** (used unchanged), **wrap** (used behind a workaround),
@@ -110,7 +194,7 @@ and Vespa plugin" table only, package paths are relative to `plugins/vespa/`.
 | Answer-quality metrics | — | replace | Not in the package at all (D-016) | Budget for all of it |
 | Starter migration | Creates the first schema | replace | Invalid app name, deprecated dimensions (D-022a) | Rewrite before deploying |
 | Starter `get_index()` | Live index handle | replace | Always sets `hybrid-search` (D-014) | Pass `query_profile=None` |
-| Starter MCP server | FastMCP tools | replace | `ingest`/`delete` write uncitable chunks (D-026) | Keep the shape, rewrite the tools |
+| Starter MCP server | Seven FastMCP tools on chunk ids and offsets | replace | `ingest`/`delete` write uncitable chunks (D-026); a Work session never used five of the seven (D-044) | Three tools addressed by URL and section key |
 | Starter `COLLECTION_NAME` | Schema name from `.env` | replace | Entrypoints and migration disagree (D-022) | Own schema names in code |
 
 ## What worked well
@@ -645,3 +729,6 @@ app's `ingest`/`delete` MCP tools.
 | `LLMReRanker` | replace | Sequential, one call per candidate, and it discards its own score; one listwise call gave section recall@1 0.732 → 0.873 |
 | Retrieval eval harness | wrap | Sound arithmetic, but nDCG assumes each gold id appears once and the runner aborts on the first failure |
 | Answer generation and citations | replace | Not in the package at all |
+| Agent surface: seven tools on chunk ids | replace | Three tools addressed by the URL the model cites; the plugin's `read` still runs underneath (D-044, D-047) |
+| Time axis and changelog | own | Not in the package; snapshot corpora read as files, section identity across dates decided offline (D-041, D-048) |
+| Result containment | own | Not in the package; one language tab, no repeated sample, outputs cut, at render time (D-050) |
