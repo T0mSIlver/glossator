@@ -1,0 +1,22 @@
+{
+  "agent_deletion": "deleted",
+  "agent_id": "ag_01a0952f46dd725bb50c2f18f59e765c",
+  "connector": "01a09051-8f79-73fa-a42b-c144932140c3",
+  "connector_tools": null,
+  "consumer": "work-proxy-mistral-small-latest-none",
+  "consumers": [
+    "work-proxy-mistral-small-latest-none"
+  ],
+  "dataset": "eval/dev-smoke.jsonl",
+  "dataset_hash": "c769d857e66cf22db9e5270a14bab3104d4b0d32e2fcd446ab12fa0cad357044",
+  "fresh_count": 0,
+  "judge_model": null,
+  "kind": "work_proxy_eval",
+  "mined_count": 2,
+  "model": "mistral-small-latest",
+  "name": "work-proxy-smoke",
+  "question_count": 2,
+  "reasoning_effort": "none",
+  "run_dir": "eval/runs/2026-09-12-1033-work-proxy-smoke",
+  "timeout_s": 300.0
+}
