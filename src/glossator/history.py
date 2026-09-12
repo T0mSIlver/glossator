@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import difflib
 import hashlib
-from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 from glossator.answer.citations import find_span, fragment_link
+from glossator.citing import section_keys
 from glossator.corpus.snapshots import (
     DEFAULT_MANIFEST,
     SnapshotRecord,
@@ -18,12 +18,17 @@ from glossator.corpus.snapshots import (
 )
 from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
-from glossator.retrieval.config import RetrievalConfig
-from glossator.retrieval.engine import Hit, SearchEngine
 
 DIFF_MAX_CHARS = 6000
-QUESTION_TEXT_MAX_CHARS = 2400
 SITE_ORIGIN = "https://docs.mistral.ai"
+
+
+class UnknownPageError(ValueError):
+    """No stored snapshot contains the requested page."""
+
+
+def _canonical_url(url: str) -> str:
+    return url.rstrip("/").replace("/studio-api/", "/studio/")
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,17 +47,6 @@ class SectionState:
     content_sha256: str | None
     diff: str | None = None
     diff_truncated: bool = False
-
-
-@dataclass(frozen=True, slots=True)
-class QuestionState:
-    snapshot: str
-    state: str
-    page: str | None
-    anchor: str | None
-    content_sha256: str | None
-    text: str | None
-    text_truncated: bool = False
 
 
 def available_snapshots(manifest_path: Path = DEFAULT_MANIFEST) -> list[SnapshotRecord]:
@@ -99,37 +93,57 @@ def phrase_history(text: str, manifest_path: Path = DEFAULT_MANIFEST) -> dict[st
     }
 
 
-def _target(value: str) -> tuple[str, str | None]:
-    raw = value.strip()
+def _target(page_url: str, section: str | None) -> tuple[str, str | None]:
+    raw = page_url.strip()
     if not raw:
-        raise ValueError("section must contain a documentation URL or page path")
+        raise ValueError("page_url must contain a documentation URL or page path")
     parsed = urlsplit(raw if "://" in raw else f"{SITE_ORIGIN}/{raw.lstrip('/')}")
     if parsed.netloc and parsed.netloc != "docs.mistral.ai":
-        raise ValueError("section must be on docs.mistral.ai")
-    return f"{SITE_ORIGIN}{parsed.path.rstrip('/') or '/'}", parsed.fragment or None
+        raise ValueError("page_url must be on docs.mistral.ai")
+    key = section.strip() if section is not None else parsed.fragment
+    if section is not None and not key:
+        raise ValueError("section must contain a key")
+    return f"{SITE_ORIGIN}{parsed.path.rstrip('/') or '/'}", key or None
 
 
-def _selected(page: CorpusPage, anchor: str | None) -> tuple[str, str | None] | None:
-    if anchor is None:
+def _selected(page: CorpusPage, key: str | None) -> tuple[str, str | None] | None:
+    if key is None:
         return page.body, None
     sections = parse_sections(page.body, page_title=page.title)
-    section = next((item for item in sections if item.own_anchor == anchor), None)
-    return (section.body, section.own_anchor) if section is not None else None
+    keys = section_keys(sections)
+    for parsed, named in zip(sections, keys, strict=True):
+        if named.key == key:
+            return parsed.body, named.key
+    return None
 
 
 def _locate(
-    pages: list[CorpusPage], url: str, anchor: str | None, previous_text: str | None
+    pages: list[CorpusPage], url: str, key: str | None, previous_text: str | None
 ) -> tuple[CorpusPage, str, str | None] | None:
     page = next((item for item in pages if item.url.rstrip("/") == url.rstrip("/")), None)
     if page is not None:
-        selected = _selected(page, anchor)
+        selected = _selected(page, key)
         if selected is not None:
             return page, selected[0], selected[1]
     if previous_text:
+        matches: list[tuple[CorpusPage, str, str | None]] = []
         for candidate in pages:
-            match = find_span(candidate.body, previous_text)
-            if match is not None:
-                return candidate, candidate.body[match[0] : match[1]], None
+            if key is None:
+                match = find_span(candidate.body, previous_text)
+                if match is not None:
+                    matches.append((candidate, candidate.body[match[0] : match[1]], None))
+                continue
+            sections = parse_sections(candidate.body, page_title=candidate.title)
+            keys = section_keys(sections)
+            for parsed, named in zip(sections, keys, strict=True):
+                match = find_span(parsed.body, previous_text)
+                if match is not None:
+                    matches.append((candidate, parsed.body[match[0] : match[1]], named.key))
+        if matches:
+            return next(
+                (match for match in matches if _canonical_url(match[0].url) == _canonical_url(url)),
+                matches[0],
+            )
     return None
 
 
@@ -152,97 +166,82 @@ def _diff(before: str, after: str, limit: int) -> tuple[str, bool]:
 
 
 def section_history(
-    section: str,
+    page_url: str,
+    section: str | None = None,
     manifest_path: Path = DEFAULT_MANIFEST,
     *,
     diff_max_chars: int = DIFF_MAX_CHARS,
 ) -> dict[str, Any]:
-    url, anchor = _target(section)
-    states: list[SectionState] = []
+    url, key = _target(page_url, section)
+    snapshots = available_snapshots(manifest_path)
+    snapshot_pages = [(snapshot, _pages(snapshot)) for snapshot in snapshots]
+    pages_at_url = [
+        page
+        for _snapshot, pages in snapshot_pages
+        for page in pages
+        if page.url.rstrip("/") == url.rstrip("/")
+    ]
+    if not pages_at_url:
+        raise UnknownPageError(url)
+    if key is not None and not any(_selected(page, key) is not None for page in pages_at_url):
+        raise ValueError(
+            f'page {url} has no section "{key}" in any stored snapshot; '
+            f"read_page({url}) prints the keys"
+        )
+
+    located_states: list[tuple[CorpusPage, str, str | None] | None] = []
     previous_text: str | None = None
-    previous_digest: str | None = None
-    previous_page: str | None = None
-    for snapshot in available_snapshots(manifest_path):
-        located = _locate(_pages(snapshot), url, anchor, previous_text)
+    for _snapshot, pages in snapshot_pages:
+        located = _locate(pages, url, key, previous_text)
+        located_states.append(located)
+        if located is not None:
+            previous_text = located[1]
+
+    first_present = next((i for i, item in enumerate(located_states) if item is not None), None)
+    if first_present is not None and first_present > 0:
+        first_text = located_states[first_present][1]  # type: ignore[index]
+        for index in range(first_present - 1, -1, -1):
+            located_states[index] = _locate(snapshot_pages[index][1], url, key, first_text)
+
+    states: list[SectionState] = []
+    previous: tuple[CorpusPage, str, str | None] | None = None
+    for (snapshot, _pages_for_date), located in zip(snapshot_pages, located_states, strict=True):
         if located is None:
             states.append(SectionState(snapshot.date, "absent", None, None, None))
+            previous = None
             continue
-        page, text, found_anchor = located
+        page, text, found_key = located
         digest = _digest(text)
-        # Compared without the trailing slash on both sides: a page that only
-        # gained or lost one did not move.
         here = page.url.rstrip("/")
-        if previous_digest is None:
+        if previous is None:
             state = "moved" if here != url.rstrip("/") else "same"
-        elif digest == previous_digest:
-            state = "moved" if here != (previous_page or "").rstrip("/") else "same"
         else:
-            state = "changed"
+            previous_location = (previous[0].url.rstrip("/"), previous[2])
+            if (here, found_key) != previous_location:
+                state = "moved"
+            elif digest != _digest(previous[1]):
+                state = "changed"
+            else:
+                state = "same"
         rendered_diff = None
         truncated = False
-        if state == "changed" and previous_text is not None:
-            rendered_diff, truncated = _diff(previous_text, text, diff_max_chars)
+        if state == "changed" and previous is not None:
+            rendered_diff, truncated = _diff(previous[1], text, diff_max_chars)
         states.append(
             SectionState(
                 snapshot=snapshot.date,
                 state=state,
                 page=page.url,
-                anchor=found_anchor,
+                anchor=found_key,
                 content_sha256=digest,
                 diff=rendered_diff,
                 diff_truncated=truncated,
             )
         )
-        previous_text = text
-        previous_digest = digest
-        previous_page = page.url
-    return {"form": "section", "section": section, "states": [asdict(row) for row in states]}
-
-
-def _question_state(hit: Hit | None, previous: Hit | None, snapshot: str) -> QuestionState:
-    if hit is None:
-        return QuestionState(snapshot, "absent", None, None, None, None)
-    digest = hit.content_sha256 or _digest(hit.content)
-    previous_digest = (
-        previous.content_sha256 or _digest(previous.content) if previous is not None else None
-    )
-    if previous is None:
-        state = "same"
-    elif digest == previous_digest:
-        state = "moved" if hit.citation_url != previous.citation_url else "same"
-    else:
-        state = "changed"
-    truncated = len(hit.content) > QUESTION_TEXT_MAX_CHARS
-    text = hit.content[:QUESTION_TEXT_MAX_CHARS] + ("...[text truncated]" if truncated else "")
-    return QuestionState(
-        snapshot,
-        state,
-        hit.url,
-        hit.anchor,
-        digest,
-        text,
-        truncated,
-    )
-
-
-async def question_history(
-    question: str,
-    manifest_path: Path = DEFAULT_MANIFEST,
-    *,
-    engine_factory: Callable[[RetrievalConfig], Any] = SearchEngine,
-) -> dict[str, Any]:
-    if not question.strip():
-        raise ValueError("question must contain non-whitespace text")
-    states: list[QuestionState] = []
-    previous: Hit | None = None
-    for snapshot in available_snapshots(manifest_path):
-        config = RetrievalConfig.shipped(variant="snap1024", snapshot=snapshot.date, top_k=1)
-        hits = await engine_factory(config).search(question, top_k=1)
-        hit = hits[0] if hits else None
-        states.append(_question_state(hit, previous, snapshot.date))
-        previous = hit
+        previous = located
     return {
-        "form": "question",
-        "question": question,
+        "form": "section",
+        "page_url": url,
+        "section": key,
         "states": [asdict(row) for row in states],
     }

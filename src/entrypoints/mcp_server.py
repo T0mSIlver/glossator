@@ -608,9 +608,8 @@ def _history_description() -> str:
 
     Pass exactly one of:
         text: An exact phrase; returns its first and last appearance with links.
-        section: A docs.mistral.ai url#anchor or page; returns its state at each
-            date with the diff when it changed.
-        question: A question; returns the top matching section at each date.
+        page_url: A docs.mistral.ai page; returns its state at each date with
+            the diff when it changed. Add section for one key on that page.
     """
 
 
@@ -624,16 +623,17 @@ def _first_snapshot() -> str:
 
 async def mistral_docs_history(
     text: str | None = None,
+    page_url: str | None = None,
     section: str | None = None,
-    question: str | None = None,
 ) -> str:
-    forms = [("text", text), ("section", section), ("question", question)]
+    if section is not None and page_url is None:
+        raise _bad_param("section requires page_url.", f'{HISTORY}(page_url="url", section="key").')
+    forms = [("text", text), ("page_url", page_url)]
     selected = [(name, value) for name, value in forms if value is not None]
     if len(selected) != 1:
         raise _bad_param(
-            "history takes exactly one of text, section or question.",
-            f'{HISTORY}(text="phrase"), {HISTORY}(section="url#anchor") or '
-            f'{HISTORY}(question="question").',
+            "history takes exactly one of text or page_url.",
+            f'{HISTORY}(text="phrase") or {HISTORY}(page_url="url", section="key").',
         )
     name, value = selected[0]
     if value is None or not value.strip():
@@ -643,18 +643,16 @@ async def mistral_docs_history(
             result = await asyncio.to_thread(
                 history_service.phrase_history, value, SNAPSHOT_MANIFEST
             )
-        elif name == "section":
-            result = await asyncio.to_thread(
-                history_service.section_history, value, SNAPSHOT_MANIFEST
-            )
         else:
-            async with _admission_or_busy():
-                result = await history_service.question_history(
-                    value, SNAPSHOT_MANIFEST, engine_factory=_snapshot_engine
-                )
+            result = await asyncio.to_thread(
+                history_service.section_history, value, section, SNAPSHOT_MANIFEST
+            )
+    except history_service.UnknownPageError as exc:
+        raise _unknown_page(str(exc)) from exc
     except (OSError, ValueError) as exc:
         raise _bad_param(str(exc), "pass one documented history form.") from exc
-    lines = [f"history {name}: {json.dumps(value)}"]
+    display_name = "section" if name == "page_url" else name
+    lines = [f"history {display_name}: {json.dumps(value)}"]
     if name == "text":
         first, last = result["first"], result["last"]
         if first is None:
@@ -687,15 +685,14 @@ async def mistral_docs_history(
         lines.extend(block)
     lines.append(f"Results: {rendered} of {len(states)} stored snapshots")
     if rendered < len(states):
+        arguments = f'page_url="{value}"'
+        if section is not None:
+            arguments += f', section="{section}"'
         lines.append(
-            f'next: {HISTORY}(section="{value}") again names the same section; the dates '
+            f"next: {HISTORY}({arguments}) again names the same section; the dates "
             f"after {states[rendered - 1]['snapshot']} were not rendered in this call."
         )
     return "\n".join(lines)
-
-
-def _snapshot_engine(config: RetrievalConfig) -> SearchEngine:
-    return SearchEngine(config.model_copy(update={"rerank": False}))
 
 
 _TOOL_IMPLS: dict[str, Callable[..., Awaitable[str]]] = {

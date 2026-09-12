@@ -594,17 +594,19 @@ async def page(
 @app.get("/history")
 async def history(
     text: str | None = None,
+    page_url: str | None = None,
     section: str | None = None,
-    question: str | None = None,
 ) -> dict[str, object]:
-    forms = [("text", text), ("section", section), ("question", question)]
+    if section is not None and page_url is None:
+        raise ApiError(400, "E_BAD_PARAM", "section requires page_url", "set page_url and section")
+    forms = [("text", text), ("page_url", page_url)]
     selected = [(name, value) for name, value in forms if value is not None]
     if len(selected) != 1:
         raise ApiError(
             400,
             "E_BAD_PARAM",
-            "history requires exactly one of text, section, or question",
-            "set one query parameter; see /openapi.json for the three forms",
+            "history requires exactly one of text or page_url",
+            "set one query parameter; see /openapi.json for the forms",
         )
     name, value = selected[0]
     if value is None or not value.strip():
@@ -613,9 +615,14 @@ async def history(
     try:
         if name == "text":
             return await asyncio.to_thread(history_service.phrase_history, value, manifest)
-        if name == "section":
-            return await asyncio.to_thread(history_service.section_history, value, manifest)
-        return await history_service.question_history(value, manifest)
+        return await asyncio.to_thread(history_service.section_history, value, section, manifest)
+    except history_service.UnknownPageError as exc:
+        raise ApiError(
+            404,
+            "E_UNKNOWN_PAGE",
+            f'no indexed page has the URL "{exc}"',
+            "use the url exactly as a search hit printed it",
+        ) from exc
     except (OSError, ValueError) as exc:
         raise ApiError(
             400,

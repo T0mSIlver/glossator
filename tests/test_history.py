@@ -1,15 +1,13 @@
 import asyncio
-import hashlib
 import json
 from pathlib import Path
 
+import pytest
 from mistralai.search.toolkit.context import RetrievalContext
 from mistralai.search.toolkit.embedding import Embedder, EmbeddingResult
 
-from glossator.history import phrase_history, question_history, section_history
+from glossator.history import UnknownPageError, phrase_history, section_history
 from glossator.ingest.pipeline import CachedEmbedder
-from glossator.retrieval.config import RetrievalConfig
-from glossator.retrieval.engine import Hit
 
 
 def _page(path: Path, url: str, body: str) -> None:
@@ -64,53 +62,64 @@ def test_phrase_history_reports_first_and_last_snapshot(tmp_path: Path) -> None:
 
 
 def test_section_history_reports_a_changed_section_and_diff(tmp_path: Path) -> None:
-    result = section_history("/page#limits", _manifest(tmp_path))
+    result = section_history("/page", "limits", _manifest(tmp_path))
 
     assert [row["state"] for row in result["states"]] == ["same", "changed"]
     assert "-The limit is 10." in result["states"][1]["diff"]
     assert "+The limit is 20." in result["states"][1]["diff"]
 
 
-def test_question_history_filters_every_retrieval_to_its_date(tmp_path: Path) -> None:
+def test_section_history_rejects_unknown_page(tmp_path: Path) -> None:
+    with pytest.raises(UnknownPageError):
+        section_history("/missing", None, _manifest(tmp_path))
+
+
+def test_section_history_rejects_unknown_key(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match='no section "missing"'):
+        section_history("/page", "missing", _manifest(tmp_path))
+
+
+def test_section_history_addresses_generated_key(tmp_path: Path) -> None:
     manifest = _manifest(tmp_path)
-    configs: list[RetrievalConfig] = []
+    for date in ("2026-06-01", "2026-06-15"):
+        _page(
+            tmp_path / date / "page.md",
+            "https://docs.mistral.ai/page",
+            "# Page\n\n## Limits\n\nThe limit is 10.\n",
+        )
 
-    class FakeEngine:
-        def __init__(self, config: RetrievalConfig) -> None:
-            configs.append(config)
-            self.config = config
+    result = section_history("/page", "limits", manifest)
 
-        async def search(self, question: str, top_k: int) -> list[Hit]:
-            del question, top_k
-            date = self.config.snapshot or ""
-            content = f"answer on {date}"
-            return [
-                Hit(
-                    chunk_id=date,
-                    score=1.0,
-                    url="https://docs.mistral.ai/page",
-                    anchor="limits",
-                    heading_path=("Page", "Limits"),
-                    page_title="Page",
-                    kind="doc",
-                    locale="en",
-                    section_index=1,
-                    content=content,
-                    source_id=f"page:{date}",
-                    start_offset=0,
-                    end_offset=len(content),
-                    snapshot=date,
-                    content_sha256=hashlib.sha256(content.encode()).hexdigest(),
-                )
-            ]
+    assert result["section"] == "limits"
+    assert all(row["anchor"] == "limits" for row in result["states"])
 
-    result = asyncio.run(
-        question_history("what is the limit?", manifest, engine_factory=FakeEngine)
+
+def test_section_history_prefers_renamed_page_for_leading_history(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    payload = json.loads(manifest.read_text())
+    old_root = Path(payload["snapshots"][0]["corpus_dir"])
+    new_root = Path(payload["snapshots"][1]["corpus_dir"])
+    (old_root / "page.md").unlink()
+    _page(
+        old_root / "old.md",
+        "https://docs.mistral.ai/studio-api/page",
+        "# Page\n\n## Before {#before}\n\nShared introduction.\n",
+    )
+    _page(
+        old_root / "unrelated.md",
+        "https://docs.mistral.ai/admin/page",
+        "# Admin\n\n## Before {#before}\n\nShared introduction.\n",
+    )
+    _page(
+        new_root / "page.md",
+        "https://docs.mistral.ai/studio/page",
+        "# Page\n\n## Before {#before}\n\nShared introduction.\n",
     )
 
-    assert [config.snapshot for config in configs] == ["2026-06-01", "2026-06-15"]
-    assert all(config.rerank for config in configs)
-    assert len(result["states"]) == 2
+    states = section_history("https://docs.mistral.ai/studio/page", "before", manifest)["states"]
+
+    assert states[0]["page"] == "https://docs.mistral.ai/studio-api/page"
+    assert states[1]["state"] == "moved"
 
 
 class FakeEmbedder(Embedder):
@@ -154,6 +163,6 @@ def test_first_and_last_follow_the_dates_not_the_manifest_order(tmp_path: Path) 
 
     assert result["first"]["snapshot"] == "2026-06-01"
     assert result["last"]["snapshot"] == "2026-06-15"
-    states = section_history("https://docs.mistral.ai/page#limits", manifest)["states"]
+    states = section_history("https://docs.mistral.ai/page#limits", None, manifest)["states"]
     assert [state["snapshot"] for state in states] == ["2026-06-01", "2026-06-15"]
     assert states[1]["state"] == "changed"

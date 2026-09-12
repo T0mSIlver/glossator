@@ -538,9 +538,12 @@ def test_read_page_asks_the_index_for_the_whole_page_under_the_vespa_limit(mcp_s
 
 def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
     text = _call_error(mcp_server, "mistral_docs_history", {})
-    assert "exactly one of text, section or question" in text
-    text = _call_error(mcp_server, "mistral_docs_history", {"text": "a", "section": "b"})
+    assert "exactly one of text or page_url" in text
+    text = _call_error(mcp_server, "mistral_docs_history", {"text": "a", "page_url": PAGE})
     assert "exactly one of" in text
+
+    text = _call_error(mcp_server, "mistral_docs_history", {"section": "a"})
+    assert "section requires page_url" in text
 
 
 def test_history_text_prints_first_last_and_count(
@@ -565,7 +568,7 @@ def test_history_text_prints_first_last_and_count(
 def test_history_section_renders_states_and_diffs(
     mcp_server: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake(section: str, manifest: Any) -> dict[str, Any]:
+    def fake(page_url: str, section: str | None, manifest: Any) -> dict[str, Any]:
         return {
             "form": "section",
             "section": section,
@@ -583,7 +586,7 @@ def test_history_section_renders_states_and_diffs(
         }
 
     monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
-    text = _call(mcp_server, "mistral_docs_history", {"section": f"{PAGE}#a"})
+    text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "a"})
     assert f"2026-06-01: same | {PAGE}#a" in text
     assert "```diff\n-old\n+new\n```" in text
     assert "Results: 2 of 2 stored snapshots" in text
@@ -592,7 +595,7 @@ def test_history_section_renders_states_and_diffs(
 def test_history_stops_at_its_budget_and_names_the_next_call(
     mcp_server: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake(section: str, manifest: Any) -> dict[str, Any]:
+    def fake(page_url: str, section: str | None, manifest: Any) -> dict[str, Any]:
         return {
             "form": "section",
             "section": section,
@@ -604,16 +607,9 @@ def test_history_stops_at_its_budget_and_names_the_next_call(
 
     monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
     monkeypatch.setattr(mcp_server, "HISTORY_MAX_CHARS", 1200)
-    text = _call(mcp_server, "mistral_docs_history", {"section": PAGE})
+    text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE})
     assert "Results: 2 of 5 stored snapshots" in text
     assert "after 2026-02-01 were not rendered" in text
-
-
-def test_history_question_runs_without_the_reranker(mcp_server: Any) -> None:
-    config = mcp_server.RetrievalConfig.shipped(variant="snap1024", snapshot="2026-06-01", top_k=1)
-    assert config.rerank is True
-    engine = mcp_server._snapshot_engine(config)
-    assert engine.config.rerank is False
 
 
 def test_health_lists_pages_chunks_and_the_three_tools(
