@@ -58,7 +58,7 @@ class _SectionRecord:
         return self.page.rstrip("/"), self.key
 
 
-def _comparable_body(body: str) -> str:
+def comparable_body(body: str) -> str:
     without_anchor_markup = _HEADING_ANCHOR.sub(r"\1\2", body)
     return normalize(_INTERNAL_LINK.sub(_link_tail, without_anchor_markup))
 
@@ -71,7 +71,7 @@ def _link_tail(match: re.Match[str]) -> str:
 
 
 def _contains_body(haystack: str, needle: str) -> bool:
-    return find_span(_comparable_body(haystack), _comparable_body(needle)) is not None
+    return find_span(comparable_body(haystack), comparable_body(needle)) is not None
 
 
 def _shared_path_tail(left: str, right: str) -> int:
@@ -120,7 +120,7 @@ def _records(snapshot: SnapshotRecord) -> tuple[list[_SectionRecord], list[Corpu
                     key=key.key,
                     heading_path=section.heading_path,
                     body=section.body,
-                    normalized=_comparable_body(section.body),
+                    normalized=comparable_body(section.body),
                     cite=cite,
                 )
             )
@@ -172,7 +172,7 @@ def _match_pair(
             matched[old_index] = new_index
             available.remove(new_index)
 
-    page_text = [(page, _comparable_body(page.body)) for page in after_pages]
+    page_text = [(page, comparable_body(page.body)) for page in after_pages]
     for old_index, old in enumerate(before):
         if old_index in matched or not old.normalized:
             continue
@@ -202,7 +202,7 @@ def _match_pair(
         source_pages = [
             page
             for page, body in before_page_text.items()
-            if new.normalized in _comparable_body(body)
+            if new.normalized in comparable_body(body)
         ]
         if not source_pages:
             continue

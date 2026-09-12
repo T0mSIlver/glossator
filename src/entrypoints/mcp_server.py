@@ -792,9 +792,10 @@ async def mistral_docs_history(
         if first is None:
             lines.append("Results: the phrase is absent from every stored snapshot.")
         else:
-            lines.append(
-                f"first stored date with the phrase: {first['snapshot']} | {first['page']}"
-            )
+            first_line = f"first stored date with the phrase: {first['snapshot']} | {first['page']}"
+            if result.get("absent_before"):
+                first_line += f" (absent at {result['absent_before']})"
+            lines.append(first_line)
             lines.append(f"last stored date with the phrase: {last['snapshot']} | {last['page']}")
             lines.append(
                 f"Results: present in {result['snapshots_found']} of "

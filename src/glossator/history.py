@@ -10,7 +10,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from glossator.answer.citations import find_span, fragment_link
-from glossator.changelog import is_under, under_prefix
+from glossator.changelog import comparable_body, is_under, under_prefix
 from glossator.citing import section_keys
 from glossator.corpus.snapshots import (
     DEFAULT_MANIFEST,
@@ -120,11 +120,18 @@ def phrase_history(
         raise UnknownPageError(scope_url)
     if prefix is not None and scoped_pages == 0:
         raise ValueError(f'no stored page exists under "{prefix}"')
+    # The stored date before the first appearance, so the render can say the
+    # phrase was absent then: an appearance is a bound, not a day (D-048).
+    dates = [snapshot.date for snapshot in snapshots]
+    absent_before = None
+    if occurrences and dates.index(occurrences[0].snapshot) > 0:
+        absent_before = dates[dates.index(occurrences[0].snapshot) - 1]
     return {
         "form": "text",
         "text": text,
         "page_url": scope_url,
         "under": prefix,
+        "absent_before": absent_before,
         "first": asdict(occurrences[0]) if occurrences else None,
         "last": asdict(occurrences[-1]) if occurrences else None,
         "snapshots_found": len(occurrences),
@@ -165,19 +172,21 @@ def _locate(
         if selected is not None:
             return page, selected[0], selected[1]
     if previous_text:
+        # Bodies compare with internal links reduced to their last path segment,
+        # as the changelog builder compares them: a folder rename rewrites the
+        # links inside a page, and the page is still the same page (D-048a).
+        wanted = comparable_body(previous_text)
         matches: list[tuple[CorpusPage, str, str | None]] = []
         for candidate in pages:
             if key is None:
-                match = find_span(candidate.body, previous_text)
-                if match is not None:
-                    matches.append((candidate, candidate.body[match[0] : match[1]], None))
+                if comparable_body(candidate.body) == wanted:
+                    matches.append((candidate, candidate.body, None))
                 continue
             sections = parse_sections(candidate.body, page_title=candidate.title)
             keys = section_keys(sections)
             for parsed, named in zip(sections, keys, strict=True):
-                match = find_span(parsed.body, previous_text)
-                if match is not None:
-                    matches.append((candidate, parsed.body[match[0] : match[1]], named.key))
+                if find_span(comparable_body(parsed.body), wanted) is not None:
+                    matches.append((candidate, parsed.body, named.key))
         if matches:
             return max(matches, key=lambda match: _shared_path_tail(url, match[0].url))
     return None

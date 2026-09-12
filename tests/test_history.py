@@ -58,7 +58,12 @@ def test_phrase_history_reports_first_and_last_snapshot(tmp_path: Path) -> None:
 
     assert result["first"]["snapshot"] == "2026-06-01"
     assert result["last"]["snapshot"] == "2026-06-15"
+    assert result["absent_before"] is None
     assert ":~:text=" in result["first"]["fragment_url"]
+
+    later = phrase_history("The limit is 20", _manifest(tmp_path))
+    assert later["first"]["snapshot"] == "2026-06-15"
+    assert later["absent_before"] == "2026-06-01"
 
 
 def test_section_history_reports_a_changed_section_and_diff(tmp_path: Path) -> None:

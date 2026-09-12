@@ -607,17 +607,18 @@ def test_history_text_prints_first_last_and_count(
         return {
             "form": "text",
             "text": text,
-            "first": {"snapshot": "2026-06-01", "page": PAGE, "fragment_url": PAGE},
+            "first": {"snapshot": "2026-06-15", "page": PAGE, "fragment_url": PAGE},
             "last": {"snapshot": "2026-09-07", "page": PAGE, "fragment_url": PAGE},
-            "snapshots_found": 8,
+            "absent_before": "2026-06-01",
+            "snapshots_found": 7,
             "snapshots_total": 8,
         }
 
     monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"text": "a phrase"})
-    assert f"first stored date with the phrase: 2026-06-01 | {PAGE}" in text
+    assert f"first stored date with the phrase: 2026-06-15 | {PAGE} (absent at 2026-06-01)" in text
     assert f"last stored date with the phrase: 2026-09-07 | {PAGE}" in text
-    assert "Results: present in 8 of 8 stored snapshots" in text
+    assert "Results: present in 7 of 8 stored snapshots" in text
 
 
 def test_history_section_renders_states_and_diffs(
