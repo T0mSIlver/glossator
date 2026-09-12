@@ -560,8 +560,8 @@ def test_history_text_prints_first_last_and_count(
 
     monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"text": "a phrase"})
-    assert f"first: 2026-06-01 | {PAGE}" in text
-    assert f"last: 2026-09-07 | {PAGE}" in text
+    assert f"first stored date with the phrase: 2026-06-01 | {PAGE}" in text
+    assert f"last stored date with the phrase: 2026-09-07 | {PAGE}" in text
     assert "Results: present in 8 snapshots" in text
 
 
@@ -587,7 +587,8 @@ def test_history_section_renders_states_and_diffs(
 
     monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "a"})
-    assert f"2026-06-01: same | {PAGE}#a" in text
+    assert f"present at 2026-06-01 | {PAGE}#a" in text
+    assert f"changed between 2026-06-01 and 2026-06-15 | {PAGE}#a" in text
     assert "```diff\n-old\n+new\n```" in text
     assert "Results: 2 of 2 stored snapshots" in text
 
@@ -610,6 +611,31 @@ def test_history_stops_at_its_budget_and_names_the_next_call(
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE})
     assert "Results: 2 of 5 stored snapshots" in text
     assert "after 2026-02-01 were not rendered" in text
+
+
+def test_history_collapses_unchanged_dates_and_bounds_moves(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    old = "https://docs.mistral.ai/old"
+
+    def fake(page_url: str, section: str | None, manifest: Any) -> dict[str, Any]:
+        del page_url, section, manifest
+        return {
+            "states": [
+                {"snapshot": "2026-06-01", "state": "same", "page": old, "anchor": "a"},
+                {"snapshot": "2026-06-15", "state": "same", "page": old, "anchor": "a"},
+                {"snapshot": "2026-07-01", "state": "moved", "page": PAGE, "anchor": "b"},
+                {"snapshot": "2026-07-15", "state": "same", "page": PAGE, "anchor": "b"},
+            ]
+        }
+
+    monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
+    text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "b"})
+
+    assert "present at 2026-06-01" in text
+    assert "same through 2026-06-15" in text
+    assert f"moved between 2026-06-15 and 2026-07-01 | {old}#a -> {PAGE}#b" in text
+    assert "same through 2026-07-15" in text
 
 
 def test_health_lists_pages_chunks_and_the_three_tools(

@@ -621,6 +621,66 @@ def _first_snapshot() -> str:
     return snapshots[0].date if snapshots else "the first stored snapshot"
 
 
+def _state_target(state: dict[str, Any]) -> str:
+    target = state.get("page") or "(absent)"
+    if state.get("anchor"):
+        target += f"#{state['anchor']}"
+    return target
+
+
+def _section_timeline(states: list[dict[str, Any]]) -> list[tuple[int, list[str]]]:
+    if not states:
+        return []
+    timeline: list[tuple[int, list[str]]] = []
+    first = states[0]
+    if first.get("page"):
+        timeline.append((0, [f"present at {first['snapshot']} | {_state_target(first)}"]))
+    else:
+        timeline.append((0, [f"absent at {first['snapshot']}"]))
+
+    index = 1
+    while index < len(states):
+        state = states[index]
+        previous = states[index - 1]
+        date = state["snapshot"]
+        before = previous["snapshot"]
+        if state.get("page") is None:
+            if previous.get("page") is not None:
+                lines = [f"removed between {before} and {date} | {_state_target(previous)}"]
+            else:
+                end = index
+                while end + 1 < len(states) and states[end + 1].get("page") is None:
+                    end += 1
+                lines = [f"absent through {states[end]['snapshot']}"]
+                index = end
+        elif previous.get("page") is None:
+            lines = [f"added between {before} and {date} | {_state_target(state)}"]
+        elif state["state"] == "changed":
+            lines = [f"changed between {before} and {date} | {_state_target(state)}"]
+            if state.get("diff"):
+                lines.extend(["```diff", state["diff"], "```"])
+                if state.get("diff_truncated"):
+                    lines.append(DIFF_LIMIT_NOTE)
+        elif state["state"] == "moved":
+            lines = [
+                f"moved between {before} and {date} | "
+                f"{_state_target(previous)} -> {_state_target(state)}"
+            ]
+        else:
+            end = index
+            while (
+                end + 1 < len(states)
+                and states[end + 1].get("page") is not None
+                and states[end + 1]["state"] == "same"
+            ):
+                end += 1
+            lines = [f"same through {states[end]['snapshot']} | {_state_target(states[end])}"]
+            index = end
+        timeline.append((index, lines))
+        index += 1
+    return timeline
+
+
 async def mistral_docs_history(
     text: str | None = None,
     page_url: str | None = None,
@@ -658,39 +718,31 @@ async def mistral_docs_history(
         if first is None:
             lines.append("Results: the phrase is absent from every stored snapshot.")
         else:
-            lines.append(f"first: {first['snapshot']} | {first['page']}")
-            lines.append(f"last: {last['snapshot']} | {last['page']}")
+            lines.append(
+                f"first stored date with the phrase: {first['snapshot']} | {first['page']}"
+            )
+            lines.append(f"last stored date with the phrase: {last['snapshot']} | {last['page']}")
             lines.append(f"Results: present in {result['snapshots_found']} snapshots")
         return "\n".join(lines)
     states = result["states"]
     spent = 0
-    rendered = 0
-    for state in states:
-        block: list[str] = []
-        target = state.get("page") or "(absent)"
-        if state.get("anchor"):
-            target += f"#{state['anchor']}"
-        block.append(f"{state['snapshot']}: {state['state']} | {target}")
-        if state.get("diff"):
-            block.extend(["```diff", state["diff"], "```"])
-            if state.get("diff_truncated"):
-                block.append(DIFF_LIMIT_NOTE)
-        if state.get("text"):
-            block.append(state["text"])
+    rendered = -1
+    for end_index, block in _section_timeline(states):
         size = sum(len(line) + 1 for line in block)
-        if rendered and spent + size > HISTORY_MAX_CHARS:
+        if rendered >= 0 and spent + size > HISTORY_MAX_CHARS:
             break
         spent += size
-        rendered += 1
+        rendered = end_index
         lines.extend(block)
-    lines.append(f"Results: {rendered} of {len(states)} stored snapshots")
-    if rendered < len(states):
+    shown = rendered + 1
+    lines.append(f"Results: {shown} of {len(states)} stored snapshots")
+    if shown < len(states):
         arguments = f'page_url="{value}"'
         if section is not None:
             arguments += f', section="{section}"'
         lines.append(
             f"next: {HISTORY}({arguments}) again names the same section; the dates "
-            f"after {states[rendered - 1]['snapshot']} were not rendered in this call."
+            f"after {states[rendered]['snapshot']} were not rendered in this call."
         )
     return "\n".join(lines)
 
