@@ -1,0 +1,5502 @@
+[
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/authentication#make-a-request",
+    "heading_path": [
+      "Authentication",
+      "Authentication and Admin API keys",
+      "Make a request"
+    ],
+    "key": "make-a-request",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/authentication",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles#before-you-start",
+    "heading_path": [
+      "Manage groups and roles",
+      "Manage groups and roles with the Admin API",
+      "Before you start"
+    ],
+    "key": "before-you-start",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles#group-org-role",
+    "heading_path": [
+      "Manage groups and roles",
+      "Manage groups and roles with the Admin API",
+      "Assign a group to a workspace",
+      "Set a group's Organization role"
+    ],
+    "key": "group-org-role",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles#manage-groups",
+    "heading_path": [
+      "Manage groups and roles",
+      "Manage groups and roles with the Admin API",
+      "Manage groups"
+    ],
+    "key": "manage-groups",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles#members",
+    "heading_path": [
+      "Manage groups and roles",
+      "Manage groups and roles with the Admin API",
+      "Manage members"
+    ],
+    "key": "members",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles#roles",
+    "heading_path": [
+      "Manage groups and roles",
+      "Manage groups and roles with the Admin API",
+      "Roles"
+    ],
+    "key": "roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles#workspace-assignments",
+    "heading_path": [
+      "Manage groups and roles",
+      "Manage groups and roles with the Admin API",
+      "Assign a group to a workspace"
+    ],
+    "key": "workspace-assignments",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-groups-roles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#before-you-start",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "Before you start"
+    ],
+    "key": "before-you-start",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#create-users",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "Create users"
+    ],
+    "key": "create-users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#delete-user",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "Delete a user"
+    ],
+    "key": "delete-user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#get-user",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "List users",
+      "Get a single user"
+    ],
+    "key": "get-user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#invitations",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "Invitations"
+    ],
+    "key": "invitations",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#list-users",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "List users"
+    ],
+    "key": "list-users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#organization-roles",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "Organization roles"
+    ],
+    "key": "organization-roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-users#update-user",
+    "heading_path": [
+      "Manage users",
+      "Manage users with the Admin API",
+      "Update a user"
+    ],
+    "key": "update-user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#before-you-start",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Before you start"
+    ],
+    "key": "before-you-start",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#create-workspace",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Create a Workspace"
+    ],
+    "key": "create-workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#delete-workspace",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Delete a Workspace"
+    ],
+    "key": "delete-workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#list-workspaces",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "List Workspaces"
+    ],
+    "key": "list-workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#members",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Manage members"
+    ],
+    "key": "members",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#remove-members",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Manage members",
+      "Remove members"
+    ],
+    "key": "remove-members",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#update-workspace",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Update a Workspace"
+    ],
+    "key": "update-workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/manage-workspaces#workspace-roles",
+    "heading_path": [
+      "Manage Workspaces",
+      "Manage Workspaces with the Admin API",
+      "Workspace roles"
+    ],
+    "key": "workspace-roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/manage-workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/overview#roles",
+    "heading_path": [
+      "Overview",
+      "Admin API overview",
+      "Roles and permissions"
+    ],
+    "key": "roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/overview",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#before-you-start",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "Before you start"
+    ],
+    "key": "before-you-start",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#billing-usage",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "Billing usage"
+    ],
+    "key": "billing-usage",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#lechat-by-agent",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "le Chat analytics",
+      "By agent"
+    ],
+    "key": "lechat-by-agent",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#lechat-by-time",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "le Chat analytics",
+      "Over time"
+    ],
+    "key": "lechat-by-time",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#lechat-by-user",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "le Chat analytics",
+      "By user"
+    ],
+    "key": "lechat-by-user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#limits",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "Spending and rate limits"
+    ],
+    "key": "limits",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#vibe-by-organization",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "Vibe Code analytics",
+      "By Organization"
+    ],
+    "key": "vibe-by-organization",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/usage-metrics#vibe-by-workspace",
+    "heading_path": [
+      "Usage metrics",
+      "Usage metrics with the Admin API",
+      "Vibe Code analytics",
+      "By workspace"
+    ],
+    "key": "vibe-by-workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/user-provisioning#assign-workspace",
+    "heading_path": [
+      "User provisioning",
+      "User provisioning with the Admin API",
+      "Assign a group to a workspace"
+    ],
+    "key": "assign-workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/user-provisioning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/user-provisioning#before-you-start",
+    "heading_path": [
+      "User provisioning",
+      "User provisioning with the Admin API",
+      "Before you start"
+    ],
+    "key": "before-you-start",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/user-provisioning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/user-provisioning#create-users",
+    "heading_path": [
+      "User provisioning",
+      "User provisioning with the Admin API",
+      "Create users in bulk"
+    ],
+    "key": "create-users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/user-provisioning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/user-provisioning#group-users",
+    "heading_path": [
+      "User provisioning",
+      "User provisioning with the Admin API",
+      "Group users"
+    ],
+    "key": "group-users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/user-provisioning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/user-provisioning#invite-users",
+    "heading_path": [
+      "User provisioning",
+      "User provisioning with the Admin API",
+      "Invite users by email"
+    ],
+    "key": "invite-users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/user-provisioning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/admin-api/user-provisioning#lifecycle",
+    "heading_path": [
+      "User provisioning",
+      "User provisioning with the Admin API",
+      "Manage the user lifecycle"
+    ],
+    "key": "lifecycle",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/admin-api/user-provisioning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/invoices#contents",
+    "heading_path": [
+      "Invoices",
+      "What invoices include"
+    ],
+    "key": "contents",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/invoices",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/invoices#payment-schedule",
+    "heading_path": [
+      "Invoices",
+      "Payment schedule"
+    ],
+    "key": "payment-schedule",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/invoices",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#api-plan",
+    "heading_path": [
+      "Subscriptions",
+      "API Plan"
+    ],
+    "key": "api-plan",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#free-mode",
+    "heading_path": [
+      "Subscriptions",
+      "API Plan",
+      "Free mode"
+    ],
+    "key": "free-mode",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#included-monthly-usage",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription",
+      "Included monthly usage"
+    ],
+    "key": "included-monthly-usage",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#manage-subscription",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription",
+      "Manage your plan"
+    ],
+    "key": "manage-subscription",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#mistral-code",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription",
+      "Mistral Code and Vibe Code"
+    ],
+    "key": "mistral-code",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#mistral-plan",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription",
+      "Mistral plan"
+    ],
+    "key": "mistral-plan",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#open-subscriptions",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription",
+      "Open Subscription"
+    ],
+    "key": "open-subscriptions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#pay-as-you-go",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription",
+      "Pay-as-you-go"
+    ],
+    "key": "pay-as-you-go",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#scale-plan",
+    "heading_path": [
+      "Subscriptions",
+      "API Plan",
+      "Scale plan"
+    ],
+    "key": "scale-plan",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "heading_path": [
+      "Subscriptions",
+      "Subscription"
+    ],
+    "key": "subscription",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "heading_path": [
+      "Subscriptions"
+    ],
+    "key": "subscriptions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/subscriptions#vibe-plans",
+    "heading_path": [
+      "Subscriptions",
+      "Vibe plans"
+    ],
+    "key": "vibe-plans",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/subscriptions",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/usage-limits#api-plan-and-tiers",
+    "heading_path": [
+      "Usage and limits",
+      "API plan and usage tiers"
+    ],
+    "key": "api-plan-and-tiers",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/billing-usage/usage-limits#plan-usage-and-limits",
+    "heading_path": [
+      "Usage and limits",
+      "Plan, usage, and limits"
+    ],
+    "key": "plan-usage-and-limits",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/identity-access/api-keys#api-key-scope",
+    "heading_path": [
+      "API keys",
+      "API key scope"
+    ],
+    "key": "api-key-scope",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/identity-access/api-keys",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/identity-access/roles-permissions#assign-roles",
+    "heading_path": [
+      "Roles and permissions (RBAC)",
+      "Assign roles"
+    ],
+    "key": "assign-roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/identity-access/roles-permissions",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/identity-access/roles-permissions#workspace-roles",
+    "heading_path": [
+      "Roles and permissions (RBAC)",
+      "Workspace roles"
+    ],
+    "key": "workspace-roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/identity-access/roles-permissions",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/identity-access/user-management#seats-and-subscriptions",
+    "heading_path": [
+      "User management",
+      "Manage members",
+      "Manage seats and subscriptions"
+    ],
+    "key": "seats-and-subscriptions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/identity-access/user-management",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/identity-access/user-management",
+    "heading_path": [
+      "User management"
+    ],
+    "key": "user-management",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/identity-access/user-management",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Actor types"
+    ],
+    "key": "actor-types",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference"
+    ],
+    "key": "audit-logs-reference",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "Billing events"
+    ],
+    "key": "billing-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference#:~:text=Use%20these%20query",
+    "heading_path": [
+      "Audit logs reference",
+      "Filters"
+    ],
+    "key": "filters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "Jobs and files events"
+    ],
+    "key": "jobs-and-files-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "le Chat events"
+    ],
+    "key": "le-chat-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "Library and integration events"
+    ],
+    "key": "library-and-integration-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Metadata fields"
+    ],
+    "key": "metadata-fields",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "Other events"
+    ],
+    "key": "other-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Response fields"
+    ],
+    "key": "response-fields",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "Studio events"
+    ],
+    "key": "studio-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Target types"
+    ],
+    "key": "target-types",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "heading_path": [
+      "Audit logs reference",
+      "Event types",
+      "User management events"
+    ],
+    "key": "user-management-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/audit-logs/reference",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/monitor-comply/privacy-data-controls#data-usage",
+    "heading_path": [
+      "Privacy and data controls",
+      "Privacy",
+      "Data usage"
+    ],
+    "key": "data-usage",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/monitor-comply/privacy-data-controls",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/admin/set-up-organization/create-organization#next-steps",
+    "heading_path": [
+      "Create your Organization",
+      "Next steps"
+    ],
+    "key": "next-steps",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/set-up-organization/create-organization",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "heading_path": [
+      "Beta Admin Analytics API"
+    ],
+    "key": "beta-admin-analytics-api",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_by_agent_stats_api_admin_analytics_vibe_usage_by_agent_stats",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get By Agent Stats"
+    ],
+    "key": "operation-get_by_agent_stats_api_admin_analytics_vibe_usage_by_agent_stats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_by_agent_stats_api_admin_analytics_vibe_usage_by_agent_stats",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get By Agent Stats",
+      "Responses"
+    ],
+    "key": "operation-get_by_agent_stats_api_admin_analytics_vibe_usage_by_agent_stats/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_by_time_stats_api_admin_analytics_vibe_usage_by_time_stats",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get By Time Stats"
+    ],
+    "key": "operation-get_by_time_stats_api_admin_analytics_vibe_usage_by_time_stats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_by_time_stats_api_admin_analytics_vibe_usage_by_time_stats",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get By Time Stats",
+      "Responses"
+    ],
+    "key": "operation-get_by_time_stats_api_admin_analytics_vibe_usage_by_time_stats/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_by_user_stats_api_admin_analytics_vibe_usage_by_user_stats",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get By User Stats"
+    ],
+    "key": "operation-get_by_user_stats_api_admin_analytics_vibe_usage_by_user_stats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_by_user_stats_api_admin_analytics_vibe_usage_by_user_stats",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get By User Stats",
+      "Responses"
+    ],
+    "key": "operation-get_by_user_stats_api_admin_analytics_vibe_usage_by_user_stats/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_organization_stats_api_admin_analytics_vibe_usage_by_organization",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get Organization Stats"
+    ],
+    "key": "operation-get_organization_stats_api_admin_analytics_vibe_usage_by_organization",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics#operation-get_workspace_stats_api_admin_analytics_vibe_usage_by_workspace",
+    "heading_path": [
+      "Beta Admin Analytics API",
+      "Get Workspace Stats"
+    ],
+    "key": "operation-get_workspace_stats_api_admin_analytics_vibe_usage_by_workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys#operation-users_api_admin_api_keys_create_api_key",
+    "heading_path": [
+      "Beta Admin Api Keys API",
+      "Create Api Key"
+    ],
+    "key": "operation-users_api_admin_api_keys_create_api_key",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys#operation-users_api_admin_api_keys_delete_api_key",
+    "heading_path": [
+      "Beta Admin Api Keys API",
+      "Delete Api Key"
+    ],
+    "key": "operation-users_api_admin_api_keys_delete_api_key",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys#operation-users_api_admin_api_keys_get_api_keys",
+    "heading_path": [
+      "Beta Admin Api Keys API",
+      "Get Api Keys"
+    ],
+    "key": "operation-users_api_admin_api_keys_get_api_keys",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/audit-logs#operation-users_api_admin_audit_logs_get_audit_logs",
+    "heading_path": [
+      "Beta Admin Audit Logs API",
+      "Get Audit Logs"
+    ],
+    "key": "operation-users_api_admin_audit_logs_get_audit_logs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/audit-logs",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/billing#operation-users_api_admin_rate_limits_get_rate_limits",
+    "heading_path": [
+      "Beta Admin Billing API",
+      "Get Rate Limits"
+    ],
+    "key": "operation-users_api_admin_rate_limits_get_rate_limits",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/billing",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/billing#operation-users_api_admin_spend_limits_get_spend_limits",
+    "heading_path": [
+      "Beta Admin Billing API",
+      "Get Spend Limits"
+    ],
+    "key": "operation-users_api_admin_spend_limits_get_spend_limits",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/billing",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/billing#operation-users_api_admin_spend_limits_update_spend_limits",
+    "heading_path": [
+      "Beta Admin Billing API",
+      "Update Spend Limits"
+    ],
+    "key": "operation-users_api_admin_spend_limits_update_spend_limits",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/billing",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/billing#operation-users_api_admin_usage_get_usage",
+    "heading_path": [
+      "Beta Admin Billing API",
+      "Get Usage"
+    ],
+    "key": "operation-users_api_admin_usage_get_usage",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/billing",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_admin_user_groups_get_group_workspace_assignments",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Get Group Workspace Assignments"
+    ],
+    "key": "operation-users_admin_user_groups_get_group_workspace_assignments",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_admin_user_groups_remove_group_from_workspace",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Remove Group From Workspace"
+    ],
+    "key": "operation-users_admin_user_groups_remove_group_from_workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_admin_user_groups_update_group_workspace_assignment",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Update Group Workspace Assignment"
+    ],
+    "key": "operation-users_admin_user_groups_update_group_workspace_assignment",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_admin_user_groups_update_group_workspace_assignment",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Update Group Workspace Assignment",
+      "Request body"
+    ],
+    "key": "operation-users_admin_user_groups_update_group_workspace_assignment/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_admin_user_groups_update_user_group_organization_role",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Update User Group Organization Role"
+    ],
+    "key": "operation-users_admin_user_groups_update_user_group_organization_role",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_assign_group_to_workspace",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Assign Group To Workspace"
+    ],
+    "key": "operation-users_api_admin_user_groups_assign_group_to_workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_assign_group_to_workspace",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Assign Group To Workspace",
+      "Request body"
+    ],
+    "key": "operation-users_api_admin_user_groups_assign_group_to_workspace/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_assign_users_to_group",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Assign Users To Group"
+    ],
+    "key": "operation-users_api_admin_user_groups_assign_users_to_group",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_create_user_group",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Create User Group"
+    ],
+    "key": "operation-users_api_admin_user_groups_create_user_group",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_delete_user_group",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Delete User Group"
+    ],
+    "key": "operation-users_api_admin_user_groups_delete_user_group",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_get_user_group",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Get User Group"
+    ],
+    "key": "operation-users_api_admin_user_groups_get_user_group",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_get_user_group_members",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Get User Group Members"
+    ],
+    "key": "operation-users_api_admin_user_groups_get_user_group_members",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_get_user_groups",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Get User Groups"
+    ],
+    "key": "operation-users_api_admin_user_groups_get_user_groups",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_provision_group_to_workspace",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Provision Group To Workspace"
+    ],
+    "key": "operation-users_api_admin_user_groups_provision_group_to_workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_provision_group_to_workspace",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Provision Group To Workspace",
+      "Request body"
+    ],
+    "key": "operation-users_api_admin_user_groups_provision_group_to_workspace/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_remove_users_from_group",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Remove Users From Group"
+    ],
+    "key": "operation-users_api_admin_user_groups_remove_users_from_group",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups#operation-users_api_admin_user_groups_update_user_group",
+    "heading_path": [
+      "Beta Admin User Groups API",
+      "Update User Group"
+    ],
+    "key": "operation-users_api_admin_user_groups_update_user_group",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_roles_get_roles",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Get Roles"
+    ],
+    "key": "operation-users_api_admin_roles_get_roles",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_create_users",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Create Users"
+    ],
+    "key": "operation-users_api_admin_users_create_users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_delete_invite",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Delete Invite"
+    ],
+    "key": "operation-users_api_admin_users_delete_invite",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_delete_user",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Delete User"
+    ],
+    "key": "operation-users_api_admin_users_delete_user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_get_invite",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Get Invite"
+    ],
+    "key": "operation-users_api_admin_users_get_invite",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_get_user",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Get User"
+    ],
+    "key": "operation-users_api_admin_users_get_user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_get_users",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Get Users"
+    ],
+    "key": "operation-users_api_admin_users_get_users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_invite_users",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Invite Users"
+    ],
+    "key": "operation-users_api_admin_users_invite_users",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/users#operation-users_api_admin_users_update_user",
+    "heading_path": [
+      "Beta Admin Users API",
+      "Update User"
+    ],
+    "key": "operation-users_api_admin_users_update_user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/users",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API"
+    ],
+    "key": "beta-admin-vibe-code-analytics-api",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics#operation-get_organization_stats_v1_admin_analytics_vibe_code_usage_by_organization",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API",
+      "Usage by organization"
+    ],
+    "key": "operation-get_organization_stats_v1_admin_analytics_vibe_code_usage_by_organization",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics#operation-get_organization_stats_v1_admin_analytics_vibe_code_usage_by_organization",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API",
+      "Usage by organization",
+      "Parameters"
+    ],
+    "key": "operation-get_organization_stats_v1_admin_analytics_vibe_code_usage_by_organization/parameters",
+    "old_key": "operation-get_by_user_stats_api_admin_analytics_vibe_usage_by_user_stats/parameters",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics#operation-get_organization_stats_v1_admin_analytics_vibe_code_usage_by_organization",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API",
+      "Usage by organization",
+      "Responses"
+    ],
+    "key": "operation-get_organization_stats_v1_admin_analytics_vibe_code_usage_by_organization/responses",
+    "old_key": "operation-get_organization_stats_api_admin_analytics_vibe_usage_by_organization/responses",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics#operation-get_workspace_stats_v1_admin_analytics_vibe_code_usage_by_workspace",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API",
+      "Usage by workspace"
+    ],
+    "key": "operation-get_workspace_stats_v1_admin_analytics_vibe_code_usage_by_workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics#operation-get_workspace_stats_v1_admin_analytics_vibe_code_usage_by_workspace",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API",
+      "Usage by workspace",
+      "Parameters"
+    ],
+    "key": "operation-get_workspace_stats_v1_admin_analytics_vibe_code_usage_by_workspace/parameters",
+    "old_key": "operation-get_workspace_stats_api_admin_analytics_vibe_usage_by_workspace/parameters",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics#operation-get_workspace_stats_v1_admin_analytics_vibe_code_usage_by_workspace",
+    "heading_path": [
+      "Beta Admin Vibe Code Analytics API",
+      "Usage by workspace",
+      "Responses"
+    ],
+    "key": "operation-get_workspace_stats_v1_admin_analytics_vibe_code_usage_by_workspace/responses",
+    "old_key": "operation-get_workspace_stats_api_admin_analytics_vibe_usage_by_workspace/responses",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-code-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API"
+    ],
+    "key": "beta-admin-vibe-work-analytics-api",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_agent_stats_v1_admin_analytics_vibe_work_usage_by_agent_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage by agent"
+    ],
+    "key": "operation-get_by_agent_stats_v1_admin_analytics_vibe_work_usage_by_agent_stats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_agent_stats_v1_admin_analytics_vibe_work_usage_by_agent_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage by agent",
+      "Parameters"
+    ],
+    "key": "operation-get_by_agent_stats_v1_admin_analytics_vibe_work_usage_by_agent_stats/parameters",
+    "old_key": "operation-get_organization_stats_api_admin_analytics_vibe_usage_by_organization/parameters",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_agent_stats_v1_admin_analytics_vibe_work_usage_by_agent_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage by agent",
+      "Responses"
+    ],
+    "key": "operation-get_by_agent_stats_v1_admin_analytics_vibe_work_usage_by_agent_stats/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_time_stats_v1_admin_analytics_vibe_work_usage_by_time_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage over time"
+    ],
+    "key": "operation-get_by_time_stats_v1_admin_analytics_vibe_work_usage_by_time_stats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_time_stats_v1_admin_analytics_vibe_work_usage_by_time_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage over time",
+      "Parameters"
+    ],
+    "key": "operation-get_by_time_stats_v1_admin_analytics_vibe_work_usage_by_time_stats/parameters",
+    "old_key": "operation-get_by_time_stats_api_admin_analytics_vibe_usage_by_time_stats/parameters",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_time_stats_v1_admin_analytics_vibe_work_usage_by_time_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage over time",
+      "Responses"
+    ],
+    "key": "operation-get_by_time_stats_v1_admin_analytics_vibe_work_usage_by_time_stats/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_user_stats_v1_admin_analytics_vibe_work_usage_by_user_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage by user"
+    ],
+    "key": "operation-get_by_user_stats_v1_admin_analytics_vibe_work_usage_by_user_stats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_user_stats_v1_admin_analytics_vibe_work_usage_by_user_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage by user",
+      "Parameters"
+    ],
+    "key": "operation-get_by_user_stats_v1_admin_analytics_vibe_work_usage_by_user_stats/parameters",
+    "old_key": "operation-get_by_agent_stats_api_admin_analytics_vibe_usage_by_agent_stats/parameters",
+    "old_page": "https://docs.mistral.ai/api/endpoint/beta/admin/analytics",
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics#operation-get_by_user_stats_v1_admin_analytics_vibe_work_usage_by_user_stats",
+    "heading_path": [
+      "Beta Admin Vibe Work Analytics API",
+      "Usage by user",
+      "Responses"
+    ],
+    "key": "operation-get_by_user_stats_v1_admin_analytics_vibe_work_usage_by_user_stats/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/vibe-work-analytics",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_add_or_update_users_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Add Or Update Users Workspaces"
+    ],
+    "key": "operation-users_api_admin_workspaces_add_or_update_users_workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_add_or_update_users_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Add Or Update Users Workspaces",
+      "Request body"
+    ],
+    "key": "operation-users_api_admin_workspaces_add_or_update_users_workspaces/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_add_users_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Add Users Workspaces"
+    ],
+    "key": "operation-users_api_admin_workspaces_add_users_workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_add_users_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Add Users Workspaces",
+      "Request body"
+    ],
+    "key": "operation-users_api_admin_workspaces_add_users_workspaces/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_create_workspace",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Create Workspace"
+    ],
+    "key": "operation-users_api_admin_workspaces_create_workspace",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_delete_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Delete Workspaces"
+    ],
+    "key": "operation-users_api_admin_workspaces_delete_workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_get_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Get Workspaces"
+    ],
+    "key": "operation-users_api_admin_workspaces_get_workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_remove_users_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Remove Users Workspaces"
+    ],
+    "key": "operation-users_api_admin_workspaces_remove_users_workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces#operation-users_api_admin_workspaces_update_workspaces",
+    "heading_path": [
+      "Beta Admin Workspaces API",
+      "Update Workspaces"
+    ],
+    "key": "operation-users_api_admin_workspaces_update_workspaces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/admin/workspaces",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/connectors#operation-connector_create_v1",
+    "heading_path": [
+      "Beta Connectors API",
+      "Create a new connector.",
+      "Request body"
+    ],
+    "key": "operation-connector_create_v1/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/connectors",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/connectors#operation-connector_update_v1",
+    "heading_path": [
+      "Beta Connectors API",
+      "Update a connector.",
+      "Request body"
+    ],
+    "key": "operation-connector_update_v1/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/connectors",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets#operation-create_dataset_record_v1_observability_datasets_dataset_id_records_post",
+    "heading_path": [
+      "Beta Observability Datasets API",
+      "Add a conversation to the dataset",
+      "Request body"
+    ],
+    "key": "operation-create_dataset_record_v1_observability_datasets_dataset_id_records_post/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets/records#operation-update_dataset_record_payload_v1_observability_dataset_records_dataset_record_id_payload_put",
+    "heading_path": [
+      "Beta Observability Datasets Records API",
+      "Update a dataset record conversation payload",
+      "Request body"
+    ],
+    "key": "operation-update_dataset_record_payload_v1_observability_dataset_records_dataset_record_id_payload_put/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets/records",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/ocr#operation-ocr_v1_ocr_post",
+    "heading_path": [
+      "Ocr API",
+      "OCR",
+      "Request body"
+    ],
+    "key": "operation-ocr_v1_ocr_post/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/ocr",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-create_deployment_v1_workflows_deployments_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Create Deployment"
+    ],
+    "key": "operation-create_deployment_v1_workflows_deployments_post",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-create_deployment_v1_workflows_deployments_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Create Deployment",
+      "Request body"
+    ],
+    "key": "operation-create_deployment_v1_workflows_deployments_post/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-create_deployment_v1_workflows_deployments_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Create Deployment",
+      "Responses"
+    ],
+    "key": "operation-create_deployment_v1_workflows_deployments_post/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-delete_deployment_v1_workflows_deployments_name_delete",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Delete Deployment"
+    ],
+    "key": "operation-delete_deployment_v1_workflows_deployments_name_delete",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-delete_deployment_v1_workflows_deployments_name_delete",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Delete Deployment",
+      "Parameters"
+    ],
+    "key": "operation-delete_deployment_v1_workflows_deployments_name_delete/parameters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-delete_deployment_v1_workflows_deployments_name_delete",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Delete Deployment",
+      "Responses"
+    ],
+    "key": "operation-delete_deployment_v1_workflows_deployments_name_delete/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-restart_deployment_v1_workflows_deployments_name_restart_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Restart Deployment"
+    ],
+    "key": "operation-restart_deployment_v1_workflows_deployments_name_restart_post",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-restart_deployment_v1_workflows_deployments_name_restart_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Restart Deployment",
+      "Parameters"
+    ],
+    "key": "operation-restart_deployment_v1_workflows_deployments_name_restart_post/parameters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-restart_deployment_v1_workflows_deployments_name_restart_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Restart Deployment",
+      "Responses"
+    ],
+    "key": "operation-restart_deployment_v1_workflows_deployments_name_restart_post/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-start_deployment_v1_workflows_deployments_name_start_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Start Deployment"
+    ],
+    "key": "operation-start_deployment_v1_workflows_deployments_name_start_post",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-start_deployment_v1_workflows_deployments_name_start_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Start Deployment",
+      "Parameters"
+    ],
+    "key": "operation-start_deployment_v1_workflows_deployments_name_start_post/parameters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-start_deployment_v1_workflows_deployments_name_start_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Start Deployment",
+      "Responses"
+    ],
+    "key": "operation-start_deployment_v1_workflows_deployments_name_start_post/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-stop_deployment_v1_workflows_deployments_name_stop_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Stop Deployment"
+    ],
+    "key": "operation-stop_deployment_v1_workflows_deployments_name_stop_post",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-stop_deployment_v1_workflows_deployments_name_stop_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Stop Deployment",
+      "Parameters"
+    ],
+    "key": "operation-stop_deployment_v1_workflows_deployments_name_stop_post/parameters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-stop_deployment_v1_workflows_deployments_name_stop_post",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Stop Deployment",
+      "Responses"
+    ],
+    "key": "operation-stop_deployment_v1_workflows_deployments_name_stop_post/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-update_deployment_v1_workflows_deployments_name_patch",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Update Deployment"
+    ],
+    "key": "operation-update_deployment_v1_workflows_deployments_name_patch",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-update_deployment_v1_workflows_deployments_name_patch",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Update Deployment",
+      "Parameters"
+    ],
+    "key": "operation-update_deployment_v1_workflows_deployments_name_patch/parameters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-update_deployment_v1_workflows_deployments_name_patch",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Update Deployment",
+      "Request body"
+    ],
+    "key": "operation-update_deployment_v1_workflows_deployments_name_patch/request-body",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/deployments#operation-update_deployment_v1_workflows_deployments_name_patch",
+    "heading_path": [
+      "Workflows Deployments API",
+      "Update Deployment",
+      "Responses"
+    ],
+    "key": "operation-update_deployment_v1_workflows_deployments_name_patch/responses",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/deployments",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/workflows/runs#operation-list_runs_v1_workflows_runs_get",
+    "heading_path": [
+      "Workflows Runs API",
+      "List Runs",
+      "Parameters"
+    ],
+    "key": "operation-list_runs_v1_workflows_runs_get/parameters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/workflows/runs",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli#prerequisites",
+    "heading_path": [
+      "Install the Vibe CLI and send your first prompt",
+      "Prerequisites"
+    ],
+    "key": "prerequisites",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli#step-2",
+    "heading_path": [
+      "Install the Vibe CLI and send your first prompt",
+      "Step 2: Launch and configure"
+    ],
+    "key": "step-2",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/analyze-data#prerequisites",
+    "heading_path": [
+      "Analyze a dataset",
+      "Prerequisites"
+    ],
+    "key": "prerequisites",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/analyze-data",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/first-task#prerequisites",
+    "heading_path": [
+      "Run your first Vibe Work task",
+      "Prerequisites"
+    ],
+    "key": "prerequisites",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/first-task",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models",
+    "heading_path": [
+      "Model capability matrix",
+      "All models"
+    ],
+    "key": "all-models",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models",
+    "heading_path": [
+      "Model capability matrix",
+      "Audio"
+    ],
+    "key": "audio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/codestral-25-08",
+    "heading_path": [
+      "Codestral",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/codestral-25-08",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/codestral-embed-25-05",
+    "heading_path": [
+      "Codestral Embed",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/codestral-embed-25-05",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/leanstral-1-5",
+    "heading_path": [
+      "Leanstral 1.5",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/leanstral-1-5",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/ministral-3-14b-25-12",
+    "heading_path": [
+      "Ministral 3 14B",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/ministral-3-14b-25-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/ministral-3-3b-25-12",
+    "heading_path": [
+      "Ministral 3 3B",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/ministral-3-3b-25-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/ministral-3-8b-25-12",
+    "heading_path": [
+      "Ministral 3 8B",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/ministral-3-8b-25-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-embed-23-12",
+    "heading_path": [
+      "Mistral Embed",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-embed-23-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-large-3-25-12",
+    "heading_path": [
+      "Mistral Large 3",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-large-3-25-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-medium-3-5-26-04",
+    "heading_path": [
+      "Mistral Medium 3.5",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-medium-3-5-26-04",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-moderation-26-03",
+    "heading_path": [
+      "Mistral Moderation 2",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-moderation-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-small-4-0-26-03",
+    "heading_path": [
+      "Mistral Small 4",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-small-4-0-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/ocr-3-25-12",
+    "heading_path": [
+      "OCR 3",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/ocr-3-25-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/ocr-4-0",
+    "heading_path": [
+      "OCR 4",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/ocr-4-0",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "heading_path": [
+      "Voxtral Mini Transcribe",
+      "Lifecycle"
+    ],
+    "key": "lifecycle",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe 2",
+      "Links"
+    ],
+    "key": "links",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe 2",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe Realtime",
+      "Links"
+    ],
+    "key": "links",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe Realtime",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-small-25-07",
+    "heading_path": [
+      "Voxtral Small",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-small-25-07",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "heading_path": [
+      "Voxtral TTS",
+      "Features"
+    ],
+    "key": "features",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "heading_path": [
+      "Voxtral TTS",
+      "Links"
+    ],
+    "key": "links",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "heading_path": [
+      "Voxtral TTS",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/deprecated/finetuning#fine-tuning-vs-prompting",
+    "heading_path": [
+      "Finetuning",
+      "Fine-tuning",
+      "Fine-tuning vs. Prompting"
+    ],
+    "key": "fine-tuning-vs-prompting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/deprecated/finetuning#fine-tuning-vs-prompting",
+    "heading_path": [
+      "Finetuning",
+      "Fine-tuning",
+      "Fine-tuning Services"
+    ],
+    "key": "fine-tuning-vs-prompting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/deprecated/finetuning#fine-tuning-vs-prompting",
+    "heading_path": [
+      "Finetuning",
+      "Fine-tuning",
+      "Fine-tuning Services"
+    ],
+    "key": "fine-tuning-vs-prompting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/security-advisories#indicators-of-compromise-pypi",
+    "heading_path": [
+      "Security advisories",
+      "Indicators of Compromise"
+    ],
+    "key": "indicators-of-compromise-pypi",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/security-advisories",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/security-advisories#indicators-of-compromise-pypi",
+    "heading_path": [
+      "Security advisories",
+      "Indicators of Compromise",
+      "PyPI"
+    ],
+    "key": "indicators-of-compromise-pypi",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/security-advisories",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/security-advisories#indicators-of-compromise-pypi",
+    "heading_path": [
+      "Security advisories",
+      "Indicators of Compromise",
+      "PyPI"
+    ],
+    "key": "indicators-of-compromise-pypi",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/security-advisories",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots",
+    "heading_path": [
+      "Mistral AI Crawlers"
+    ],
+    "key": "mistral-ai-crawlers",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots",
+    "heading_path": [
+      "Mistral crawlers"
+    ],
+    "key": "mistral-crawlers",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots#mistralai-index",
+    "heading_path": [
+      "Mistral crawlers",
+      "MistralAI-Index"
+    ],
+    "key": "mistralai-index",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots#mistralai-index-info",
+    "heading_path": [
+      "Mistral crawlers",
+      "MistralAI-Index",
+      "Crawler info"
+    ],
+    "key": "mistralai-index-info",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots#mistralai-training",
+    "heading_path": [
+      "Mistral crawlers",
+      "MistralAI-Training"
+    ],
+    "key": "mistralai-training",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots#mistralai-training-info",
+    "heading_path": [
+      "Mistral crawlers",
+      "MistralAI-Training",
+      "Crawler info"
+    ],
+    "key": "mistralai-training-info",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots#mistralai-user",
+    "heading_path": [
+      "Mistral crawlers",
+      "MistralAI-User"
+    ],
+    "key": "mistralai-user",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/robots#mistralai-user-info",
+    "heading_path": [
+      "Mistral crawlers",
+      "MistralAI-User",
+      "Crawler info"
+    ],
+    "key": "mistralai-user-info",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/robots",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#before-you-start",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Before You Start",
+      "Models with Audio Capabilities"
+    ],
+    "key": "before-you-start/models-with-audio-capabilities",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#example-samples",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Chat with Audio",
+      "Example Samples"
+    ],
+    "key": "example-samples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#example-samples",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Example Samples"
+    ],
+    "key": "example-samples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#example-samples",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Example Samples"
+    ],
+    "key": "example-samples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#models",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Chat with Audio",
+      "Use Audio with Instruction Following models"
+    ],
+    "key": "models/use-audio-with-instruction-following-models",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#transcription",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Context biasing"
+    ],
+    "key": "transcription/context-biasing",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#transcription",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Transcribe any Audio"
+    ],
+    "key": "transcription/transcribe-any-audio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#transcription:~:text=You%20can%20request",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Transcription with Timestamps"
+    ],
+    "key": "transcription/transcription-with-timestamps",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/text_to_speech/voices",
+    "heading_path": [
+      "Voices"
+    ],
+    "key": "voices",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/text_to_speech/voices",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/batch-processing#list-batch-jobs",
+    "heading_path": [
+      "Batch Processing",
+      "Get/Retrieve",
+      "List batch jobs"
+    ],
+    "key": "list-batch-jobs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/batch-processing",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/conversations/moderation#conversations-guardrails",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Custom Guardrails",
+      "Conversations guardrails"
+    ],
+    "key": "conversations-guardrails",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/conversations/moderation#custom-guardrails",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Custom Guardrails"
+    ],
+    "key": "custom-guardrails",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/conversations/moderation#endpoints",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Moderation",
+      "Endpoints"
+    ],
+    "key": "endpoints",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/conversations/moderation#inline-guardrails",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Custom Guardrails",
+      "Chat completions guardrails"
+    ],
+    "key": "inline-guardrails",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "heading_path": [
+      "Moderation & Guardrailing"
+    ],
+    "key": "moderation-guardrailing",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/conversations/moderation#what-is-the-distribution-of-false-positive-and-false-negative-results-on-the-new-moderation-api-models-specifically-will-they-be-more-likely-to-flag-something-as-harmful-when-it-is-not-or-not-flag-something-that-is-harmful",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Moderation",
+      "What is the distribution of false-positive and false-negative results on the new moderation API models. Specifically, will they be more likely to flag something as harmful when it is not or not flag something that is harmful?"
+    ],
+    "key": "what-is-the-distribution-of-false-positive-and-false-negative-results-on-the-new-moderation-api-models-specifically-will-they-be-more-likely-to-flag-something-as-harmful-when-it-is-not-or-not-flag-something-that-is-harmful",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#how-they-connect",
+    "heading_path": [
+      "Observability",
+      "How they connect"
+    ],
+    "key": "how-they-connect",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#next-steps",
+    "heading_path": [
+      "Observability",
+      "Next steps"
+    ],
+    "key": "next-steps",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability",
+    "heading_path": [
+      "Observability"
+    ],
+    "key": "observability",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#offline-evaluations",
+    "heading_path": [
+      "Observability",
+      "Offline evaluations"
+    ],
+    "key": "offline-evaluations",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#the-four-components",
+    "heading_path": [
+      "Observability",
+      "The four components"
+    ],
+    "key": "the-four-components",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#traces",
+    "heading_path": [
+      "Observability",
+      "Traces"
+    ],
+    "key": "traces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#traces",
+    "heading_path": [
+      "Observability",
+      "Traces",
+      "Access"
+    ],
+    "key": "traces/access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability#what-observability-does",
+    "heading_path": [
+      "Observability",
+      "What Observability does"
+    ],
+    "key": "what-observability-does",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#annotations-dont-look-right",
+    "heading_path": [
+      "Campaigns",
+      "FAQ",
+      "Annotations don't look right"
+    ],
+    "key": "annotations-dont-look-right",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#campaign-creation-failed-with-a-filter-error",
+    "heading_path": [
+      "Campaigns",
+      "FAQ",
+      "Campaign creation failed with a filter error"
+    ],
+    "key": "campaign-creation-failed-with-a-filter-error",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "heading_path": [
+      "Campaigns"
+    ],
+    "key": "campaigns",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#can-i-change-the-filter-after-starting-a-campaign",
+    "heading_path": [
+      "Campaigns",
+      "FAQ",
+      "Can I change the filter after starting a Campaign?"
+    ],
+    "key": "can-i-change-the-filter-after-starting-a-campaign",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#how-long-does-a-campaign-take",
+    "heading_path": [
+      "Campaigns",
+      "FAQ",
+      "How long does a Campaign take?"
+    ],
+    "key": "how-long-does-a-campaign-take",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#how-to-run",
+    "heading_path": [
+      "Campaigns",
+      "How to run a Campaign"
+    ],
+    "key": "how-to-run",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#how-to-run",
+    "heading_path": [
+      "Campaigns",
+      "How to run a Campaign",
+      "Prerequisite: create a Judge"
+    ],
+    "key": "how-to-run/prerequisite-create-a-judge",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#how-to-run",
+    "heading_path": [
+      "Campaigns",
+      "How to run a Campaign",
+      "Step 1: Filter events"
+    ],
+    "key": "how-to-run/step-1-filter-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#how-to-run",
+    "heading_path": [
+      "Campaigns",
+      "How to run a Campaign",
+      "Step 2: Launch the Campaign"
+    ],
+    "key": "how-to-run/step-2-launch-the-campaign",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#how-to-run",
+    "heading_path": [
+      "Campaigns",
+      "How to run a Campaign",
+      "Step 3: Analyze results"
+    ],
+    "key": "how-to-run/step-3-analyze-results",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#i-need-more-than-10000-events",
+    "heading_path": [
+      "Campaigns",
+      "FAQ",
+      "I need more than 10,000 events"
+    ],
+    "key": "i-need-more-than-10000-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#if-i-delete-a-campaign-are-the-annotations-lost",
+    "heading_path": [
+      "Campaigns",
+      "FAQ",
+      "If I delete a Campaign, are the annotations lost?"
+    ],
+    "key": "if-i-delete-a-campaign-are-the-annotations-lost",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#sdk-access",
+    "heading_path": [
+      "Campaigns",
+      "[Developer] Use Campaigns programmatically"
+    ],
+    "key": "sdk-access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/campaigns#when-to-use",
+    "heading_path": [
+      "Campaigns",
+      "When to use Campaigns"
+    ],
+    "key": "when-to-use",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#add-data",
+    "heading_path": [
+      "Datasets",
+      "Add data to a Dataset"
+    ],
+    "key": "add-data",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#add-data",
+    "heading_path": [
+      "Datasets",
+      "Add data to a Dataset",
+      "Create manually"
+    ],
+    "key": "add-data/create-manually",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#add-data",
+    "heading_path": [
+      "Datasets",
+      "Add data to a Dataset",
+      "From a Campaign"
+    ],
+    "key": "add-data/from-a-campaign",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#add-data",
+    "heading_path": [
+      "Datasets",
+      "Add data to a Dataset",
+      "From a file"
+    ],
+    "key": "add-data/from-a-file",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#add-data",
+    "heading_path": [
+      "Datasets",
+      "Add data to a Dataset",
+      "From Explorer"
+    ],
+    "key": "add-data/from-explorer",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#add-data",
+    "heading_path": [
+      "Datasets",
+      "Add data to a Dataset",
+      "From the Playground"
+    ],
+    "key": "add-data/from-the-playground",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Curate your records"
+    ],
+    "key": "best-practices/curate-your-records",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Keep Datasets healthy"
+    ],
+    "key": "best-practices/keep-datasets-healthy",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Remove low-value records"
+    ],
+    "key": "best-practices/remove-low-value-records",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Test before you commit"
+    ],
+    "key": "best-practices/test-before-you-commit",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#campaign-scores-are-noisy-is-it-the-dataset-or-the-judge",
+    "heading_path": [
+      "Datasets",
+      "FAQ",
+      "Campaign scores are noisy. Is it the Dataset or the Judge?"
+    ],
+    "key": "campaign-scores-are-noisy-is-it-the-dataset-or-the-judge",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "heading_path": [
+      "Datasets"
+    ],
+    "key": "datasets",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#download-data",
+    "heading_path": [
+      "Datasets",
+      "Export a Dataset"
+    ],
+    "key": "download-data",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#my-dataset-is-too-broad-and-results-are-hard-to-interpret",
+    "heading_path": [
+      "Datasets",
+      "FAQ",
+      "My Dataset is too broad and results are hard to interpret"
+    ],
+    "key": "my-dataset-is-too-broad-and-results-are-hard-to-interpret",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#record-structure",
+    "heading_path": [
+      "Datasets",
+      "What's in a record"
+    ],
+    "key": "record-structure",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#record-structure",
+    "heading_path": [
+      "Datasets",
+      "What's in a record",
+      "Properties"
+    ],
+    "key": "record-structure/properties",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/datasets#sdk-access",
+    "heading_path": [
+      "Datasets",
+      "[Developer] Use Datasets programmatically"
+    ],
+    "key": "sdk-access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#can-i-run-multiple-evaluators-in-a-single-run",
+    "heading_path": [
+      "Offline evaluations",
+      "FAQ",
+      "Can I run multiple evaluators in a single run?"
+    ],
+    "key": "can-i-run-multiple-evaluators-in-a-single-run",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#can-i-use-synchronous-functions-for-tasks-and-scorers",
+    "heading_path": [
+      "Offline evaluations",
+      "FAQ",
+      "Can I use synchronous functions for tasks and scorers?"
+    ],
+    "key": "can-i-use-synchronous-functions-for-tasks-and-scorers",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#core-concepts",
+    "heading_path": [
+      "Offline evaluations",
+      "Core concepts"
+    ],
+    "key": "core-concepts",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#displaying-results",
+    "heading_path": [
+      "Offline evaluations",
+      "Displaying results"
+    ],
+    "key": "displaying-results",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#faq",
+    "heading_path": [
+      "Offline evaluations",
+      "FAQ"
+    ],
+    "key": "faq",
+    "old_key": "faq",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#guides",
+    "heading_path": [
+      "Offline evaluations",
+      "Guides"
+    ],
+    "key": "guides",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#how-do-i-compare-two-model-versions",
+    "heading_path": [
+      "Offline evaluations",
+      "FAQ",
+      "How do I compare two model versions?"
+    ],
+    "key": "how-do-i-compare-two-model-versions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#how-do-i-use-an-llm-as-a-judge",
+    "heading_path": [
+      "Offline evaluations",
+      "FAQ",
+      "How do I use an LLM as a judge?"
+    ],
+    "key": "how-do-i-use-an-llm-as-a-judge",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#installation",
+    "heading_path": [
+      "Offline evaluations",
+      "Installation"
+    ],
+    "key": "installation",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#local-mode",
+    "heading_path": [
+      "Offline evaluations",
+      "Local mode"
+    ],
+    "key": "local-mode",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "heading_path": [
+      "Offline evaluations"
+    ],
+    "key": "offline-evaluations",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#organizing-in-studio",
+    "heading_path": [
+      "Offline evaluations",
+      "Organizing runs in Studio"
+    ],
+    "key": "organizing-in-studio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#quickstart",
+    "heading_path": [
+      "Offline evaluations",
+      "Quickstart"
+    ],
+    "key": "quickstart",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#results-in-studio",
+    "heading_path": [
+      "Offline evaluations",
+      "Results in Studio"
+    ],
+    "key": "results-in-studio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations#what-python-version-is-required",
+    "heading_path": [
+      "Offline evaluations",
+      "FAQ",
+      "What Python version is required?"
+    ],
+    "key": "what-python-version-is-required",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/context-objects",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/context-objects",
+    "sections": 4,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices"
+    ],
+    "key": "best-practices",
+    "old_key": "best-practices",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Curate for representativeness"
+    ],
+    "key": "best-practices/curate-for-representativeness",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Ground truth quality matters"
+    ],
+    "key": "best-practices/ground-truth-quality-matters",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Keep datasets focused"
+    ],
+    "key": "best-practices/keep-datasets-focused",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#best-practices",
+    "heading_path": [
+      "Datasets",
+      "Best practices",
+      "Version your datasets"
+    ],
+    "key": "best-practices/version-your-datasets",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#can-i-load-records-from-a-file",
+    "heading_path": [
+      "Datasets",
+      "FAQ",
+      "Can I load records from a file?"
+    ],
+    "key": "can-i-load-records-from-a-file",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "heading_path": [
+      "Datasets"
+    ],
+    "key": "datasets",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#faq",
+    "heading_path": [
+      "Datasets",
+      "FAQ"
+    ],
+    "key": "faq",
+    "old_key": "faq",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#how-large-can-my-dataset-be",
+    "heading_path": [
+      "Datasets",
+      "FAQ",
+      "How large can my dataset be?"
+    ],
+    "key": "how-large-can-my-dataset-be",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#my-scores-are-noisy-is-it-the-dataset-or-the-scorer",
+    "heading_path": [
+      "Datasets",
+      "FAQ",
+      "My scores are noisy. Is it the dataset or the scorer?"
+    ],
+    "key": "my-scores-are-noisy-is-it-the-dataset-or-the-scorer",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#organizing-in-studio",
+    "heading_path": [
+      "Datasets",
+      "Organizing in Studio"
+    ],
+    "key": "organizing-in-studio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#record-structure",
+    "heading_path": [
+      "Datasets",
+      "Record structure"
+    ],
+    "key": "record-structure",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#type-safety",
+    "heading_path": [
+      "Datasets",
+      "Type safety with TypedDict"
+    ],
+    "key": "type-safety",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets#what-to-include",
+    "heading_path": [
+      "Datasets",
+      "What to include in records"
+    ],
+    "key": "what-to-include",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/datasets",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/goals",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/goals",
+    "sections": 8,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#basic-llm-judge",
+    "heading_path": [
+      "Judges",
+      "Basic LLM judge"
+    ],
+    "key": "basic-llm-judge",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#can-i-use-the-same-judge-across-multiple-evaluation-runs",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "Can I use the same judge across multiple evaluation runs?"
+    ],
+    "key": "can-i-use-the-same-judge-across-multiple-evaluation-runs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#faq",
+    "heading_path": [
+      "Judges",
+      "FAQ"
+    ],
+    "key": "faq",
+    "old_key": "faq",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#how-do-i-choose-between-a-rule-based-scorer-and-an-llm-judge",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "How do I choose between a rule-based scorer and an LLM judge?"
+    ],
+    "key": "how-do-i-choose-between-a-rule-based-scorer-and-an-llm-judge",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#instruction-guidelines",
+    "heading_path": [
+      "Judges",
+      "Writing good judge instructions"
+    ],
+    "key": "instruction-guidelines",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "heading_path": [
+      "Judges"
+    ],
+    "key": "judges",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#multiple-evaluators",
+    "heading_path": [
+      "Judges",
+      "Combining rule-based and LLM judges"
+    ],
+    "key": "multiple-evaluators",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#my-judge-gives-inconsistent-scores-on-similar-inputs",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "My judge gives inconsistent scores on similar inputs"
+    ],
+    "key": "my-judge-gives-inconsistent-scores-on-similar-inputs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#reducing-variance",
+    "heading_path": [
+      "Judges",
+      "Reducing judge variance"
+    ],
+    "key": "reducing-variance",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#structured-output",
+    "heading_path": [
+      "Judges",
+      "Structured output with Score"
+    ],
+    "key": "structured-output",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/judges#the-judge-returns-parsing-errors-or-out-of-range-values",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "The judge returns parsing errors or out-of-range values"
+    ],
+    "key": "the-judge-returns-parsing-errors-or-out-of-range-values",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/judges",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/local-mode",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/local-mode",
+    "sections": 4,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/multiple-evaluators",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/multiple-evaluators",
+    "sections": 5,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/num-generations",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/num-generations",
+    "sections": 5,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/retry-failed-records",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/retry-failed-records",
+    "sections": 5,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/run-evaluators",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/run-evaluators",
+    "sections": 7,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/evaluations/system-params",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/evaluations/system-params",
+    "sections": 4,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "heading_path": [
+      "Explorer"
+    ],
+    "key": "explorer",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#export-is-blocked-or-the-button-is-greyed-out",
+    "heading_path": [
+      "Explorer",
+      "FAQ",
+      "Export is blocked or the button is greyed out"
+    ],
+    "key": "export-is-blocked-or-the-button-is-greyed-out",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#export-to-datasets",
+    "heading_path": [
+      "Explorer",
+      "Export to a Dataset"
+    ],
+    "key": "export-to-datasets",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#filter-language",
+    "heading_path": [
+      "Explorer",
+      "Filter language"
+    ],
+    "key": "filter-language",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#filter-language",
+    "heading_path": [
+      "Explorer",
+      "Filter language",
+      "Available fields"
+    ],
+    "key": "filter-language/available-fields",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#filter-language",
+    "heading_path": [
+      "Explorer",
+      "Filter language",
+      "Available operators"
+    ],
+    "key": "filter-language/available-operators",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#filter-language:~:text=by%20model%20and",
+    "heading_path": [
+      "Explorer",
+      "Filter language",
+      "Examples"
+    ],
+    "key": "filter-language/examples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#filter-language:~:text=Start%20broad%20with",
+    "heading_path": [
+      "Explorer",
+      "Filter language",
+      "Query design tips"
+    ],
+    "key": "filter-language/query-design-tips",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#i-cant-see-explorer-in-my-sidebar",
+    "heading_path": [
+      "Explorer",
+      "FAQ",
+      "I can't see Explorer in my sidebar"
+    ],
+    "key": "i-cant-see-explorer-in-my-sidebar",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#inspect-events",
+    "heading_path": [
+      "Explorer",
+      "Inspect events"
+    ],
+    "key": "inspect-events",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#my-filters-return-no-results",
+    "heading_path": [
+      "Explorer",
+      "FAQ",
+      "My filters return no results"
+    ],
+    "key": "my-filters-return-no-results",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#results-are-too-noisy-to-be-useful",
+    "heading_path": [
+      "Explorer",
+      "FAQ",
+      "Results are too noisy to be useful"
+    ],
+    "key": "results-are-too-noisy-to-be-useful",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#sdk-access",
+    "heading_path": [
+      "Explorer",
+      "[Developer] Use Explorer programmatically"
+    ],
+    "key": "sdk-access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#what-you-can-do",
+    "heading_path": [
+      "Explorer",
+      "What you can do"
+    ],
+    "key": "what-you-can-do",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#can-i-reuse-the-same-judge-across-multiple-campaigns",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "Can I reuse the same Judge across multiple Campaigns?"
+    ],
+    "key": "can-i-reuse-the-same-judge-across-multiple-campaigns",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#choosing-a-model",
+    "heading_path": [
+      "Judges",
+      "Choosing a model"
+    ],
+    "key": "choosing-a-model",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#how-do-i-choose-between-classification-and-regression",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "How do I choose between classification and regression?"
+    ],
+    "key": "how-do-i-choose-between-classification-and-regression",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges",
+    "heading_path": [
+      "Judges"
+    ],
+    "key": "judges",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#my-judge-gives-inconsistent-scores-on-similar-inputs",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "My Judge gives inconsistent scores on similar inputs"
+    ],
+    "key": "my-judge-gives-inconsistent-scores-on-similar-inputs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#sdk-access",
+    "heading_path": [
+      "Judges",
+      "[Developer] Use Judges programmatically"
+    ],
+    "key": "sdk-access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#setting-instructions",
+    "heading_path": [
+      "Judges",
+      "Instructions guidelines"
+    ],
+    "key": "setting-instructions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#too-many-judgments-come-back-as-undefined",
+    "heading_path": [
+      "Judges",
+      "FAQ",
+      "Too many judgments come back as undefined"
+    ],
+    "key": "too-many-judgments-come-back-as-undefined",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#two-types",
+    "heading_path": [
+      "Judges",
+      "Two types of Judges"
+    ],
+    "key": "two-types",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#two-types",
+    "heading_path": [
+      "Judges",
+      "Two types of Judges",
+      "Classification Judges"
+    ],
+    "key": "two-types/classification-judges",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#two-types",
+    "heading_path": [
+      "Judges",
+      "Two types of Judges",
+      "Regression Judges"
+    ],
+    "key": "two-types/regression-judges",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#validation-before-scale",
+    "heading_path": [
+      "Judges",
+      "Validate before you scale"
+    ],
+    "key": "validation-before-scale",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/quickstart",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/quickstart",
+    "sections": 14,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces",
+    "sections": 2,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#by-source",
+    "heading_path": [
+      "Data redaction",
+      "Redaction by source"
+    ],
+    "key": "by-source",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#configure",
+    "heading_path": [
+      "Data redaction",
+      "Configure redaction"
+    ],
+    "key": "configure",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "heading_path": [
+      "Data redaction"
+    ],
+    "key": "data-redaction",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#does-redaction-affect-performance",
+    "heading_path": [
+      "Data redaction",
+      "FAQ",
+      "Does redaction affect performance?"
+    ],
+    "key": "does-redaction-affect-performance",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#does-redaction-guarantee-no-sensitive-data-is-exported",
+    "heading_path": [
+      "Data redaction",
+      "FAQ",
+      "Does redaction guarantee no sensitive data is exported?"
+    ],
+    "key": "does-redaction-guarantee-no-sensitive-data-is-exported",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#faq",
+    "heading_path": [
+      "Data redaction",
+      "FAQ"
+    ],
+    "key": "faq",
+    "old_key": "faq",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#how-it-works",
+    "heading_path": [
+      "Data redaction",
+      "How redaction works"
+    ],
+    "key": "how-it-works",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#is-redaction-on-by-default",
+    "heading_path": [
+      "Data redaction",
+      "FAQ",
+      "Is redaction on by default?"
+    ],
+    "key": "is-redaction-on-by-default",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#policies",
+    "heading_path": [
+      "Data redaction",
+      "Redaction policies"
+    ],
+    "key": "policies",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": 14,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/send-traces",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/send-traces",
+    "sections": 8,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/regional-inference",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/regional-inference",
+    "sections": 9,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/safety-moderation#conversations-guardrails",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Custom Guardrails",
+      "Conversations guardrails"
+    ],
+    "key": "conversations-guardrails",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/safety-moderation#custom-guardrails",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Custom Guardrails"
+    ],
+    "key": "custom-guardrails",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/safety-moderation#endpoints",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Moderation",
+      "Endpoints"
+    ],
+    "key": "endpoints",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/safety-moderation#inline-guardrails",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Custom Guardrails",
+      "Chat completions guardrails"
+    ],
+    "key": "inline-guardrails",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "heading_path": [
+      "Moderation & Guardrailing"
+    ],
+    "key": "moderation-guardrailing",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/safety-moderation#what-is-the-distribution-of-false-positive-and-false-negative-results-on-the-new-moderation-api-models-specifically-will-they-be-more-likely-to-flag-something-as-harmful-when-it-is-not-or-not-flag-something-that-is-harmful",
+    "heading_path": [
+      "Moderation & Guardrailing",
+      "Moderation",
+      "What is the distribution of false-positive and false-negative results on the new moderation API models. Specifically, will they be more likely to flag something as harmful when it is not or not flag something that is harmful?"
+    ],
+    "key": "what-is-the-distribution-of-false-positive-and-false-negative-results-on-the-new-moderation-api-models-specifically-will-they-be-more-likely-to-flag-something-as-harmful-when-it-is-not-or-not-flag-something-that-is-harmful",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/basics#heartbeat-timeout",
+    "heading_path": [
+      "Basics",
+      "Activity basics",
+      "Core activity features",
+      "Heartbeat timeout"
+    ],
+    "key": "heartbeat-timeout",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/basics",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/local_activities",
+    "heading_path": [
+      "Local activities"
+    ],
+    "key": "local-activities",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/local_activities",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/local_activities#performance-impact",
+    "heading_path": [
+      "Local activities",
+      "Performance impact"
+    ],
+    "key": "performance-impact",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/local_activities",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
+    "sections": 8,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors#declare-slots",
+    "heading_path": [
+      "Connectors in workflows",
+      "Build a workflow with Connectors",
+      "Step 1: Declare Connector slots"
+    ],
+    "key": "declare-slots",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors#execute",
+    "heading_path": [
+      "Connectors in workflows",
+      "Execute a Connector Workflow"
+    ],
+    "key": "execute",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors#run-as",
+    "heading_path": [
+      "Connectors in workflows",
+      "Choose the Connector identity (run_as)"
+    ],
+    "key": "run-as",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#agent",
+    "heading_path": [
+      "Durable agents",
+      "Core components",
+      "Agent"
+    ],
+    "key": "agent",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#agent-lifecycle",
+    "heading_path": [
+      "Durable agents",
+      "Session types",
+      "Agent lifecycle"
+    ],
+    "key": "agent-lifecycle",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#best-practices",
+    "heading_path": [
+      "Durable agents",
+      "Best practices"
+    ],
+    "key": "best-practices",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#built-in-tools",
+    "heading_path": [
+      "Durable agents",
+      "Built-in tools"
+    ],
+    "key": "built-in-tools",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#complete-workflow-example",
+    "heading_path": [
+      "Durable agents",
+      "Complete workflow example"
+    ],
+    "key": "complete-workflow-example",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#core-components",
+    "heading_path": [
+      "Durable agents",
+      "Core components"
+    ],
+    "key": "core-components",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "heading_path": [
+      "Durable agents"
+    ],
+    "key": "durable-agents",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#local-session",
+    "heading_path": [
+      "Durable agents",
+      "Session types",
+      "LocalSession (experimental)"
+    ],
+    "key": "local-session",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#mcp-integration",
+    "heading_path": [
+      "Durable agents",
+      "MCP integration"
+    ],
+    "key": "mcp-integration",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#multi-agent-handoffs",
+    "heading_path": [
+      "Durable agents",
+      "Multi-agent handoffs"
+    ],
+    "key": "multi-agent-handoffs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#remote-session",
+    "heading_path": [
+      "Durable agents",
+      "Session types",
+      "RemoteSession (recommended)"
+    ],
+    "key": "remote-session",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#session-types",
+    "heading_path": [
+      "Durable agents",
+      "Session types"
+    ],
+    "key": "session-types",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#sessions",
+    "heading_path": [
+      "Durable agents",
+      "Core components",
+      "Sessions"
+    ],
+    "key": "sessions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#sse-mcp-server",
+    "heading_path": [
+      "Durable agents",
+      "MCP integration",
+      "SSE MCP server"
+    ],
+    "key": "sse-mcp-server",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#stdio-mcp-server",
+    "heading_path": [
+      "Durable agents",
+      "MCP integration",
+      "Stdio MCP server"
+    ],
+    "key": "stdio-mcp-server",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents#streamable-http-mcp-server",
+    "heading_path": [
+      "Durable agents",
+      "MCP integration",
+      "Streamable HTTP MCP Server"
+    ],
+    "key": "streamable-http-mcp-server",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/encryption",
+    "heading_path": [
+      "Encryption"
+    ],
+    "key": "encryption",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/encryption",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
+    "heading_path": [
+      "Payload offloading"
+    ],
+    "key": "payload-offloading-2",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts#how-it-fits-together",
+    "heading_path": [
+      "Core concepts",
+      "How it fits together"
+    ],
+    "key": "how-it-fits-together",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts#mental-model",
+    "heading_path": [
+      "Core concepts",
+      "The mental model"
+    ],
+    "key": "mental-model",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/activities#long-running-activities-heartbeats",
+    "heading_path": [
+      "Activities",
+      "Long-running activities: heartbeats"
+    ],
+    "key": "long-running-activities-heartbeats",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/activities",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/workers#execution-flow",
+    "heading_path": [
+      "Workers",
+      "Execution flow"
+    ],
+    "key": "execution-flow",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/workers",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/workers#starting-a-worker",
+    "heading_path": [
+      "Workers",
+      "Starting a worker"
+    ],
+    "key": "starting-a-worker",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/workers",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/your_first_workflow#step-1-define-your-workflow-and-worker",
+    "heading_path": [
+      "Your first workflow",
+      "Step 1: Define your workflow and worker"
+    ],
+    "key": "step-1-define-your-workflow-and-worker",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/your_first_workflow",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/rate_limiting#how-rate-limiting-works",
+    "heading_path": [
+      "Rate Limiting",
+      "Rate Limiting in Workflows",
+      "How Rate Limiting Works"
+    ],
+    "key": "how-rate-limiting-works",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/rate_limiting",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#configuring-telemetry-export",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Configuring telemetry export"
+    ],
+    "key": "configuring-telemetry-export",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#disabling-telemetry-export",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Configuring telemetry export",
+      "Disabling telemetry export"
+    ],
+    "key": "disabling-telemetry-export",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#fetching-workflow-logs",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Traces (OpenTelemetry)",
+      "Fetching workflow logs"
+    ],
+    "key": "fetching-workflow-logs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#fetching-workflow-traces",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Traces (OpenTelemetry)",
+      "Fetching workflow traces"
+    ],
+    "key": "fetching-workflow-traces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#telemetry-setup",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Telemetry setup"
+    ],
+    "key": "telemetry-setup",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#trace-sampling",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Traces (OpenTelemetry)",
+      "Trace sampling"
+    ],
+    "key": "trace-sampling",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#traces-opentelemetry",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Traces (OpenTelemetry)"
+    ],
+    "key": "traces-opentelemetry",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability#using-your-own-otel-endpoint",
+    "heading_path": [
+      "Observability",
+      "Workflow observability",
+      "Configuring telemetry export",
+      "Using your own OTEL endpoint"
+    ],
+    "key": "using-your-own-otel-endpoint",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "heading_path": [
+      "Observability",
+      "Workflow observability"
+    ],
+    "key": "workflow-observability",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles#plan-billing",
+    "heading_path": [
+      "API keys and profiles",
+      "Plan and billing notes"
+    ],
+    "key": "plan-billing",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles#where-to-create",
+    "heading_path": [
+      "API keys and profiles",
+      "Where to create your API key"
+    ],
+    "key": "where-to-create",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/configuration#hooks",
+    "heading_path": [
+      "Configuration",
+      "Common configuration sections",
+      "Hooks"
+    ],
+    "key": "hooks",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/configuration",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/hooks",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/hooks",
+    "sections": 8,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/install-setup#choose-access-path",
+    "heading_path": [
+      "Install and setup",
+      "Choose your access path"
+    ],
+    "key": "choose-access-path",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/install-setup",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/install-setup",
+    "heading_path": [
+      "Install and setup"
+    ],
+    "key": "install-and-setup",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/install-setup",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/install-setup#prerequisites",
+    "heading_path": [
+      "Install and setup",
+      "Prerequisites"
+    ],
+    "key": "prerequisites",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/install-setup",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/safety-approvals-permissions#approval-model",
+    "heading_path": [
+      "Safety, approvals, and permissions",
+      "Approval model"
+    ],
+    "key": "approval-model",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/safety-approvals-permissions",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/use-vibe-in-other-ides#requirements",
+    "heading_path": [
+      "Use Vibe in other IDEs",
+      "Before you start"
+    ],
+    "key": "requirements",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/use-vibe-in-other-ides",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/vibe-code-web/get-started",
+    "heading_path": [
+      "Get started",
+      "Get started with Vibe Code Web"
+    ],
+    "key": "get-started-with-vibe-code-web",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/vibe-code-web/get-started",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/vs-code-extension/install-authenticate",
+    "heading_path": [
+      "Install and authenticate"
+    ],
+    "key": "install-and-authenticate",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/vs-code-extension/install-authenticate",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/vs-code-extension/install-authenticate#requirements",
+    "heading_path": [
+      "Install and authenticate",
+      "Requirements"
+    ],
+    "key": "requirements",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/vs-code-extension/install-authenticate",
+    "sections": null,
+    "state": "changed"
+  }
+]
