@@ -1,0 +1,29 @@
+{
+  "agent_deletion": "deleted",
+  "agent_id": "ag_01a0954b2df3754e9607103eba5e93e0",
+  "connector": "mistral_docs_ca30",
+  "connector_tools": [
+    "mistral_docs_search",
+    "mistral_docs_read_page",
+    "mistral_docs_history"
+  ],
+  "consumer": "work-proxy-mistral-medium-3-5-high",
+  "consumers": [
+    "work-proxy-mistral-medium-3-5-high"
+  ],
+  "dataset": "eval/demo.jsonl",
+  "dataset_hash": "739c1066cb6464e42630591fa6ab62097808420cc6a2eb5c8f6903277207e2b2",
+  "fresh_count": 0,
+  "judge_model": "zai:glm-5.3",
+  "judge_models": [
+    "zai:glm-5.3"
+  ],
+  "kind": "work_proxy_eval",
+  "mined_count": 30,
+  "model": "mistral-medium-3-5",
+  "name": "demo-medium35",
+  "question_count": 30,
+  "reasoning_effort": "high",
+  "run_dir": "eval/runs/2026-09-12-1102-demo-medium35",
+  "timeout_s": 300.0
+}
