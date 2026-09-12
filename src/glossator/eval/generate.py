@@ -71,6 +71,12 @@ from glossator.ingest.sections import Section
 
 logger = structlog.get_logger(__name__)
 
+GENERATED_TYPES: tuple[QuestionType, ...] = tuple(
+    question_type for question_type in QuestionType if question_type is not QuestionType.HISTORY
+)
+"""Every type this generator fills. History questions are written by hand from
+the snapshot labels and carry a date bound no page-level prompt can produce."""
+
 # One truncation constant, applied once per page or section text handed to a
 # model. Different limits in generation and filtering let the filter reject a
 # fact the generator legitimately used.
@@ -1010,13 +1016,15 @@ async def generate_questions(
     attempts_per_question: int = 4,
     recorder: RunRecorder | None = None,
 ) -> tuple[list[EvalQuestion], list[GenerationAttempt], list[TypeResult]]:
-    """Generate up to ``n`` questions, evenly across the six types.
+    """Generate up to ``n`` questions, evenly across the six generated types.
 
     A type that cannot be filled does not fail the run: the dataset is written
     with what was accepted and the shortfall is reported.
     """
-    if n < len(QuestionType):
-        raise ValueError(f"n must be at least {len(QuestionType)} so every type is represented")
+    if n < len(GENERATED_TYPES):
+        raise ValueError(
+            f"n must be at least {len(GENERATED_TYPES)} so every generated type is represented"
+        )
     context = GenerationContext(
         provider=provider,
         model=model,
@@ -1031,7 +1039,7 @@ async def generate_questions(
     attempts: list[GenerationAttempt] = []
     results: list[TypeResult] = []
 
-    for question_type in QuestionType:
+    for question_type in GENERATED_TYPES:
         target = allocations[question_type]
         budget = target * attempts_per_question
         plans = plan_attempts(documents, question_type, budget, rng)
@@ -1084,7 +1092,7 @@ def _question_id(question_type: QuestionType, question: str, gold: Sequence[Gold
 
 
 def _allocations(n: int) -> dict[QuestionType, int]:
-    order = list(QuestionType)
+    order = list(GENERATED_TYPES)
     allocations = {question_type: 1 for question_type in order}
     for index in range(n - len(order)):
         allocations[order[index % len(order)]] += 1
@@ -1125,7 +1133,7 @@ def _dry_run(documents: Sequence[CorpusDocument], args: argparse.Namespace) -> N
     """Show the sources a real run with these arguments would ask about."""
     rng = random.Random(args.seed)
     allocations = _allocations(args.n)
-    for question_type in QuestionType:
+    for question_type in GENERATED_TYPES:
         budget = allocations[question_type] * args.attempts_per_question
         for plan in plan_attempts(documents, question_type, budget, rng):
             print(
