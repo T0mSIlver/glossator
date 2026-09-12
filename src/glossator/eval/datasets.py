@@ -27,6 +27,9 @@ class QuestionType(StrEnum):
     CAPABILITY = "capability"
     POST_CUTOFF = "post_cutoff"
     UNANSWERABLE = "unanswerable"
+    HISTORY = "history"
+    """Answered only from the dated snapshots: when a section was added, changed or
+    moved. The gold carries the interval between two stored dates."""
 
 
 class QuestionSource(StrEnum):
@@ -46,6 +49,9 @@ class GoldSource(BaseModel):
 
     url: str
     anchor: str | None = None
+    between: tuple[str, str] | None = None
+    """For a history question: the two adjacent stored dates the change lies
+    between. The snapshots are a fortnight apart, so no answer names a day."""
 
 
 class EvalQuestion(BaseModel):
