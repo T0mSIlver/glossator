@@ -6,14 +6,18 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from glossator.eval.consumer import ConsumerRecord, is_server_tool
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, QuestionType
 from glossator.eval.work_proxy import (
     ParsedConversation,
     agent_instructions,
+    connector_call_count,
     custom_instructions_block,
     parse_conversation_response,
     record_for,
+    render_transcript,
     resolve_run_directory,
     select_pending,
     skill_body,
@@ -63,10 +67,29 @@ def test_parse_recorded_response() -> None:
     assert parsed.answer_text.startswith("Here are the query parameters")
     assert record.answer_text == parsed.answer_text
     usage = fixture["usage"]
-    assert parsed.usage.input_tokens == usage["prompt_tokens"]
+    # Connector tokens are input tokens, and the raw usage object is kept
+    # verbatim beside them.
+    assert parsed.usage.input_tokens == usage["prompt_tokens"] + usage["connector_tokens"]
     assert parsed.usage.output_tokens == usage["completion_tokens"]
-    assert record.tokens.total == usage["prompt_tokens"] + usage["completion_tokens"]
-    assert record.harness_cost_usd > 0.0
+    assert record.tokens.total == (
+        usage["prompt_tokens"] + usage["connector_tokens"] + usage["completion_tokens"]
+    )
+    assert parsed.raw_usage == usage
+    # Priced at Medium 3.5's rate over input (prompt + connector) and output.
+    assert record.harness_cost_usd == pytest.approx(
+        (usage["prompt_tokens"] + usage["connector_tokens"]) / 1_000_000 * 1.50
+        + usage["completion_tokens"] / 1_000_000 * 7.50,
+        abs=1e-9,
+    )
+
+
+def test_connector_call_count_in_transcript_header() -> None:
+    fixture = _load("conversation-response.json")
+    parsed = parse_conversation_response(fixture)
+
+    assert connector_call_count(parsed) == fixture["usage"]["connectors"]["mistral_docs_ca30"]
+    header = render_transcript(_question("q"), parsed, None).splitlines()[0]
+    assert header == f"# q (single_page, {connector_call_count(parsed)} connector calls)"
 
 
 def test_tool_calls_parsed_with_arguments() -> None:

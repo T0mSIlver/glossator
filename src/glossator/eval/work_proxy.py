@@ -222,12 +222,25 @@ def parse_conversation_response(response: Mapping[str, Any]) -> ParsedConversati
             _parse_message_output(entry, parsed)
     raw_usage: Any = response.get("usage")
     usage: Mapping[str, Any] = raw_usage if isinstance(raw_usage, dict) else {}
+    # Connector tokens are billed like input tokens: the Conversations API
+    # counts them beside prompt_tokens, and a record's input is what the run
+    # pays for, so they join the input side rather than hiding in raw_usage.
     parsed.usage = HarnessTokens(
-        input_tokens=int(usage.get("prompt_tokens", 0) or 0),
+        input_tokens=int(usage.get("prompt_tokens", 0) or 0)
+        + int(usage.get("connector_tokens", 0) or 0),
         output_tokens=int(usage.get("completion_tokens", 0) or 0),
     )
     parsed.raw_usage = dict(usage)
     return parsed
+
+
+def connector_call_count(parsed: ParsedConversation) -> int:
+    """How many times the conversation called its Connector, from the usage's
+    per-connector call-count map."""
+    connectors = parsed.raw_usage.get("connectors")
+    if not isinstance(connectors, Mapping):
+        return 0
+    return sum(int(count) for count in connectors.values() if isinstance(count, int))
 
 
 def tool_call_records(calls: Sequence[ParsedToolExecution]) -> list[ToolCallRecord]:
@@ -359,8 +372,13 @@ def record_for(
 
 
 def render_transcript(question: EvalQuestion, parsed: ParsedConversation, error: str | None) -> str:
+    calls_note = (
+        f"{question.type.value}, {connector_call_count(parsed)} connector calls"
+        if parsed.raw_usage
+        else question.type.value
+    )
     lines = [
-        f"# {question.id} ({question.type.value})",
+        f"# {question.id} ({calls_note})",
         "",
         "## Question",
         "",
@@ -817,6 +835,7 @@ __all__ = [
     "WorkProxyConfig",
     "agent_instructions",
     "append_call",
+    "connector_call_count",
     "consumer_name",
     "custom_instructions_block",
     "parse_conversation_response",
