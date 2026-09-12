@@ -20,6 +20,16 @@ the model fills the gap from adjacent pages (`2026-09-12-1102-demo-medium35`,
 D-049a). Links resolved 0.95, 0.76 of answers named a gold page, 5.2 tool calls
 and 16 s per question at the median, 0.60 USD for the run.
 
+Tool results are 82% of a Work session's tokens, so what `read_page` prints is
+contained by rule: one language tab per sample group (`lang`, default Python),
+a byte-identical sample printed once, a pasted output cut to its first 1,500
+characters, code never cut (D-050). Measured on the same thirty questions:
+characters per read 7,374 to 4,735, median input tokens per question 6,926 to
+4,876, correctness 0.62 against 0.60, inside the noise of two runs
+(`2026-09-12-1211-demo-medium35-contained`, D-050a). Every run's README now
+carries a size table beside its cells: tokens per question and characters per
+tool result.
+
 ## In one paragraph
 
 The pipeline that ships is: section-aware chunks of the docs repo at a pinned

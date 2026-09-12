@@ -1618,3 +1618,32 @@ The same census on the 57 reads the demo run actually made (420,322 characters):
 2. **The rule is deterministic and argument-free in the common case.** The model chooses nothing unless the user works in TypeScript or cURL, and then chooses the same word the docs' tab shows. This is the D-046 principle: one argument, one thing, and no free string that invites guessing.
 3. **Measured before it ships.** The transform runs over the 57 recorded reads for the character count per rule, and the thirty-question demo set runs again on the deployed server for correctness and tokens per question beside D-049a. If correctness moves outside the noise of two runs on thirty questions, the rule that caused it is withdrawn.
 4. **Not taken.** E stays available as a one-line change if a host is ever shown to need it; the search snippet, the history diff and the API pages are unchanged; per-session budgets stay deferred (D-046 point 3).
+
+---
+
+## D-050a · Containment measured: a read prints 36% fewer characters, correctness unchanged within the noise of two runs
+
+**Status:** recorded · 2026-09-12 · `src/glossator/containing.py` (GLM 5.3 on branch `agent/contain-reads`, one follow-up by hand for a tab label the docs print twice in a row), deployed at 13:55, the Connector's tool cache refreshed to the `lang` schema; `eval/runs/2026-09-12-1211-demo-medium35-contained/` (the thirty questions of `eval/demo.jsonl` again, same agent, same model and effort, judged by GLM 5.3) beside `2026-09-12-1102-demo-medium35` (D-049a); the runner's README now carries a size table, tokens per question and characters per tool result, on every run
+
+| | D-049a | contained |
+|---|---:|---:|
+| correctness | 0.60 | 0.62 |
+| links resolve | 0.95 | 0.97 |
+| on gold | 0.76 | 0.76 |
+| tool calls per question | 5.2 | 5.8 |
+| characters per `read_page` result | 7,374 | 4,735 |
+| characters per tool result, all tools | 4,828 | 3,884 |
+| characters per question | 24,944 | 22,654 |
+| input tokens per question, mean | 7,599 | 7,287 |
+| input tokens per question, median | 6,926 | 4,876 |
+| cost of the run, USD | 0.60 | 0.58 |
+
+**Facts.**
+- Over the 55 reads recorded in the D-049a run, the transform saves 14.1% of the characters (tabs 42,942, cut outputs 9,097, duplicates 4,365, identical V1/V2 3,073); over every section of the corpus it saves 21.3%. On the live run the reads shrank more, 36% per result, because the questions the model read for are the tab-heavy ones: the reasoning section drops from 7,191 to 1,644 characters, the batch page's pasted result file from 123,879 to 6,531.
+- The model passed `lang` on 0 of 59 reads; none of the thirty questions is written from TypeScript or cURL, so the default tab was the right one every time and the omitted-tabs line never had to be acted on.
+- Per question the saving is smaller than per read because the second run made more calls (175 against 155): 21 history calls against 11, two of them `under` on a whole folder at the 12,000-character budget, and 95 searches against 87. That is run-to-run variation of a sampled model, not the transform; the median question fell from 6,926 to 4,876 input tokens.
+- Ten verdicts moved, five up and five down, net +0.02. The one that looked like a containment loss is not: on the hooks question the second run asked for 5 hits instead of 10 and read the `pre-tool` section instead of the page, so it never saw `file-locations`; the transform leaves every section of that page byte-identical, since none holds a fence. The history rows went 0.80 to 0.90 and the unanswerable rows 0.20 to 0.30, both inside the noise of five questions.
+- Two things the second run shows about the history tool, recorded here for the next entry: the model combined `text` with `page_url` or `under` in four calls on two questions ("this phrase, on this page"; "this phrase, under this path") and got the bad-parameter reply each time; and `under` on a folder such as `/studio-api` or `/models` fills the budget with a changelog the question did not need. A scoped `text` is the natural reading of those four calls.
+- The z.ai five-hour window was at its 80% ceiling when the judge started, from the afternoon's GLM sessions; the judge paused and would have waited until 17:16. It was rerun with the ceiling lifted and finished in nine minutes without a 429.
+
+**Reading.** D-050 point 3 asked for correctness inside the noise of two runs on thirty questions, and it is. The containment does what the census predicted where it applies, a third of every read, and the number that measures a session's weight from now on is the size table: characters per tool result and tokens per question, printed on every run beside correctness.
