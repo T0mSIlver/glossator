@@ -23,6 +23,15 @@ subcommands read this directory unchanged.
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | work-proxy-mistral-medium-3-5-high / A1 | 30 | 0.60 | 0.83 | 0.95 | 0.76 | 1.00 | 0.00 | 0.00 | 5.17 | 0.00 | 15.97 |
 
+## Size
+
+| questions | input tokens / question (mean) | (p50) | output tokens / question | tool results | chars / tool result | chars / question |
+|---:|---:|---:|---:|---:|---:|---:|
+| 30 | 7,599 | 6,926 | 1,143 | 155 | 4,828 | 24,944 |
+
+Input tokens include the Connector's tool results as the API counts them;
+characters are what the tools printed, before tokenization.
+
 Correctness is the blind judge's 1 / 0.5 / 0 mean where judged, else `--`.
 Run `python -m glossator.eval.consumer judge --run <dir>` and then `score`
 to fill it in; `score` also writes `metrics.json`, `figures/`, `defects.md`
