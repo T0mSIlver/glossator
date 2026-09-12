@@ -1,7 +1,7 @@
 """Three read-only MCP tools for searching, reading and tracking Mistral's documentation.
 
-Tools identify sections only by their docs.mistral.ai ``url#anchor``. Answer
-generation and citation verification remain in the package and HTTP API (D-044).
+Tools identify pages by URL and sections by the keys printed with search hits.
+Answer generation and citation verification remain in the package and HTTP API (D-044).
 """
 
 import argparse
@@ -210,7 +210,7 @@ def _instructions() -> str:
     if READ_PAGE in _ENABLED_TOOLS:
         steps.append(f"{READ_PAGE} reads the page a hit is on")
     if HISTORY in _ENABLED_TOOLS:
-        steps.append(f"{HISTORY} shows when a fact or a section changed")
+        steps.append(f"{HISTORY} shows when a fact, section or path changed")
     return (
         f"Searches {scope} (docs.mistral.ai guides, API reference, model cards) at a "
         "pinned commit. Use it for any question about Mistral models, the API, SDKs, "
@@ -600,27 +600,20 @@ async def mistral_docs_read_page(page_url: str, section: str | None = None) -> s
 
 
 def _history_description() -> str:
-    return f"""Track what changed in Mistral's documentation across dated snapshots.
-    Snapshots run from {_first_snapshot()} to the pinned commit.
+    return f"""Track Mistral documentation across stored snapshots.
 
-    USE WHEN: the question is when something appeared, changed or disappeared,
-    or what an alias like `-latest` pointed to on a date.
+    USE WHEN: something appeared, changed, moved or disappeared, or you need
+    the changes below a page or path.
 
     DO NOT USE: to read the current documentation ({SEARCH}, {READ_PAGE}).
 
-    Pass exactly one of:
-        text: An exact phrase; returns its first and last appearance with links.
-        page_url: A docs.mistral.ai page; returns its state at each date with
-            the diff when it changed. Add section for one key on that page.
+    Args:
+        text: Exact phrase for its first and last stored appearance.
+        page_url: Page to track. Add section for one key printed by a hit or read.
+        section: Optional key on page_url. A fragment on page_url also supplies it.
+        under: Page or path whose interval changelog to list.
+        since: Optional date for under; snaps to the next stored date.
     """
-
-
-def _first_snapshot() -> str:
-    try:
-        snapshots = history_service.available_snapshots(SNAPSHOT_MANIFEST)
-    except (OSError, ValueError):
-        return "the first stored snapshot"
-    return snapshots[0].date if snapshots else "the first stored snapshot"
 
 
 def _state_target(state: dict[str, Any]) -> str:

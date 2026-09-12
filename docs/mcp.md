@@ -15,7 +15,7 @@ MCP server (D-044).
 |---|---|
 | `mistral_docs_search(q, max_hits=5, under)` | The sections that state something: one hit per section with its key, heading path, snippet and the link to cite. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
 | `mistral_docs_read_page(page_url, section)` | A whole page in reading order, or one section by its key; a read that stops early names the key to continue at. |
-| `mistral_docs_history(text \| section \| question)` | When a phrase appeared, how a section changed across the dated snapshots, or what a question retrieved on each date. |
+| `mistral_docs_history(text \| page_url + section \| under + since)` | When a phrase appeared, how a page or section changed, or what changed under a path between stored dates. |
 
 Every section has a key: the heading's anchor when it has one, otherwise a
 generated `ancestor-anchor/heading-slug` name. A hit or a section header prints
