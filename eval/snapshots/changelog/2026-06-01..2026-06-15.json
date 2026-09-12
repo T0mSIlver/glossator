@@ -1,0 +1,860 @@
+[
+  {
+    "cite": "https://docs.mistral.ai/admin/security-access/admin-api#reference",
+    "heading_path": [
+      "Admin API",
+      "API reference"
+    ],
+    "key": "reference",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/admin/security-access/admin-api",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/api/endpoint/beta/connectors",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/api/endpoint/beta/connectors",
+    "sections": 60,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/studio/create-reusable-prompt",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/studio/create-reusable-prompt",
+    "sections": 9,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/studio/create-skill",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/studio/create-skill",
+    "sections": 10,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/studio/test-model-playground#whats-next",
+    "heading_path": [
+      "Test a model in the API playground",
+      "What's next"
+    ],
+    "key": "whats-next",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/studio/test-model-playground",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli#step-2",
+    "heading_path": [
+      "Install the Vibe CLI and send your first prompt",
+      "Step 2: Launch and configure"
+    ],
+    "key": "step-2",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models",
+    "heading_path": [
+      "Model capability matrix",
+      "All models"
+    ],
+    "key": "all-models",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models",
+    "heading_path": [
+      "Model capability matrix",
+      "Audio"
+    ],
+    "key": "audio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/devstral-2-25-12",
+    "heading_path": [
+      "Devstral 2",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/devstral-2-25-12",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/leanstral-26-03",
+    "heading_path": [
+      "Leanstral",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/leanstral-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/magistral-medium-1-2-25-09",
+    "heading_path": [
+      "Magistral Medium 1.2",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/magistral-medium-1-2-25-09",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-medium-3-1-25-08",
+    "heading_path": [
+      "Mistral Medium 3.1",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-medium-3-1-25-08",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-medium-3-25-05",
+    "heading_path": [
+      "Mistral Medium 3",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-medium-3-25-05",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/mistral-nemo-12b-24-07",
+    "heading_path": [
+      "Mistral Nemo 12B",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/mistral-nemo-12b-24-07",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "heading_path": [
+      "Voxtral Mini Transcribe",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "heading_path": [
+      "Voxtral Mini Transcribe"
+    ],
+    "key": "voxtral-mini-transcribe",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe 2"
+    ],
+    "key": "voxtral-mini-transcribe-2",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe Realtime",
+      "Features"
+    ],
+    "key": "features",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe Realtime",
+      "Links"
+    ],
+    "key": "links",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "heading_path": [
+      "Voxtral Mini Transcribe Realtime"
+    ],
+    "key": "voxtral-mini-transcribe-realtime",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "heading_path": [
+      "Voxtral TTS",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/deprecated/finetuning#fine-tuning-vs-prompting",
+    "heading_path": [
+      "Finetuning",
+      "Fine-tuning",
+      "Fine-tuning vs. Prompting"
+    ],
+    "key": "fine-tuning-vs-prompting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/deprecated/finetuning#fine-tuning-vs-prompting",
+    "heading_path": [
+      "Finetuning",
+      "Fine-tuning",
+      "Fine-tuning Services"
+    ],
+    "key": "fine-tuning-vs-prompting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/deprecated/finetuning#fine-tuning-vs-prompting",
+    "heading_path": [
+      "Finetuning",
+      "Fine-tuning",
+      "Fine-tuning Services"
+    ],
+    "key": "fine-tuning-vs-prompting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/known-limitations#context-window",
+    "heading_path": [
+      "Known limitations",
+      "Context window"
+    ],
+    "key": "context-window",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/known-limitations",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/known-limitations#rate-limits",
+    "heading_path": [
+      "Known limitations",
+      "Rate limits"
+    ],
+    "key": "rate-limits",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/known-limitations",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/languages",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/languages",
+    "sections": 3,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/security-advisories#indicators-of-compromise-pypi",
+    "heading_path": [
+      "Security advisories",
+      "Indicators of Compromise"
+    ],
+    "key": "indicators-of-compromise-pypi",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/security-advisories",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/security-advisories#indicators-of-compromise-pypi",
+    "heading_path": [
+      "Security advisories",
+      "Indicators of Compromise",
+      "PyPI"
+    ],
+    "key": "indicators-of-compromise-pypi",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/security-advisories",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/resources/security-advisories#indicators-of-compromise-pypi",
+    "heading_path": [
+      "Security advisories",
+      "Indicators of Compromise",
+      "PyPI"
+    ],
+    "key": "indicators-of-compromise-pypi",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/resources/security-advisories",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/overview",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/overview",
+    "sections": 13,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "heading_path": [
+      "Speech to Text",
+      "Audio & Transcription"
+    ],
+    "key": "audio-transcription",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text#document-ai-services",
+    "heading_path": [
+      "Speech to Text",
+      "Speech Transcription",
+      "Speech Transcription Services"
+    ],
+    "key": "document-ai-services",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text#:~:text=Explore%20the%20features",
+    "heading_path": [
+      "Speech to Text",
+      "Speech Transcription",
+      "Getting Started"
+    ],
+    "key": "getting-started",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "heading_path": [
+      "Speech to Text",
+      "Speech Transcription",
+      "Overview"
+    ],
+    "key": "overview",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "heading_path": [
+      "Speech to Text",
+      "Speech Transcription"
+    ],
+    "key": "speech-transcription",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "heading_path": [
+      "Speech to Text",
+      "Speech Transcription",
+      "Overview",
+      "Voxtral Realtime"
+    ],
+    "key": "voxtral-realtime",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#example-samples",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Chat with Audio",
+      "Example Samples"
+    ],
+    "key": "example-samples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#example-samples",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Example Samples"
+    ],
+    "key": "example-samples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#example-samples",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Example Samples"
+    ],
+    "key": "example-samples",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription#transcription:~:text=You%20can%20request",
+    "heading_path": [
+      "Offline",
+      "Offline Transcription",
+      "Transcription",
+      "Transcription with Timestamps"
+    ],
+    "key": "transcription/transcription-with-timestamps",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/audio/text_to_speech/speech#text-prompt-guidelines",
+    "heading_path": [
+      "Speech Generation",
+      "Best Practices",
+      "Text Prompt Guidelines"
+    ],
+    "key": "text-prompt-guidelines",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/audio/text_to_speech/speech",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#before-you-start",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Before You Start",
+      "Key Features"
+    ],
+    "key": "before-you-start/key-features",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/overview",
+    "heading_path": [
+      "Document Processing",
+      "Document AI"
+    ],
+    "key": "document-ai",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/overview",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings#services",
+    "heading_path": [
+      "Embeddings",
+      "Services"
+    ],
+    "key": "services",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings#services",
+    "heading_path": [
+      "Embeddings",
+      "Services",
+      "More"
+    ],
+    "key": "services",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings#services",
+    "heading_path": [
+      "Embeddings",
+      "Services",
+      "More"
+    ],
+    "key": "services",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/quickstart#define-schema",
+    "heading_path": [
+      "Quickstart",
+      "Define your schema"
+    ],
+    "key": "define-schema",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/quickstart",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/local-development#step-1-create-your-first-migration",
+    "heading_path": [
+      "Local development",
+      "Step 1: Create Your First Migration"
+    ],
+    "key": "step-1-create-your-first-migration",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/local-development",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/migrations#defining-a-schema",
+    "heading_path": [
+      "Manage schema",
+      "Defining a Schema"
+    ],
+    "key": "defining-a-schema",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/migrations",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/explorer#filter-language",
+    "heading_path": [
+      "Explorer",
+      "Filter language",
+      "Available fields"
+    ],
+    "key": "filter-language/available-fields",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#sdk-access",
+    "heading_path": [
+      "Judges",
+      "[Developer] Use Judges programmatically"
+    ],
+    "key": "sdk-access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/judges#setting-instructions",
+    "heading_path": [
+      "Judges",
+      "Instructions guidelines"
+    ],
+    "key": "setting-instructions",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/judges",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/consuming_events#detecting-completion",
+    "heading_path": [
+      "Consuming Streaming Events",
+      "Using the Workflows API Client",
+      "Detecting Completion"
+    ],
+    "key": "detecting-completion",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/consuming_events",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#available-cookbooks",
+    "heading_path": [
+      "Cookbook examples",
+      "Available cookbooks"
+    ],
+    "key": "available-cookbooks",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#linear-summarization",
+    "heading_path": [
+      "Cookbook examples",
+      "Linear Summarization"
+    ],
+    "key": "linear-summarization",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#linear-summarization",
+    "heading_path": [
+      "Cookbook examples",
+      "Linear Summarization",
+      "How to run it"
+    ],
+    "key": "linear-summarization/how-to-run-it",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#linear-summarization",
+    "heading_path": [
+      "Cookbook examples",
+      "Linear Summarization",
+      "Prerequisites"
+    ],
+    "key": "linear-summarization/prerequisites",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#linear-summarization",
+    "heading_path": [
+      "Cookbook examples",
+      "Linear Summarization",
+      "What it does"
+    ],
+    "key": "linear-summarization/what-it-does",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#linear-summarization:~:text=that%20the%20issue%2Dfetching",
+    "heading_path": [
+      "Cookbook examples",
+      "Linear Summarization",
+      "What to look for"
+    ],
+    "key": "linear-summarization/what-to-look-for",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/concurrency#monitoring-and-alerting",
+    "heading_path": [
+      "Concurrency Patterns",
+      "Concurrency patterns: scale your workflows",
+      "Performance Considerations",
+      "Monitoring and Alerting"
+    ],
+    "key": "monitoring-and-alerting",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/concurrency",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/hardened_deployments#registering-an-obo-workflow",
+    "heading_path": [
+      "Hardened deployments",
+      "Registering an OBO workflow"
+    ],
+    "key": "registering-an-obo-workflow",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/hardened_deployments",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/choose-chat-work-code#chat",
+    "heading_path": [
+      "Choose Chat, Work, or Code",
+      "Chat (migrating from Le Chat)"
+    ],
+    "key": "chat",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/choose-chat-work-code",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles#where-to-create",
+    "heading_path": [
+      "API keys and profiles",
+      "Where to create your API key"
+    ],
+    "key": "where-to-create",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles",
+    "sections": null,
+    "state": "changed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/vibe/code/cli/install-setup#choose-access-path",
+    "heading_path": [
+      "Install and setup",
+      "Choose your access path"
+    ],
+    "key": "choose-access-path",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/vibe/code/cli/install-setup",
+    "sections": null,
+    "state": "changed"
+  }
+]

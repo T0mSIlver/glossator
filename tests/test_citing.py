@@ -1,6 +1,7 @@
 """Section keys and citation links (D-047)."""
 
 from glossator.citing import (
+    SectionKey,
     citation_link,
     first_sentence,
     page_search_text,
@@ -44,7 +45,7 @@ We support up to 1 million requests in a single batch.
 """
 
 
-def _keys():
+def _keys() -> list[SectionKey]:
     return section_keys(parse_sections(BODY, page_title="Batch Processing"))
 
 

@@ -1,7 +1,7 @@
 """Three read-only MCP tools for searching, reading and tracking Mistral's documentation.
 
-Tools identify sections only by their docs.mistral.ai ``url#anchor``. Answer
-generation and citation verification remain in the package and HTTP API (D-044).
+Tools identify pages by URL and sections by the keys printed with search hits.
+Answer generation and citation verification remain in the package and HTTP API (D-044).
 """
 
 import argparse
@@ -9,6 +9,7 @@ import asyncio
 import hmac
 import json
 import os
+from collections import Counter
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +31,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator import changelog as changelog_service
 from glossator import history as history_service
 from glossator import package_version
 from glossator.answer.config import DEFAULT_VARIANT
@@ -208,7 +210,7 @@ def _instructions() -> str:
     if READ_PAGE in _ENABLED_TOOLS:
         steps.append(f"{READ_PAGE} reads the page a hit is on")
     if HISTORY in _ENABLED_TOOLS:
-        steps.append(f"{HISTORY} shows when a fact or a section changed")
+        steps.append(f"{HISTORY} shows when a fact, section or path changed")
     return (
         f"Searches {scope} (docs.mistral.ai guides, API reference, model cards) at a "
         "pinned commit. Use it for any question about Mistral models, the API, SDKs, "
@@ -598,42 +600,119 @@ async def mistral_docs_read_page(page_url: str, section: str | None = None) -> s
 
 
 def _history_description() -> str:
-    return f"""Track what changed in Mistral's documentation across dated snapshots.
-    Snapshots run from {_first_snapshot()} to the pinned commit.
+    return f"""Track Mistral documentation across stored snapshots.
 
-    USE WHEN: the question is when something appeared, changed or disappeared,
-    or what an alias like `-latest` pointed to on a date.
+    USE WHEN: something appeared, changed, moved or disappeared, or you need
+    the changes below a page or path.
 
     DO NOT USE: to read the current documentation ({SEARCH}, {READ_PAGE}).
 
-    Pass exactly one of:
-        text: An exact phrase; returns its first and last appearance with links.
-        section: A docs.mistral.ai url#anchor or page; returns its state at each
-            date with the diff when it changed.
-        question: A question; returns the top matching section at each date.
+    Args:
+        text: Exact phrase for its first and last stored appearance.
+        page_url: Page to track. Add section for one key printed by a hit or read.
+        section: Optional key on page_url. A fragment on page_url also supplies it.
+        under: Page or path whose interval changelog to list.
+        since: Optional date for under; snaps to the next stored date.
     """
 
 
-def _first_snapshot() -> str:
-    try:
-        snapshots = history_service.available_snapshots(SNAPSHOT_MANIFEST)
-    except (OSError, ValueError):
-        return "the first stored snapshot"
-    return snapshots[0].date if snapshots else "the first stored snapshot"
+def _state_target(state: dict[str, Any]) -> str:
+    target = state.get("page") or "(absent)"
+    if state.get("anchor"):
+        target += f"#{state['anchor']}"
+    return target
+
+
+def _section_timeline(states: list[dict[str, Any]]) -> list[tuple[int, list[str]]]:
+    if not states:
+        return []
+    timeline: list[tuple[int, list[str]]] = []
+    first = states[0]
+    if first.get("page"):
+        end = 0
+        while (
+            end + 1 < len(states)
+            and states[end + 1].get("page") is not None
+            and states[end + 1]["state"] == "same"
+        ):
+            end += 1
+        if end:
+            timeline.append(
+                (
+                    end,
+                    [
+                        f"present at {first['snapshot']}, same through "
+                        f"{states[end]['snapshot']} | {_state_target(states[end])}"
+                    ],
+                )
+            )
+        else:
+            timeline.append((0, [f"present at {first['snapshot']} | {_state_target(first)}"]))
+    else:
+        end = 0
+        timeline.append((0, [f"absent at {first['snapshot']}"]))
+
+    index = end + 1
+    while index < len(states):
+        state = states[index]
+        previous = states[index - 1]
+        date = state["snapshot"]
+        before = previous["snapshot"]
+        if state.get("page") is None:
+            if previous.get("page") is not None:
+                lines = [f"removed between {before} and {date} | {_state_target(previous)}"]
+            else:
+                end = index
+                while end + 1 < len(states) and states[end + 1].get("page") is None:
+                    end += 1
+                lines = [f"absent through {states[end]['snapshot']}"]
+                index = end
+        elif previous.get("page") is None:
+            lines = [f"added between {before} and {date} | {_state_target(state)}"]
+        elif state["state"] == "changed":
+            lines = [f"changed between {before} and {date} | {_state_target(state)}"]
+            if state.get("diff"):
+                lines.extend(["```diff", state["diff"], "```"])
+                if state.get("diff_truncated"):
+                    lines.append(DIFF_LIMIT_NOTE)
+        elif state["state"] == "moved":
+            lines = [
+                f"moved between {before} and {date} | "
+                f"{_state_target(previous)} -> {_state_target(state)}"
+            ]
+        else:
+            end = index
+            while (
+                end + 1 < len(states)
+                and states[end + 1].get("page") is not None
+                and states[end + 1]["state"] == "same"
+            ):
+                end += 1
+            lines = [f"same through {states[end]['snapshot']} | {_state_target(states[end])}"]
+            index = end
+        timeline.append((index, lines))
+        index += 1
+    return timeline
 
 
 async def mistral_docs_history(
     text: str | None = None,
+    page_url: str | None = None,
     section: str | None = None,
-    question: str | None = None,
+    under: str | None = None,
+    since: str | None = None,
 ) -> str:
-    forms = [("text", text), ("section", section), ("question", question)]
+    if section is not None and page_url is None:
+        raise _bad_param("section requires page_url.", f'{HISTORY}(page_url="url", section="key").')
+    if since is not None and under is None:
+        raise _bad_param("since requires under.", f'{HISTORY}(under="path", since="date").')
+    forms = [("text", text), ("page_url", page_url), ("under", under)]
     selected = [(name, value) for name, value in forms if value is not None]
     if len(selected) != 1:
         raise _bad_param(
-            "history takes exactly one of text, section or question.",
-            f'{HISTORY}(text="phrase"), {HISTORY}(section="url#anchor") or '
-            f'{HISTORY}(question="question").',
+            "history takes exactly one of text, page_url or under.",
+            f'{HISTORY}(text="phrase"), {HISTORY}(page_url="url", section="key") or '
+            f'{HISTORY}(under="path", since="date").',
         )
     name, value = selected[0]
     if value is None or not value.strip():
@@ -643,59 +722,125 @@ async def mistral_docs_history(
             result = await asyncio.to_thread(
                 history_service.phrase_history, value, SNAPSHOT_MANIFEST
             )
-        elif name == "section":
+        elif name == "page_url":
             result = await asyncio.to_thread(
-                history_service.section_history, value, SNAPSHOT_MANIFEST
+                history_service.section_history, value, section, SNAPSHOT_MANIFEST
             )
         else:
-            async with _admission_or_busy():
-                result = await history_service.question_history(
-                    value, SNAPSHOT_MANIFEST, engine_factory=_snapshot_engine
-                )
+            result = await asyncio.to_thread(
+                changelog_service.history_under, value, since, SNAPSHOT_MANIFEST
+            )
+    except history_service.UnknownPageError as exc:
+        raise _unknown_page(str(exc)) from exc
     except (OSError, ValueError) as exc:
         raise _bad_param(str(exc), "pass one documented history form.") from exc
-    lines = [f"history {name}: {json.dumps(value)}"]
+    if name == "under":
+        return _render_under(result)
     if name == "text":
+        lines = [f"history text: {json.dumps(value)}"]
         first, last = result["first"], result["last"]
         if first is None:
             lines.append("Results: the phrase is absent from every stored snapshot.")
         else:
-            lines.append(f"first: {first['snapshot']} | {first['page']}")
-            lines.append(f"last: {last['snapshot']} | {last['page']}")
+            lines.append(
+                f"first stored date with the phrase: {first['snapshot']} | {first['page']}"
+            )
+            lines.append(f"last stored date with the phrase: {last['snapshot']} | {last['page']}")
             lines.append(f"Results: present in {result['snapshots_found']} snapshots")
         return "\n".join(lines)
+    heading = f"history page: {result.get('page_url', value)}"
+    result_section = result.get("section")
+    if result_section:
+        heading += f" | section: {result_section}"
+    lines = [heading]
     states = result["states"]
     spent = 0
-    rendered = 0
-    for state in states:
-        block: list[str] = []
-        target = state.get("page") or "(absent)"
-        if state.get("anchor"):
-            target += f"#{state['anchor']}"
-        block.append(f"{state['snapshot']}: {state['state']} | {target}")
-        if state.get("diff"):
-            block.extend(["```diff", state["diff"], "```"])
-            if state.get("diff_truncated"):
-                block.append(DIFF_LIMIT_NOTE)
-        if state.get("text"):
-            block.append(state["text"])
+    rendered = -1
+    for end_index, block in _section_timeline(states):
         size = sum(len(line) + 1 for line in block)
-        if rendered and spent + size > HISTORY_MAX_CHARS:
+        if rendered >= 0 and spent + size > HISTORY_MAX_CHARS:
             break
         spent += size
-        rendered += 1
+        rendered = end_index
         lines.extend(block)
-    lines.append(f"Results: {rendered} of {len(states)} stored snapshots")
-    if rendered < len(states):
+    shown = rendered + 1
+    lines.append(f"Results: {shown} of {len(states)} stored snapshots")
+    if shown < len(states):
+        arguments = f'page_url="{value}"'
+        if section is not None:
+            arguments += f', section="{section}"'
         lines.append(
-            f'next: {HISTORY}(section="{value}") again names the same section; the dates '
-            f"after {states[rendered - 1]['snapshot']} were not rendered in this call."
+            f"next: {HISTORY}({arguments}) again names the same section; the dates "
+            f"after {states[rendered]['snapshot']} were not rendered in this call."
         )
     return "\n".join(lines)
 
 
-def _snapshot_engine(config: RetrievalConfig) -> SearchEngine:
-    return SearchEngine(config.model_copy(update={"rerank": False}))
+def _change_block(row: dict[str, Any]) -> list[str]:
+    line = f"  {row['state']} | {row['page']}"
+    if row.get("key"):
+        line += f" | section: {row['key']}"
+    elif row.get("sections") is not None:
+        line += f" | {row['sections']} sections"
+    block = [line]
+    if row.get("old_page"):
+        old = row["old_page"]
+        if row.get("old_key"):
+            old += f"#{row['old_key']}"
+        block.append(f"    from: {old}")
+    block.append(f"    cite: {row['cite']}")
+    return block
+
+
+def _render_under(result: dict[str, Any]) -> str:
+    intervals = result["intervals"]
+    summaries: list[str] = []
+    for interval in intervals:
+        counts = Counter(row["state"] for row in interval["rows"])
+        detail = ", ".join(
+            f"{counts[state]} {state}"
+            for state in ("added", "removed", "changed", "moved")
+            if counts[state]
+        )
+        summaries.append(
+            f"between {interval['before']} and {interval['after']}: {detail or 'no change'}"
+        )
+    heading = f"history under: {result['under']} | since: {result['since']}"
+    result_line = f"Results: {result['changes']} changes over {len(intervals)} intervals"
+    cut_line = "next: narrow under or raise since; the rest was not rendered"
+    reserved = sum(len(line) + 1 for line in [heading, *summaries, result_line, cut_line])
+    remaining = max(0, HISTORY_MAX_CHARS - reserved)
+    rendered_rows = 0
+    detail_lines: list[list[str]] = []
+    for interval in intervals:
+        lines: list[str] = []
+        for row in interval["rows"]:
+            block = _change_block(row)
+            size = sum(len(line) + 1 for line in block)
+            if size > remaining:
+                break
+            remaining -= size
+            rendered_rows += 1
+            lines.extend(block)
+        detail_lines.append(lines)
+    lines = [heading]
+    for summary, details in zip(summaries, detail_lines, strict=True):
+        lines.append(summary)
+        lines.extend(details)
+    lines.append(result_line)
+    if rendered_rows < result["changes"]:
+        lines.append(cut_line)
+    else:
+        first = next(
+            (row for interval in intervals for row in interval["rows"] if row.get("key")),
+            None,
+        )
+        if first is not None:
+            lines.append(
+                f'next: {HISTORY}(page_url="{first["page"]}", section="{first["key"]}") '
+                "shows the diff of one section"
+            )
+    return "\n".join(lines)
 
 
 _TOOL_IMPLS: dict[str, Callable[..., Awaitable[str]]] = {

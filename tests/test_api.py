@@ -695,11 +695,23 @@ def test_history_text_form_returns_the_service_result(
 
 
 def test_history_rejects_zero_or_two_forms() -> None:
-    for path in ("/history", "/history?text=a&question=b"):
+    for path in ("/history", "/history?text=a&page_url=/page"):
         response = _request("GET", path)
 
         assert response.status_code == 400
         assert response.json()["error"]["code"] == "E_BAD_PARAM"
+
+
+def test_history_under_returns_grouped_intervals(monkeypatch: pytest.MonkeyPatch) -> None:
+    def history_under(under: str, since: str | None, manifest: object) -> dict[str, object]:
+        del manifest
+        return {"form": "under", "under": under, "since": since, "intervals": []}
+
+    monkeypatch.setattr("glossator.changelog.history_under", history_under)
+    response = _request("GET", "/history?under=/vibe&since=2026-07-01")
+
+    assert response.status_code == 200
+    assert response.json()["form"] == "under"
 
 
 def test_history_rejects_an_empty_form() -> None:
@@ -787,12 +799,12 @@ def test_ask_lists_one_source_entry_per_url_and_anchor(
 def test_history_section_errors_become_bad_param(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def section_history(section: str, manifest: object) -> dict[str, object]:
+    def section_history(page_url: str, section: str | None, manifest: object) -> dict[str, object]:
         raise ValueError("section must be on docs.mistral.ai")
 
     monkeypatch.setattr("glossator.history.section_history", section_history)
 
-    response = _request("GET", "/history?section=https://example.com/page")
+    response = _request("GET", "/history?page_url=https://example.com/page")
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "E_BAD_PARAM"

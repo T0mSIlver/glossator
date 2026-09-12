@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from starlette.responses import Response
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator import changelog as changelog_service
 from glossator import history as history_service
 from glossator import package_version
 from glossator.answer import cite as cite_engine
@@ -594,16 +595,23 @@ async def page(
 @app.get("/history")
 async def history(
     text: str | None = None,
+    page_url: str | None = None,
     section: str | None = None,
-    question: str | None = None,
+    under: str | None = None,
+    since: str | None = None,
 ) -> dict[str, object]:
-    forms = [("text", text), ("section", section), ("question", question)]
+    """Track a phrase, a page or section key, or changes under a path."""
+    if section is not None and page_url is None:
+        raise ApiError(400, "E_BAD_PARAM", "section requires page_url", "set page_url and section")
+    if since is not None and under is None:
+        raise ApiError(400, "E_BAD_PARAM", "since requires under", "set under and since")
+    forms = [("text", text), ("page_url", page_url), ("under", under)]
     selected = [(name, value) for name, value in forms if value is not None]
     if len(selected) != 1:
         raise ApiError(
             400,
             "E_BAD_PARAM",
-            "history requires exactly one of text, section, or question",
+            "history requires exactly one of text, page_url, or under",
             "set one query parameter; see /openapi.json for the three forms",
         )
     name, value = selected[0]
@@ -613,9 +621,18 @@ async def history(
     try:
         if name == "text":
             return await asyncio.to_thread(history_service.phrase_history, value, manifest)
-        if name == "section":
-            return await asyncio.to_thread(history_service.section_history, value, manifest)
-        return await history_service.question_history(value, manifest)
+        if name == "page_url":
+            return await asyncio.to_thread(
+                history_service.section_history, value, section, manifest
+            )
+        return await asyncio.to_thread(changelog_service.history_under, value, since, manifest)
+    except history_service.UnknownPageError as exc:
+        raise ApiError(
+            404,
+            "E_UNKNOWN_PAGE",
+            f'no indexed page has the URL "{exc}"',
+            "use the url exactly as a search hit printed it",
+        ) from exc
     except (OSError, ValueError) as exc:
         raise ApiError(
             400,
