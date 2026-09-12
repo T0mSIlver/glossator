@@ -175,6 +175,52 @@ def test_first_and_last_follow_the_dates_not_the_manifest_order(tmp_path: Path) 
     assert states[1]["state"] == "changed"
 
 
+def test_whole_page_history_follows_a_rename_whose_prose_changed(tmp_path: Path) -> None:
+    snapshots = []
+    for date, url, body in (
+        (
+            "2026-06-01",
+            "https://docs.mistral.ai/old/guide",
+            "# Guide\n\n## Steps {#steps}\n\nOne.\n",
+        ),
+        (
+            "2026-06-15",
+            "https://docs.mistral.ai/old/guide",
+            "# Guide\n\n## Steps {#steps}\n\nTwo.\n",
+        ),
+        (
+            "2026-07-01",
+            "https://docs.mistral.ai/new/guide",
+            "# Guide\n\n## Steps {#steps}\n\nTwo.\n",
+        ),
+    ):
+        corpus = tmp_path / date
+        _page(corpus / "guide.md", url, body)
+        snapshots.append(
+            {
+                "date": date,
+                "commit": date.replace("-", ""),
+                "pages": 1,
+                "content_digest": date,
+                "corpus_dir": str(corpus),
+                "status": "built",
+                "error": None,
+                "openapi_source": "openapi.yaml",
+                "openapi_snapshot_exact": True,
+                "models_snapshot_exact": True,
+            }
+        )
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"snapshots": snapshots}))
+
+    result = section_history("/new/guide", None, manifest)
+
+    states = [(row["state"], row["page"]) for row in result["states"]]
+    assert states[0] == ("moved", "https://docs.mistral.ai/old/guide")
+    assert states[1] == ("changed", "https://docs.mistral.ai/old/guide")
+    assert states[2] == ("moved", "https://docs.mistral.ai/new/guide")
+
+
 def test_phrase_history_scoped_to_a_page_and_a_path(tmp_path: Path) -> None:
     manifest = _manifest(tmp_path)
 

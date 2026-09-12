@@ -177,19 +177,35 @@ def _locate(
         # links inside a page, and the page is still the same page (D-048a).
         wanted = comparable_body(previous_text)
         matches: list[tuple[CorpusPage, str, str | None]] = []
+        structural: list[tuple[CorpusPage, str, str | None]] = []
+        wanted_shape = _shape(previous_text)
         for candidate in pages:
             if key is None:
                 if comparable_body(candidate.body) == wanted:
                     matches.append((candidate, candidate.body, None))
+                elif (
+                    _shared_path_tail(url, candidate.url) >= 1
+                    and _shape(candidate.body) == wanted_shape
+                ):
+                    # The same page under another folder with its prose edited:
+                    # same last path segment, same headings in the same order.
+                    structural.append((candidate, candidate.body, None))
                 continue
             sections = parse_sections(candidate.body, page_title=candidate.title)
             keys = section_keys(sections)
             for parsed, named in zip(sections, keys, strict=True):
                 if find_span(comparable_body(parsed.body), wanted) is not None:
                     matches.append((candidate, parsed.body, named.key))
+        matches = matches or structural
         if matches:
             return max(matches, key=lambda match: _shared_path_tail(url, match[0].url))
     return None
+
+
+def _shape(body: str) -> tuple[str, ...]:
+    """A page's headings in order, the identity a rename keeps when the prose moves on."""
+    sections = parse_sections(body, page_title="")
+    return tuple(section.heading_path[-1] if section.heading_path else "" for section in sections)
 
 
 def _digest(text: str) -> str:
