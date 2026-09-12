@@ -13,6 +13,7 @@ from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, Qu
 from glossator.eval.work_proxy import (
     ParsedConversation,
     agent_instructions,
+    answered_ids,
     connector_call_count,
     custom_instructions_block,
     parse_conversation_response,
@@ -172,3 +173,26 @@ def test_resume_skips_done_ids(tmp_path: Path) -> None:
     again = resolve_run_directory("resume-check", root=tmp_path)
     assert again == run_dir
     assert run_dir.name.endswith("resume-check")
+
+
+def test_resume_asks_error_rows_again() -> None:
+    parsed = ParsedConversation(answer_text="an answer")
+    answered = record_for(
+        _question("q1"),
+        parsed,
+        consumer="c",
+        model="m",
+        wall_seconds=1.0,
+        transcript="t",
+        error=None,
+    )
+    failed = record_for(
+        _question("q2"),
+        ParsedConversation(),
+        consumer="c",
+        model="m",
+        wall_seconds=1.0,
+        transcript="t",
+        error="SDKError: Status 429",
+    )
+    assert answered_ids([answered, failed]) == {"q1"}

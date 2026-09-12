@@ -64,8 +64,10 @@ The platform suffixes a Connector's requested name with four hex characters, so
 the name to pass is the suffixed one, or the UUID (D-049)."""
 DEFAULT_CONCURRENCY = 2
 QUESTION_TIMEOUT_S = 300.0
-HTTP_ATTEMPTS = 3
-"""The providers.py retry shape: 429 and 5xx wait 0.25 * 2**attempt seconds."""
+HTTP_ATTEMPTS = 5
+"""429 and 5xx wait 2 * 2**attempt seconds. The platform rate-limits custom
+Connector calls per minute, which the providers' sub-second backoff never
+outwaits; four retries reach half a minute."""
 
 ReasoningEffortChoice = Literal["high", "none"]
 """What the Work demo runs: reasoning on (high) or off (none). The Conversations
@@ -295,7 +297,7 @@ async def start_conversation(
             status = _status_of(error)
             retryable = status == 429 or (status is not None and status >= 500)
             if retryable and attempt < HTTP_ATTEMPTS - 1:
-                await asyncio.sleep(0.25 * (2**attempt))
+                await asyncio.sleep(2.0 * (2**attempt))
                 continue
             raise
     raise RuntimeError("conversation retry loop ended unexpectedly") from last_error
@@ -438,6 +440,12 @@ def write_transcript(run_dir: Path, question: EvalQuestion, body: str) -> str:
     return str(target.relative_to(run_dir))
 
 
+def answered_ids(records: Sequence[ConsumerRecord]) -> set[str]:
+    """The questions a run need not ask again. An error row is not an answer:
+    a resumed run asks that question again and the fresh record replaces it."""
+    return {record.question_id for record in records if not record.error}
+
+
 def select_pending(questions: Sequence[EvalQuestion], done_ids: set[str]) -> list[EvalQuestion]:
     """The questions a resumed run still owes, in dataset order."""
     return [question for question in questions if question.id not in done_ids]
@@ -561,7 +569,7 @@ async def run_work_proxy(
     """Every pending question through one proxy agent, resumable by question id."""
     api_client = client or Mistral(api_key=_api_key())
     records = load_records(config.run_dir / "records.jsonl")
-    done_ids = {record.question_id for record in records}
+    done_ids = answered_ids(records)
     pending = select_pending(questions, done_ids)
     logger.info(
         "Work proxy collection",
