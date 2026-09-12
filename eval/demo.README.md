@@ -35,6 +35,15 @@ a point date scores at most partial (D-048).
 | hist-004 | the custom vector store page gained the partial-updates section | 2026-09-01 and 2026-09-07 | snapshot label of dev-089; `phrase_history("PatchableIndex")` |
 | hist-005 | the Reasoning guide moved from `/studio-api/` to `/studio/` | 2026-08-01 and 2026-08-15 | the snapshot corpora; the August rename of D-041a |
 
+## Known defect
+
+`mined2-066` (which models can be chained in handoffs) is labelled unanswerable, but the
+Agents introduction FAQ states that only `mistral-medium-latest` and `mistral-large-latest`
+are supported (`studio/agents/introduction#which-models-are-supported`). An answer that
+cites it is grounded; the judge, which sees no served passages in a consumer run, scored it
+wrong in `2026-09-12-1102-demo-medium35` (D-049a). The row stays as mined so the set keeps
+its digest; read that cell as a reference defect.
+
 ## Regenerate
 
 The selection is a fixed list of ids plus the five handwritten rows; the builder lives with the

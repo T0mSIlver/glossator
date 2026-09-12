@@ -1,8 +1,24 @@
-# Evaluation status, 10 September 2026
+# Evaluation status, 12 September 2026
 
-Where the evaluation stands before the hand test in Mistral Work. Every number
-names the model that produced it. `D-0xx` is a `DECISIONS.md` entry; run names
-are directories under `eval/runs/`.
+Where the evaluation stands at the ship of the Work demo. Every number names
+the model that produced it. `D-0xx` is a `DECISIONS.md` entry; run names are
+directories under `eval/runs/`.
+
+## The demo, measured where it runs
+
+Work has no API, but a Work session is a Connector-attached agent, and the
+Conversations API runs the same server-side tool loop with the same model and
+`reasoning_effort` (D-049). `glossator.eval.work_proxy` sends a question set
+through that loop with the Skill as the agent's instructions and the workspace
+Connector as its only tool. On `eval/demo.jsonl` (30 questions: 20 realistic
+rows on agents, MCP, the Vibe CLI and the Search Toolkit, 5 the documentation
+cannot answer, 5 that need the history tool), Medium 3.5 at `reasoning_effort=high`
+scored 0.60 correctness with GLM 5.3 judging: 0.80 on the history rows, all five
+answered through `mistral_docs_history` with the change as a bound between two
+snapshot dates; 0.68 on single-page rows; 0.20 on the unanswerable rows, where
+the model fills the gap from adjacent pages (`2026-09-12-1102-demo-medium35`,
+D-049a). Links resolved 0.95, 0.76 of answers named a gold page, 5.2 tool calls
+and 16 s per question at the median, 0.60 USD for the run.
 
 ## In one paragraph
 
@@ -40,7 +56,7 @@ key's quota for both models is zero (D-017a).
 | Refusal | Insufficient-evidence flag plus "no verified citation" rule, unchanged | D-030b, D-042 | `failure-analysis`, `-v2` | Ministral 3 14B answers, GLM 5.3 verdicts |
 | MCP surface | `mistral-docs`, three read-only tools addressed by url#anchor, no ids, no time or cost in model-facing text | D-044, D-029a, D-037b, D-037c, D-040b | `consumer-eval`, `consumer-eval-v2` | Claude Sonnet, GPT luna, muse spark 1.3 as consumers; GLM 5.3 judge |
 | Deployment | One image, `remote-index` and `full`, Cloudflare tunnel, bearer token, index rebuilt from cache | D-037a, D-037d | `tests/test_deploy.py` | none |
-| Time axis | Eight biweekly snapshots in one schema, `history` tool, labels by span search then two judges | D-041, D-041a | `snapshot-labels`, `snapshot-eval` | local Ministral 3 14B Reasoning gen, GLM 5.3 judge |
+| Time axis | Eight biweekly snapshots, `history` in three forms (phrase, page or section by key, changes under a path) over a precomputed changelog, every change a bound between two dates | D-041, D-041a, D-048, D-048a | `snapshot-labels`, `snapshot-eval`, `demo-medium35` | local Ministral 3 14B Reasoning gen, GLM 5.3 judge; Medium 3.5 on the demo |
 
 ## The Search Toolkit: what we use and what we do not
 

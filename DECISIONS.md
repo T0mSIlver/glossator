@@ -1558,3 +1558,31 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 - The codex session hit its usage limit after three of the five review fixes; the last two (the page-set cache and the `present in 1 of 8 stored snapshots` wording) were done by hand.
 
 **Reading.** The decision of D-048 held in every point. What the code taught: tier 3 as written ("body found as a span") is not enough on a rename, because bodies carry links that rename with the site; normalizing the links is what makes tier 3 general. And a changelog at section grain is unreadable across a rename unless whole-page moves collapse; the collapse is what keeps `under="/"` usable.
+
+---
+
+## D-049a · The demo measured: Medium 3.5 with reasoning through the Work Connector scores 0.60 on the thirty, 0.80 on the history rows and 0.20 on the unanswerable ones
+
+**Status:** recorded · 2026-09-12 · `eval/runs/2026-09-12-1102-demo-medium35/` (30 questions, `mistral-medium-3-5`, `reasoning_effort=high`, Tom's Connector `mistral_docs_ca30` on the D-048 server deployed at 12:58, judged by GLM 5.3 under judge prompt v2, scored by the consumer `score` command); the smoke runs `2026-09-12-1033-work-proxy-smoke` (Small, two questions) and `2026-09-12-1050-medium35-smoke` (Medium 3.5, two questions, over the D-047 server)
+
+| cell | n | correctness | links resolve | on gold | tool calls | p50 s |
+|---|---:|---:|---:|---:|---:|---:|
+| Medium 3.5, high, Skill + Connector | 30 | 0.60 | 0.95 | 0.76 | 5.2 | 16.0 |
+
+| type | n | correct | partial | wrong | mean |
+|---|---:|---:|---:|---:|---:|
+| history | 5 | 3 | 2 | 0 | 0.80 |
+| single_page | 14 | 8 | 3 | 3 | 0.68 |
+| cross_page | 3 | 1 | 2 | 0 | 0.67 |
+| api_reference | 3 | 1 | 1 | 1 | 0.50 |
+| unanswerable | 5 | 1 | 0 | 4 | 0.20 |
+
+**Facts.**
+- The loop is Work's: the agent carried the Skill body and the two custom-instruction sentences, the Connector was the only tool, every question was one unstored conversation. Every one of the thirty called the server; median 4 calls, one question 18. 227,959 input tokens (Connector tokens included) and 34,303 output tokens, 0.60 USD at the published rate.
+- The platform rate-limits custom Connector calls: at concurrency 3, fourteen of thirty conversations came back `429 Custom connector rate limit reached` after the runner's sub-second backoff. The error rows were dropped, the backoff raised to 2, 4, 8 and 16 seconds, and the fourteen were re-asked one at a time; a resumed run now re-asks every error row on its own.
+- **The history rows are answered through the tool.** All five reached `mistral_docs_history`, three of them without a prior search; the two partials are omissions against the reference wording, not wrong dates: hist-002 says "since August 15" where the reference bounds it from August 1, and hist-005 gives the old URL and the interval but not that the move was the section rename. hist-004 gives the bound and then adds "since September 7", the fortnightly grid read as a day, which D-048's rendering discourages and the model still did once. A year ago these five questions had no answer on this surface.
+- **Over-reach on the unanswerable rows is the cell that fails, as D-046 and D-047a said it would.** Four of five: the evaluation features of the Search Toolkit invented from `CacheMetrics`; the function-calling limit of 128 tools per request presented as the Vibe CLI's MCP ceiling; web search plus JSON output asserted as a documented combination; and the handoff model list. That last one is a reference defect, not a model defect: the Agents introduction FAQ says "Currently, only `mistral-medium-latest` and `mistral-large-latest` are supported" (`studio/agents/introduction#which-models-are-supported`), the model cited it, and the judge, which sees no served passages in a consumer run, called the quote fabricated. The row stays as mined; the set is frozen by its digest, and the defect is noted in `eval/demo.README.md`.
+- The three wrong answerables are each a wrong page, not a wrong reading: the Workflows durable-agent MCP classes for a question about connecting an agent to the hosted MCP server; a workflows `Agent(id=…)` upsert for a question about `PATCH /v1/agents/{id}`; chat-completion stream chunks for the conversation stream's event types. In all three the model searched three to eighteen times and read a plausible neighbour of the gold section.
+- Judge caveat: the consumer judge grades against the reference answer and sees no served passages, so `claims_supported` is 0 on every row and groundedness is not measured here; correctness is the number.
+
+**Reading.** The three-form history tool does what the demo needs: a question that needs a date gets its bound from one or two calls, and no answer names a day the snapshots cannot support except as an aside. The product's weak cell is unchanged and now counted for the Work model: when the documentation is silent, Medium 3.5 at high reasoning fills the gap in four cases of five, with citations to pages that say something adjacent. The stop rules of D-044a hold on search count (no thirteen-search loop) and do not hold on the write-up. The next lever the file has already named (D-046 point 3): a per-session budget the server reports, and instructions that make the absence proof a required sentence of the answer.

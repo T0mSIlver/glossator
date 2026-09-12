@@ -212,10 +212,11 @@ Then ask a question that needs the documentation and watch for a
 ## What the key behind the endpoint can spend, and what is served
 
 **Spend.** With the three-tool surface (D-044) the only Mistral API call a
-request can trigger is the embedding of the query: `search` and the `question`
-form of `history` embed once each on `mistral-embed`, about twenty tokens at
-0.10 USD per million, or two millionths of a dollar per call. `read_page` and
-the `text` and `section` forms of `history` read Vespa and call no model. The
+request can trigger is the embedding of the query: `search` embeds it once on
+`mistral-embed`, about twenty tokens at 0.10 USD per million, or two millionths
+of a dollar per call. `read_page` reads Vespa, and every form of `history`
+reads the snapshot corpora and the committed changelog (D-048); neither calls a
+model. The
 API's `POST /ask` and `POST /cite` are not exposed through the tunnel unless
 `API=1` is passed to `make deploy`; `/ask` is the one route that pays for
 generation and reranking, about 0.006 USD per question on Medium 3.5 (D-017b).
