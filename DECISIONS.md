@@ -1586,3 +1586,35 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 - Judge caveat: the consumer judge grades against the reference answer and sees no served passages, so `claims_supported` is 0 on every row and groundedness is not measured here; correctness is the number.
 
 **Reading.** The three-form history tool does what the demo needs: a question that needs a date gets its bound from one or two calls, and no answer names a day the snapshots cannot support except as an aside. The product's weak cell is unchanged and now counted for the Work model: when the documentation is silent, Medium 3.5 at high reasoning fills the gap in four cases of five, with citations to pages that say something adjacent. The stop rules of D-044a hold on search count (no thirteen-search loop) and do not hold on the write-up. The next lever the file has already named (D-046 point 3): a per-session budget the server reports, and instructions that make the absence proof a required sentence of the answer.
+
+---
+
+## D-050 · What `read_page` prints is contained: one language tab, no repeated sample, pasted outputs cut to their head
+
+**Status:** decided by Tom on the direction ("keep tool results contained, make it a decision"), the option chosen by the assistant · 2026-09-12 · implementation on branch `agent/contain-reads` (GLM 5.3, in progress at the time of writing); evidence: the Work session export `Mistral Batch Processing Overview.html` (2026-09-12, sixteen calls), `eval/runs/2026-09-12-1102-demo-medium35/calls.jsonl` (155 tool results), a fence census of the vendored corpus, D-043, D-044, D-046, D-047
+
+**The measure.** The batch-processing Work session is 28,462 Medium 3.5 tokens, of which the sixteen tool results are about 23,400, or 82%. Seven section reads are 16,700 of those; one read, the `explanation-4` section of Batch Processing, is 5,996 tokens of pasted response the answer did not use. Searches are 620 to 1,055 tokens each; the listing is 79.
+
+**What already contains results.** A read stops at 24,000 characters and names the key to continue at (D-043); a hit on a large page names the section to read instead of the page (D-047); every section has a key so a read can be one section, which is how the batch page was read seven times without a whole-page read; snippets are 400 characters; `max_hits` defaults to 5; history diffs cut at 6,000 characters and the history budget is 12,000; text fragments print only when they move the landing; `kind` and the chunk ids are gone (D-044, D-047). None of this touches what is inside a section.
+
+**The census.** Of the corpus's 2,931,642 characters, 41.1% sit inside 1,802 code fences. By kind: code samples 23.0% (1,493 fences); pasted outputs and vectors 18.0% (306 fences, 31 of them "noise" by the D-047 rule of 20 float literals or a line over 1,500 characters, 12.8% on their own, the largest a single 118,910-character response on Batch Processing); duplicated fences, byte-identical on the same page, 4.7% (110 fences: the Python SDK V1 tab beside an identical V2 tab); the TypeScript and cURL tabs of a sample also given in Python, 12.8%. Tabs are regular: a bold label line (`Python` 330 times, `TypeScript` 201, `cURL` 189, `Output` 129, `V1` and `V2` 90 each) then the fence, on 103 pages. API and model pages hold no fence at all.
+
+The same census on the 57 reads the demo run actually made (420,322 characters): fenced 36.8%; the non-Python tabs 12.8%; outputs 4.9%; noise 2.3%; duplicates 1.8%. What the model reads in practice is prose and code samples; the pasted monsters are rare because the section keys keep reads narrow.
+
+**Options.**
+
+| option | saves on the demo reads | what it costs |
+|---|---:|---|
+| A. Elide noise fences (20 floats or a 1,500-character line) | 2.3% | nothing a reader needs; the rule is already in the corpus map |
+| B. Elide every pasted output | 4.9% | a response sample is sometimes the answer (the shape of a batch result file) |
+| C. Print a byte-identical fence once | 1.8% | nothing |
+| D. Print one language tab, name the others | 12.8% | a TypeScript or cURL user gets Python names (`reasoning_effort` for `reasoningEffort`) unless the model asks for the tab |
+| E. No code samples unless asked (`code_samples` bool, Tom's suggestion) | 36.8% | the model must foresee that it needs a sample; Work models mishandle optional arguments (D-046) and the exact parameter names in the samples are what the mined questions ask for; an extra call on every how-do-I question |
+| F. Cut any output over 1,500 characters to its head | 3.1% | the tail of a long response sample; the head keeps its shape |
+| lower `READ_MAX_CHARS` | 0 | more continuation calls, no fewer characters read |
+
+**Decision.**
+1. **D, C, F and A ship together; E does not.** `read_page(page_url, section, lang="python")`: within a tab group the tab of `lang` prints and one line names the omitted tabs with the argument that shows them; `lang` is `python`, `typescript` or `curl`, the three tabs the documentation itself has. An identical V1 beside V2 prints once; the V1 and V2 that differ print both, because that difference is the migration question. A fence already printed in the section prints as a one-line reference. A pasted output over 1,500 characters keeps its head and says how many lines follow; code samples are never cut. Expected on the demo reads: about a fifth of the characters, with every parameter name and every sample the answer needs still on the page.
+2. **The rule is deterministic and argument-free in the common case.** The model chooses nothing unless the user works in TypeScript or cURL, and then chooses the same word the docs' tab shows. This is the D-046 principle: one argument, one thing, and no free string that invites guessing.
+3. **Measured before it ships.** The transform runs over the 57 recorded reads for the character count per rule, and the thirty-question demo set runs again on the deployed server for correctness and tokens per question beside D-049a. If correctness moves outside the noise of two runs on thirty questions, the rule that caused it is withdrawn.
+4. **Not taken.** E stays available as a one-line change if a host is ever shown to need it; the search snippet, the history diff and the API pages are unchanged; per-session budgets stay deferred (D-046 point 3).
