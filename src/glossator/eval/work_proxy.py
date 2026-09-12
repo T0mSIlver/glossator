@@ -467,10 +467,12 @@ class WorkProxyConfig:
         agent_id: str | None,
         question_count: int,
         connector_tools: list[str] | None = None,
+        instructions: str | None = None,
     ) -> dict[str, Any]:
         consumer = consumer_name(self.model, self.reasoning_effort)
         return {
             "kind": "work_proxy_eval",
+            "instructions": instructions,
             "name": self.name,
             "run_dir": str(self.run_dir),
             "consumer": consumer,
@@ -590,11 +592,12 @@ async def run_work_proxy(
         )
         if not connector_tools:
             raise SystemExit(f"connector {config.connector!r} exposes no tools")
+        instructions = agent_instructions()
         agent = await create_agent(
             api_client,
             name=f"glossator-work-proxy-{config.name}",
             model=config.model,
-            instructions=agent_instructions(),
+            instructions=instructions,
             connector=config.connector,
             reasoning_effort=config.reasoning_effort,
         )
@@ -608,6 +611,7 @@ async def run_work_proxy(
                     tool.name if not isinstance(tool, dict) else str(tool.get("name", ""))
                     for tool in connector_tools
                 ],
+                instructions=instructions,
             ),
         )
         (config.run_dir / "questions.jsonl").write_text(
