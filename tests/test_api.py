@@ -702,6 +702,18 @@ def test_history_rejects_zero_or_two_forms() -> None:
         assert response.json()["error"]["code"] == "E_BAD_PARAM"
 
 
+def test_history_under_returns_grouped_intervals(monkeypatch: pytest.MonkeyPatch) -> None:
+    def history_under(under: str, since: str | None, manifest: object) -> dict[str, object]:
+        del manifest
+        return {"form": "under", "under": under, "since": since, "intervals": []}
+
+    monkeypatch.setattr("glossator.changelog.history_under", history_under)
+    response = _request("GET", "/history?under=/vibe&since=2026-07-01")
+
+    assert response.status_code == 200
+    assert response.json()["form"] == "under"
+
+
 def test_history_rejects_an_empty_form() -> None:
     response = _request("GET", "/history?text=++")
 

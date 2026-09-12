@@ -47,6 +47,7 @@ COPY --chown=glossator:glossator pyproject.toml uv.lock ./
 # The history tool reads the snapshot manifest; it is 4 KB of metadata, and
 # without it that tool answers every call with an error.
 COPY --chown=glossator:glossator eval/snapshots/manifest.json ./eval/snapshots/manifest.json
+COPY --chown=glossator:glossator eval/snapshots/changelog ./eval/snapshots/changelog
 RUN mkdir -p /home/glossator/.cache/glossator/embeddings \
  && chown -R glossator:glossator /home/glossator
 

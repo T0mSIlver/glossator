@@ -9,6 +9,7 @@ import asyncio
 import hmac
 import json
 import os
+from collections import Counter
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +31,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from entrypoints.param_suggestions import suggest_fields
+from glossator import changelog as changelog_service
 from glossator import history as history_service
 from glossator import package_version
 from glossator.answer.config import DEFAULT_VARIANT
@@ -685,15 +687,20 @@ async def mistral_docs_history(
     text: str | None = None,
     page_url: str | None = None,
     section: str | None = None,
+    under: str | None = None,
+    since: str | None = None,
 ) -> str:
     if section is not None and page_url is None:
         raise _bad_param("section requires page_url.", f'{HISTORY}(page_url="url", section="key").')
-    forms = [("text", text), ("page_url", page_url)]
+    if since is not None and under is None:
+        raise _bad_param("since requires under.", f'{HISTORY}(under="path", since="date").')
+    forms = [("text", text), ("page_url", page_url), ("under", under)]
     selected = [(name, value) for name, value in forms if value is not None]
     if len(selected) != 1:
         raise _bad_param(
-            "history takes exactly one of text or page_url.",
-            f'{HISTORY}(text="phrase") or {HISTORY}(page_url="url", section="key").',
+            "history takes exactly one of text, page_url or under.",
+            f'{HISTORY}(text="phrase"), {HISTORY}(page_url="url", section="key") or '
+            f'{HISTORY}(under="path", since="date").',
         )
     name, value = selected[0]
     if value is None or not value.strip():
@@ -703,15 +710,21 @@ async def mistral_docs_history(
             result = await asyncio.to_thread(
                 history_service.phrase_history, value, SNAPSHOT_MANIFEST
             )
-        else:
+        elif name == "page_url":
             result = await asyncio.to_thread(
                 history_service.section_history, value, section, SNAPSHOT_MANIFEST
+            )
+        else:
+            result = await asyncio.to_thread(
+                changelog_service.history_under, value, since, SNAPSHOT_MANIFEST
             )
     except history_service.UnknownPageError as exc:
         raise _unknown_page(str(exc)) from exc
     except (OSError, ValueError) as exc:
         raise _bad_param(str(exc), "pass one documented history form.") from exc
     display_name = "section" if name == "page_url" else name
+    if name == "under":
+        return _render_under(result)
     lines = [f"history {display_name}: {json.dumps(value)}"]
     if name == "text":
         first, last = result["first"], result["last"]
@@ -744,6 +757,73 @@ async def mistral_docs_history(
             f"next: {HISTORY}({arguments}) again names the same section; the dates "
             f"after {states[rendered]['snapshot']} were not rendered in this call."
         )
+    return "\n".join(lines)
+
+
+def _change_block(row: dict[str, Any]) -> list[str]:
+    line = f"  {row['state']} | {row['page']}"
+    if row.get("key"):
+        line += f" | section: {row['key']}"
+    elif row.get("sections") is not None:
+        line += f" | {row['sections']} sections"
+    block = [line]
+    if row.get("old_page"):
+        old = row["old_page"]
+        if row.get("old_key"):
+            old += f"#{row['old_key']}"
+        block.append(f"    from: {old}")
+    block.append(f"    cite: {row['cite']}")
+    return block
+
+
+def _render_under(result: dict[str, Any]) -> str:
+    intervals = result["intervals"]
+    summaries: list[str] = []
+    for interval in intervals:
+        counts = Counter(row["state"] for row in interval["rows"])
+        detail = ", ".join(
+            f"{counts[state]} {state}"
+            for state in ("added", "removed", "changed", "moved")
+            if counts[state]
+        )
+        summaries.append(
+            f"between {interval['before']} and {interval['after']}: {detail or 'no change'}"
+        )
+    heading = f"history under: {result['under']} | since: {result['since']}"
+    result_line = f"Results: {result['changes']} changes over {len(intervals)} intervals"
+    cut_line = "next: narrow under or raise since; the rest was not rendered"
+    reserved = sum(len(line) + 1 for line in [heading, *summaries, result_line, cut_line])
+    remaining = max(0, HISTORY_MAX_CHARS - reserved)
+    rendered_rows = 0
+    detail_lines: list[list[str]] = []
+    for interval in intervals:
+        lines: list[str] = []
+        for row in interval["rows"]:
+            block = _change_block(row)
+            size = sum(len(line) + 1 for line in block)
+            if size > remaining:
+                break
+            remaining -= size
+            rendered_rows += 1
+            lines.extend(block)
+        detail_lines.append(lines)
+    lines = [heading]
+    for summary, details in zip(summaries, detail_lines, strict=True):
+        lines.append(summary)
+        lines.extend(details)
+    lines.append(result_line)
+    if rendered_rows < result["changes"]:
+        lines.append(cut_line)
+    else:
+        first = next(
+            (row for interval in intervals for row in interval["rows"] if row.get("key")),
+            None,
+        )
+        if first is not None:
+            lines.append(
+                f'next: {HISTORY}(page_url="{first["page"]}", section="{first["key"]}") '
+                "shows the diff of one section"
+            )
     return "\n".join(lines)
 
 

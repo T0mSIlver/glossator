@@ -7,8 +7,10 @@ import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from glossator.answer.citations import find_span, normalize
 from glossator.citing import citation_link, page_search_text, section_keys
@@ -17,6 +19,7 @@ from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 
 DEFAULT_CHANGELOG_DIR = Path("eval/snapshots/changelog")
+SITE_ORIGIN = "https://docs.mistral.ai"
 _HEADING_ANCHOR = re.compile(r"(?m)(^#{1,6} .+?)\s+\{#[^}]+\}(\s*$)")
 _STUDIO_API_PATH = re.compile(r"/studio-api(?=/|\b)")
 
@@ -342,6 +345,81 @@ def read_changelog(
         rows = json.loads((directory / pair["file"]).read_text())
         intervals.append({**pair, "rows": rows})
     return intervals
+
+
+def _under_prefix(under: str) -> str:
+    raw = under.strip()
+    if not raw:
+        raise ValueError("under must contain a documentation path")
+    parsed = urlsplit(raw if "://" in raw else f"{SITE_ORIGIN}/{raw.lstrip('/')}")
+    if parsed.netloc and parsed.netloc != "docs.mistral.ai":
+        raise ValueError("under must be on docs.mistral.ai")
+    return f"{SITE_ORIGIN}{parsed.path.rstrip('/') or ''}"
+
+
+def _is_under(page: str, prefix: str) -> bool:
+    return prefix == SITE_ORIGIN or page == prefix or page.startswith(prefix + "/")
+
+
+def _nearest_ancestor(prefix: str, pages: set[str]) -> str | None:
+    parent = prefix
+    while parent.startswith(SITE_ORIGIN + "/"):
+        parent = parent.rsplit("/", 1)[0]
+        if parent == SITE_ORIGIN:
+            return None
+        if any(_is_under(page, parent) for page in pages):
+            return parent
+    return None
+
+
+def history_under(
+    under: str,
+    since: str | None = None,
+    manifest_path: Path = DEFAULT_MANIFEST,
+    changelog_dir: Path | None = None,
+) -> dict[str, Any]:
+    prefix = _under_prefix(under)
+    snapshots = _built(manifest_path)
+    if not snapshots:
+        raise ValueError("the snapshot manifest has no built snapshots")
+    pages = {
+        page.url.rstrip("/")
+        for snapshot in snapshots
+        for page in (
+            load_page(path) for path in iter_page_paths(Path(snapshot.corpus_dir).expanduser())
+        )
+    }
+    if not any(_is_under(page, prefix) for page in pages):
+        ancestor = _nearest_ancestor(prefix, pages)
+        hint = f' nearest path with pages: "{ancestor}".' if ancestor else ""
+        raise ValueError(f'no stored page exists under "{prefix}".{hint}')
+    try:
+        requested = date.fromisoformat(since) if since else date.fromisoformat(snapshots[0].date)
+    except ValueError as exc:
+        raise ValueError("since must be a date in YYYY-MM-DD form") from exc
+    snapped = next(
+        (row.date for row in snapshots if date.fromisoformat(row.date) >= requested), None
+    )
+    if snapped is None:
+        raise ValueError(f"since is after the last stored date {snapshots[-1].date}")
+    intervals = []
+    for interval in read_changelog(manifest_path, changelog_dir):
+        if interval["before"] < snapped:
+            continue
+        rows = [
+            row
+            for row in interval["rows"]
+            if _is_under(row["page"], prefix)
+            or (row.get("old_page") and _is_under(row["old_page"], prefix))
+        ]
+        intervals.append({"before": interval["before"], "after": interval["after"], "rows": rows})
+    return {
+        "form": "under",
+        "under": prefix,
+        "since": snapped,
+        "intervals": intervals,
+        "changes": sum(len(interval["rows"]) for interval in intervals),
+    }
 
 
 def _parser() -> argparse.ArgumentParser:

@@ -538,12 +538,14 @@ def test_read_page_asks_the_index_for_the_whole_page_under_the_vespa_limit(mcp_s
 
 def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
     text = _call_error(mcp_server, "mistral_docs_history", {})
-    assert "exactly one of text or page_url" in text
+    assert "exactly one of text, page_url or under" in text
     text = _call_error(mcp_server, "mistral_docs_history", {"text": "a", "page_url": PAGE})
     assert "exactly one of" in text
 
     text = _call_error(mcp_server, "mistral_docs_history", {"section": "a"})
     assert "section requires page_url" in text
+    text = _call_error(mcp_server, "mistral_docs_history", {"since": "2026-07-01"})
+    assert "since requires under" in text
 
 
 def test_history_text_prints_first_last_and_count(
@@ -636,6 +638,89 @@ def test_history_collapses_unchanged_dates_and_bounds_moves(
     assert "same through 2026-06-15" in text
     assert f"moved between 2026-06-15 and 2026-07-01 | {old}#a -> {PAGE}#b" in text
     assert "same through 2026-07-15" in text
+
+
+def test_history_under_renders_grouped_intervals(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(under: str, since: str | None, manifest: Any) -> dict[str, Any]:
+        del under, since, manifest
+        return {
+            "under": "https://docs.mistral.ai/vibe",
+            "since": "2026-07-01",
+            "changes": 2,
+            "intervals": [
+                {
+                    "before": "2026-07-01",
+                    "after": "2026-07-15",
+                    "rows": [
+                        {
+                            "state": "added",
+                            "page": PAGE,
+                            "key": "a",
+                            "cite": f"{PAGE}#a",
+                        }
+                    ],
+                },
+                {
+                    "before": "2026-07-15",
+                    "after": "2026-08-01",
+                    "rows": [
+                        {
+                            "state": "moved",
+                            "page": PAGE,
+                            "key": "b",
+                            "cite": f"{PAGE}#b",
+                            "old_page": "https://docs.mistral.ai/old",
+                            "old_key": "a",
+                        }
+                    ],
+                },
+            ],
+        }
+
+    monkeypatch.setattr(mcp_server.changelog_service, "history_under", fake)
+    text = _call(
+        mcp_server,
+        "mistral_docs_history",
+        {"under": "/vibe", "since": "2026-07-01"},
+    )
+
+    assert "history under: https://docs.mistral.ai/vibe | since: 2026-07-01" in text
+    assert "between 2026-07-01 and 2026-07-15: 1 added" in text
+    assert f"  moved | {PAGE} | section: b" in text
+    assert "Results: 2 changes over 2 intervals" in text
+
+
+def test_history_under_truncation_keeps_every_summary(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    intervals = [
+        {
+            "before": f"2026-0{month}-01",
+            "after": f"2026-0{month}-15",
+            "rows": [
+                {"state": "added", "page": PAGE, "key": str(i), "cite": PAGE} for i in range(10)
+            ],
+        }
+        for month in range(1, 4)
+    ]
+
+    def fake(under: str, since: str | None, manifest: Any) -> dict[str, Any]:
+        del under, since, manifest
+        return {
+            "under": PAGE,
+            "since": "2026-01-01",
+            "changes": 30,
+            "intervals": intervals,
+        }
+
+    monkeypatch.setattr(mcp_server.changelog_service, "history_under", fake)
+    monkeypatch.setattr(mcp_server, "HISTORY_MAX_CHARS", 500)
+    text = _call(mcp_server, "mistral_docs_history", {"under": PAGE})
+
+    assert text.count("between ") == 3
+    assert "next: narrow under or raise since; the rest was not rendered" in text
 
 
 def test_health_lists_pages_chunks_and_the_three_tools(

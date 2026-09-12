@@ -3,7 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from glossator.changelog import StaleChangelogError, build_changelog, read_changelog
+from glossator.changelog import (
+    StaleChangelogError,
+    build_changelog,
+    history_under,
+    read_changelog,
+)
 
 
 def _page(root: Path, name: str, url: str, body: str) -> None:
@@ -86,3 +91,24 @@ def test_reader_refuses_manifest_digest_change(tmp_path: Path) -> None:
 
     with pytest.raises(StaleChangelogError):
         read_changelog(manifest, out)
+
+
+def test_under_filters_rows_and_snaps_since_forward(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    out = tmp_path / "changelog"
+    build_changelog(manifest, out)
+
+    result = history_under("/keep", "2026-06-02", manifest, out)
+
+    assert result["since"] == "2026-06-15"
+    assert len(result["intervals"]) == 1
+    assert [row["state"] for row in result["intervals"][0]["rows"]] == ["moved"]
+
+
+def test_under_unknown_path_names_nearest_ancestor(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    out = tmp_path / "changelog"
+    build_changelog(manifest, out)
+
+    with pytest.raises(ValueError, match='nearest path with pages: "https://docs.mistral.ai/keep"'):
+        history_under("/keep/missing", None, manifest, out)
