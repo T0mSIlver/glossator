@@ -144,9 +144,56 @@ def test_search_parameters_are_q_max_hits_and_under(mcp_server: Any) -> None:
     assert schema.get("additionalProperties") is False
 
 
-def test_read_page_parameters_are_page_url_and_section(mcp_server: Any) -> None:
+def test_read_page_parameters_are_page_url_section_and_lang(mcp_server: Any) -> None:
     schema = _tools(mcp_server)["mistral_docs_read_page"].parameters
-    assert set(schema["properties"]) == {"page_url", "section"}
+    assert set(schema["properties"]) == {"page_url", "section", "lang"}
+
+
+def test_read_page_rejects_a_lang_outside_the_three(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+    text = _call_error(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "lang": "java"})
+    assert "E_BAD_PARAM" in text
+    assert 'lang "java" is not one of python, typescript, curl' in text
+    assert 'pass lang="python", "typescript" or "curl"' in text
+
+
+def test_read_page_prints_one_tab_of_a_group_and_names_the_omitted_ones(
+    mcp_server: Any,
+) -> None:
+    tabs = (
+        "**Python**\n"
+        "\n"
+        "```python\nclient = Mistral()\n```\n"
+        "\n"
+        "**TypeScript**\n"
+        "\n"
+        "```typescript\nconst client = new Mistral();\n```\n"
+        "\n"
+        "**cURL**\n"
+        "\n"
+        "```bash\ncurl https://api.mistral.ai\n```\n"
+        "\n"
+        "closing prose\n"
+    )
+    mcp_server._engine = FakeEngine([_hit("c1", tabs)])
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
+    assert "```python\nclient = Mistral()\n```" in text
+    assert "const client" not in text
+    assert "curl https" not in text
+    assert '(samples in TypeScript and cURL omitted: pass lang="typescript" or lang="curl")' in text
+    assert "closing prose" in text
+
+
+def test_read_page_lang_picks_the_typescript_tab(mcp_server: Any) -> None:
+    tabs = (
+        "**Python**\n\n```python\nclient = Mistral()\n```\n"
+        "\n**TypeScript**\n\n```typescript\nconst c = new Mistral();\n```\n"
+    )
+    mcp_server._engine = FakeEngine([_hit("c1", tabs)])
+    text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE, "lang": "typescript"})
+    assert "const c = new Mistral();" in text
+    assert "client = Mistral()" not in text
+    assert '(sample in Python omitted: pass lang="python")' in text
 
 
 def test_instructions_carry_the_scope_the_citation_rule_and_the_refusal_rule(
