@@ -77,7 +77,8 @@ def phrase_history(text: str, manifest_path: Path = DEFAULT_MANIFEST) -> dict[st
     if not text.strip():
         raise ValueError("text must contain a non-whitespace phrase")
     occurrences: list[PhraseOccurrence] = []
-    for snapshot in available_snapshots(manifest_path):
+    snapshots = available_snapshots(manifest_path)
+    for snapshot in snapshots:
         for page in _pages(snapshot):
             match = find_span(page.body, text)
             if match is None:
@@ -97,6 +98,7 @@ def phrase_history(text: str, manifest_path: Path = DEFAULT_MANIFEST) -> dict[st
         "first": asdict(occurrences[0]) if occurrences else None,
         "last": asdict(occurrences[-1]) if occurrences else None,
         "snapshots_found": len(occurrences),
+        "snapshots_total": len(snapshots),
     }
 
 

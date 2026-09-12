@@ -8,6 +8,7 @@ import re
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -403,11 +404,26 @@ def _under_prefix(under: str) -> str:
     return f"{SITE_ORIGIN}{parsed.path.rstrip('/') or ''}"
 
 
+@lru_cache(maxsize=4)
+def _stored_page_urls(corpora: tuple[tuple[str, str], ...]) -> frozenset[str]:
+    """Every page URL any stored snapshot holds, read once per process.
+
+    Keyed on the corpus directories and their manifest digests, so a refreshed
+    snapshot set invalidates it and a call never re-reads eight corpora to
+    validate one prefix.
+    """
+    urls: set[str] = set()
+    for corpus_dir, _digest in corpora:
+        for path in iter_page_paths(Path(corpus_dir).expanduser()):
+            urls.add(load_page(path).url.rstrip("/"))
+    return frozenset(urls)
+
+
 def _is_under(page: str, prefix: str) -> bool:
     return prefix == SITE_ORIGIN or page == prefix or page.startswith(prefix + "/")
 
 
-def _nearest_ancestor(prefix: str, pages: set[str]) -> str | None:
+def _nearest_ancestor(prefix: str, pages: frozenset[str]) -> str | None:
     parent = prefix
     while parent.startswith(SITE_ORIGIN + "/"):
         parent = parent.rsplit("/", 1)[0]
@@ -428,13 +444,7 @@ def history_under(
     snapshots = _built(manifest_path)
     if not snapshots:
         raise ValueError("the snapshot manifest has no built snapshots")
-    pages = {
-        page.url.rstrip("/")
-        for snapshot in snapshots
-        for page in (
-            load_page(path) for path in iter_page_paths(Path(snapshot.corpus_dir).expanduser())
-        )
-    }
+    pages = _stored_page_urls(tuple((row.corpus_dir, row.content_digest) for row in snapshots))
     if not any(_is_under(page, prefix) for page in pages):
         ancestor = _nearest_ancestor(prefix, pages)
         hint = f' nearest path with pages: "{ancestor}".' if ancestor else ""

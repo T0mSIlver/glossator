@@ -746,7 +746,10 @@ async def mistral_docs_history(
                 f"first stored date with the phrase: {first['snapshot']} | {first['page']}"
             )
             lines.append(f"last stored date with the phrase: {last['snapshot']} | {last['page']}")
-            lines.append(f"Results: present in {result['snapshots_found']} snapshots")
+            lines.append(
+                f"Results: present in {result['snapshots_found']} of "
+                f"{result['snapshots_total']} stored snapshots"
+            )
         return "\n".join(lines)
     heading = f"history page: {result.get('page_url', value)}"
     result_section = result.get("section")
