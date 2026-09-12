@@ -1666,3 +1666,23 @@ The same census on the 57 reads the demo run actually made (420,322 characters):
 4. **Measured** by re-running the five history rows on the deployed server: the calls the model makes must now succeed, and the bound answers must hold (D-051a).
 
 **Not changed.** `page_url` and `under` remain two forms and cannot combine; `since` still needs `under`; the changelog files and their builder are untouched, since the page level is computed at read time from the section rows.
+
+---
+
+## D-051a · The five history rows on the D-051 server: five of five, half the calls
+
+**Status:** recorded · 2026-09-12 · `eval/runs/2026-09-12-1315-history-d051/` (the five history rows of `eval/demo.jsonl`, Medium 3.5 at `high`, the Work Connector, GLM 5.3 judging); deployed at 15:20 with two follow-ups found while reading the run
+
+| run | server | correctness | calls | input tokens | tool-result characters |
+|---|---|---:|---:|---:|---:|
+| D-049a | D-048 | 0.80 | 17 | 11,118 | 19,751 |
+| D-050a | D-050 | 0.90 | 32 | 33,679 | 94,579 |
+| D-051a | D-051 | 1.00 | 16 | 14,453 | 29,916 |
+
+**Facts.**
+- Every row is judged correct, and every answer states the interval: "between August 15, 2026 and September 1, 2026", "between September 1, 2026 and September 7, 2026", "moved between August 1 and August 15, 2026". One answer, the model page's, says "since August 15, 2026" from the text form's `first stored date` line; the line now adds `(absent at 2026-08-01)` so the bound is on the page the model reads.
+- The scoped `text` form was used the way D-051 expected it: `text` with `under` twice, once on a path the model guessed wrong (`/api/search-toolkit`, refused with the nearest ancestor) and once on a bare hostname; both were followed by a search and the page form, three calls where the D-050a run had taken seven and ten. The one mixed call left, `page_url` with `under`, drew the two-forms reply and was not repeated.
+- Sixteen calls for five questions against thirty-two on the D-050a server, for a third of the tool-result characters; the D-049a run was as small but scored 0.80.
+- Reading the run turned up a defect in the whole-page form that the section form did not have: `page_url=".../studio/conversations/reasoning"` without a section read `absent` before the August rename, because the backward search compared raw bodies and a folder rename rewrites the links inside a page. The page form now compares bodies as the changelog builder does, links reduced to their last path segment (D-048a), and, when the prose itself changed across the rename, follows the page by its last path segment and its headings in order. The reasoning page now reads `present at 2026-06-01`, `changed between 2026-07-01 and 2026-07-15` with the diff, `moved between 2026-08-01 and 2026-08-15`.
+
+**Reading.** The four calls D-050a recorded as errors are now answers, and the two folder-wide `under` calls that filled the budget are lists of pages. Five questions are too few for a correctness number to mean more than "nothing broke"; the number that moved is the shape of the calls, from guessing and retrying to one search and one history call.
