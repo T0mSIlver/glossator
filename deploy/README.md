@@ -228,9 +228,9 @@ behaviour at the limit: "If a Workspace reaches its monthly spending limit, API
 access for that Workspace is suspended until the next month begins or the limit
 is increased." A dedicated Workspace and key for the public server, with a limit
 of 5 USD, covers about two million searches a month. What this server does when
-the key is suspended: `search` and `history(question=...)` return a tool error
-naming the embedding service, and `read_page` and the other two history forms
-keep answering. `GET /health` runs the embedding probe once per process, so a
+the key is suspended: `search` returns a tool error naming the embedding
+service, and `read_page` and every `history` form keep answering, since they
+read files and never call a model. `GET /health` runs the embedding probe once per process, so a
 suspension after start shows as those tool errors, not in `/health`, until the
 container restarts; restart it and `/health` reports `degraded`. There is no
 lexical-only fallback for search; that is a known gap, recorded here rather
