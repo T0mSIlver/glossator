@@ -58,7 +58,10 @@ CUSTOM_INSTRUCTIONS_PATH = Path("skills/mistral-docs/custom-instructions.md")
 
 DEFAULT_MODEL = "mistral-medium-3-5"
 DEFAULT_REASONING_EFFORT = "high"
-DEFAULT_CONNECTOR = "mistral_docs"
+DEFAULT_CONNECTOR = "mistral_docs_ca30"
+"""The workspace's Connector for the deployed server, the one Work sessions use.
+The platform suffixes a Connector's requested name with four hex characters, so
+the name to pass is the suffixed one, or the UUID (D-049)."""
 DEFAULT_CONCURRENCY = 2
 QUESTION_TIMEOUT_S = 300.0
 HTTP_ATTEMPTS = 3
