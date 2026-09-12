@@ -37,6 +37,7 @@ from glossator import package_version
 from glossator.answer.config import DEFAULT_VARIANT
 from glossator.answer.context import chunk_body
 from glossator.citing import SectionKey, citation_link, page_search_text, section_keys
+from glossator.containing import LANGS, contain
 from glossator.corpus.snapshots import configured_manifest
 from glossator.index.variants import VARIANTS
 from glossator.ingest.pages import iter_page_paths, load_page
@@ -513,13 +514,41 @@ def _read_page_description() -> str:
         page_url: The page URL exactly as a hit printed it.
         section: A section key exactly as a hit or a next: line printed it, to
             read that section instead of the whole page.
+        lang: The code samples to print: python, typescript or curl. When a page
+            shows a sample in several languages, the others are omitted and named.
     """
 
 
-async def mistral_docs_read_page(page_url: str, section: str | None = None) -> str:
+def _contained_bodies(hits: list[Hit], keys: list[str], lang: str) -> list[str]:
+    """The chunk bodies with tab groups, repeated samples and pasted outputs
+    contained, one body per chunk. Containment is per section: a chunk group is
+    a section's consecutive chunks, and the transform's state carries across the
+    chunk boundaries inside one section."""
+    contained: list[str] = []
+    run: list[Hit] = []
+    previous: str | None = None
+    for hit, key in zip(hits, keys, strict=True):
+        if previous is not None and key != previous and run:
+            contained.extend(contain([chunk_body(item).rstrip() for item in run], lang))
+            run = []
+        previous = key
+        run.append(hit)
+    if run:
+        contained.extend(contain([chunk_body(item).rstrip() for item in run], lang))
+    return contained
+
+
+async def mistral_docs_read_page(
+    page_url: str, section: str | None = None, lang: str = "python"
+) -> str:
     page_url = page_url.split("#", 1)[0].strip()
     if not page_url:
         raise _bad_param("page_url is empty.", f"pass a page URL from a {SEARCH} hit.")
+    if lang not in LANGS:
+        raise _bad_param(
+            f'lang "{lang}" is not one of python, typescript, curl.',
+            f'pass lang="python", "typescript" or "curl" with {READ_PAGE}.',
+        )
     async with _admission_or_busy():
         try:
             navigation = _engine.navigation_at(page_url)
@@ -550,6 +579,7 @@ async def mistral_docs_read_page(page_url: str, section: str | None = None) -> s
         start, stop = 0, len(chunks)
         heading = f'page: {page_url} | "{title}"'
     lines = [heading, ""]
+    contained = _contained_bodies(chunks[start:stop], keys[start:stop], lang)
     spent = 0
     shown = 0
     last_key: str | None = keys[start - 1] if start > 0 and section is not None else None
@@ -560,7 +590,7 @@ async def mistral_docs_read_page(page_url: str, section: str | None = None) -> s
             block.extend(_section_header(hit))
             block.append(f"    cite: {_cite(hit)}")
             last_key = keys[index]
-        block.append(chunk_body(hit).rstrip())
+        block.append(contained[index - start])
         block.append("")
         size = sum(len(line) + 1 for line in block)
         if shown and spent + size > READ_MAX_CHARS:
