@@ -235,3 +235,21 @@ def test_an_output_label_ends_a_group_and_its_fence_is_cut() -> None:
 def test_bad_lang_is_rejected() -> None:
     with pytest.raises(ValueError, match="lang must be one of"):
         contain(["x"], "java")
+
+
+def test_a_label_repeated_twice_in_a_row_prints_once() -> None:
+    page = (
+        "**TypeScript**\n"
+        "\n"
+        "**TypeScript**\n"
+        "\n"
+        "```typescript\nconst client = new Mistral();\n```\n"
+        "\n"
+        "**cURL**\n"
+        "\n"
+        "```bash\ncurl https://api.mistral.ai\n```\n"
+    )
+    out = contain([page], "typescript")
+    assert out[0].count("**TypeScript**") == 1
+    assert "const client" in out[0]
+    assert '(sample in cURL omitted: pass lang="curl")' in out[0]

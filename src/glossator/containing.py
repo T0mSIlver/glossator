@@ -114,11 +114,17 @@ def contain(blocks: list[str], lang: str, report: dict[str, int] | None = None) 
                 seen.add(_normalized(item.fence.body))
         dropped = [tab for tab in tabs if tab != kept_tab]
         keep: set[int] = set()
+        last_label: str | None = None
         for item in printed:
             if item.label_line is not None:
-                keep.add(item.label_line)
+                # The docs sometimes repeat a tab label twice in a row; one is enough.
+                label = texts[item.label_line].strip()
+                if label != last_label:
+                    keep.add(item.label_line)
+                last_label = label
             if item.fence is not None:
                 keep.update(range(item.fence.start, item.fence.end + 1))
+                last_label = None
         solid = sorted(line for line in keep if texts[line].strip())
         # Blanks that separate kept lines stay verbatim; a run of blanks around
         # dropped lines collapses to the one separator the kept lines need.
@@ -273,9 +279,9 @@ def _opens_group(texts: list[str], fences: dict[int, _Fence], at: int) -> bool:
         return False
     if following in fences:
         return True
-    if _label_of(texts[following]) in _VERSION_LABELS:
-        nested = _next_solid(texts, following)
-        return nested is not None and nested in fences
+    # A nested V1/V2 label, or the same tab label repeated, still leads to a fence.
+    if _label_of(texts[following]) is not None:
+        return _opens_group(texts, fences, following)
     return False
 
 
