@@ -32,7 +32,8 @@ def _manifest(tmp_path: Path) -> Path:
         one,
         "move.md",
         "https://docs.mistral.ai/old",
-        "# Move\n\nSee https://docs.mistral.ai/legacy/reference#part.\n",
+        "# Move\n\nSee https://docs.mistral.ai/legacy/reference#part.\n\n"
+        "## Detail {#detail}\n\nStable detail.\n",
     )
     _page(
         one,
@@ -46,7 +47,8 @@ def _manifest(tmp_path: Path) -> Path:
         two,
         "move.md",
         "https://docs.mistral.ai/new",
-        "# Move\n\nSee https://docs.mistral.ai/current/reference#part.\n",
+        "# Move\n\nSee https://docs.mistral.ai/current/reference#part.\n\n"
+        "## Detail {#detail}\n\nStable detail.\n",
     )
     _page(
         two,
@@ -61,7 +63,8 @@ def _manifest(tmp_path: Path) -> Path:
         three,
         "move.md",
         "https://docs.mistral.ai/new",
-        "# Move\n\nSee https://docs.mistral.ai/current/reference#part.\n",
+        "# Move\n\nSee https://docs.mistral.ai/current/reference#part.\n\n"
+        "## Detail {#detail}\n\nStable detail.\n",
     )
     _page(
         three,
@@ -113,6 +116,8 @@ def test_builder_finds_added_changed_moved_removed_and_key_rename(tmp_path: Path
         "https://docs.mistral.ai/old",
         "https://docs.mistral.ai/new",
     )
+    assert move["key"] is None
+    assert move["sections"] == 2
     rewritten = next(row for row in first if row["page"] == "https://docs.mistral.ai/current/guide")
     assert rewritten["state"] == "changed"
     assert rewritten["old_page"] == "https://docs.mistral.ai/legacy/guide"

@@ -21,7 +21,7 @@
       "counts": {
         "added": 259,
         "changed": 282,
-        "moved": 168,
+        "moved": 133,
         "removed": 130
       },
       "file": "2026-06-15..2026-07-01.json"
@@ -60,7 +60,7 @@
       "counts": {
         "added": 79,
         "changed": 121,
-        "moved": 1319,
+        "moved": 251,
         "removed": 108
       },
       "file": "2026-08-01..2026-08-15.json"
@@ -73,7 +73,7 @@
       "counts": {
         "added": 12,
         "changed": 32,
-        "moved": 217,
+        "moved": 25,
         "removed": 2
       },
       "file": "2026-08-15..2026-09-01.json"

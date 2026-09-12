@@ -315,6 +315,29 @@ def _collapse_pages(
             )
         )
         consumed.update(id(row) for row in rows)
+    moved_groups: dict[tuple[str, str], list[Change]] = defaultdict(list)
+    for change in changes:
+        if change.state == "moved" and change.old_page is not None:
+            moved_groups[(change.old_page, change.page)].append(change)
+    for (old_page, page), rows in moved_groups.items():
+        if (
+            len(rows) != counts_before[old_page]
+            or len(rows) != counts_after[page]
+            or any(row.key != row.old_key for row in rows)
+        ):
+            continue
+        collapsed.append(
+            Change(
+                state="moved",
+                page=page,
+                key=None,
+                heading_path=[],
+                cite=page,
+                old_page=old_page,
+                sections=len(rows),
+            )
+        )
+        consumed.update(id(row) for row in rows)
     collapsed.extend(change for change in changes if id(change) not in consumed)
     return sorted(collapsed, key=lambda row: (row.page, row.key or "", row.state))
 

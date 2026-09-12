@@ -6650,138 +6650,13 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#approve",
-    "heading_path": [
-      "Human-in-the-loop",
-      "REST API flow",
-      "Approve the tool call"
-    ],
-    "key": "approve",
-    "old_key": "approve",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#configuration",
-    "heading_path": [
-      "Human-in-the-loop",
-      "Configuration"
-    ],
-    "key": "configuration",
-    "old_key": "configuration",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#connector-confirmation",
-    "heading_path": [
-      "Human-in-the-loop",
-      "Python SDK flow",
-      "Connector tools"
-    ],
-    "key": "connector-confirmation",
-    "old_key": "connector-confirmation",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#deny",
-    "heading_path": [
-      "Human-in-the-loop",
-      "REST API flow",
-      "Deny the tool call"
-    ],
-    "key": "deny",
-    "old_key": "deny",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "heading_path": [
-      "Human-in-the-loop"
-    ],
-    "key": "human-in-the-loop",
-    "old_key": "human-in-the-loop",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
     "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
     "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#local-functions",
-    "heading_path": [
-      "Human-in-the-loop",
-      "Python SDK flow",
-      "Local functions"
-    ],
-    "key": "local-functions",
-    "old_key": "local-functions",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#python-sdk",
-    "heading_path": [
-      "Human-in-the-loop",
-      "Python SDK flow"
-    ],
-    "key": "python-sdk",
-    "old_key": "python-sdk",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#raw-api",
-    "heading_path": [
-      "Human-in-the-loop",
-      "REST API flow"
-    ],
-    "key": "raw-api",
-    "old_key": "raw-api",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#start-conversation",
-    "heading_path": [
-      "Human-in-the-loop",
-      "REST API flow",
-      "Start the conversation"
-    ],
-    "key": "start-conversation",
-    "old_key": "start-conversation",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/confirmation#stateless",
-    "heading_path": [
-      "Human-in-the-loop",
-      "Python SDK flow",
-      "Stateless (serialize and resume)"
-    ],
-    "key": "stateless",
-    "old_key": "stateless",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
-    "page": "https://docs.mistral.ai/studio-api/connectors/confirmation",
-    "sections": null,
+    "sections": 10,
     "state": "moved"
   },
   {
@@ -6992,44 +6867,13 @@
     "state": "moved"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/tool_calling#call-tool",
-    "heading_path": [
-      "Direct tool calling with Connectors",
-      "Direct tool calling",
-      "Call a tool directly"
-    ],
-    "key": "call-tool",
-    "old_key": "call-tool",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/tool_calling",
-    "page": "https://docs.mistral.ai/studio-api/connectors/tool_calling",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/connectors/tool_calling#chaining",
-    "heading_path": [
-      "Direct tool calling with Connectors",
-      "Direct tool calling",
-      "Chain multiple tool calls"
-    ],
-    "key": "chaining",
-    "old_key": "chaining",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/tool_calling",
-    "page": "https://docs.mistral.ai/studio-api/connectors/tool_calling",
-    "sections": null,
-    "state": "moved"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio-api/connectors/tool_calling",
-    "heading_path": [
-      "Direct tool calling with Connectors",
-      "Direct tool calling"
-    ],
-    "key": "direct-tool-calling",
-    "old_key": "direct-tool-calling",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
     "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/tool_calling",
     "page": "https://docs.mistral.ai/studio-api/connectors/tool_calling",
-    "sections": null,
+    "sections": 3,
     "state": "moved"
   },
   {
@@ -8049,191 +7893,13 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#connecting-libraries-to-agents",
-    "heading_path": [
-      "Libraries",
-      "Connecting Libraries to agents"
-    ],
-    "key": "connecting-libraries-to-agents",
-    "old_key": "connecting-libraries-to-agents",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#controlling-access",
-    "heading_path": [
-      "Libraries",
-      "Controlling access"
-    ],
-    "key": "controlling-access",
-    "old_key": "controlling-access",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#conversation-with-document-library",
-    "heading_path": [
-      "Libraries",
-      "Connecting Libraries to agents",
-      "Conversations with a Document Library agent"
-    ],
-    "key": "conversation-with-document-library",
-    "old_key": "conversation-with-document-library",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#creating-a-library",
-    "heading_path": [
-      "Libraries",
-      "Creating a Library"
-    ],
-    "key": "creating-a-library",
-    "old_key": "creating-a-library",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#deleting-libraries-and-documents",
-    "heading_path": [
-      "Libraries",
-      "Deleting Libraries and documents"
-    ],
-    "key": "deleting-libraries-and-documents",
-    "old_key": "deleting-libraries-and-documents",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#document-status",
-    "heading_path": [
-      "Libraries",
-      "Uploading documents",
-      "Document status"
-    ],
-    "key": "document-status",
-    "old_key": "document-status",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#getting-document-content",
-    "heading_path": [
-      "Libraries",
-      "Uploading documents",
-      "Getting document content"
-    ],
-    "key": "getting-document-content",
-    "old_key": "getting-document-content",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#getting-document-info",
-    "heading_path": [
-      "Libraries",
-      "Uploading documents",
-      "Getting document info"
-    ],
-    "key": "getting-document-info",
-    "old_key": "getting-document-info",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#:~:text=RAG%20quickstart%3A%20build",
-    "heading_path": [
-      "Libraries",
-      "Going further"
-    ],
-    "key": "going-further",
-    "old_key": "going-further",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio-api/libraries",
-    "heading_path": [
-      "Libraries"
-    ],
-    "key": "libraries",
-    "old_key": "libraries",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
     "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
     "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#listing-documents",
-    "heading_path": [
-      "Libraries",
-      "Uploading documents",
-      "Listing documents"
-    ],
-    "key": "listing-documents",
-    "old_key": "listing-documents",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#listing-libraries",
-    "heading_path": [
-      "Libraries",
-      "Creating a Library",
-      "Listing Libraries"
-    ],
-    "key": "listing-libraries",
-    "old_key": "listing-libraries",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#understanding-the-response",
-    "heading_path": [
-      "Libraries",
-      "Connecting Libraries to agents",
-      "Understanding the response"
-    ],
-    "key": "understanding-the-response",
-    "old_key": "understanding-the-response",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/libraries#uploading-documents",
-    "heading_path": [
-      "Libraries",
-      "Uploading documents"
-    ],
-    "key": "uploading-documents",
-    "old_key": "uploading-documents",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
-    "page": "https://docs.mistral.ai/studio-api/libraries",
-    "sections": null,
+    "sections": 14,
     "state": "moved"
   },
   {
@@ -9813,106 +9479,13 @@
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#bruno",
-    "heading_path": [
-      "CLI reference",
-      "`bruno`"
-    ],
-    "key": "bruno",
-    "old_key": "bruno",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "heading_path": [
-      "CLI reference"
-    ],
-    "key": "cli-reference",
-    "old_key": "cli-reference",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
     "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
     "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#generate",
-    "heading_path": [
-      "CLI reference",
-      "`generate`"
-    ],
-    "key": "generate",
-    "old_key": "generate",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#generate-migration",
-    "heading_path": [
-      "CLI reference",
-      "`generate-migration`"
-    ],
-    "key": "generate-migration",
-    "old_key": "generate-migration",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#local-down",
-    "heading_path": [
-      "CLI reference",
-      "`local down`"
-    ],
-    "key": "local-down",
-    "old_key": "local-down",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#local-status",
-    "heading_path": [
-      "CLI reference",
-      "`local status`"
-    ],
-    "key": "local-status",
-    "old_key": "local-status",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#local-up",
-    "heading_path": [
-      "CLI reference",
-      "`local up`"
-    ],
-    "key": "local-up",
-    "old_key": "local-up",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli#migrate",
-    "heading_path": [
-      "CLI reference",
-      "`migrate`"
-    ],
-    "key": "migrate",
-    "old_key": "migrate",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/cli",
-    "sections": null,
+    "sections": 8,
     "state": "moved"
   },
   {
@@ -10200,66 +9773,12 @@
   },
   {
     "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations",
-    "heading_path": [
-      "Deploy and operate"
-    ],
-    "key": "deploy-and-operate",
-    "old_key": "deploy-and-operate",
+    "heading_path": [],
+    "key": null,
+    "old_key": null,
     "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/operations",
     "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations#health-checks-and-readiness",
-    "heading_path": [
-      "Deploy and operate",
-      "Health Checks and Readiness"
-    ],
-    "key": "health-checks-and-readiness",
-    "old_key": "health-checks-and-readiness",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/operations",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations#production-deployment",
-    "heading_path": [
-      "Deploy and operate",
-      "Production Deployment"
-    ],
-    "key": "production-deployment",
-    "old_key": "production-deployment",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/operations",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations#see-also",
-    "heading_path": [
-      "Deploy and operate",
-      "See Also"
-    ],
-    "key": "see-also",
-    "old_key": "see-also",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/operations",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations#vespaclientconfig",
-    "heading_path": [
-      "Deploy and operate",
-      "VespaClientConfig"
-    ],
-    "key": "vespaclientconfig",
-    "old_key": "vespaclientconfig",
-    "old_page": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/operations",
-    "page": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/operations",
-    "sections": null,
+    "sections": 5,
     "state": "moved"
   },
   {
