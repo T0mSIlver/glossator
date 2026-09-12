@@ -21,7 +21,10 @@ from glossator.ingest.sections import parse_sections
 DEFAULT_CHANGELOG_DIR = Path("eval/snapshots/changelog")
 SITE_ORIGIN = "https://docs.mistral.ai"
 _HEADING_ANCHOR = re.compile(r"(?m)(^#{1,6} .+?)\s+\{#[^}]+\}(\s*$)")
-_STUDIO_API_PATH = re.compile(r"/studio-api(?=/|\b)")
+_INTERNAL_LINK = re.compile(
+    r"https://docs\.mistral\.ai/(?P<path>[^#\s)>\]}'\"]+)"
+    r"(?:#(?P<fragment>[^\s)>\]}'\"]+))?"
+)
 
 
 class StaleChangelogError(ValueError):
@@ -56,21 +59,35 @@ class _SectionRecord:
 
 def _comparable_body(body: str) -> str:
     without_anchor_markup = _HEADING_ANCHOR.sub(r"\1\2", body)
-    return normalize(_STUDIO_API_PATH.sub("/studio", without_anchor_markup))
+    return normalize(_INTERNAL_LINK.sub(_link_tail, without_anchor_markup))
+
+
+def _link_tail(match: re.Match[str]) -> str:
+    path = match.group("path").rstrip("/")
+    tail = path.rsplit("/", 1)[-1]
+    fragment = match.group("fragment")
+    return f"{tail}#{fragment}" if fragment else tail
 
 
 def _contains_body(haystack: str, needle: str) -> bool:
     return find_span(_comparable_body(haystack), _comparable_body(needle)) is not None
 
 
-def _canonical_page(url: str) -> str:
-    return _STUDIO_API_PATH.sub("/studio", url.rstrip("/"))
+def _shared_path_tail(left: str, right: str) -> int:
+    left_parts = urlsplit(left).path.rstrip("/").split("/")
+    right_parts = urlsplit(right).path.rstrip("/").split("/")
+    shared = 0
+    for left_part, right_part in zip(reversed(left_parts), reversed(right_parts), strict=False):
+        if left_part != right_part:
+            break
+        shared += 1
+    return shared
 
 
-def _site_rename(old: _SectionRecord, new: _SectionRecord) -> bool:
-    return old.page.rstrip("/") != new.page.rstrip("/") and _canonical_page(
-        old.page
-    ) == _canonical_page(new.page)
+def _best_page_match(reference: str, candidates: list[int], records: list[_SectionRecord]) -> int:
+    return max(
+        candidates, key=lambda index: (_shared_path_tail(reference, records[index].page), -index)
+    )
 
 
 def _built(path: Path) -> list[SnapshotRecord]:
@@ -137,24 +154,6 @@ def _match_pair(
             matched[old_index] = new_index
             available.remove(new_index)
 
-    by_renamed_location: dict[tuple[str, str], list[int]] = defaultdict(list)
-    by_renamed_heading: dict[tuple[str, tuple[str, ...]], list[int]] = defaultdict(list)
-    for new_index in sorted(available):
-        new = after[new_index]
-        by_renamed_location[(_canonical_page(new.page), new.key)].append(new_index)
-        by_renamed_heading[(_canonical_page(new.page), new.heading_path)].append(new_index)
-    for old_index, old in enumerate(before):
-        if old_index in matched:
-            continue
-        candidates = by_renamed_location.get((_canonical_page(old.page), old.key), [])
-        if not candidates:
-            candidates = by_renamed_heading.get((_canonical_page(old.page), old.heading_path), [])
-        candidates = [index for index in candidates if index in available]
-        if candidates and _site_rename(old, after[candidates[0]]):
-            new_index = candidates[0]
-            matched[old_index] = new_index
-            available.remove(new_index)
-
     by_body: dict[str, list[int]] = defaultdict(list)
     for new_index in sorted(available):
         by_body[after[new_index].normalized].append(new_index)
@@ -163,24 +162,26 @@ def _match_pair(
             continue
         candidates = by_body.get(old.normalized, [])
         if candidates:
-            same_heading = next(
-                (index for index in candidates if after[index].heading_path == old.heading_path),
-                candidates[0],
+            new_index = _best_page_match(
+                old.page,
+                [index for index in candidates if index in available],
+                after,
             )
-            candidates.remove(same_heading)
-            matched[old_index] = same_heading
-            available.remove(same_heading)
+            candidates.remove(new_index)
+            matched[old_index] = new_index
+            available.remove(new_index)
 
     page_text = [(page, _comparable_body(page.body)) for page in after_pages]
     for old_index, old in enumerate(before):
         if old_index in matched or not old.normalized:
             continue
-        destination_page = next(
-            (page for page, body in page_text if old.normalized in body),
-            None,
-        )
-        if destination_page is None:
+        destination_pages = [page for page, body in page_text if old.normalized in body]
+        if not destination_pages:
             continue
+        destination_page = max(
+            destination_pages,
+            key=lambda page: _shared_path_tail(old.page, page.url),
+        )
         for new_index in sorted(available):
             new = after[new_index]
             if new.page == destination_page.url and _contains_body(new.body, old.body):
@@ -197,16 +198,14 @@ def _match_pair(
         new = after[new_index]
         if not new.normalized:
             continue
-        source_page = next(
-            (
-                page
-                for page, body in before_page_text.items()
-                if new.normalized in _comparable_body(body)
-            ),
-            None,
-        )
-        if source_page is None:
+        source_pages = [
+            page
+            for page, body in before_page_text.items()
+            if new.normalized in _comparable_body(body)
+        ]
+        if not source_pages:
             continue
+        source_page = max(source_pages, key=lambda page: _shared_path_tail(new.page, page))
         for old_index in unmatched_old:
             old = before[old_index]
             if old.page == source_page and _contains_body(old.body, new.body):
@@ -214,23 +213,47 @@ def _match_pair(
                 unmatched_old.remove(old_index)
                 break
 
-    remaining_by_page: dict[str, list[int]] = defaultdict(list)
+    _match_whole_pages(before, after, matched, available)
+    return matched
+
+
+def _match_whole_pages(
+    before: list[_SectionRecord],
+    after: list[_SectionRecord],
+    matched: dict[int, int],
+    available: set[int],
+) -> None:
+    old_pages: dict[str, list[int]] = defaultdict(list)
+    new_pages: dict[str, list[int]] = defaultdict(list)
+    before_urls = {record.page.rstrip("/") for record in before}
+    after_urls = {record.page.rstrip("/") for record in after}
+    for old_index, old in enumerate(before):
+        if old_index not in matched and old.page.rstrip("/") not in after_urls:
+            old_pages[old.page].append(old_index)
     for new_index in sorted(available):
-        remaining_by_page[_canonical_page(after[new_index].page)].append(new_index)
-    old_by_page: dict[str, list[int]] = defaultdict(list)
-    for old_index in range(len(before)):
-        if old_index not in matched:
-            old_by_page[_canonical_page(before[old_index].page)].append(old_index)
-    for page, old_indexes in old_by_page.items():
-        new_indexes = remaining_by_page.get(page, [])
-        if len(old_indexes) != len(new_indexes):
+        new = after[new_index]
+        if new.page.rstrip("/") not in before_urls:
+            new_pages[new.page].append(new_index)
+    for old_indexes in old_pages.values():
+        old_records = [before[index] for index in old_indexes]
+        candidates = [
+            indexes
+            for indexes in new_pages.values()
+            if len(indexes) == len(old_indexes)
+            and after[indexes[0]].heading_path[0] == old_records[0].heading_path[0]
+            and [after[index].heading_path for index in indexes]
+            == [record.heading_path for record in old_records]
+        ]
+        if not candidates:
             continue
-        if not old_indexes or not _site_rename(before[old_indexes[0]], after[new_indexes[0]]):
-            continue
+        new_indexes = max(
+            candidates,
+            key=lambda indexes: _shared_path_tail(old_records[0].page, after[indexes[0]].page),
+        )
+        new_pages.pop(after[new_indexes[0]].page)
         for old_index, new_index in zip(old_indexes, new_indexes, strict=True):
             matched[old_index] = new_index
             available.remove(new_index)
-    return matched
 
 
 def build_pair(before_snapshot: SnapshotRecord, after_snapshot: SnapshotRecord) -> list[Change]:
@@ -246,7 +269,7 @@ def build_pair(before_snapshot: SnapshotRecord, after_snapshot: SnapshotRecord) 
         same_location = old.location == new.location
         if same_body and same_location:
             continue
-        state = "moved" if same_body or _site_rename(old, new) else "changed"
+        state = "moved" if same_body else "changed"
         changes.append(
             Change(
                 state=state,

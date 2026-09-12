@@ -3645,7 +3645,7 @@
     ],
     "key": "faq",
     "old_key": "faq",
-    "old_page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/judges",
     "page": "https://docs.mistral.ai/studio-api/observability/evaluations",
     "sections": null,
     "state": "moved"
@@ -4567,132 +4567,202 @@
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#by-source",
-    "heading_path": [
-      "Data redaction",
-      "Redaction by source"
-    ],
-    "key": "by-source",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
-    "sections": null,
-    "state": "added"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#configure",
-    "heading_path": [
-      "Data redaction",
-      "Configure redaction"
-    ],
-    "key": "configure",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
-    "sections": null,
-    "state": "added"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
-    "heading_path": [
-      "Data redaction"
-    ],
-    "key": "data-redaction",
+    "heading_path": [],
+    "key": null,
     "old_key": null,
     "old_page": null,
     "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "sections": 9,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#access",
+    "heading_path": [
+      "Explore traces",
+      "Access"
+    ],
+    "key": "access",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
     "sections": null,
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#does-redaction-affect-performance",
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#api-access",
     "heading_path": [
-      "Data redaction",
-      "FAQ",
-      "Does redaction affect performance?"
+      "Explore traces",
+      "Query traces programmatically"
     ],
-    "key": "does-redaction-affect-performance",
+    "key": "api-access",
     "old_key": null,
     "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
     "sections": null,
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#does-redaction-guarantee-no-sensitive-data-is-exported",
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#array-fields",
     "heading_path": [
-      "Data redaction",
-      "FAQ",
-      "Does redaction guarantee no sensitive data is exported?"
+      "Explore traces",
+      "Search and filter",
+      "Array fields"
     ],
-    "key": "does-redaction-guarantee-no-sensitive-data-is-exported",
+    "key": "array-fields",
     "old_key": null,
     "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
     "sections": null,
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#faq",
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#available-fields",
     "heading_path": [
-      "Data redaction",
-      "FAQ"
+      "Explore traces",
+      "Search and filter",
+      "Available fields"
     ],
-    "key": "faq",
-    "old_key": "faq",
-    "old_page": "https://docs.mistral.ai/studio-api/observability/judges",
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
-    "sections": null,
-    "state": "moved"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#how-it-works",
-    "heading_path": [
-      "Data redaction",
-      "How redaction works"
-    ],
-    "key": "how-it-works",
+    "key": "available-fields",
     "old_key": null,
     "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
     "sections": null,
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#is-redaction-on-by-default",
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#common-examples",
     "heading_path": [
-      "Data redaction",
-      "FAQ",
-      "Is redaction on by default?"
+      "Explore traces",
+      "Search and filter",
+      "Common examples"
     ],
-    "key": "is-redaction-on-by-default",
+    "key": "common-examples",
     "old_key": null,
     "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
-    "sections": null,
-    "state": "added"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction#policies",
-    "heading_path": [
-      "Data redaction",
-      "Redaction policies"
-    ],
-    "key": "policies",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
     "sections": null,
     "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
-    "heading_path": [],
-    "key": null,
+    "heading_path": [
+      "Explore traces"
+    ],
+    "key": "explore-traces",
     "old_key": null,
     "old_page": null,
     "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
-    "sections": 14,
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#faq",
+    "heading_path": [
+      "Explore traces",
+      "FAQ"
+    ],
+    "key": "faq",
+    "old_key": "faq",
+    "old_page": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#i-cant-see-the-trace-explorer-in-studio",
+    "heading_path": [
+      "Explore traces",
+      "FAQ",
+      "I can't see the Trace Explorer in Studio"
+    ],
+    "key": "i-cant-see-the-trace-explorer-in-studio",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#i-enabled-the-sdk-but-dont-see-any-traces",
+    "heading_path": [
+      "Explore traces",
+      "FAQ",
+      "I enabled the SDK but don't see any traces"
+    ],
+    "key": "i-enabled-the-sdk-but-dont-see-any-traces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#my-search-returns-no-results",
+    "heading_path": [
+      "Explore traces",
+      "FAQ",
+      "My search returns no results"
+    ],
+    "key": "my-search-returns-no-results",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#operators",
+    "heading_path": [
+      "Explore traces",
+      "Search and filter",
+      "Operators"
+    ],
+    "key": "operators",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#searching-traces",
+    "heading_path": [
+      "Explore traces",
+      "Search and filter"
+    ],
+    "key": "searching-traces",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#span-attribute-queries",
+    "heading_path": [
+      "Explore traces",
+      "Search and filter",
+      "Span attribute queries"
+    ],
+    "key": "span-attribute-queries",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
+    "state": "added"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/observability/traces/explorer#what-traces-contain",
+    "heading_path": [
+      "Explore traces",
+      "What traces contain"
+    ],
+    "key": "what-traces-contain",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
+    "sections": null,
     "state": "added"
   },
   {

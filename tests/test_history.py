@@ -102,7 +102,7 @@ def test_section_history_prefers_renamed_page_for_leading_history(tmp_path: Path
     (old_root / "page.md").unlink()
     _page(
         old_root / "old.md",
-        "https://docs.mistral.ai/studio-api/page",
+        "https://docs.mistral.ai/studio-api/conversations/page",
         "# Page\n\n## Before {#before}\n\nShared introduction.\n",
     )
     _page(
@@ -112,13 +112,15 @@ def test_section_history_prefers_renamed_page_for_leading_history(tmp_path: Path
     )
     _page(
         new_root / "page.md",
-        "https://docs.mistral.ai/studio/page",
+        "https://docs.mistral.ai/studio/conversations/page",
         "# Page\n\n## Before {#before}\n\nShared introduction.\n",
     )
 
-    states = section_history("https://docs.mistral.ai/studio/page", "before", manifest)["states"]
+    states = section_history(
+        "https://docs.mistral.ai/studio/conversations/page", "before", manifest
+    )["states"]
 
-    assert states[0]["page"] == "https://docs.mistral.ai/studio-api/page"
+    assert states[0]["page"] == "https://docs.mistral.ai/studio-api/conversations/page"
     assert states[1]["state"] == "moved"
 
 

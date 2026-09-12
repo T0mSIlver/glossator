@@ -227,61 +227,6 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio#studio-capabilities",
-    "heading_path": [
-      "Studio",
-      "Studio capabilities"
-    ],
-    "key": "studio-capabilities",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio",
-    "sections": null,
-    "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/agents/agent-tools#tool-types",
-    "heading_path": [
-      "Agents Tools Overview",
-      "Tools",
-      "Tool types"
-    ],
-    "key": "tool-types",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/agents/agent-tools",
-    "sections": null,
-    "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/agents/agent-tools/websearch#more",
-    "heading_path": [
-      "Websearch",
-      "How it Works",
-      "More"
-    ],
-    "key": "more",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/agents/agent-tools/websearch",
-    "sections": null,
-    "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/agents/introduction#more-informations",
-    "heading_path": [
-      "Agents Introduction",
-      "What are AI agents?",
-      "More informations"
-    ],
-    "key": "more-informations",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/agents/introduction",
-    "sections": null,
-    "state": "changed"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio/audio/speech_to_text/offline_transcription#example-samples",
     "heading_path": [
       "Offline",
@@ -363,44 +308,6 @@
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio/knowledge-rag/embeddings",
-    "heading_path": [
-      "Embeddings"
-    ],
-    "key": "embeddings",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/knowledge-rag/embeddings",
-    "sections": null,
-    "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/knowledge-rag/embeddings/text_embeddings#services:~:text=Additionally%2C%20let%27s%20take",
-    "heading_path": [
-      "Text Embeddings",
-      "Usage Examples",
-      "Comparison with fastText embeddings"
-    ],
-    "key": "services/comparison-with-fasttext-embeddings",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/knowledge-rag/embeddings/text_embeddings",
-    "sections": null,
-    "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/knowledge-rag/rag_quickstart",
-    "heading_path": [
-      "RAG Quickstart"
-    ],
-    "key": "rag-quickstart",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/knowledge-rag/rag_quickstart",
-    "sections": null,
-    "state": "changed"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio/observability/evaluations/datasets#can-i-pass-a-studio-dataset-id-directly-to-evaluationrun",
     "heading_path": [
       "Datasets",
@@ -426,605 +333,6 @@
     "page": "https://docs.mistral.ai/studio/observability/evaluations/datasets",
     "sections": null,
     "state": "added"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit#ingestion",
-    "heading_path": [
-      "Search Toolkit",
-      "Key features",
-      "Ingestion"
-    ],
-    "key": "ingestion",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit#next-steps",
-    "heading_path": [
-      "Search Toolkit",
-      "Next steps"
-    ],
-    "key": "next-steps",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit#retrieval",
-    "heading_path": [
-      "Search Toolkit",
-      "Key features",
-      "Retrieval"
-    ],
-    "key": "retrieval",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/changelog#0-0-9",
-    "heading_path": [
-      "Changelog",
-      "0.0.9"
-    ],
-    "key": "0-0-9",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/changelog",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/document-model#see-also",
-    "heading_path": [
-      "Document model",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/document-model",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/ingestion#components",
-    "heading_path": [
-      "Ingestion",
-      "Components"
-    ],
-    "key": "components",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/ingestion",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/ingestion/enrichers#available-chunk-enrichers",
-    "heading_path": [
-      "Chunk enrichers",
-      "Available chunk enrichers"
-    ],
-    "key": "available-chunk-enrichers",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/enrichers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/ingestion/extractors#available-document-extractors",
-    "heading_path": [
-      "Document extractors",
-      "Available document extractors"
-    ],
-    "key": "available-document-extractors",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/extractors",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/ingestion/extractors",
-    "heading_path": [
-      "Document extractors"
-    ],
-    "key": "document-extractors",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/extractors",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/ingestion/loaders#available-file-loaders",
-    "heading_path": [
-      "File loaders",
-      "Available file loaders"
-    ],
-    "key": "available-file-loaders",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/loaders",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/ingestion/splitters#available-text-splitters",
-    "heading_path": [
-      "Text splitters",
-      "Available text splitters"
-    ],
-    "key": "available-text-splitters",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/splitters",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/quickstart#define-schema",
-    "heading_path": [
-      "Quickstart",
-      "Define your schema"
-    ],
-    "key": "define-schema",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/quickstart",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval#components",
-    "heading_path": [
-      "Retrieval",
-      "Components"
-    ],
-    "key": "components",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval/preprocessing#see-also",
-    "heading_path": [
-      "Query preprocessing",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/preprocessing",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval/rerankers#available-rerankers",
-    "heading_path": [
-      "Rerankers",
-      "Available rerankers"
-    ],
-    "key": "available-rerankers",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/rerankers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval/rerankers#see-also",
-    "heading_path": [
-      "Rerankers",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/rerankers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval/retrievers#available-retrievers",
-    "heading_path": [
-      "Retrievers",
-      "Available retrievers"
-    ],
-    "key": "available-retrievers",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/retrievers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval/retrievers#see-also",
-    "heading_path": [
-      "Retrievers",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/retrievers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/retrieval/semantic-cache#see-also",
-    "heading_path": [
-      "Semantic cache",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/semantic-cache",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/search-index#available-vector-stores",
-    "heading_path": [
-      "Search index",
-      "Available vector stores"
-    ],
-    "key": "available-vector-stores",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/search-index#vespa-search-index",
-    "heading_path": [
-      "Search index",
-      "Vespa search index"
-    ],
-    "key": "vespa-search-index",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/search-index#vespa-search-index",
-    "heading_path": [
-      "Search index",
-      "Vespa search index",
-      "Configure Vespa as a vector store"
-    ],
-    "key": "vespa-search-index/configure-vespa-as-a-vector-store",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/search-index#vespa-search-index",
-    "heading_path": [
-      "Search index",
-      "Vespa search index",
-      "Prerequisites"
-    ],
-    "key": "vespa-search-index/prerequisites",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa#getting-started",
-    "heading_path": [
-      "Manage and deploy Vespa applications",
-      "Getting Started"
-    ],
-    "key": "getting-started",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa#using-vespa-as-a-search-backend",
-    "heading_path": [
-      "Manage and deploy Vespa applications",
-      "Using Vespa as a Search Backend"
-    ],
-    "key": "using-vespa-as-a-search-backend",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "heading_path": [
-      "Anatomy of a Vespa application"
-    ],
-    "key": "anatomy-of-a-vespa-application",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy#application-package",
-    "heading_path": [
-      "Anatomy of a Vespa application",
-      "Application package"
-    ],
-    "key": "application-package",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy#fields",
-    "heading_path": [
-      "Anatomy of a Vespa application",
-      "Fields"
-    ],
-    "key": "fields",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy#query-profiles",
-    "heading_path": [
-      "Anatomy of a Vespa application",
-      "Query profiles"
-    ],
-    "key": "query-profiles",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy#schemas",
-    "heading_path": [
-      "Anatomy of a Vespa application",
-      "Schemas",
-      "Indexing mode"
-    ],
-    "key": "schemas/indexing-mode",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy#see-also",
-    "heading_path": [
-      "Anatomy of a Vespa application",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
-    "heading_path": [
-      "Local development"
-    ],
-    "key": "local-development",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development#prerequisites",
-    "heading_path": [
-      "Local development",
-      "Prerequisites"
-    ],
-    "key": "prerequisites",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development#see-also",
-    "heading_path": [
-      "Local development",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers#creating-schemas",
-    "heading_path": [
-      "Migration helpers reference",
-      "Creating schemas",
-      "`create_schema`"
-    ],
-    "key": "creating-schemas/create-schema",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers#evolving-schemas",
-    "heading_path": [
-      "Migration helpers reference",
-      "Evolving schemas",
-      "`add_query_profiles`"
-    ],
-    "key": "evolving-schemas/add-query-profiles",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
-    "heading_path": [
-      "Migration helpers reference"
-    ],
-    "key": "migration-helpers-reference",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers#see-also",
-    "heading_path": [
-      "Migration helpers reference",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations#deploying",
-    "heading_path": [
-      "Manage schema",
-      "Deploying"
-    ],
-    "key": "deploying",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
-    "heading_path": [
-      "Manage schema"
-    ],
-    "key": "manage-schema",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations#migration-helpers",
-    "heading_path": [
-      "Manage schema",
-      "Migration helpers"
-    ],
-    "key": "migration-helpers",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations#see-also",
-    "heading_path": [
-      "Manage schema",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/operations#see-also",
-    "heading_path": [
-      "Deploy and operate",
-      "See Also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/operations",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles#common-query-fields",
-    "heading_path": [
-      "Manage ranking",
-      "Common query fields"
-    ],
-    "key": "common-query-fields",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
-    "heading_path": [
-      "Manage ranking"
-    ],
-    "key": "manage-ranking",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles#see-also",
-    "heading_path": [
-      "Manage ranking",
-      "See also"
-    ],
-    "key": "see-also",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
-    "sections": null,
-    "state": "removed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/agentic-search",
@@ -1259,11 +567,11 @@
       "Ingestion"
     ],
     "key": "ingestion",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "ingestion",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit#key-features",
@@ -1285,11 +593,11 @@
       "Next steps"
     ],
     "key": "next-steps",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "next-steps",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit#packages",
@@ -1312,11 +620,11 @@
       "Retrieval"
     ],
     "key": "retrieval",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "retrieval",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit",
@@ -1350,11 +658,11 @@
       "0.0.9"
     ],
     "key": "0-0-9",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "0-0-9",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/changelog",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/changelog",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/changelog",
@@ -1491,11 +799,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/document-model",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/document-model",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/document-model#source-id",
@@ -1517,11 +825,11 @@
       "Components"
     ],
     "key": "components",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "components",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/ingestion",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion",
@@ -1708,11 +1016,11 @@
       "Available chunk enrichers"
     ],
     "key": "available-chunk-enrichers",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-chunk-enrichers",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/enrichers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/enrichers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/enrichers",
@@ -1787,11 +1095,11 @@
       "Available document extractors"
     ],
     "key": "available-document-extractors",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-document-extractors",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/extractors",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/extractors",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/extractors#creating-custom-extractors",
@@ -1812,11 +1120,11 @@
       "Document extractors"
     ],
     "key": "document-extractors",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "document-extractors",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/extractors",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/extractors",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/extractors#email-extractor",
@@ -1929,11 +1237,11 @@
       "Available file loaders"
     ],
     "key": "available-file-loaders",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-file-loaders",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/loaders",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/loaders",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/loaders#aws-s3-file-loader",
@@ -2032,11 +1340,11 @@
       "Available text splitters"
     ],
     "key": "available-text-splitters",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-text-splitters",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/ingestion/splitters",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/splitters",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/ingestion/splitters#character-text-splitter",
@@ -2137,11 +1445,11 @@
       "Define your schema"
     ],
     "key": "define-schema",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "define-schema",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/quickstart",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/quickstart",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/quickstart#deploy-schema",
@@ -2253,11 +1561,11 @@
       "Components"
     ],
     "key": "components",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "components",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval#query-engine",
@@ -2342,11 +1650,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/preprocessing",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/preprocessing",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/preprocessing#when-to-use",
@@ -2368,11 +1676,11 @@
       "Available rerankers"
     ],
     "key": "available-rerankers",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-rerankers",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/rerankers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers#chaining-rerankers",
@@ -2458,11 +1766,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/rerankers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers#available-retrievers",
@@ -2471,11 +1779,11 @@
       "Available retrievers"
     ],
     "key": "available-retrievers",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-retrievers",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/retrievers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers#custom-retrievers",
@@ -2509,11 +1817,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/retrievers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/retrievers#vector-retriever",
@@ -2613,11 +1921,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/retrieval/semantic-cache",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/semantic-cache",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/semantic-cache",
@@ -2638,11 +1946,11 @@
       "Available vector stores"
     ],
     "key": "available-vector-stores",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-vector-stores",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/search-index",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/search-index#custom-vector-stores",
@@ -2676,11 +1984,11 @@
       "Vespa search index"
     ],
     "key": "vespa-search-index",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "vespa-search-index",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/search-index",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/search-index#vespa-search-index",
@@ -2690,11 +1998,11 @@
       "Configure Vespa as a vector store"
     ],
     "key": "vespa-search-index/configure-vespa-as-a-vector-store",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "vespa-search-index/configure-vespa-as-a-vector-store",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/search-index",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/search-index#vespa-search-index",
@@ -2704,11 +2012,11 @@
       "Prerequisites"
     ],
     "key": "vespa-search-index/prerequisites",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "vespa-search-index/prerequisites",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/search-index",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/search-index",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa#getting-started",
@@ -2717,11 +2025,11 @@
       "Getting Started"
     ],
     "key": "getting-started",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "getting-started",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa#installation",
@@ -2768,11 +2076,11 @@
       "Using Vespa as a Search Backend"
     ],
     "key": "using-vespa-as-a-search-backend",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "using-vespa-as-a-search-backend",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
@@ -2780,11 +2088,11 @@
       "Anatomy of a Vespa application"
     ],
     "key": "anatomy-of-a-vespa-application",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "anatomy-of-a-vespa-application",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy#application-package",
@@ -2793,11 +2101,11 @@
       "Application package"
     ],
     "key": "application-package",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "application-package",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy#fields",
@@ -2806,11 +2114,11 @@
       "Fields"
     ],
     "key": "fields",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "fields",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy#fields",
@@ -2846,11 +2154,11 @@
       "Query profiles"
     ],
     "key": "query-profiles",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "query-profiles",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy#ranking-profiles",
@@ -2914,11 +2222,11 @@
       "Indexing mode"
     ],
     "key": "schemas/indexing-mode",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "schemas/indexing-mode",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy#schemas",
@@ -2941,11 +2249,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/anatomy",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/anatomy",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/cli#bruno",
@@ -3082,11 +2390,11 @@
       "Local development"
     ],
     "key": "local-development",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "local-development",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/local-development",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/local-development#optional-generate-a-vespalock-snapshot",
@@ -3108,11 +2416,11 @@
       "Prerequisites"
     ],
     "key": "prerequisites",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "prerequisites",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/local-development",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/local-development#see-also",
@@ -3121,11 +2429,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/local-development",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/local-development",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/local-development#step-1-create-your-first-migration",
@@ -3309,11 +2617,11 @@
       "`create_schema`"
     ],
     "key": "creating-schemas/create-schema",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "creating-schemas/create-schema",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers#enums",
@@ -3405,11 +2713,11 @@
       "`add_query_profiles`"
     ],
     "key": "evolving-schemas/add-query-profiles",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "evolving-schemas/add-query-profiles",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers#evolving-schemas",
@@ -3584,11 +2892,11 @@
       "Migration helpers reference"
     ],
     "key": "migration-helpers-reference",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "migration-helpers-reference",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers#see-also",
@@ -3597,11 +2905,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migration-helpers",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migration-helpers#vespamigration",
@@ -3677,11 +2985,11 @@
       "Deploying"
     ],
     "key": "deploying",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "deploying",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations",
@@ -3689,11 +2997,11 @@
       "Manage schema"
     ],
     "key": "manage-schema",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "manage-schema",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations#migration-helpers",
@@ -3702,11 +3010,11 @@
       "Migration helpers"
     ],
     "key": "migration-helpers",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "migration-helpers",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations#optional-snapshot",
@@ -3728,11 +3036,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/migrations",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/migrations",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/operations",
@@ -3779,11 +3087,11 @@
       "See Also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/operations",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/operations",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/operations#vespaclientconfig",
@@ -3805,11 +3113,11 @@
       "Common query fields"
     ],
     "key": "common-query-fields",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "common-query-fields",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/query-profiles",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/query-profiles#creating-custom-query-profiles",
@@ -3843,11 +3151,11 @@
       "Manage ranking"
     ],
     "key": "manage-ranking",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "manage-ranking",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/query-profiles",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/query-profiles#see-also",
@@ -3856,11 +3164,11 @@
       "See also"
     ],
     "key": "see-also",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "see-also",
+    "old_page": "https://docs.mistral.ai/studio/search-toolkit/vespa/query-profiles",
     "page": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/query-profiles",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/studio/search/search-toolkit/vespa/query-profiles#using-query-profiles-at-query-time",

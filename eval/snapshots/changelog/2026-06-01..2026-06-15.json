@@ -709,20 +709,6 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/workflows/building-workflows/plugins#mistral-ai-plugin",
-    "heading_path": [
-      "Plugins",
-      "Official Plugins",
-      "Mistral AI Plugin"
-    ],
-    "key": "mistral-ai-plugin",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/plugins",
-    "sections": null,
-    "state": "changed"
-  },
-  {
     "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples#available-cookbooks",
     "heading_path": [
       "Cookbook examples",
@@ -803,19 +789,6 @@
     "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
     "sections": null,
     "state": "added"
-  },
-  {
-    "cite": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts#mental-model",
-    "heading_path": [
-      "Core concepts",
-      "The mental model"
-    ],
-    "key": "mental-model",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts",
-    "sections": null,
-    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/concurrency#monitoring-and-alerting",

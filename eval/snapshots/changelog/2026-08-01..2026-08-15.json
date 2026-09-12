@@ -1781,19 +1781,6 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/community",
-    "heading_path": [
-      "Community",
-      "In this section"
-    ],
-    "key": "in-this-section",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/community",
-    "sections": null,
-    "state": "changed"
-  },
-  {
     "cite": "https://docs.mistral.ai/developers",
     "heading_path": [],
     "key": null,
@@ -1897,11 +1884,11 @@
       "In this section"
     ],
     "key": "in-this-section",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "in-this-section",
+    "old_page": "https://docs.mistral.ai/models/deployment",
     "page": "https://docs.mistral.ai/inference/deployment",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/inference/deployment/cloud-deployments",
@@ -1922,11 +1909,11 @@
       "Cloud Providers"
     ],
     "key": "cloud-providers",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "cloud-providers",
+    "old_page": "https://docs.mistral.ai/models/deployment/cloud-deployments",
     "page": "https://docs.mistral.ai/inference/deployment/cloud-deployments",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/inference/deployment/cloud-deployments/amazon_bedrock",
@@ -2172,11 +2159,11 @@
       "Outscale"
     ],
     "key": "outscale",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "outscale",
+    "old_page": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale",
     "page": "https://docs.mistral.ai/inference/deployment/cloud-deployments/outscale",
     "sections": null,
-    "state": "added"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/inference/deployment/cloud-deployments/outscale#querying-the-model-chat",
@@ -2200,11 +2187,11 @@
       "Querying the Model (FIM Completion)"
     ],
     "key": "querying-the-model-fim",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "querying-the-model-fim",
+    "old_page": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale",
     "page": "https://docs.mistral.ai/inference/deployment/cloud-deployments/outscale",
     "sections": null,
-    "state": "added"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/inference/deployment/cloud-deployments/sfcortex#getting-access-to-the-model",
@@ -2266,11 +2253,11 @@
       "Snowflake Cortex"
     ],
     "key": "snowflake-cortex",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "snowflake-cortex",
+    "old_page": "https://docs.mistral.ai/models/deployment/cloud-deployments/sfcortex",
     "page": "https://docs.mistral.ai/inference/deployment/cloud-deployments/sfcortex",
     "sections": null,
-    "state": "added"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/inference/deployment/cloud-deployments/vertex#getting-started",
@@ -2320,11 +2307,11 @@
       "Querying the model (FIM completion)"
     ],
     "key": "querying-the-model-fim",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "querying-the-model-fim",
+    "old_page": "https://docs.mistral.ai/models/deployment/cloud-deployments/vertex",
     "page": "https://docs.mistral.ai/inference/deployment/cloud-deployments/vertex",
     "sections": null,
-    "state": "added"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/inference/deployment/cloud-deployments/vertex#requesting-access-to-the-model",
@@ -2713,11 +2700,11 @@
       "Available Models"
     ],
     "key": "available-models",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "available-models",
+    "old_page": "https://docs.mistral.ai/models/labs",
     "page": "https://docs.mistral.ai/inference/labs",
     "sections": null,
-    "state": "added"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/inference/labs#feedback",
@@ -3077,11 +3064,11 @@
       "System Prompt"
     ],
     "key": "prompting-examples/system-prompt",
-    "old_key": null,
-    "old_page": null,
+    "old_key": "prompting-examples/system-prompt",
+    "old_page": "https://docs.mistral.ai/models/best-practices/prompt-engineering",
     "page": "https://docs.mistral.ai/inference/prompting",
     "sections": null,
-    "state": "added"
+    "state": "moved"
   },
   {
     "cite": "https://docs.mistral.ai/inference/prompting#purpose",
@@ -3475,20 +3462,6 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/models/best-practices/prompt-engineering#prompting-examples",
-    "heading_path": [
-      "Prompting",
-      "Prompting Examples",
-      "System Prompt"
-    ],
-    "key": "prompting-examples/system-prompt",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/best-practices/prompt-engineering",
-    "sections": null,
-    "state": "removed"
-  },
-  {
     "cite": "https://docs.mistral.ai/models/codestral-25-01",
     "heading_path": [
       "Codestral",
@@ -3528,84 +3501,6 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/models/deployment",
-    "heading_path": [
-      "Deployment",
-      "In this section"
-    ],
-    "key": "in-this-section",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/deployment",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/models/deployment/cloud-deployments#cloud-providers",
-    "heading_path": [
-      "Cloud",
-      "Cloud Providers"
-    ],
-    "key": "cloud-providers",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/deployment/cloud-deployments",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale",
-    "heading_path": [
-      "Outscale"
-    ],
-    "key": "outscale",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale#querying-the-model-fim",
-    "heading_path": [
-      "Outscale",
-      "Getting Started",
-      "Querying the Model (FIM Completion)"
-    ],
-    "key": "querying-the-model-fim",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/models/deployment/cloud-deployments/sfcortex",
-    "heading_path": [
-      "Snowflake Cortex"
-    ],
-    "key": "snowflake-cortex",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/deployment/cloud-deployments/sfcortex",
-    "sections": null,
-    "state": "removed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/models/deployment/cloud-deployments/vertex#querying-the-model-fim",
-    "heading_path": [
-      "Vertex AI",
-      "Getting Started",
-      "Querying the model (FIM completion)"
-    ],
-    "key": "querying-the-model-fim",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/deployment/cloud-deployments/vertex",
-    "sections": null,
-    "state": "removed"
-  },
-  {
     "cite": "https://docs.mistral.ai/models/devstral-2-25-12",
     "heading_path": [
       "Devstral 2",
@@ -3630,19 +3525,6 @@
     "page": "https://docs.mistral.ai/models/devstral-small-2-25-12",
     "sections": null,
     "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/models/labs#available-models",
-    "heading_path": [
-      "Labs",
-      "Available Models"
-    ],
-    "key": "available-models",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/models/labs",
-    "sections": null,
-    "state": "removed"
   },
   {
     "cite": "https://docs.mistral.ai/models/magistral-medium-1-2-25-09",
@@ -4918,6 +4800,238 @@
     "page": "https://docs.mistral.ai/studio",
     "sections": null,
     "state": "moved"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#are-there-any-limits-regarding-the-ocr-api",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "FAQ",
+      "Are there any limits regarding the OCR API?"
+    ],
+    "key": "are-there-any-limits-regarding-the-ocr-api",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#before-you-start",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Before You Start",
+      "Key Features"
+    ],
+    "key": "before-you-start/key-features",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#block-extraction",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Block Extraction"
+    ],
+    "key": "block-extraction",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#block-extraction",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Block Extraction",
+      "Extract Structural Blocks with Bounding Boxes"
+    ],
+    "key": "block-extraction/extract-structural-blocks-with-bounding-boxes",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#confidence-scores",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Confidence Scores"
+    ],
+    "key": "confidence-scores",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#confidence-scores",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Confidence Scores",
+      "Extract Confidence Scores"
+    ],
+    "key": "confidence-scores/extract-confidence-scores",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#cookbooks",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "Cookbooks"
+    ],
+    "key": "cookbooks",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor"
+    ],
+    "key": "document-ai-ocr-processor",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#ocr-at-scale",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "OCR at Scale"
+    ],
+    "key": "ocr-at-scale",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#ocr-images",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "OCR with Images and PDFs",
+      "Images"
+    ],
+    "key": "ocr-images",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#ocr-images-and-pdfs",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "OCR with Images and PDFs"
+    ],
+    "key": "ocr-images-and-pdfs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#ocr-images-and-pdfs:~:text=Once%20all%20OCR",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "OCR with Images and PDFs",
+      "Delete File"
+    ],
+    "key": "ocr-images-and-pdfs/delete-file",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#ocr-images-and-pdfs",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "OCR with Images and PDFs",
+      "OCR your Documents"
+    ],
+    "key": "ocr-images-and-pdfs/ocr-your-documents",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#ocr-pdfs",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "OCR with Images and PDFs",
+      "PDFs"
+    ],
+    "key": "ocr-pdfs",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr#what-document-types-are-supported",
+    "heading_path": [
+      "OCR Processor",
+      "Document AI - OCR Processor",
+      "FAQ",
+      "What document types are supported?"
+    ],
+    "key": "what-document-types-are-supported",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "sections": null,
+    "state": "removed"
+  },
+  {
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/document_qna#before-you-start",
+    "heading_path": [
+      "Document QnA",
+      "Document AI QnA",
+      "Before You Start"
+    ],
+    "key": "before-you-start",
+    "old_key": null,
+    "old_page": null,
+    "page": "https://docs.mistral.ai/studio-api/document-processing/document_qna",
+    "sections": null,
+    "state": "removed"
   },
   {
     "cite": "https://docs.mistral.ai/studio-api/regional-inference",
@@ -7462,7 +7576,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/connectors/management",
     "page": "https://docs.mistral.ai/studio/connectors/management",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/connectors/management#list-tools",
@@ -8508,7 +8622,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/conversations/function-calling",
     "page": "https://docs.mistral.ai/studio/conversations/function-calling",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/conversations/function-calling#five-steps",
@@ -9762,11 +9876,11 @@
       "Are there any limits regarding the OCR API?"
     ],
     "key": "are-there-any-limits-regarding-the-ocr-api",
-    "old_key": "are-there-any-limits-regarding-the-ocr-api",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#before-you-start",
@@ -9776,11 +9890,11 @@
       "Before you start"
     ],
     "key": "before-you-start",
-    "old_key": "before-you-start",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#before-you-start",
@@ -9791,11 +9905,11 @@
       "Key features"
     ],
     "key": "before-you-start/key-features",
-    "old_key": "before-you-start/key-features",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#block-extraction",
@@ -9805,11 +9919,11 @@
       "Block extraction"
     ],
     "key": "block-extraction",
-    "old_key": "block-extraction",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#block-extraction",
@@ -9820,11 +9934,11 @@
       "Extract structural blocks with bounding boxes"
     ],
     "key": "block-extraction/extract-structural-blocks-with-bounding-boxes",
-    "old_key": "block-extraction/extract-structural-blocks-with-bounding-boxes",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#confidence-scores",
@@ -9834,11 +9948,11 @@
       "Confidence scores"
     ],
     "key": "confidence-scores",
-    "old_key": "confidence-scores",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#confidence-scores",
@@ -9849,11 +9963,11 @@
       "Extract confidence scores"
     ],
     "key": "confidence-scores/extract-confidence-scores",
-    "old_key": "confidence-scores/extract-confidence-scores",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#cookbooks",
@@ -9863,11 +9977,11 @@
       "Cookbooks"
     ],
     "key": "cookbooks",
-    "old_key": "cookbooks",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
@@ -9876,11 +9990,11 @@
       "Document AI OCR processor"
     ],
     "key": "document-ai-ocr-processor",
-    "old_key": "document-ai-ocr-processor",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#faq",
@@ -9904,11 +10018,11 @@
       "OCR at scale"
     ],
     "key": "ocr-at-scale",
-    "old_key": "ocr-at-scale",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-images",
@@ -9919,11 +10033,11 @@
       "Images"
     ],
     "key": "ocr-images",
-    "old_key": "ocr-images",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-images-and-pdfs",
@@ -9933,11 +10047,11 @@
       "OCR with images and PDFs"
     ],
     "key": "ocr-images-and-pdfs",
-    "old_key": "ocr-images-and-pdfs",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-images-and-pdfs:~:text=Once%20all%20OCR",
@@ -9948,11 +10062,11 @@
       "Delete File"
     ],
     "key": "ocr-images-and-pdfs/delete-file",
-    "old_key": "ocr-images-and-pdfs/delete-file",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-images-and-pdfs:~:text=You%20can%20now",
@@ -9993,11 +10107,11 @@
       "Process your documents"
     ],
     "key": "ocr-images-and-pdfs/process-your-documents",
-    "old_key": "ocr-images-and-pdfs/ocr-your-documents",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#ocr-images-and-pdfs:~:text=Once%20the%20file",
@@ -10038,11 +10152,11 @@
       "PDFs"
     ],
     "key": "ocr-pdfs",
-    "old_key": "ocr-pdfs",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/basic_ocr#what-document-types-are-supported",
@@ -10053,11 +10167,11 @@
       "What document types are supported?"
     ],
     "key": "what-document-types-are-supported",
-    "old_key": "what-document-types-are-supported",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "old_key": null,
+    "old_page": null,
     "page": "https://docs.mistral.ai/studio/document-processing/basic_ocr",
     "sections": null,
-    "state": "moved"
+    "state": "added"
   },
   {
     "cite": "https://docs.mistral.ai/studio/document-processing/document_qna#are-there-any-limits-regarding-the-document-qna-api",
@@ -10083,7 +10197,7 @@
     ],
     "key": "before-you-start",
     "old_key": "before-you-start",
-    "old_page": "https://docs.mistral.ai/studio-api/document-processing/document_qna",
+    "old_page": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
     "page": "https://docs.mistral.ai/studio/document-processing/document_qna",
     "sections": null,
     "state": "moved"
@@ -10340,7 +10454,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/hidden-collection/setup",
     "page": "https://docs.mistral.ai/studio/hidden-collection/setup",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/hidden-collection/setup",
@@ -11086,7 +11200,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability",
     "page": "https://docs.mistral.ai/studio/observability",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability#traces",
@@ -12213,7 +12327,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
     "page": "https://docs.mistral.ai/studio/observability/traces/data-redaction",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability/traces/data-redaction#configure",
@@ -12226,7 +12340,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
     "page": "https://docs.mistral.ai/studio/observability/traces/data-redaction",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability/traces/data-redaction",
@@ -12306,7 +12420,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability/traces/data-redaction",
     "page": "https://docs.mistral.ai/studio/observability/traces/data-redaction",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability/traces/data-redaction#policies",
@@ -12508,7 +12622,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability/traces/explorer",
     "page": "https://docs.mistral.ai/studio/observability/traces/explorer",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability/traces/send-traces#are-traces-stored-securely",
@@ -12549,7 +12663,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability/traces/send-traces",
     "page": "https://docs.mistral.ai/studio/observability/traces/send-traces",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability/traces/send-traces#do-i-need-to-change-my-application-code",
@@ -12576,7 +12690,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/observability/traces/send-traces",
     "page": "https://docs.mistral.ai/studio/observability/traces/send-traces",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/observability/traces/send-traces#faq",
@@ -15779,7 +15893,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/compression",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/compression#combining-features",
@@ -15792,7 +15906,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/compression",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/compression",
@@ -15830,7 +15944,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/compression",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/compression#prerequisites",
@@ -15856,7 +15970,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/compression",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/compression#worker-config",
@@ -15870,7 +15984,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/compression",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/compression",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/connectors#agents",
@@ -16805,7 +16919,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/encryption",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/encryption",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/encryption#generate-key",
@@ -16935,7 +17049,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#activity-field-offloading",
@@ -16948,7 +17062,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#client-config",
@@ -16962,7 +17076,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#defining-offloadable-fields",
@@ -16990,7 +17104,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#payload-offloading",
@@ -17015,7 +17129,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#performance-tip",
@@ -17070,7 +17184,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#when-to-use-what",
@@ -17083,7 +17197,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading#worker-config",
@@ -17097,7 +17211,7 @@
     "old_page": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
     "page": "https://docs.mistral.ai/studio/workflows/building-workflows/payload_offloading",
     "sections": null,
-    "state": "moved"
+    "state": "changed"
   },
   {
     "cite": "https://docs.mistral.ai/studio/workflows/building-workflows/plugins#creating-your-own-plugins",
@@ -21685,19 +21799,6 @@
     "old_key": null,
     "old_page": null,
     "page": "https://docs.mistral.ai/vibe/code/cli/install-setup",
-    "sections": null,
-    "state": "changed"
-  },
-  {
-    "cite": "https://docs.mistral.ai/vibe/code/cli/offline-models#recommended-model",
-    "heading_path": [
-      "Using offline models",
-      "Recommended models"
-    ],
-    "key": "recommended-model",
-    "old_key": null,
-    "old_page": null,
-    "page": "https://docs.mistral.ai/vibe/code/cli/offline-models",
     "sections": null,
     "state": "changed"
   },

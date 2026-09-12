@@ -27,8 +27,15 @@ class UnknownPageError(ValueError):
     """No stored snapshot contains the requested page."""
 
 
-def _canonical_url(url: str) -> str:
-    return url.rstrip("/").replace("/studio-api/", "/studio/")
+def _shared_path_tail(left: str, right: str) -> int:
+    left_parts = urlsplit(left).path.rstrip("/").split("/")
+    right_parts = urlsplit(right).path.rstrip("/").split("/")
+    shared = 0
+    for left_part, right_part in zip(reversed(left_parts), reversed(right_parts), strict=False):
+        if left_part != right_part:
+            break
+        shared += 1
+    return shared
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,10 +147,7 @@ def _locate(
                 if match is not None:
                     matches.append((candidate, parsed.body[match[0] : match[1]], named.key))
         if matches:
-            return next(
-                (match for match in matches if _canonical_url(match[0].url) == _canonical_url(url)),
-                matches[0],
-            )
+            return max(matches, key=lambda match: _shared_path_tail(url, match[0].url))
     return None
 
 

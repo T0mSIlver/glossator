@@ -8,7 +8,7 @@
       "before_content_digest": "7f29347fb299b5fff3b286f8fa0a712754d7091db5a9d73c181c61ba9fecff89",
       "counts": {
         "added": 16,
-        "changed": 45,
+        "changed": 43,
         "removed": 6
       },
       "file": "2026-06-01..2026-06-15.json"
@@ -19,10 +19,10 @@
       "before": "2026-06-15",
       "before_content_digest": "8e6f3756244b7fdd211e8d029b5027659f569877497a5d5a1682688f9d9be163",
       "counts": {
-        "added": 302,
-        "changed": 244,
-        "moved": 146,
-        "removed": 167
+        "added": 259,
+        "changed": 282,
+        "moved": 168,
+        "removed": 130
       },
       "file": "2026-06-15..2026-07-01.json"
     },
@@ -45,7 +45,7 @@
       "before": "2026-07-15",
       "before_content_digest": "ae400b161dcae0434f490e5f5bc630badb1d81d79b93aba8959194ed31a3cd1a",
       "counts": {
-        "added": 111,
+        "added": 116,
         "changed": 208,
         "moved": 12,
         "removed": 81
@@ -58,10 +58,10 @@
       "before": "2026-08-01",
       "before_content_digest": "b9bb9845b08b046f1c202a241d0cbe6c0e2cceecc8fc190a14c087a3a0bc7c1d",
       "counts": {
-        "added": 71,
-        "changed": 94,
-        "moved": 1356,
-        "removed": 100
+        "added": 79,
+        "changed": 121,
+        "moved": 1319,
+        "removed": 108
       },
       "file": "2026-08-01..2026-08-15.json"
     },
@@ -71,10 +71,10 @@
       "before": "2026-08-15",
       "before_content_digest": "fb627bb04b5aeea107d357261fc33a1a1e03c437123c6f741f91c32faa0ac6a3",
       "counts": {
-        "added": 58,
-        "changed": 39,
-        "moved": 171,
-        "removed": 48
+        "added": 12,
+        "changed": 32,
+        "moved": 217,
+        "removed": 2
       },
       "file": "2026-08-15..2026-09-01.json"
     },
@@ -84,10 +84,10 @@
       "before": "2026-09-01",
       "before_content_digest": "8b034349a5ace7a1b75466db33b8f85d1de63961f0a2e06328af23d30fbc772b",
       "counts": {
-        "added": 68,
-        "changed": 43,
-        "moved": 60,
-        "removed": 46
+        "added": 39,
+        "changed": 54,
+        "moved": 77,
+        "removed": 17
       },
       "file": "2026-09-01..2026-09-07.json"
     }
