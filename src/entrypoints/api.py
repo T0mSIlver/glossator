@@ -605,22 +605,35 @@ async def history(
         raise ApiError(400, "E_BAD_PARAM", "section requires page_url", "set page_url and section")
     if since is not None and under is None:
         raise ApiError(400, "E_BAD_PARAM", "since requires under", "set under and since")
-    forms = [("text", text), ("page_url", page_url), ("under", under)]
-    selected = [(name, value) for name, value in forms if value is not None]
-    if len(selected) != 1:
+    if text is not None:
+        if page_url is not None and under is not None:
+            raise ApiError(400, "E_BAD_PARAM", "text takes page_url or under, not both", "set one")
+        if section is not None or since is not None:
+            raise ApiError(
+                400, "E_BAD_PARAM", "text takes page_url or under, not section or since", "drop it"
+            )
+        name, value = "text", text
+    elif page_url is not None and under is not None:
+        raise ApiError(400, "E_BAD_PARAM", "page_url and under are two forms", "pass one")
+    elif page_url is not None:
+        name, value = "page_url", page_url
+    elif under is not None:
+        name, value = "under", under
+    else:
         raise ApiError(
             400,
             "E_BAD_PARAM",
-            "history requires exactly one of text, page_url, or under",
+            "history requires text, page_url, or under",
             "set one query parameter; see /openapi.json for the three forms",
         )
-    name, value = selected[0]
-    if value is None or not value.strip():
+    if not value.strip():
         raise ApiError(400, "E_BAD_PARAM", f"{name} is empty", f"send text in {name}")
     manifest = configured_manifest()
     try:
         if name == "text":
-            return await asyncio.to_thread(history_service.phrase_history, value, manifest)
+            return await asyncio.to_thread(
+                history_service.phrase_history, value, manifest, page_url=page_url, under=under
+            )
         if name == "page_url":
             return await asyncio.to_thread(
                 history_service.section_history, value, section, manifest

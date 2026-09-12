@@ -156,3 +156,24 @@ def test_under_unknown_path_names_nearest_ancestor(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match='nearest path with pages: "https://docs.mistral.ai/keep"'):
         history_under("/keep/missing", None, manifest, out)
+
+
+def test_under_a_folder_lists_pages_and_under_a_page_lists_sections(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    out = tmp_path / "changelog"
+    build_changelog(manifest, out)
+
+    site = history_under("/", None, manifest, out)
+    first = site["intervals"][0]["rows"]
+    assert all(row["level"] == "page" for row in first)
+    by_page = {row["page"]: row for row in first}
+    assert by_page["https://docs.mistral.ai/keep"]["state"] == "changed"
+    assert by_page["https://docs.mistral.ai/keep"]["counts"] == {"changed": 1}
+    assert by_page["https://docs.mistral.ai/added"]["state"] == "added"
+    assert by_page["https://docs.mistral.ai/added"]["sections"] == 1
+    assert by_page["https://docs.mistral.ai/new"]["old_page"] == "https://docs.mistral.ai/old"
+
+    page = history_under("/keep", None, manifest, out)
+    rows = page["intervals"][0]["rows"]
+    assert [row["level"] for row in rows] == ["section"]
+    assert rows[0]["key"] == "a"

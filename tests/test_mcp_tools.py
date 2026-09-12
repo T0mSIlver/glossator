@@ -585,9 +585,13 @@ def test_read_page_asks_the_index_for_the_whole_page_under_the_vespa_limit(mcp_s
 
 def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
     text = _call_error(mcp_server, "mistral_docs_history", {})
-    assert "exactly one of text, page_url or under" in text
-    text = _call_error(mcp_server, "mistral_docs_history", {"text": "a", "page_url": PAGE})
-    assert "exactly one of" in text
+    assert "history takes text, page_url or under" in text
+    text = _call_error(mcp_server, "mistral_docs_history", {"page_url": PAGE, "under": "/vibe"})
+    assert "two forms" in text
+    text = _call_error(
+        mcp_server, "mistral_docs_history", {"text": "a", "under": "/vibe", "since": "2026-07-01"}
+    )
+    assert "not section or since" in text
 
     text = _call_error(mcp_server, "mistral_docs_history", {"section": "a"})
     assert "section requires page_url" in text
@@ -598,7 +602,8 @@ def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
 def test_history_text_prints_first_last_and_count(
     mcp_server: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake(text: str, manifest: Any) -> dict[str, Any]:
+    def fake(text: str, manifest: Any, **scope: Any) -> dict[str, Any]:
+        del manifest, scope
         return {
             "form": "text",
             "text": text,
@@ -863,3 +868,74 @@ def test_a_vendored_page_gets_generated_keys_and_fragment_links(mcp_server: Any)
     text = _call(mcp_server, "mistral_docs_read_page", {"page_url": page.url, "section": "outputs"})
     assert "## section: outputs" in text
     assert 'section="choosing-between-the-apis") for the section after it' in text
+
+
+def test_history_under_renders_page_rows_without_cite_lines(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(under: str, since: str | None, manifest: Any) -> dict[str, Any]:
+        del under, since, manifest
+        return {
+            "under": "https://docs.mistral.ai/vibe",
+            "since": "2026-07-01",
+            "changes": 2,
+            "intervals": [
+                {
+                    "before": "2026-07-01",
+                    "after": "2026-07-15",
+                    "rows": [
+                        {
+                            "level": "page",
+                            "state": "changed",
+                            "page": PAGE,
+                            "counts": {"added": 2, "changed": 1},
+                            "old_page": None,
+                            "cite": PAGE,
+                        },
+                        {
+                            "level": "page",
+                            "state": "moved",
+                            "page": f"{PAGE}-new",
+                            "sections": 4,
+                            "old_page": PAGE,
+                            "cite": f"{PAGE}-new",
+                        },
+                    ],
+                }
+            ],
+        }
+
+    monkeypatch.setattr(mcp_server.changelog_service, "history_under", fake)
+    text = _call(mcp_server, "mistral_docs_history", {"under": "/vibe"})
+
+    assert "between 2026-07-01 and 2026-07-15: 1 page changed, 1 page moved" in text
+    assert f"  changed | {PAGE} | 2 added, 1 changed" in text
+    assert f"  moved | {PAGE}-new | 4 sections\n    from: {PAGE}" in text
+    assert "cite:" not in text
+    assert f'next: mistral_docs_history(under="{PAGE}") lists the sections of one page' in text
+
+
+def test_history_text_scoped_to_a_page_names_it(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: dict[str, Any] = {}
+
+    def fake(text: str, manifest: Any, **scope: Any) -> dict[str, Any]:
+        del manifest
+        seen.update(scope)
+        return {
+            "form": "text",
+            "text": text,
+            "page_url": PAGE,
+            "under": None,
+            "first": {"snapshot": "2026-06-01", "page": PAGE, "fragment_url": PAGE},
+            "last": {"snapshot": "2026-09-07", "page": PAGE, "fragment_url": PAGE},
+            "snapshots_found": 8,
+            "snapshots_total": 8,
+        }
+
+    monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
+    text = _call(mcp_server, "mistral_docs_history", {"text": "a phrase", "page_url": PAGE})
+
+    assert seen == {"page_url": PAGE, "under": None}
+    assert text.startswith(f'history text: "a phrase" | page: {PAGE}\n')

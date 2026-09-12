@@ -394,7 +394,7 @@ def read_changelog(
     return intervals
 
 
-def _under_prefix(under: str) -> str:
+def under_prefix(under: str) -> str:
     raw = under.strip()
     if not raw:
         raise ValueError("under must contain a documentation path")
@@ -419,7 +419,7 @@ def _stored_page_urls(corpora: tuple[tuple[str, str], ...]) -> frozenset[str]:
     return frozenset(urls)
 
 
-def _is_under(page: str, prefix: str) -> bool:
+def is_under(page: str, prefix: str) -> bool:
     return prefix == SITE_ORIGIN or page == prefix or page.startswith(prefix + "/")
 
 
@@ -429,7 +429,7 @@ def _nearest_ancestor(prefix: str, pages: frozenset[str]) -> str | None:
         parent = parent.rsplit("/", 1)[0]
         if parent == SITE_ORIGIN:
             return None
-        if any(_is_under(page, parent) for page in pages):
+        if any(is_under(page, parent) for page in pages):
             return parent
     return None
 
@@ -440,12 +440,12 @@ def history_under(
     manifest_path: Path = DEFAULT_MANIFEST,
     changelog_dir: Path | None = None,
 ) -> dict[str, Any]:
-    prefix = _under_prefix(under)
+    prefix = under_prefix(under)
     snapshots = _built(manifest_path)
     if not snapshots:
         raise ValueError("the snapshot manifest has no built snapshots")
     pages = _stored_page_urls(tuple((row.corpus_dir, row.content_digest) for row in snapshots))
-    if not any(_is_under(page, prefix) for page in pages):
+    if not any(is_under(page, prefix) for page in pages):
         ancestor = _nearest_ancestor(prefix, pages)
         hint = f' nearest path with pages: "{ancestor}".' if ancestor else ""
         raise ValueError(f'no stored page exists under "{prefix}".{hint}')
@@ -465,10 +465,16 @@ def history_under(
         rows = [
             row
             for row in interval["rows"]
-            if _is_under(row["page"], prefix)
-            or (row.get("old_page") and _is_under(row["old_page"], prefix))
+            if is_under(row["page"], prefix)
+            or (row.get("old_page") and is_under(row["old_page"], prefix))
         ]
-        intervals.append({"before": interval["before"], "after": interval["after"], "rows": rows})
+        intervals.append(
+            {
+                "before": interval["before"],
+                "after": interval["after"],
+                "rows": _two_levels(rows, prefix),
+            }
+        )
     return {
         "form": "under",
         "under": prefix,
@@ -476,6 +482,50 @@ def history_under(
         "intervals": intervals,
         "changes": sum(len(interval["rows"]) for interval in intervals),
     }
+
+
+_STATES = ("added", "removed", "changed", "moved")
+
+
+def _two_levels(rows: list[dict[str, Any]], prefix: str) -> list[dict[str, Any]]:
+    """Sections for the prefix page itself, one row per page for everything
+    beneath it. A folder-wide call then reads as a list of pages, and the page
+    form or ``under`` on one page gives the sections (D-051)."""
+    own: list[dict[str, Any]] = []
+    beneath: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        pages = {row["page"].rstrip("/"), (row.get("old_page") or "").rstrip("/")}
+        if prefix in pages:
+            own.append({**row, "level": "section"})
+        else:
+            beneath.setdefault(row["page"].rstrip("/"), []).append(row)
+    collapsed: list[dict[str, Any]] = []
+    for _page, page_rows in sorted(beneath.items()):
+        whole = next((row for row in page_rows if row.get("sections") is not None), None)
+        if whole is not None and len(page_rows) == 1:
+            collapsed.append(
+                {
+                    "level": "page",
+                    "state": whole["state"],
+                    "page": whole["page"],
+                    "sections": whole["sections"],
+                    "old_page": whole.get("old_page"),
+                    "cite": whole["page"],
+                }
+            )
+            continue
+        counts = Counter(row["state"] for row in page_rows)
+        collapsed.append(
+            {
+                "level": "page",
+                "state": "changed",
+                "page": page_rows[0]["page"],
+                "counts": {state: counts[state] for state in _STATES if counts[state]},
+                "old_page": None,
+                "cite": page_rows[0]["page"],
+            }
+        )
+    return own + collapsed
 
 
 def _parser() -> argparse.ArgumentParser:

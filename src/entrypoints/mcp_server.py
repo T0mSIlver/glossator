@@ -638,10 +638,12 @@ def _history_description() -> str:
     DO NOT USE: to read the current documentation ({SEARCH}, {READ_PAGE}).
 
     Args:
-        text: Exact phrase for its first and last stored appearance.
+        text: Exact phrase for its first and last stored appearance; add
+            page_url or under to look on one page or path.
         page_url: Page to track. Add section for one key printed by a hit or read.
         section: Optional key on page_url. A fragment on page_url also supplies it.
-        under: Page or path whose interval changelog to list.
+        under: Page or path: its sections and, per page beneath it, what changed
+            between stored dates.
         since: Optional date for under; snaps to the next stored date.
     """
 
@@ -732,25 +734,38 @@ async def mistral_docs_history(
     under: str | None = None,
     since: str | None = None,
 ) -> str:
+    forms_hint = (
+        f'{HISTORY}(text="phrase", page_url="url" or under="path"), '
+        f'{HISTORY}(page_url="url", section="key") or {HISTORY}(under="path", since="date").'
+    )
     if section is not None and page_url is None:
         raise _bad_param("section requires page_url.", f'{HISTORY}(page_url="url", section="key").')
     if since is not None and under is None:
         raise _bad_param("since requires under.", f'{HISTORY}(under="path", since="date").')
-    forms = [("text", text), ("page_url", page_url), ("under", under)]
-    selected = [(name, value) for name, value in forms if value is not None]
-    if len(selected) != 1:
-        raise _bad_param(
-            "history takes exactly one of text, page_url or under.",
-            f'{HISTORY}(text="phrase"), {HISTORY}(page_url="url", section="key") or '
-            f'{HISTORY}(under="path", since="date").',
-        )
-    name, value = selected[0]
-    if value is None or not value.strip():
+    if text is not None:
+        if page_url is not None and under is not None:
+            raise _bad_param("text takes page_url or under, not both.", forms_hint)
+        if section is not None or since is not None:
+            raise _bad_param("text takes page_url or under, not section or since.", forms_hint)
+        name, value = "text", text
+    elif page_url is not None and under is not None:
+        raise _bad_param("page_url and under are two forms; pass one.", forms_hint)
+    elif page_url is not None:
+        name, value = "page_url", page_url
+    elif under is not None:
+        name, value = "under", under
+    else:
+        raise _bad_param("history takes text, page_url or under.", forms_hint)
+    if not value.strip():
         raise _bad_param(f"{name} is empty.", f"send text in {name}.")
     try:
         if name == "text":
             result = await asyncio.to_thread(
-                history_service.phrase_history, value, SNAPSHOT_MANIFEST
+                history_service.phrase_history,
+                value,
+                SNAPSHOT_MANIFEST,
+                page_url=page_url,
+                under=under,
             )
         elif name == "page_url":
             result = await asyncio.to_thread(
@@ -767,7 +782,12 @@ async def mistral_docs_history(
     if name == "under":
         return _render_under(result)
     if name == "text":
-        lines = [f"history text: {json.dumps(value)}"]
+        heading = f"history text: {json.dumps(value)}"
+        if result.get("page_url"):
+            heading += f" | page: {result['page_url']}"
+        elif result.get("under"):
+            heading += f" | under: {result['under']}"
+        lines = [heading]
         first, last = result["first"], result["last"]
         if first is None:
             lines.append("Results: the phrase is absent from every stored snapshot.")
@@ -811,6 +831,16 @@ async def mistral_docs_history(
 
 def _change_block(row: dict[str, Any]) -> list[str]:
     line = f"  {row['state']} | {row['page']}"
+    if row.get("level") == "page":
+        # One row per page beneath the prefix: the row is the URL, so no cite line.
+        if row.get("sections") is not None:
+            line += f" | {row['sections']} sections"
+        elif row.get("counts"):
+            line += " | " + ", ".join(f"{n} {state}" for state, n in row["counts"].items())
+        block = [line]
+        if row.get("old_page"):
+            block.append(f"    from: {row['old_page']}")
+        return block
     if row.get("key"):
         line += f" | section: {row['key']}"
     elif row.get("sections") is not None:
@@ -829,15 +859,19 @@ def _render_under(result: dict[str, Any]) -> str:
     intervals = result["intervals"]
     summaries: list[str] = []
     for interval in intervals:
-        counts = Counter(row["state"] for row in interval["rows"])
-        detail = ", ".join(
-            f"{counts[state]} {state}"
+        sections = Counter(row["state"] for row in interval["rows"] if row.get("level") != "page")
+        pages = Counter(row["state"] for row in interval["rows"] if row.get("level") == "page")
+        parts = [
+            f"{sections[state]} {state}"
             for state in ("added", "removed", "changed", "moved")
-            if counts[state]
-        )
-        summaries.append(
-            f"between {interval['before']} and {interval['after']}: {detail or 'no change'}"
-        )
+            if sections[state]
+        ] + [
+            f"{pages[state]} {'page' if pages[state] == 1 else 'pages'} {state}"
+            for state in ("added", "removed", "changed", "moved")
+            if pages[state]
+        ]
+        detail = ", ".join(parts) or "no change"
+        summaries.append(f"between {interval['before']} and {interval['after']}: {detail}")
     heading = f"history under: {result['under']} | since: {result['since']}"
     result_line = f"Results: {result['changes']} changes over {len(intervals)} intervals"
     cut_line = "next: narrow under or raise since; the rest was not rendered"
@@ -864,11 +898,24 @@ def _render_under(result: dict[str, Any]) -> str:
     if rendered_rows < result["changes"]:
         lines.append(cut_line)
     else:
+        page_row = next(
+            (
+                row
+                for interval in intervals
+                for row in interval["rows"]
+                if row.get("level") == "page" and row["state"] != "removed"
+            ),
+            None,
+        )
         first = next(
             (row for interval in intervals for row in interval["rows"] if row.get("key")),
             None,
         )
-        if first is not None:
+        if page_row is not None:
+            lines.append(
+                f'next: {HISTORY}(under="{page_row["page"]}") lists the sections of one page'
+            )
+        elif first is not None:
             lines.append(
                 f'next: {HISTORY}(page_url="{first["page"]}", section="{first["key"]}") '
                 "shows the diff of one section"

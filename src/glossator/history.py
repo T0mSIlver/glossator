@@ -10,6 +10,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from glossator.answer.citations import find_span, fragment_link
+from glossator.changelog import is_under, under_prefix
 from glossator.citing import section_keys
 from glossator.corpus.snapshots import (
     DEFAULT_MANIFEST,
@@ -73,13 +74,36 @@ def _pages(snapshot: SnapshotRecord) -> list[CorpusPage]:
     return [load_page(path) for path in iter_page_paths(corpus_dir)]
 
 
-def phrase_history(text: str, manifest_path: Path = DEFAULT_MANIFEST) -> dict[str, Any]:
+def phrase_history(
+    text: str,
+    manifest_path: Path = DEFAULT_MANIFEST,
+    *,
+    page_url: str | None = None,
+    under: str | None = None,
+) -> dict[str, Any]:
+    """Where a phrase first and last appears, site-wide or on one page or path.
+
+    The scope is what a model reaches for when it asks "this phrase, on this
+    page" (D-051); a page that no snapshot holds is refused, as the page form
+    refuses it.
+    """
     if not text.strip():
         raise ValueError("text must contain a non-whitespace phrase")
+    if page_url is not None and under is not None:
+        raise ValueError("text takes page_url or under, not both")
+    scope_url = _target(page_url, None)[0] if page_url is not None else None
+    prefix = under_prefix(under) if under is not None else None
     occurrences: list[PhraseOccurrence] = []
     snapshots = available_snapshots(manifest_path)
+    scoped_pages = 0
     for snapshot in snapshots:
         for page in _pages(snapshot):
+            here = page.url.rstrip("/")
+            if scope_url is not None and here != scope_url.rstrip("/"):
+                continue
+            if prefix is not None and not is_under(here, prefix):
+                continue
+            scoped_pages += 1
             match = find_span(page.body, text)
             if match is None:
                 continue
@@ -92,9 +116,15 @@ def phrase_history(text: str, manifest_path: Path = DEFAULT_MANIFEST) -> dict[st
                 )
             )
             break
+    if scope_url is not None and scoped_pages == 0:
+        raise UnknownPageError(scope_url)
+    if prefix is not None and scoped_pages == 0:
+        raise ValueError(f'no stored page exists under "{prefix}"')
     return {
         "form": "text",
         "text": text,
+        "page_url": scope_url,
+        "under": prefix,
         "first": asdict(occurrences[0]) if occurrences else None,
         "last": asdict(occurrences[-1]) if occurrences else None,
         "snapshots_found": len(occurrences),

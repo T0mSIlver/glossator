@@ -1647,3 +1647,22 @@ The same census on the 57 reads the demo run actually made (420,322 characters):
 - The z.ai five-hour window was at its 80% ceiling when the judge started, from the afternoon's GLM sessions; the judge paused and would have waited until 17:16. It was rerun with the ceiling lifted and finished in nine minutes without a 429.
 
 **Reading.** D-050 point 3 asked for correctness inside the noise of two runs on thirty questions, and it is. The containment does what the census predicted where it applies, a third of every read, and the number that measures a session's weight from now on is the size table: characters per tool result and tokens per question, printed on every run beside correctness.
+
+---
+
+## D-051 · The history tool accepts the calls the model makes: `text` takes a page or a path, and `under` on a folder lists pages
+
+**Status:** decided by Tom · 2026-09-12 · `src/glossator/history.py`, `src/glossator/changelog.py`, `src/entrypoints/mcp_server.py`, `src/entrypoints/api.py`, `skills/mistral-docs/SKILL.md` (rule 4), `docs/mcp.md`; evidence: `eval/runs/2026-09-12-1211-demo-medium35-contained/` (D-050a), the five history rows of `eval/demo.jsonl` · revises D-048 point 2 (exactly one of `text`, `page_url`, `under`) and point 5 (`under` lists sections)
+
+**Facts.**
+- In the D-050a run Medium 3.5 called `history(text="zai-glm-5-2", page_url=".../vibe/code/cli/configuration")`, then `history(text="zai-glm-5-2", under=".../models")`, and the same shapes twice more on another question: four calls on two of the five history questions, each answered with the bad-parameter reply. The intent of each is plain, "this phrase, on this page" and "this phrase, under this path", and each is a smaller, better question than the site-wide one the tool allowed.
+- On the same run the model called `under="/studio-api"` twice and `under=".../models"` once; each filled the 12,000-character budget with section rows of a folder, one row per section of dozens of pages, and the question needed one page's dates.
+- Five options were weighed: a scoped `text` (the reading of the four calls); a two-level `under`, sections for the path's own page and one row per page beneath it; a better reply on the mixed call; rule 4 of the Skill spelling out the forms; a required `mode` enum. The enum duplicates what the argument names say and adds a fourth argument (D-046 point 2); the better reply keeps sending the model back for a second call it did not want.
+
+**Decision.**
+1. **`text` takes a scope.** `text` alone is the site-wide phrase history; with `page_url` it is that page, with `under` it is the pages beneath a path. A page no snapshot holds is refused as the page form refuses it; a path with no page names the nearest ancestor that has one. `text` with `section` or `since`, or with both scopes, is a bad parameter. The header names the scope: `history text: "phrase" | page: <url>`.
+2. **`under` has two levels.** The path's own page is listed by section, as before; every page strictly beneath it is one row: `changed | <url> | 2 added, 1 changed`, `added | <url> | 9 sections`, `moved | <url> | 14 sections` with its `from:` line, and no `cite:` line, the row being the URL. The interval summary counts sections and pages apart. The `next:` line names `under="<page>"` for the sections of one page. On the real snapshots `under=".../models"` goes from section rows cut at the budget to two own sections plus ten to twenty-five page rows per interval, and `under="/studio-api"` from 11,864 characters of sections to one line per page.
+3. **Rule 4 of the Skill spells out the three forms**, one clause each, "one form per call", and adds the O5 rule the D-049a run showed was still needed: report the interval the tool prints, never a single day.
+4. **Measured** by re-running the five history rows on the deployed server: the calls the model makes must now succeed, and the bound answers must hold (D-051a).
+
+**Not changed.** `page_url` and `under` remain two forms and cannot combine; `since` still needs `under`; the changelog files and their builder are untouched, since the page level is computed at read time from the section rows.

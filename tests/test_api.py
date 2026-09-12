@@ -681,7 +681,8 @@ def test_history_text_form_returns_the_service_result(
 ) -> None:
     calls: list[str] = []
 
-    def phrase_history(text: str, manifest: object) -> dict[str, object]:
+    def phrase_history(text: str, manifest: object, **scope: object) -> dict[str, object]:
+        del manifest, scope
         calls.append(text)
         return {"form": "text", "text": text, "first": None, "last": None}
 
@@ -695,7 +696,11 @@ def test_history_text_form_returns_the_service_result(
 
 
 def test_history_rejects_zero_or_two_forms() -> None:
-    for path in ("/history", "/history?text=a&page_url=/page"):
+    for path in (
+        "/history",
+        "/history?page_url=/page&under=/vibe",
+        "/history?text=a&since=2026-07-01",
+    ):
         response = _request("GET", path)
 
         assert response.status_code == 400

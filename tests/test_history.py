@@ -168,3 +168,20 @@ def test_first_and_last_follow_the_dates_not_the_manifest_order(tmp_path: Path) 
     states = section_history("https://docs.mistral.ai/page#limits", None, manifest)["states"]
     assert [state["snapshot"] for state in states] == ["2026-06-01", "2026-06-15"]
     assert states[1]["state"] == "changed"
+
+
+def test_phrase_history_scoped_to_a_page_and_a_path(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+
+    on_page = phrase_history("The limit is", manifest, page_url="/page")
+    assert on_page["page_url"] == "https://docs.mistral.ai/page"
+    assert on_page["snapshots_found"] == 2
+
+    under = phrase_history("The limit is", manifest, under="/")
+    assert under["under"] == "https://docs.mistral.ai"
+    assert under["snapshots_found"] == 2
+
+    with pytest.raises(UnknownPageError):
+        phrase_history("The limit is", manifest, page_url="/missing")
+    with pytest.raises(ValueError, match="page_url or under, not both"):
+        phrase_history("The limit is", manifest, page_url="/page", under="/")
