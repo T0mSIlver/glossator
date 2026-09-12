@@ -6,7 +6,7 @@
 4. Mistral embeddings map each chunk to 1,024 dimensions (128 stays as a measured variant).
 5. Vespa stores one schema for each index variant, and one more for the dated snapshots.
 6. Vespa combines BM25 and vector features in a two-phase ranking profile.
-7. The MCP server exposes search, whole-page reads and history; every result is addressed by `url#anchor`.
+7. The MCP server exposes search, whole-page reads and history; every hit and section prints its key and the link to cite, and history reads a precomputed changelog of the dated snapshots.
 8. The answer layer gathers context, generates structured output and verifies quoted citations, behind the HTTP API.
 9. FastAPI and MCP both use `SearchEngine`; each entry point constructs its own instances.
 10. Evaluation records every query, model call, hit, score, citation, cost, and latency.
