@@ -629,11 +629,30 @@ def _section_timeline(states: list[dict[str, Any]]) -> list[tuple[int, list[str]
     timeline: list[tuple[int, list[str]]] = []
     first = states[0]
     if first.get("page"):
-        timeline.append((0, [f"present at {first['snapshot']} | {_state_target(first)}"]))
+        end = 0
+        while (
+            end + 1 < len(states)
+            and states[end + 1].get("page") is not None
+            and states[end + 1]["state"] == "same"
+        ):
+            end += 1
+        if end:
+            timeline.append(
+                (
+                    end,
+                    [
+                        f"present at {first['snapshot']}, same through "
+                        f"{states[end]['snapshot']} | {_state_target(states[end])}"
+                    ],
+                )
+            )
+        else:
+            timeline.append((0, [f"present at {first['snapshot']} | {_state_target(first)}"]))
     else:
+        end = 0
         timeline.append((0, [f"absent at {first['snapshot']}"]))
 
-    index = 1
+    index = end + 1
     while index < len(states):
         state = states[index]
         previous = states[index - 1]
@@ -715,11 +734,10 @@ async def mistral_docs_history(
         raise _unknown_page(str(exc)) from exc
     except (OSError, ValueError) as exc:
         raise _bad_param(str(exc), "pass one documented history form.") from exc
-    display_name = "section" if name == "page_url" else name
     if name == "under":
         return _render_under(result)
-    lines = [f"history {display_name}: {json.dumps(value)}"]
     if name == "text":
+        lines = [f"history text: {json.dumps(value)}"]
         first, last = result["first"], result["last"]
         if first is None:
             lines.append("Results: the phrase is absent from every stored snapshot.")
@@ -730,6 +748,11 @@ async def mistral_docs_history(
             lines.append(f"last stored date with the phrase: {last['snapshot']} | {last['page']}")
             lines.append(f"Results: present in {result['snapshots_found']} snapshots")
         return "\n".join(lines)
+    heading = f"history page: {result.get('page_url', value)}"
+    result_section = result.get("section")
+    if result_section:
+        heading += f" | section: {result_section}"
+    lines = [heading]
     states = result["states"]
     spent = 0
     rendered = -1

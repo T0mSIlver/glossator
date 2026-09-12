@@ -573,6 +573,7 @@ def test_history_section_renders_states_and_diffs(
     def fake(page_url: str, section: str | None, manifest: Any) -> dict[str, Any]:
         return {
             "form": "section",
+            "page_url": page_url,
             "section": section,
             "states": [
                 {"snapshot": "2026-06-01", "state": "same", "page": PAGE, "anchor": "a"},
@@ -589,6 +590,7 @@ def test_history_section_renders_states_and_diffs(
 
     monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "a"})
+    assert text.startswith(f"history page: {PAGE} | section: a\n")
     assert f"present at 2026-06-01 | {PAGE}#a" in text
     assert f"changed between 2026-06-01 and 2026-06-15 | {PAGE}#a" in text
     assert "```diff\n-old\n+new\n```" in text
@@ -601,6 +603,7 @@ def test_history_stops_at_its_budget_and_names_the_next_call(
     def fake(page_url: str, section: str | None, manifest: Any) -> dict[str, Any]:
         return {
             "form": "section",
+            "page_url": page_url,
             "section": section,
             "states": [
                 {"snapshot": f"2026-0{i}-01", "state": "changed", "page": PAGE, "diff": "x" * 500}
@@ -634,8 +637,7 @@ def test_history_collapses_unchanged_dates_and_bounds_moves(
     monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "b"})
 
-    assert "present at 2026-06-01" in text
-    assert "same through 2026-06-15" in text
+    assert f"present at 2026-06-01, same through 2026-06-15 | {old}#a" in text
     assert f"moved between 2026-06-15 and 2026-07-01 | {old}#a -> {PAGE}#b" in text
     assert "same through 2026-07-15" in text
 
