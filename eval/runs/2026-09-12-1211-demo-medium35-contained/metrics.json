@@ -1,0 +1,34 @@
+{
+  "cells": {
+    "work-proxy-mistral-medium-3-5-high / A1": {
+      "bad_param_errors": 0.0,
+      "cite_called": 0.0,
+      "cite_rejected": 0.0,
+      "cite_verified": 0.0,
+      "clamps": 0.0,
+      "correctness": 0.6166666666666667,
+      "errors": 0,
+      "latency_p50": 17.069720391999,
+      "links_on_gold": 0.76,
+      "links_resolve": 0.9689655172413794,
+      "mcp_called": 1.0,
+      "n": 30,
+      "refusal_correct": 0.8333333333333334,
+      "rerank_asked": 0.0,
+      "tokens_total": 8400.033333333333,
+      "tool_calls": 5.833333333333333
+    }
+  },
+  "correctness_cost": {
+    "work-proxy-mistral-medium-3-5-high / A1": 16800.066666666666
+  },
+  "fragments": {
+    "fragment_links": 1,
+    "fragments_found": 0,
+    "links_checked": 52,
+    "seed": 0,
+    "share_found": 0.0
+  },
+  "judged": 30,
+  "records": 30
+}
