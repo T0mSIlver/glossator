@@ -27,7 +27,7 @@ from glossator.eval.datasets import EvalQuestion, read_jsonl, write_jsonl
 from glossator.eval.providers.client import OpenAICompatibleProvider
 from glossator.eval.providers.models import ProviderName
 from glossator.eval.providers.scopes import call_scope, candidate_scope
-from glossator.eval.run_records import RunRecorder, create_run_directory
+from glossator.eval.run_records.recorder import RunRecorder, create_run_directory
 
 PROMPT_VERSION = "translate-v1"
 SYSTEM = (

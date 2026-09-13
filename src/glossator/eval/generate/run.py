@@ -20,7 +20,7 @@ from glossator.eval.generate.models import (
 from glossator.eval.generate.planning import plan_attempts
 from glossator.eval.lexical import LexicalIndex
 from glossator.eval.providers.models import ChatProvider, ThinkingMode
-from glossator.eval.run_records import RunRecorder
+from glossator.eval.run_records.recorder import RunRecorder
 
 logger = structlog.get_logger(__name__)
 

@@ -10,7 +10,7 @@ from glossator.eval.datasets import read_jsonl
 from glossator.eval.retrieval_grid.grid import expand, select
 from glossator.eval.retrieval_grid.models import DEFAULT_REQUEST_INTERVAL, GridSpec
 from glossator.eval.retrieval_grid.run import GridRun
-from glossator.eval.run_records import create_run_directory
+from glossator.eval.run_records.recorder import create_run_directory
 
 
 def _parse_args() -> argparse.Namespace:

@@ -8,12 +8,9 @@ import pytest
 from glossator.eval.generate.models import GenerationAttempt
 from glossator.eval.providers.models import TokenUsage
 from glossator.eval.report import rebuild, render_figures
-from glossator.eval.run_records import (
-    STATUS_IN_PROGRESS,
-    RunRecorder,
-    create_run_directory,
-    regenerate,
-)
+from glossator.eval.run_records.models import STATUS_IN_PROGRESS
+from glossator.eval.run_records.recorder import RunRecorder, create_run_directory
+from glossator.eval.run_records.summary import regenerate
 
 CONFIG = {
     "model": "glm-5.3-flash",

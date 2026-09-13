@@ -15,7 +15,7 @@ from glossator.eval.perturb.prompts import PROMPT_VERSION
 from glossator.eval.perturb.variants import assign_kinds, perturb_all
 from glossator.eval.providers.client import OpenAICompatibleProvider
 from glossator.eval.providers.models import ChatProvider, ProviderName, ThinkingMode
-from glossator.eval.run_records import RunRecorder, create_run_directory
+from glossator.eval.run_records.recorder import RunRecorder, create_run_directory
 
 
 def render_figures(metrics: dict[str, Any], figures_dir: Path) -> None:

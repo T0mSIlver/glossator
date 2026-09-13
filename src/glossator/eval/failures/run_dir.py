@@ -11,7 +11,7 @@ from typing import Any
 from glossator.eval.failures.aggregate import aggregate, breakdown, grouped
 from glossator.eval.failures.models import AnalysedRun, FailureRecord, SkippedRun
 from glossator.eval.failures.report import render_figures, render_readme
-from glossator.eval.run_records import RUN_NAME_RE
+from glossator.eval.run_records.models import RUN_NAME_RE
 
 RUNS_ROOT = Path("eval/runs")
 

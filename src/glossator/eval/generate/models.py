@@ -13,7 +13,7 @@ from glossator.eval.corpus import CorpusDocument
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionType
 from glossator.eval.lexical import LexicalIndex
 from glossator.eval.providers.models import ChatProvider, ThinkingMode
-from glossator.eval.run_records import RunRecorder
+from glossator.eval.run_records.recorder import RunRecorder
 
 GENERATED_TYPES: tuple[QuestionType, ...] = tuple(
     question_type for question_type in QuestionType if question_type is not QuestionType.HISTORY

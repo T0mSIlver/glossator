@@ -22,7 +22,7 @@ from glossator.eval.calibrate_floors.models import (
 from glossator.eval.calibrate_floors.proposal import summarize
 from glossator.eval.calibrate_floors.report import write_report
 from glossator.eval.datasets import QuestionType, read_jsonl
-from glossator.eval.run_records import create_run_directory
+from glossator.eval.run_records.recorder import create_run_directory
 from glossator.retrieval.config import DEFAULT_CORPUS_DIR, RetrievalConfig
 from glossator.retrieval.engine import SearchEngine
 

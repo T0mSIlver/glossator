@@ -18,7 +18,7 @@ from glossator.eval.answer_eval.figures import render_figures
 from glossator.eval.answer_eval.metrics import aggregate
 from glossator.eval.answer_eval.models import QuestionRecord
 from glossator.eval.answer_eval.report import render_readme
-from glossator.eval.run_records import RUN_NAME_RE
+from glossator.eval.run_records.models import RUN_NAME_RE
 
 RUNS_ROOT = Path("eval/runs")
 

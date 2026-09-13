@@ -14,7 +14,7 @@ import structlog
 from glossator.answer.config import ModelPrice
 from glossator.eval.answer_eval.run_dir import RunDirectory
 from glossator.eval.replay.records import call_row, replay_record, single_pass_records
-from glossator.eval.run_records import create_run_directory
+from glossator.eval.run_records.recorder import create_run_directory
 from glossator.index.variants import VARIANTS
 
 logger = structlog.get_logger(__name__)

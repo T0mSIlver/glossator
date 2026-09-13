@@ -37,7 +37,7 @@ from glossator.eval.perturb.prompts import (
 from glossator.eval.perturb.typos import typo_variant
 from glossator.eval.providers.models import ChatProvider, ProviderCallError, ThinkingMode
 from glossator.eval.providers.scopes import call_scope, candidate_scope
-from glossator.eval.run_records import RunRecorder
+from glossator.eval.run_records.recorder import RunRecorder
 
 
 def assign_kinds(subset: Sequence[EvalQuestion]) -> list[tuple[EvalQuestion, str]]:

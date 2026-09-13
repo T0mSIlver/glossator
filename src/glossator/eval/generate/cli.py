@@ -29,7 +29,7 @@ from glossator.eval.generate.prompts import PROMPT_HASHES, PROMPT_VERSION
 from glossator.eval.generate.run import generate_questions, type_allocations
 from glossator.eval.providers.client import OpenAICompatibleProvider
 from glossator.eval.providers.models import ProviderName, ThinkingMode
-from glossator.eval.run_records import RunRecorder, create_run_directory
+from glossator.eval.run_records.recorder import RunRecorder, create_run_directory
 from glossator.ingest.pages import read_manifest
 
 

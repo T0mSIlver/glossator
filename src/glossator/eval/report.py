@@ -21,7 +21,7 @@ from glossator.eval.failures.models import FAILURES_KIND
 from glossator.eval.failures.run_dir import regenerate as regenerate_failures
 from glossator.eval.loop_grid.summary import regenerate as regenerate_loop_grid
 from glossator.eval.perturb.run import render_figures as render_perturb_figures
-from glossator.eval.run_records import regenerate
+from glossator.eval.run_records.summary import regenerate
 
 ANSWER_EVAL_KIND = "answer_eval"
 LOOP_GRID_KIND = "loop_grid"
