@@ -61,7 +61,13 @@ src = ["src", "tests"]
 # Ruff also formats Python inside Markdown code fences, which would rewrite the vendored
 # skill documentation and the corpus fixtures (their hashes are in a manifest), so the
 # scope is stated as explicit Python paths.
-include = ["src/glossator/**/*.py", "src/entrypoints/**/*.py", "tests/**/*.py", "deploy/*.py"]
+include = [
+    "src/glossator/**/*.py",
+    "src/entrypoints/**/*.py",
+    "tests/**/*.py",
+    "deploy/*.py",
+    "eval/corpus-map/*.py",
+]
 extend-exclude = ["tests/fixtures"]
 
 [tool.ruff.lint]
@@ -91,7 +97,7 @@ strict = true
 mypy_path = "src"
 explicit_package_bases = true
 namespace_packages = true
-files = ["src/glossator", "src/entrypoints", "tests", "deploy"]
+files = ["src/glossator", "src/entrypoints", "tests", "deploy", "eval/corpus-map"]
 exclude = "^tests/fixtures/"
 
 [[tool.mypy.overrides]]

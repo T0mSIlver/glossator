@@ -6,12 +6,11 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
-sys.path.insert(0, "src")
-from glossator.index.variants import ChunkStrategy  # noqa: E402
-from glossator.ingest.chunker import PageFacts, build_chunker  # noqa: E402
-from glossator.ingest.pages import iter_page_paths, load_page, read_manifest  # noqa: E402
-from glossator.ingest.sections import parse_sections  # noqa: E402
+from glossator.ingest.chunker import PageFacts, SectionChunker
+from glossator.ingest.pages import iter_page_paths, load_page, read_manifest
+from glossator.ingest.sections import parse_sections
 
 READ_MAX_CHARS = 24_000
 LARGE_PAGE_CHARS = 32_000
@@ -20,7 +19,7 @@ FLOAT = re.compile(r"-?\d+\.\d{4,}")
 LONG_LINE = 1500
 
 
-def composition(text: str) -> dict:
+def composition(text: str) -> dict[str, Any]:
     """Characters of fenced code, prose, and two noise signals: float literals
     with four or more decimals (embedding vectors) and lines over 1,500 chars
     (pasted JSON responses)."""
@@ -40,15 +39,17 @@ def composition(text: str) -> dict:
     }
 
 
-chunker = build_chunker(ChunkStrategy.SECTION)
+# The concrete class rather than build_chunker: the map reports token counts,
+# which only the section chunker exposes, and sec1024 is the shipped strategy.
+chunker = SectionChunker()
 corpus = Path("corpus/mistral-docs")
-pages = []
+pages: list[dict[str, Any]] = []
 for path in iter_page_paths(corpus):
     page = load_page(path)
     facts = PageFacts(url=page.url, title=page.title, kind=page.kind, locale=page.locale)
     chunks = chunker.plan(page.body, facts)
     sections = parse_sections(page.body, page_title=page.title)
-    per_section: list[list[dict]] = [[] for _ in sections]
+    per_section: list[list[dict[str, Any]]] = [[] for _ in sections]
     for n, chunk in enumerate(chunks):
         span = page.body[chunk.start : chunk.end]
         entry = {
@@ -96,17 +97,31 @@ for path in iter_page_paths(corpus):
 
 pages.sort(key=lambda p: p["path"])
 manifest = read_manifest(corpus)
-commit = next((e.get("source_commit") for e in manifest if e.get("source_commit")), None) if manifest else None
+commit = (
+    next((e.get("source_commit") for e in manifest if e.get("source_commit")), None)
+    if manifest
+    else None
+)
 out = {
     "commit": commit,
     "read_max_chars": READ_MAX_CHARS,
     "large_page_chars": LARGE_PAGE_CHARS,
     "pages": pages,
 }
-json.dump(out, open(sys.argv[1], "w"), ensure_ascii=False)
+with open(sys.argv[1], "w") as handle:
+    json.dump(out, handle, ensure_ascii=False)
 n_sections = sum(len(p["sections"]) for p in pages)
 n_chunks = sum(p["chunks"] for p in pages)
 noisy_sections = sum(1 for p in pages for s in p["sections"] if s["noisy"])
 code_share = sum(p["code_chars"] for p in pages) / sum(p["chars"] for p in pages)
-print(len(pages), "pages", n_sections, "sections", n_chunks, "chunks;",
-      noisy_sections, "noisy sections;", f"code share {code_share:.2f}")
+print(
+    len(pages),
+    "pages",
+    n_sections,
+    "sections",
+    n_chunks,
+    "chunks;",
+    noisy_sections,
+    "noisy sections;",
+    f"code share {code_share:.2f}",
+)

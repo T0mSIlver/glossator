@@ -42,7 +42,7 @@ tests/                   offline tests; tests that need Vespa or an API key skip
 - `structlog` for logging in library code; no `print` outside CLI output.
 - Every module has one job; entrypoints only parse arguments and call `glossator.surface`, which calls the engine.
 - `make test` runs the offline tests (`pytest -m "not slow"`); tests that need Vespa or an API key skip when they are not configured. `make test-all` also runs the `slow` container image build.
-- `uv run ruff format . && uv run ruff check --fix . && uv run mypy` before a commit. Bare `mypy` uses the file list in `pyproject.toml` (src and tests), matching CI.
+- `uv run ruff format . && uv run ruff check --fix . && uv run mypy` before a commit. Bare `mypy` uses the file list in `pyproject.toml` (src, tests, deploy and `eval/corpus-map`), matching CI; `eval/replay/run_replay.py` stays outside on purpose (standard library only, copied to other machines).
 - Comments explain why, not what. No commented-out code, no TODOs without an owner.
 - All LLM calls go through `glossator.eval.providers` (offline tools) or `glossator.answer` (serving path), are cached on disk by content hash, and log token usage.
 
