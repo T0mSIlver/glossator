@@ -20,10 +20,12 @@ from mistralai.search.toolkit.search.errors import IndexingError
 from glossator.index.variants import get_variant
 from glossator.ingest.pages import CorpusError, verify_manifest
 from glossator.ingest.pipeline import (
+    DEFAULT_EMBEDDING_CACHE,
     IndexWritePreflightError,
     IngestReport,
     PartialIngestError,
     _verify_index_writable,
+    embedding_cache_dir,
     ingest_corpus,
 )
 
@@ -193,3 +195,21 @@ def test_allow_partial_returns_the_report_instead(
     report = asyncio.run(ingest_corpus(corpus_dir, "sec128", allow_partial=True))
 
     assert len(report.failures) == 9
+
+
+def test_the_embedding_cache_follows_its_environment_variable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GLOSSATOR_EMBEDDING_CACHE", str(tmp_path / "embeddings"))
+    assert embedding_cache_dir() == tmp_path / "embeddings"
+
+
+@pytest.mark.parametrize("value", [None, "", "  "])
+def test_an_unset_or_blank_embedding_cache_keeps_the_default(
+    value: str | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    if value is None:
+        monkeypatch.delenv("GLOSSATOR_EMBEDDING_CACHE", raising=False)
+    else:
+        monkeypatch.setenv("GLOSSATOR_EMBEDDING_CACHE", value)
+    assert embedding_cache_dir() == DEFAULT_EMBEDDING_CACHE
