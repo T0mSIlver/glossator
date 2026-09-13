@@ -1,0 +1,130 @@
+---
+url: https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle
+title: Limits and lifecycle
+breadcrumbs: [Vibe, Code, Vibe Code Web]
+kind: doc
+locale: en
+source_path: src/content/en/docs/vibe/code/vibe-code-web/limits-and-lifecycle/page.mdx
+source_commit: 6e06c6cfc14e66e45ddf1f06445146314cff5393
+---
+
+# Limits and lifecycle
+
+A Vibe Code Web session is **one run of the Vibe Code agent against a GitHub repository in a managed cloud sandbox**. This page covers how a session starts, what state it can be in, what persists, what gets deleted, and which limits apply.
+
+## Lifecycle {#lifecycle}
+
+### Phases {#phases}
+
+| Phase | What happens |
+|---|---|
+| **Start** | Vibe Code Web creates an isolated cloud sandbox. |
+| **Clone** | The selected GitHub repository and branch are cloned into the sandbox. |
+| **Run** | The agent reads files, runs commands, edits code, and asks follow-up questions when needed. |
+| **Review** | You inspect the branch, commits, or pull request created by the agent. |
+| **End** | The sandbox is deleted when the session stops, times out, or errors. |
+
+A pushed branch or pull request **doesn't end the session automatically**. You can keep iterating by sending follow-up prompts, reviewer comments, or CI failures.
+
+### Active states {#active-states}
+
+While a session is alive, it reports one of these operational states:
+
+| State | Meaning |
+|---|---|
+| **Active** | The agent is currently running commands, editing code, or thinking. |
+| **Waiting for input** | The agent asked a clarifying question and is paused until you reply. |
+| **Idle** | The agent finished the current step and is waiting for your next instruction. |
+| **Stopped** | The session has ended. See [End states](https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle#end-states) for the reason. |
+
+You can scan all active sessions across your projects from the Vibe Code Web sidebar.
+
+### End states {#end-states}
+
+| End state | What happened |
+|---|---|
+| **Completed** | The agent reached a natural stopping point. |
+| **Timed out** | The session reached a duration or inactivity limit. |
+| **Error** | Sandbox setup or agent execution failed. |
+
+In every case, **GitHub branches and pull requests already created by Vibe Code Web remain in your repository**.
+
+> **Note**
+>
+> Cancellation, interrupt, and manual-stop controls are not available yet. See [Follow-up capabilities](https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle#follow-ups).
+
+## Limits, quotas, and models {#limits-quotas-models}
+
+### Session limits {#session-limits}
+
+| Limit | Current value |
+|---|---|
+| Maximum session duration | 24 hours |
+| Inactivity timeout while waiting for your reply | 3 hours |
+| Concurrent sessions per user | Plan-dependent |
+
+Session limits can depend on your plan and rollout status.
+
+### Daily quotas {#daily-quotas}
+
+| User type | Limit |
+|---|---|
+| Free users | 2 sessions per day, where access is enabled |
+| Paid users | 100 sessions per day |
+
+### Model behavior {#model-behavior}
+
+| Session source | Model behavior |
+|---|---|
+| Vibe Code Web | Uses Mistral Medium 3.5 |
+| Vibe CLI with Mistral model selected | Uses the selected Mistral model |
+| Vibe CLI with non-Mistral model selected | Defaults to Mistral Medium 3.5 |
+
+## After a session {#after-session}
+
+### What persists {#persistence}
+
+| Data | What persists |
+|---|---|
+| **Sandbox files** | Deleted when the sandbox is deprovisioned at session end. |
+| **Build artifacts** | Deleted with the sandbox unless committed to GitHub. |
+| **GitHub branches** | Persist in your repository. |
+| **Commits and pull requests** | Persist in your repository and follow your normal GitHub workflow. |
+| **Session history** | Persists according to your plan and the applicable data-retention policy. |
+
+Session history can be inspected after a run, but inactive sessions cannot be resumed once the sandbox has been deprovisioned. To continue, start a new session.
+
+> **Note**
+>
+> Vibe Code Web runs in a **cloud sandbox, not on your machine**. Use the CLI or VS Code extension for tasks that require local files, local services, local secrets, unsupported runtimes, or hardware-specific dependencies.
+
+### Visibility and sharing {#visibility}
+
+Sessions are **personal**: each session belongs to the user who created it and is visible only to that user from the Vibe Code Web sidebar.
+
+To collaborate on the agent's output, share the resulting GitHub branch or pull request. Teammates review and comment using the normal GitHub flow.
+
+## Follow-up capabilities {#follow-ups}
+
+The capabilities below are planned for release after the May 28 launch. They are scoped here so you can plan around the launch surface.
+
+| Area | Planned capability |
+|---|---|
+| **Triggers** | Start a session from Slack or from GitHub events. |
+| **Mobility** | Teleport a remote session back to a local CLI. |
+| **Session control** | Approvals for sensitive actions, cancellation, interrupt, and steering. |
+| **Visibility** | Notifications, rich in-app diff and review UI. |
+| **Sandbox customization** | Custom sandbox configuration, setup scripts, project-level secrets, and environment variables. |
+
+## Common issues {#common-issues}
+
+| Issue | What to check |
+|---|---|
+| Session looks stuck | Check whether it's **waiting for input**, has hit a timeout, or lost GitHub access. |
+| Repository clone is slow | Large repositories take longer. If cloning fails, retry or scope the task to a smaller repository or branch. |
+| Project commands fail | The sandbox may not have local services, OS-specific tooling, GPUs, or private dependencies required by your project. See [Sandbox environment](https://docs.mistral.ai/vibe/code/vibe-code-web/sandbox-environment). |
+| GitHub authorization revoked or expired | Reconnect the Mistral GitHub App from [github.com/settings/installations](https://github.com/settings/installations). |
+| Organization owner approval pending | The Mistral GitHub App may require organization owner approval before members can use it. |
+| Repository not selected in GitHub App installation | Open the App configuration in GitHub and add the repository to the selected list. |
+| Repository belongs to a different GitHub owner | A project includes repositories from a single GitHub owner. Create a separate project for the other owner. |
+| Cannot resume an inactive session | Once the sandbox is deprovisioned, a session cannot be resumed. Start a new session to continue. |

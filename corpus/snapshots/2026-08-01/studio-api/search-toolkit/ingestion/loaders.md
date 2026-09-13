@@ -1,0 +1,256 @@
+---
+url: https://docs.mistral.ai/studio-api/search-toolkit/ingestion/loaders
+title: File loaders
+breadcrumbs: [Studio, Search Toolkit, Ingestion]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio-api/search-toolkit/ingestion/loaders/page.mdx
+source_commit: 6e06c6cfc14e66e45ddf1f06445146314cff5393
+---
+
+# File loaders
+
+File loaders load files from various sources into `File` objects that can be processed by document extractors.
+
+## Available file loaders {#available-file-loaders}
+
+| Loader | Source |
+|--------|--------|
+| **[Filesystem File Loader](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/loaders#filesystem-file-loader)** | Local filesystem |
+| **[AWS S3 File Loader](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/loaders#aws-s3-file-loader)** | AWS S3 (and S3-compatible: MinIO, Ceph) |
+| **[Google Cloud Storage Loader](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/loaders#google-cloud-storage-loader)** | Google Cloud Storage |
+| **[Azure Blob Storage Loader](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/loaders#azure-blob-storage-loader)** | Azure Blob Storage |
+| **[Custom Loaders](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/loaders#custom-loaders)** | Any source |
+
+## Filesystem file loader {#filesystem-file-loader}
+
+`FilesystemFileLoader` loads files from the local filesystem. It accepts a `root` parameter that restricts access. Any path resolving outside the root is rejected, preventing path traversal.
+
+**Installation**: Core library (no extra required)
+
+**Example**:
+
+```python
+from pathlib import Path
+from mistralai.search.toolkit.ingestion.loaders import FilesystemFileLoader
+
+loader = FilesystemFileLoader(root="/data/documents")
+file = await loader.load_file(Path("report.pdf"))
+```
+
+**Limiting file size**:
+
+Use `max_file_size` to reject files that exceed a given size in bytes. The check is performed via a metadata lookup before loading, so oversized files are never read into memory:
+
+```python
+from mistralai.search.toolkit.ingestion.loaders import FilesystemFileLoader
+
+loader = FilesystemFileLoader(
+    root="/data/documents",
+    max_file_size=50 * 1024 * 1024,  # 50 MiB
+)
+file = await loader.load_file("report.pdf")
+```
+
+A `FileSizeLimitExceededException` is raised when a file exceeds the limit.
+
+**Parameters**:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `root` | `Path \| str` | `"/"` | Root directory. Paths resolving outside this directory are rejected. |
+| `max_file_size` | `int \| None` | `None` | Maximum file size in bytes. Files exceeding this limit are rejected before loading. `None` means no limit. |
+
+**Security**:
+
+The `root` parameter prevents path traversal attacks. Any path resolving outside the root directory is rejected before attempting to open the file.
+
+## AWS S3 file loader {#aws-s3-file-loader}
+
+Load files from AWS S3 buckets (or S3-compatible services like MinIO, Ceph). `S3FileLoader` is a convenience wrapper around `FileLoader` backed by `S3BlobStorage`.
+
+**Installation**:
+
+```bash
+uv add "mistralai-search-toolkit-storage-s3"
+```
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.plugins.storage.s3 import S3FileLoader
+
+loader = S3FileLoader(
+    bucket_name="my-bucket",
+    region_name="us-east-1",
+    endpoint_url="http://localhost:9000",  # optional, for MinIO / other S3-compatible backends
+)
+
+file = await loader.load_file("reports/example.pdf")
+```
+
+**Parameters** (`S3FileLoader`):
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `bucket_name` | `str` | *(required)* | S3 bucket name |
+| `region_name` | `str \| None` | `None` | AWS region (falls back to the SDK/env default) |
+| `endpoint_url` | `str \| None` | `None` | Custom endpoint URL (for MinIO, Ceph, or other S3-compatible services) |
+| `aws_access_key_id` | `str \| None` | `None` | Explicit AWS access key (falls back to the credential chain) |
+| `aws_secret_access_key` | `str \| None` | `None` | Explicit AWS secret key |
+| `max_file_size` | `int \| None` | `None` | Reject files larger than this many bytes |
+
+**Authentication**:
+
+Uses the default AWS credentials chain:
+- IAM role (recommended for production)
+- Environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- AWS credentials file: `~/.aws/credentials`
+
+## Azure Blob Storage loader {#azure-blob-storage-loader}
+
+Load files from Azure Blob Storage. `AzureBlobFileLoader` is a convenience wrapper around `FileLoader` backed by `AzureBlobStorage`.
+
+**Installation**:
+
+```bash
+uv add "mistralai-search-toolkit-storage-azure"
+```
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.plugins.storage.azure import AzureBlobFileLoader
+
+loader = AzureBlobFileLoader(
+    container_name="my-container",
+    account_url="https://myaccount.blob.core.windows.net",
+    use_workload_identity=True,  # or pass azure_connection_string=... for connection-string auth
+)
+
+file = await loader.load_file("reports/example.pdf")
+```
+
+**Parameters** (`AzureBlobFileLoader`):
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `container_name` | `str` | *(required)* | Azure Blob Storage container name |
+| `azure_connection_string` | `str \| None` | `None` | Connection string for authentication (required unless `use_workload_identity` is `True`) |
+| `account_url` | `str \| None` | `None` | Azure storage account URL, e.g. `https://myaccount.blob.core.windows.net` (required when `use_workload_identity` is `True`) |
+| `use_workload_identity` | `bool` | `False` | Use workload identity for authentication (recommended for Azure VMs/Functions) |
+| `max_file_size` | `int \| None` | `None` | Reject files larger than this many bytes |
+
+**Authentication**:
+
+- **Workload Identity** (recommended for Azure VMs/Functions)
+- **Connection string**: Pass via `azure_connection_string` parameter or set `AZURE_STORAGE_CONNECTION_STRING` environment variable
+- **SAS token**: Time-limited access (configure via account credentials)
+
+## Google Cloud Storage loader {#google-cloud-storage-loader}
+
+Load files from Google Cloud Storage (GCS). `GCSFileLoader` is a convenience wrapper around `FileLoader` backed by `GCSBlobStorage`.
+
+**Installation**:
+
+```bash
+uv add "mistralai-search-toolkit-storage-gcs"
+```
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.plugins.storage.gcs import GCSFileLoader
+
+loader = GCSFileLoader(
+    bucket_name="my-bucket",
+    service_account_file="/path/to/service-account.json",  # optional; falls back to ADC
+)
+
+file = await loader.load_file("reports/example.pdf")
+```
+
+**Parameters** (`GCSFileLoader`):
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `bucket_name` | `str` | *(required)* | GCS bucket name |
+| `service_account_file` | `str \| None` | `None` | Path to service account JSON file. If not provided, uses Application Default Credentials (ADC) |
+| `api_root` | `str \| None` | `None` | Custom API endpoint for a local emulator (e.g. fake-gcs-server); falls back to `STORAGE_EMULATOR_HOST` |
+| `max_file_size` | `int \| None` | `None` | Reject files larger than this many bytes |
+
+**Authentication**:
+
+- **Application Default Credentials (ADC)** (recommended): uses credentials from environment, metadata service, or gcloud CLI
+- **Service account file**: Pass via `service_account_file` parameter or set `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+
+## Batch loading {#batch-loading}
+
+Load multiple files with concurrency control:
+
+```python
+import asyncio
+from mistralai.search.toolkit.ingestion.loaders import FileLoader
+from mistralai.search.toolkit.plugins.storage.s3 import S3FileLoader
+
+async def load_files_batch(
+    loader: FileLoader,
+    paths: list[str],
+    max_concurrent: int = 10,
+) -> list:
+    """Load multiple files concurrently with semaphore."""
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def load_with_semaphore(path: str):
+        async with semaphore:
+            try:
+                return await loader.load_file(path)
+            except Exception as e:
+                print(f"Failed to load {path}: {e}")
+                return None
+
+    results = await asyncio.gather(
+        *[load_with_semaphore(p) for p in paths],
+        return_exceptions=False,
+    )
+    return [f for f in results if f is not None]
+
+# Usage
+loader = S3FileLoader(bucket_name="my-bucket")
+files = await load_files_batch(
+    loader,
+    ["doc1.pdf", "doc2.pdf", "doc3.pdf"],
+    max_concurrent=5,
+)
+```
+
+> **Info**
+>
+> **Advanced**: each cloud loader wraps a generic `FileLoader` over an `ObjectStorage` backend. For full control (custom storage settings, a backend not covered by a wrapper), construct it directly: `FileLoader(lambda: S3BlobStorage(...))`.
+
+## Custom loaders {#custom-loaders}
+
+Implement the `FileLoader` protocol for custom sources not covered above:
+
+```python
+from pathlib import Path
+from mistralai.search.toolkit.ingestion.loaders import FileLoader
+from mistralai.search.toolkit.ingestion import File
+
+class CustomFileLoader(FileLoader):
+    """Load files from a custom source."""
+
+    async def load_file(self, path: Path | str) -> File:
+        # Implement your custom loading logic
+        content = await self._fetch_from_custom_source(str(path))
+        filename = Path(str(path)).name
+
+        return File(
+            path=str(path),
+            name=filename,
+            raw=content,
+        )
+
+    async def _fetch_from_custom_source(self, path: str) -> bytes:
+        # Your implementation here
+        ...

@@ -38,6 +38,7 @@ SNAPSHOT_DATES = (
 DEFAULT_MANIFEST = Path("eval/snapshots/manifest.json")
 MANIFEST_VAR = "GLOSSATOR_SNAPSHOT_MANIFEST"
 DEFAULT_SNAPSHOT_ROOT = Path.home() / ".cache" / "glossator" / "snapshots"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 OPENAPI_CANDIDATES = (
     "openapi-public-doc.yaml",
     "openapi.yaml",
@@ -57,6 +58,33 @@ class SnapshotRecord:
     openapi_source: str | None
     openapi_snapshot_exact: bool
     models_snapshot_exact: bool
+
+
+class SnapshotUnavailableError(RuntimeError):
+    """A snapshot listed as built cannot be read from its recorded directory."""
+
+
+def snapshot_corpus_dir(snapshot: SnapshotRecord) -> Path:
+    """Resolve and check one snapshot corpus path.
+
+    Relative manifest paths start at the repository root so they work from a
+    checkout and from the application image regardless of the current working
+    directory. Absolute paths and home-relative paths remain supported for
+    generated manifests and local experiments.
+    """
+    path = Path(snapshot.corpus_dir).expanduser()
+    if not path.is_absolute():
+        path = REPOSITORY_ROOT / path
+    try:
+        if not path.is_dir():
+            raise OSError("directory does not exist")
+        if not os.access(path, os.R_OK | os.X_OK):
+            raise OSError("directory is not readable")
+    except OSError as exc:
+        raise SnapshotUnavailableError(
+            f"snapshot {snapshot.date} is unavailable at {path}: {exc}"
+        ) from exc
+    return path
 
 
 def configured_manifest() -> Path:

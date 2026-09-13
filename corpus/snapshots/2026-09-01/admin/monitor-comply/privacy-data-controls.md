@@ -1,0 +1,80 @@
+---
+url: https://docs.mistral.ai/admin/monitor-comply/privacy-data-controls
+title: Privacy and data controls
+breadcrumbs: [Admin, Monitor and comply]
+kind: doc
+locale: en
+source_path: src/content/en/docs/admin/monitor-comply/privacy-data-controls/page.mdx
+source_commit: 0c66041e3f05a5820976e058e9e305b744e4f045
+---
+
+# Privacy
+
+Use privacy and data controls to manage how your data is handled across Vibe and the API. These controls cover data usage policies, training opt-out, and GDPR rights.
+
+## Data usage {#data-usage}
+
+- **Vibe (Free mode)**: conversations can be used to improve our models. You can opt out at any time from the Admin Panel.
+- **Vibe (Pro, Team, Enterprise)**: conversations aren't used for model training by default.
+- **API**: data sent through the API isn't used for model training.
+- **Connectors**: data accessed through Connectors is fetched on demand and not stored permanently. Connector data isn't used for training.
+- **Libraries**: uploaded documents are stored securely and not used for training.
+
+> **Info**
+>
+> For more information about trust, security, and compliance, see the [Trust, Security, and Compliance Help Center collection](https://help.mistral.ai/en/collections/789666-trust-security-compliance).
+
+## Vibe privacy controls {#vibe-privacy-controls}
+
+Use Vibe privacy controls to manage model training, public chat sharing, user feedback, and chat retention for your Organization.
+
+Open [Admin Panel > Vibe > Privacy](https://admin.mistral.ai/vibe/privacy).
+
+In `Privacy`, you can configure:
+
+- **Model training**: allow or disable the use of Vibe interactions to train Mistral models. If you disable this option, new interactions from your users aren't used to train models.
+- **Public chat sharing**: allow Organization members to share chats publicly, including access to document Libraries. If you disable this option, members can still share chats inside the Organization.
+- **Model response feedback**: allow Organization members to submit thumbs up, thumbs down, and free-text feedback on model responses.
+- **Chat Retention Policy**: automatically delete chats and their artifacts after a set period from creation. You can choose **Never**, **30 days**, **60 days**, **90 days**, **180 days**, or **1 year**.
+
+## API privacy controls {#api-privacy-controls}
+
+Use API privacy controls to manage model training, data retention, and Labs model access for API usage.
+
+Open [Admin Panel > API > Privacy](https://admin.mistral.ai/plateforme/privacy).
+
+In `Privacy`, you can configure:
+
+- **Data usage for improving our services**: allow or disable the use of API calls to train Mistral models. If you disable this option, new interactions from your users aren't used to train models.
+- **Zero data retention**: review whether troubleshooting and analytics data are stored for your Organization. When zero data retention is enabled, troubleshooting and analytics data are not stored. See [Zero data retention](https://docs.mistral.ai/admin/monitor-comply/zero-data-retention) for supported endpoints, exclusions, and request steps.
+- **Labs models**: enable Labs models for the Organization. If you activate Labs models, data can be used to train Mistral models, regardless of your subscription plan or opt-out settings, in accordance with the Commercial Terms of Service.
+
+## GDPR rights {#gdpr}
+
+Under GDPR, you have the following rights:
+
+| Right | Description |
+|-------|-------------|
+| **Access** | Obtain copies of your personal data |
+| **Rectification** | Correct inaccurate personal information |
+| **Erasure** | Delete your account and associated data |
+| **Data portability** | Request your data in a transferable format |
+| **Object** | Opt out of certain processing activities |
+| **Restriction** | Request limitations on data processing |
+
+To exercise these rights, follow [How can I exercise my GDPR rights?](https://help.mistral.ai/en/articles/347639-how-can-i-exercise-my-gdpr-rights). Use the email address associated with your account and specify which data or activities concern you.
+
+For account data changes, use the Admin Panel directly. For data export, download from Vibe or Studio.
+
+> **Warning**
+>
+> Account deletion is permanent and irreversible. All prompts, outputs, and personal data are removed and can't be recovered.
+
+## Legal resources {#legal}
+
+For terms of service, privacy policies, and data processing agreements, see the [Legal Center](https://legal.mistral.ai/) and [Trust Center](https://trust.mistral.ai/).
+
+For support and compliance help, see:
+
+- [Trust, Security, and Compliance Help Center collection](https://help.mistral.ai/en/collections/789666-trust-security-compliance)
+- [How do I contact support?](https://help.mistral.ai/en/articles/347458-how-do-i-contact-support)

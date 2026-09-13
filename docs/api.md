@@ -9,8 +9,8 @@ schema.
 | `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
 | `POST /cite` | `draft`, `quotes` (`n`, `quote`, plus `chunk_id` or page `url`); optional `variant` | per-quote verdicts, uncovered markers, deduplicated sources, the rendered `sources_markdown` block |
 | `GET /pages/{path}` | documentation path; optional `variant`, `start_offset`, `top_k` | up to 100 page sections in reading order; `truncated` says whether more exist |
-| `GET /history` | exactly one of `text`, `section`, `question` | a phrase's first and last stored snapshot, a section's state and diff per date, or the top retrieved section per date |
-| `GET /health` | none | Vespa counts, corpus commit, and embedding-probe status |
+| `GET /history` | `text` with an optional page or path, `page_url` with an optional section, or `under` with an optional date | a phrase's first and last stored snapshot, a page or section's state and diff, or changes below a path |
+| `GET /health` | none | Vespa counts, corpus commit, readable snapshot count, and embedding-probe status |
 | `GET /version` | none | package version, variants, and allowed generation models |
 
 Every error uses `{"error":{"code","message","next"}}`. Unknown field names are

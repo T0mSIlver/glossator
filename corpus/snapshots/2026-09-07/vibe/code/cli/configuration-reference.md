@@ -1,0 +1,119 @@
+---
+url: https://docs.mistral.ai/vibe/code/cli/configuration-reference
+title: Configuration reference
+breadcrumbs: [Vibe, Code, CLI]
+kind: doc
+locale: en
+source_path: src/content/en/docs/vibe/code/cli/configuration-reference/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Configuration reference
+
+An exhaustive index of every key accepted by `config.toml` and the agent-definition files. Keys are grouped by section, each linking to the page that explains the concept in depth. Use this as a lookup; use [Configuration](https://docs.mistral.ai/vibe/code/cli/configuration) to learn how the file works.
+
+## Top-level keys {#top-level}
+
+All keys live at the root of `config.toml` unless noted.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `default_agent` | string |  | Default interactive agent, for example `"plan"`. Ignored in programmatic mode, which falls back to `auto-approve`. See [Agents](https://docs.mistral.ai/vibe/code/cli/agents) |
+| `active_model` | string |  | Model alias currently in use. Set to a `[[models]]` `alias` or a built-in model ID |
+| `log_interactions` | boolean | `true` | Enables session logging. Required for `--continue` / `--resume`. See [Work with the CLI](https://docs.mistral.ai/vibe/code/cli/work-with-cli#resume) |
+| `skill_paths` | array&lt;string&gt; |  | Extra directories to discover skills from. See [Skills](https://docs.mistral.ai/vibe/code/cli/skills) |
+| `enabled_skills` | array&lt;string&gt; |  | Allow-list of skill name patterns (exact, glob, or `re:` regex). When non-empty, only matching skills load |
+| `disabled_skills` | array&lt;string&gt; |  | Deny-list of skill name patterns, applied when `enabled_skills` is empty |
+| `enabled_tools` | array&lt;string&gt; |  | Allow-list of tool name patterns. See [Safety, approvals, and permissions](https://docs.mistral.ai/vibe/code/safety-approvals-permissions#tool-permissions) |
+| `disabled_tools` | array&lt;string&gt; |  | Deny-list of tool name patterns |
+| `enable_auto_update` | boolean | `true` | Checks for and installs new releases in the background |
+| `enable_notifications` | boolean | `true` | OS-level notifications when a long task finishes or input is needed |
+| `enable_telemetry` | boolean | `true` | Sends anonymous usage and error telemetry to Mistral. Disable for offline-only setups |
+| `[[providers]]` | table array |  | Provider presets. Fields listed below. See [API keys and profiles](https://docs.mistral.ai/vibe/code/cli/api-keys-profiles) |
+| `[[models]]` | table array |  | Model presets. Fields listed below. See [API keys and profiles](https://docs.mistral.ai/vibe/code/cli/api-keys-profiles) |
+| `[[mcp_servers]]` | table array |  | MCP server definitions. Fields listed below. See [MCP servers](https://docs.mistral.ai/vibe/code/cli/mcp-servers) |
+
+## Providers (`[[providers]]`) {#providers}
+
+One `[[providers]]` table per provider preset.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `name` | string | Required | Provider preset identifier, referenced by a `[[models]]` `provider` |
+| `api_base` | string |  | Base URL for the provider's API |
+| `api_key_env_var` | string |  | Environment variable name holding the API key. Secrets must use this form in admin config |
+| `api_style` | string |  | API style, for example `"openai"` |
+| `backend` | string |  | Backend type, for example `"generic"` or `"mistral"` |
+| `region` | string |  | Region, for example `"eu-west-1"`. Enterprise setups only |
+| `[providers.extra_headers]` | table |  | Subtable of extra HTTP headers, for example `"x-acme-tenant" = "engineering"` |
+
+## Models (`[[models]]`) {#models}
+
+One `[[models]]` table per model preset.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `name` | string | Required | Model ID, for example `mistral-medium-latest` |
+| `provider` | string | Required | References a `[[providers]]` `name` |
+| `alias` | string |  | Local alias used by `active_model` |
+| `temperature` | number |  | Sampling temperature, for example `0.2` |
+| `input_price` | number |  | Indicative per-input cost, fed to `--max-price` |
+| `output_price` | number |  | Indicative per-output cost, fed to `--max-price` |
+
+## MCP servers (`[[mcp_servers]]`) {#mcp-servers}
+
+One `[[mcp_servers]]` table per server. Required fields depend on the `transport` (`http`, `streamable-http`, or `stdio`).
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `name` | string | Required | Short alias; prefixes this server's tool names |
+| `transport` | string | Required | One of `http`, `streamable-http`, or `stdio` |
+| `url` | string |  | Base URL for HTTP transports |
+| `command` | string |  | Command for the stdio transport |
+| `args` | array&lt;string&gt; |  | Arguments for the stdio transport |
+| `headers` | table |  | Extra HTTP headers for HTTP transports |
+| `env` | table |  | Environment variables passed to the stdio process |
+| `api_key_env` | string |  | Env var holding the API key. Distinct from providers' `api_key_env_var` |
+| `api_key_header` | string |  | Header name to set with the API key |
+| `api_key_format` | string |  | Format string, for example `"Bearer {token}"` |
+| `startup_timeout_sec` | number |  | Seconds to wait for the server to start |
+| `tool_timeout_sec` | number |  | Seconds to wait for a tool call to complete |
+
+## Per-tool permissions (`[tools.<tool_name>]`) {#tool-permissions}
+
+`<tool_name>` is a built-in tool (`read_file`, `bash`, etc.) or an MCP tool named `{server_name}_{tool_name}`. One block per tool.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `permission` | string |  | `"always"` to auto-allow the tool, `"ask"` to prompt before use |
+| `allow` | array&lt;string&gt; |  | `bash` only. Command allow-list, for example `["git status", "pnpm test"]` |
+| `deny` | array&lt;string&gt; |  | `bash` only. Command deny-list, for example `["rm -rf *"]` |
+
+## Agent definition files {#agent-files}
+
+These keys live in `~/.vibe/agents/<name>.toml` or `./.vibe/agents/<name>.toml`, **not in `config.toml`**. They define custom agents and subagents. Most top-level keys above (`active_model`, `enabled_tools`, `disabled_tools`, `[tools.*]` blocks) can also be set inside an agent file to override the global config for that agent.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `agent_type` | string | Required | `"agent"` (user-facing, selectable via `--agent`) or `"subagent"` (delegation-only) |
+| `display_name` | string |  | Human-readable label |
+| `description` | string |  | Free-text description |
+| `safety` | string |  | Visual hint: `safe`, `neutral`, `destructive`, or `yolo`. Changes the input border color only; does not enforce permissions |
+| `system_prompt_id` | string |  | Points to a prompt file in `~/.vibe/prompts/` |
+| `active_model` | string |  | Model alias for this agent (same key as global config) |
+| `enabled_tools` | array&lt;string&gt; |  | Tool allow-list for this agent |
+| `disabled_tools` | array&lt;string&gt; |  | Tool deny-list for this agent |
+
+See [Agents](https://docs.mistral.ai/vibe/code/cli/agents) for built-in agents and full examples.
+
+## Environment variables {#environment-variables}
+
+Not `config.toml` keys, but part of the configuration model. They sit at precedence level 3 (env vars).
+
+| Variable | Purpose |
+|---|---|
+| `VIBE_HOME` | Overrides the `~/.vibe/` home directory for all state (config, prompts, agents, skills, logs) |
+| `MISTRAL_API_KEY` | Primary Mistral API key |
+| `<PROVIDER>_API_KEY` | API key referenced by a `[[providers]]` `api_key_env_var` (for example `OPENROUTER_API_KEY`) |
+
+See [Configuration precedence](https://docs.mistral.ai/vibe/code/cli/configuration#precedence) and [Admin config](https://docs.mistral.ai/vibe/code/cli/admin-config) for how these layers combine.

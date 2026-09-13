@@ -1,0 +1,216 @@
+---
+url: https://docs.mistral.ai/studio-api/search-toolkit/ingestion/splitters
+title: Text splitters
+breadcrumbs: [Studio, Search Toolkit, Ingestion]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio-api/search-toolkit/ingestion/splitters/page.mdx
+source_commit: 7925ed1f1b7f02a453d3747e88aa58d1537c304c
+---
+
+# Text splitters
+
+Text splitters divide documents into retrievable `DocumentChunk` objects. The choice of splitter significantly impacts retrieval quality.
+
+## Available text splitters {#available-text-splitters}
+
+| Splitter | Best for |
+|----------|----------|
+| **[Character Text Splitter](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/splitters#character-text-splitter)** | Simple text, quick prototyping |
+| **[Token Text Splitter](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/splitters#token-text-splitter)** | Token-aware chunking, LLM context management |
+| **[Markdown Text Splitter](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/splitters#markdowntextsplitter)** | Markdown documents, structured content with headers |
+| **[Separator Text Splitter](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/splitters#separatortextsplitter)** | Custom splitting logic, hierarchical text |
+| **[Custom Splitters](https://docs.mistral.ai/studio-api/search-toolkit/ingestion/splitters#creating-custom-splitters)** | Any splitting strategy |
+
+> **Info**
+>
+> All splitters automatically preserve important metadata in each chunk:
+>
+> - `page_number`: Source page number
+> - `filename`: Original filename
+> - `filepath`: Original file path
+> - `start_offset`: Character position in document
+> - `end_offset`: Character position in document
+> - `images`: List of image references in chunk (if any)
+
+## Chunk size guidance {#chunk-size-guidance}
+
+Chunk size significantly impacts retrieval quality and LLM context usage. Choose based on your use case:
+
+| LLM Context | Chunk Size | Overlap | Use case |
+|-------------|-----------|---------|----------|
+| 4k tokens | 300-500 chars | 50-100 chars | Memory-constrained, fast retrieval |
+| 8k tokens | 500-1000 chars | 100-200 chars | Balanced retrieval quality |
+| 32k+ tokens | 1000-2000 chars | 200-500 chars | Rich context, complex retrieval |
+| Code/technical | 500-1000 chars | 100-200 chars | Preserve logical units |
+| Legal/financial | 1000-2000 chars | 200-500 chars | Full context for interpretation |
+
+**Rule of thumb**: ~400-600 characters ≈ 100-150 tokens. Adjust based on domain complexity and retrieval precision needs.
+
+**Chunk overlap benefits**:
+- Prevents semantic boundaries from splitting related concepts
+- Improves context when chunks are used individually
+- Increases index size and query latency proportionally
+
+## Character Text Splitter {#character-text-splitter}
+
+`CharacterTextSplitter` splits text by character count. Best for simple text and quick prototyping.
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.ingestion.text_splitters import CharacterTextSplitter
+
+splitter = CharacterTextSplitter(
+    chunk_size=500,     # Characters per chunk
+)
+chunks = splitter.split_document(document)
+```
+
+**Parameters**:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `chunk_size` | `int` | `1000` | Maximum number of characters per chunk |
+
+## Token Text Splitter {#token-text-splitter}
+
+Token-aware splitting using a tokenizer for LLM context window management and precise token control.
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.ingestion.text_splitters import TokenTextSplitter
+
+splitter = TokenTextSplitter(
+    chunk_size=1000,         # Tokens per chunk
+    chunk_overlap=200,       # Token overlap
+)
+
+chunks = splitter.split_document(document)
+```
+
+**Configuration options**:
+
+| Option | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `chunk_size` | int | 1000 | Tokens per chunk (uses Mistral tokenizer) |
+| `chunk_overlap` | int | 0 | Tokens of overlap between chunks |
+| `tokenizer_model` | str | "mistral" | Tokenizer to use for counting |
+
+**When to use**:
+- Precise token budgeting for LLM context windows
+- Consistent chunks across different text densities
+- When working with specific token limits
+
+### MarkdownTextSplitter
+
+`MarkdownTextSplitter` splits markdown documents at header boundaries. It inherits from `SeparatorTextSplitter` and adds header-aware splitting with configurable header levels.
+
+**Requirements**:
+
+Install the `text-splitter-langchain` extra:
+
+```bash
+uv add "mistralai-search-toolkit[text-splitter-langchain]"
+```
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.ingestion.text_splitters import MarkdownTextSplitter, MarkdownTextSplitterConfig
+
+config = MarkdownTextSplitterConfig(
+    headers_to_split_on=[
+        ("#", "h1"),
+        ("##", "h2"),
+        ("###", "h3"),
+    ],
+    strip_headers=False,    # Keep headers in chunks
+    chunk_size=1000,        # Inherited from SeparatorTextSplitterConfig
+    chunk_overlap=200,      # Inherited from SeparatorTextSplitterConfig
+)
+
+splitter = MarkdownTextSplitter(config=config)
+chunks = splitter.split_document(document)
+```
+
+**Parameters** (`MarkdownTextSplitterConfig`):
+
+`MarkdownTextSplitterConfig` extends `SeparatorTextSplitterConfig`, adding:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `headers_to_split_on` | `list[tuple[str, str]]` | `[("#", "Header 1"), ("##", "Header 2"), ("###", "Header 3")]` | Markdown headers to split on. Each tuple is `(header_prefix, label)`. |
+| `strip_headers` | `bool` | `False` | Remove header lines from chunk content |
+
+All parameters from `SeparatorTextSplitterConfig` are also available (`chunk_size`, `chunk_max_size`, `chunk_overlap`, `chunk_separators`, `keep_separator`, `strip_whitespace`).
+
+### SeparatorTextSplitter
+
+Recursive splitting with custom separators for handling custom document structures with precise control over split points and hierarchical text organization.
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.ingestion.text_splitters import SeparatorTextSplitter, SeparatorTextSplitterConfig
+
+config = SeparatorTextSplitterConfig(
+    chunk_size=1000,          # Target size (characters)
+    chunk_max_size=1500,      # Maximum size (characters)
+    chunk_overlap=200,        # Overlap (characters)
+    chunk_separators=[        # Tried in order
+        "\n\n",    # Paragraphs first
+        "\n",      # Then lines
+        ". ",      # Then sentences
+        " ",       # Then words
+        "",        # Finally characters
+    ],
+)
+
+splitter = SeparatorTextSplitter(config=config)
+chunks = splitter.split_document(document)
+```
+
+**Features**:
+- Tries separators in order
+- Respects max size even if splitting fails
+- Merges small chunks when possible
+- Returns start/end offsets
+
+## Creating custom splitters {#creating-custom-splitters}
+
+Implement the `TextSplitter` protocol:
+
+```python
+from mistralai.search.toolkit.context import IngestContext
+from mistralai.search.toolkit.ingestion.text_splitters import TextSplitter
+from mistralai.search.toolkit.ingestion.text_splitters.models import TextFragment
+
+class ParagraphSplitter(TextSplitter):
+    """Split text into chunks by paragraphs."""
+
+    def __init__(self, max_paragraphs_per_chunk: int = 3):
+        self.max_paragraphs_per_chunk = max_paragraphs_per_chunk
+
+    def split_text(self, text: str, context: IngestContext = IngestContext()) -> list[TextFragment]:
+        paragraphs = text.split("\n\n")
+        fragments = []
+        offset = 0
+
+        for i in range(0, len(paragraphs), self.max_paragraphs_per_chunk):
+            chunk_paragraphs = paragraphs[i:i + self.max_paragraphs_per_chunk]
+            content = "\n\n".join(chunk_paragraphs)
+
+            fragments.append(TextFragment(
+                content=content,
+                start_offset=offset,
+                end_offset=offset + len(content),
+            ))
+            offset += len(content) + 2
+
+        return fragments
+
+splitter = ParagraphSplitter(max_paragraphs_per_chunk=3)
+fragments = splitter.split_text("First paragraph.\n\nSecond paragraph.\n\nThird paragraph.")
+```

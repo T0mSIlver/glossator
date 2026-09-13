@@ -1,0 +1,161 @@
+---
+url: https://docs.mistral.ai/studio/workflows/building-workflows/workflow_exception
+title: Workflows Exception
+breadcrumbs: [Studio, Workflows, Building Workflows]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/workflows/building-workflows/workflow_exception/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# WorkflowsException
+
+Workflows provides a structured exception class, `WorkflowsException`, for consistent error handling across workflows and activities.
+
+## When to use {#when-to-use}
+
+Raise `WorkflowsException` for **expected, structured errors** that callers (other workflows, activities, or API consumers) need to inspect and react to — invalid input, business-rule violations, known failure modes of an external service. The structured `code` and HTTP `status` make these errors recognizable across the system and surfaceable in API responses.
+
+For **unexpected errors** (a `KeyError`, an `httpx.ConnectError`, a panic in a third-party library), let the exception propagate. The platform will record the error in the activity/workflow event history, apply your retry policy, and ultimately mark the execution as failed if retries are exhausted. Wrapping every exception in `WorkflowsException` adds noise without information.
+
+## Overview {#overview}
+
+`WorkflowsException` provides:
+
+- Structured error codes via the `ErrorCode` enum
+- HTTP status code mapping
+- Serialization to JSON responses
+- Factory methods for common error scenarios
+
+## Basic usage {#basic-usage}
+
+**Python**
+
+```python
+import asyncio
+import http
+import mistralai.workflows as workflows
+from mistralai.workflows.exceptions import WorkflowsException, ErrorCode
+from pydantic import BaseModel
+
+
+@workflows.activity()
+async def validate_input(value: str) -> str:
+    if not value:
+        raise WorkflowsException(
+            code=ErrorCode.INVALID_ARGUMENTS_ERROR,
+            message="Input value cannot be empty",
+            status=http.HTTPStatus.BAD_REQUEST,
+        )
+    return f"valid:{value}"
+
+
+class Input(BaseModel):
+    value: str
+
+
+@workflows.workflow.define(name="exception_workflow")
+class ExceptionWorkflow:
+    @workflows.workflow.entrypoint
+    async def run(self, params: Input) -> str:
+        return await validate_input(params.value)
+
+
+async def main():
+    result = await workflows.execute_workflow(
+        ExceptionWorkflow,
+        params=Input(value="hello"),
+    )
+    print(result)
+
+    try:
+        await workflows.execute_workflow(
+            ExceptionWorkflow,
+            params=Input(value=""),
+        )
+    except WorkflowsException as e:
+        print(f"code:    {e.code}")
+        print(f"message: {e.message}")
+        print(f"status:  {e.status}")
+```
+
+**Output**
+
+```
+valid:hello
+code:    invalid_arguments_error
+message: Input value cannot be empty
+status:  400
+```
+
+## Constructor Parameters {#constructor-parameters}
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `message` | `str` | required | Human-readable error message |
+| `status` | `HTTPStatus` | `INTERNAL_SERVER_ERROR` | HTTP status code |
+| `code` | `ErrorCode` | `EXECUTION_ERROR` | Structured error code |
+| `type` | `str` | `"invalid_request_error"` | Top-level error type string surfaced in API responses (matches the `type` field used by other Mistral APIs). Most callers can leave this default. |
+
+## Error Codes {#error-codes}
+
+The `ErrorCode` enum provides structured error codes organized by category:
+
+### General Errors (40xx) {#general-errors-40}
+
+| Code | Description |
+|------|-------------|
+| `execution_error` | General execution error |
+| `platform_error` | Platform-related error |
+| `platform_service_error` | Platform service error |
+| `platform_connection_error` | Connection to platform failed |
+| `platform_client_creation_error` | Failed to create platform client |
+| `search_attributes_creation_error` | Failed to create search attributes |
+
+### Activity Errors (41xx) {#activity-errors-41}
+
+| Code | Description |
+|------|-------------|
+| `activity_definition_error` | Activity incorrectly defined |
+| `activity_not_found_error` | Activity not found |
+| `invalid_arguments_error` | Invalid arguments provided |
+| `activity_not_module_level` | Activity must be at module level |
+| `tool_argument_error` | Tool argument error |
+| `rate_limit_error` | Rate limit exceeded |
+
+### Workflow Errors (42xx) {#workflow-errors-42}
+
+| Code | Description |
+|------|-------------|
+| `workflow_definition_error` | Workflow incorrectly defined |
+| `workflow_description_error` | Workflow description error |
+| `workflow_already_started` | Workflow already running |
+| `workflow_not_found` | Workflow not found |
+| `invalid_params_error` | Invalid parameters |
+| `workflow_timeout_error` | Workflow timed out |
+| `workflow_signal_definition_error` | Signal incorrectly defined |
+| `workflow_update_definition_error` | Update incorrectly defined |
+| `workflow_query_error` | Fail to query a workflow |
+
+### Worker Errors (43xx) {#worker-errors-43}
+
+| Code | Description |
+|------|-------------|
+| `worker_registration_error` | Worker registration failed |
+| `worker_runtime_config_error` | Worker runtime configuration error |
+
+### Durable Agent Errors (44xx) {#durable-agent-errors-44}
+
+| Code | Description |
+|------|-------------|
+| `agent_execution_error` | Agent Execution Error |
+
+### Infrastructure Errors (45xx) {#infrastructure-errors-45}
+
+| Code | Description |
+|------|-------------|
+| `workspace_already_used` | Workspace already in use |
+| `in_memory_cache_error` | In-memory cache error |
+| `rejected_query_error` | Query was rejected |
+| `unserializable_payload_error` | Payload cannot be serialized |
+| `blob_storage_config_error` | Blob storage configuration error |

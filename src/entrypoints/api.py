@@ -220,6 +220,7 @@ class HealthResponse(BaseModel):
     variants: dict[str, VariantHealth]
     embedding_probe: dict[str, Any]
     corpus: dict[str, Any] | None
+    snapshots: dict[str, int]
     version: str
 
 
@@ -646,6 +647,13 @@ async def history(
             f'no indexed page has the URL "{exc}"',
             "use the url exactly as a search hit printed it",
         ) from exc
+    except history_service.SnapshotUnavailableError as exc:
+        raise ApiError(
+            503,
+            "E_UPSTREAM",
+            str(exc),
+            "retry the identical request; if it repeats, check GET /health",
+        ) from exc
     except (OSError, ValueError) as exc:
         raise ApiError(
             400,
@@ -722,6 +730,7 @@ async def health() -> HealthResponse:
         variants=counts,
         embedding_probe=probe,
         corpus=await asyncio.to_thread(_corpus_info),
+        snapshots=history_service.snapshot_availability(configured_manifest()),
         version=PACKAGE_VERSION,
     )
 

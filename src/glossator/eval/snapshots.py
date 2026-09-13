@@ -23,7 +23,12 @@ from glossator.answer.citations import contains_span
 from glossator.answer.config import LOCAL_MINISTRAL_3_14B, AnswerConfig
 from glossator.answer.llm import MistralLLM
 from glossator.clients import chat_client, chat_reasoning_effort, chat_server_url
-from glossator.corpus.snapshots import DEFAULT_MANIFEST, SnapshotRecord, read_snapshot_manifest
+from glossator.corpus.snapshots import (
+    DEFAULT_MANIFEST,
+    SnapshotRecord,
+    read_snapshot_manifest,
+    snapshot_corpus_dir,
+)
 from glossator.eval.agreement import agreement_report
 from glossator.eval.answer_eval import (
     AnswerCallRecorder,
@@ -453,7 +458,7 @@ async def label(
         }
     try:
         for snapshot in snapshots:
-            documents = load_documents(Path(snapshot.corpus_dir).expanduser())
+            documents = load_documents(snapshot_corpus_dir(snapshot))
             lexical = LexicalIndex(documents)
             for dataset, question in questions:
                 key = (question.id, snapshot.date)

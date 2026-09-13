@@ -1,0 +1,51 @@
+---
+url: https://docs.mistral.ai/models/ocr-4-0
+title: OCR 4
+breadcrumbs: [Models]
+kind: model
+locale: en
+source_path: src/schema/models/models/ocr-4-0.ts
+source_commit: 7925ed1f1b7f02a453d3747e88aa58d1537c304c
+---
+
+# OCR 4
+
+Our latest OCR service powering our Document AI stack, with native paragraph-level bounding box extraction and structural block labels.
+
+## Overview
+
+| Field | Value |
+| --- | --- |
+| API names | `mistral-ocr-4-0`, `mistral-ocr-4`, `mistral-ocr-latest` |
+| Slug | `ocr-4-0` |
+| Status | Active |
+| Release date | 2026-06-23 |
+| Version | 4.0 |
+| Type | Premier |
+| Class | Specialist |
+| Legacy | no |
+
+## Modalities
+
+- Input: Image, Document
+- Output: Text, Image
+
+## Features
+
+- [BBox Extraction](https://docs.mistral.ai/studio-api/document-processing/basic_ocr) (`bbox-extraction`)
+- [OCR](https://docs.mistral.ai/studio-api/document-processing/overview) (`ocr`)
+- [Annotations - Structured](https://docs.mistral.ai/studio-api/document-processing/annotations) (`annotations-structured-ocr`)
+- [Batching](https://docs.mistral.ai/studio-api/batch-processing) (`batching`)
+
+## Pricing
+
+- Input: 4.0 USD/1000 Pages; 5.0 USD/1000 Annotated Pages
+
+## Links
+
+- [Blog post](https://mistral.ai/news/ocr-4/)
+- [Playground](https://console.mistral.ai/build/document-ai/ocr-playground)
+
+## Capability matrix
+
+See the [model capability matrix](https://docs.mistral.ai/models) for every model that shares these features.

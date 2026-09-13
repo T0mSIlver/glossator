@@ -1,0 +1,233 @@
+---
+url: https://docs.mistral.ai/studio/observability/evaluations/judges
+title: Judges
+breadcrumbs: [Studio, Observability, Offline evaluations]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/observability/evaluations/judges/page.mdx
+source_commit: 2ca5afeebb3ee0e675575d1ac60f3c138d2c4a3d
+hidden: true
+---
+
+# Judges
+
+Judges are LLM-based scorers you can use within the [Evaluation SDK](https://docs.mistral.ai/studio/observability/evaluations#installation). Instead of a rule-based function, a Judge calls a model to grade each output. They're useful for criteria that are hard to capture with code, such as helpfulness, factual accuracy, or tone.
+
+> **Note**
+>
+> Make sure you have the `mistralai-observability` package installed before following the examples on this page. See [Offline evaluations → Installation](https://docs.mistral.ai/studio/observability/evaluations#installation).
+
+## Basic LLM judge {#basic-llm-judge}
+
+A scorer is a function. To use an LLM as a judge, call the Mistral API inside your scorer and return a numeric score:
+
+```python
+from mistralai.observability import ScorerContext
+
+JUDGE_PROMPT = """You are a strict grader. Given a user prompt and a model answer,
+respond with a single integer between 0 and 5 (higher is better) measuring how helpful and on-topic
+the answer is. Respond with only the integer, no other text.
+
+User prompt: {prompt}
+Model answer: {answer}
+"""
+
+def llm_judge(ctx: ScorerContext) -> int:
+    response = client.chat.complete(
+        model="mistral-large-latest",
+        messages=[
+            {
+                "role": "user",
+                "content": JUDGE_PROMPT.format(
+                    prompt=ctx.input_record["prompt"], answer=ctx.output
+                ),
+            }
+        ],
+        temperature=0,
+    )
+    raw = str(response.choices[0].message.content).strip()
+    try:
+        return int(raw[0])
+    except (ValueError, IndexError):
+        return 0
+```
+
+Use it in an evaluator:
+
+```python
+from mistralai.observability import Evaluator, Goal
+
+Evaluator(
+    name="helpfulness",
+    description="LLM judge: helpfulness score from 0 to 5.",
+    scorer=llm_judge,
+    goal=Goal.gte(3.5),
+)
+```
+
+## Structured output with Score {#structured-output}
+
+For richer feedback, return a `Score` object with a value and a rationale. The rationale is stored alongside the score in Studio:
+
+```python
+from pydantic import BaseModel
+from mistralai.observability import ScorerContext, Score
+
+class RecallJudgment(BaseModel):
+    score: float
+    comment: str
+
+async def recall_scorer(ctx: ScorerContext) -> Score:
+    completion = await client.chat.parse_async(
+        model="mistral-large-latest",
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Evaluate recall between 0.0 and 1.0.\n\n"
+                    f"Expected: {ctx.input_record['expected']}\n"
+                    f"Got: {ctx.output}\n\n"
+                    f"Provide a score and a short comment."
+                ),
+            }
+        ],
+        response_format=RecallJudgment,
+    )
+    judgment = completion.choices[0].message.parsed
+    return Score(value=judgment.score, rationale=judgment.comment)
+```
+
+## Reducing judge variance {#reducing-variance}
+
+LLM judges can be noisy. Set `num_scores` on the evaluator to score each generation multiple times and average the results:
+
+```python
+Evaluator(
+    name="recall",
+    description="LLM judge: recall score (0.0 to 1.0).",
+    scorer=recall_scorer,
+    num_scores=3,  # scored 3 times per generation, results are averaged
+)
+```
+
+## Combining rule-based and LLM judges {#multiple-evaluators}
+
+You can mix rule-based and LLM-based scorers in the same run:
+
+```python
+import asyncio
+import os
+
+from pydantic import BaseModel
+from mistralai.observability import (
+    Evaluation, Evaluator, Goal, Mistral, Project, Score, ScorerContext, System, TaskContext,
+)
+
+client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+
+dataset = [
+    {
+        "text": "Kim Wong documented over 300 species across multiple continents.",
+        "facts": ["wildlife photographer", "documented 300 species"],
+    },
+]
+
+class FactList(BaseModel):
+    facts: list[str]
+
+class RecallJudgment(BaseModel):
+    score: float
+    comment: str
+
+async def task(ctx: TaskContext) -> FactList:
+    completion = await client.chat.parse_async(
+        model=str(ctx.system.params["model"]),
+        messages=[
+            {"role": "system", "content": str(ctx.system.params["system_prompt"])},
+            {"role": "user", "content": ctx.input_record["text"]},
+        ],
+        response_format=FactList,
+    )
+    return completion.choices[0].message.parsed
+
+def conciseness_scorer(ctx: ScorerContext) -> float:
+    gt_chars = sum(len(f) for f in ctx.input_record["facts"])
+    pred_chars = sum(len(f) for f in ctx.output.facts)
+    return min(1.0, gt_chars / pred_chars) if pred_chars > 0 else 0.0
+
+async def recall_scorer(ctx: ScorerContext) -> Score:
+    completion = await client.chat.parse_async(
+        model="mistral-small-latest",
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Ground truth: {ctx.input_record['facts']}\n"
+                    f"Predicted: {ctx.output.facts}\n"
+                    f"Score recall from 0.0 to 1.0 with a comment."
+                ),
+            }
+        ],
+        response_format=RecallJudgment,
+    )
+    j = completion.choices[0].message.parsed
+    return Score(value=j.score, rationale=j.comment)
+
+async def main():
+    run = await client.evaluation.run(
+        project=Project(name="Fact Extraction"),
+        evaluation=Evaluation(name="Recall + Conciseness"),
+        dataset=dataset,
+        task=task,
+        system=System(name="mistral-small", params={
+            "model": "mistral-small-latest",
+            "system_prompt": "Extract the key facts from the given text as a structured list.",
+        }),
+        evaluators=[
+            Evaluator(
+                name="conciseness",
+                description="Ratio of groundtruth length to predicted length. 1.0 = as concise or more.",
+                scorer=conciseness_scorer,
+                goal=Goal.gte(0.3),
+            ),
+            Evaluator(
+                name="recall",
+                description="LLM judge: how well predicted facts cover the groundtruth (0.0 to 1.0).",
+                scorer=recall_scorer,
+                num_scores=3,
+                goal=Goal.gte(0.3),
+            ),
+        ],
+    )
+    run.show(level="scores")
+
+asyncio.run(main())
+```
+
+## Writing good judge instructions {#instruction-guidelines}
+
+Craft your judge prompts with care:
+
+- **Be specific.** Avoid vague criteria: describe exactly what a good response looks like for your use case.
+- **Don't assume** the judge knows your context. Spell out what "good" means explicitly.
+- **Use boundary examples**: *"A score of 3 means the response partially answers the question but omits a key detail."*
+- **Keep temperature low** (for example, `temperature=0`) for more deterministic judgments.
+- **Test on a small sample** before using a judge in a large evaluation run. Spot inconsistencies early.
+
+## FAQ {#faq}
+
+### My judge gives inconsistent scores on similar inputs {#my-judge-gives-inconsistent-scores-on-similar-inputs}
+
+The prompt is probably too vague. Add explicit criteria and concrete boundary examples. Try a stronger model. Run the same input multiple times and set `num_scores` to average out noise.
+
+### The judge returns parsing errors or out-of-range values {#the-judge-returns-parsing-errors-or-out-of-range-values}
+
+Use structured output (`response_format`) with a Pydantic model to force valid output. Add a try/except around the parsing logic to return a fallback score rather than crashing.
+
+### Can I use the same judge across multiple evaluation runs? {#can-i-use-the-same-judge-across-multiple-evaluation-runs}
+
+Yes. A judge is a function. Reuse it across any number of evaluators and runs. If you change the judge prompt between runs, scores won't be directly comparable.
+
+### How do I choose between a rule-based scorer and an LLM judge? {#how-do-i-choose-between-a-rule-based-scorer-and-an-llm-judge}
+
+Use rule-based scoring whenever possible: it's deterministic, fast, and cheap. Use an LLM judge when the quality criterion can't be captured with code, such as tone, coherence, or nuanced factual accuracy.

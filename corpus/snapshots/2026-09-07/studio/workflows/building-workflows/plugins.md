@@ -1,0 +1,186 @@
+---
+url: https://docs.mistral.ai/studio/workflows/building-workflows/plugins
+title: Plugins
+breadcrumbs: [Studio, Workflows, Building Workflows]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/workflows/building-workflows/plugins/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Plugins
+
+Mistral Workflows plugins are standard Python packages that expose reusable workflows, activities, and dependencies under the `mistralai.workflows.plugins` namespace. Install them with `pip` and import into your code like any other package.
+
+```python
+from mistralai.workflows.plugins.mistralai import mistralai_chat_complete
+from mistralai.workflows.plugins.mistralai import Agent, Runner
+```
+
+## Official Plugins {#official-plugins}
+
+### Mistral AI Plugin {#mistral-ai-plugin}
+
+**Package:** `mistralai-workflows-plugins-mistralai`
+
+Provides native Mistral AI integration for LLM operations, agent execution, session management, and MCP support within workflows.
+
+**Key activities:**
+
+| Activity | Description |
+|----------|-------------|
+| `mistralai_chat_complete` | Single-turn chat completion |
+| `mistralai_chat_stream` | Streaming chat completion |
+| `mistralai_chat_parse` | Chat completion with structured output parsing |
+| `mistralai_embeddings` | Generate text embeddings |
+| `mistralai_ocr` | Extract text from images and documents |
+| `mistralai_create_agent` | Create a remote agent |
+| `mistralai_update_agent` | Update a remote agent |
+| `mistralai_start_conversation` | Start an agent conversation |
+| `mistralai_start_conversation_stream` | Start an agent conversation with streaming |
+| `mistralai_append_conversation` | Add messages to an existing conversation |
+| `mistralai_append_conversation_stream` | Add messages to an existing conversation with streaming |
+
+**Key components:**
+
+| Component | Description |
+|-----------|-------------|
+| `Agent` | Agent definition with model, tools, and configuration |
+| `Runner` | Orchestrates agent execution with conversation and tool loops |
+| `LocalSession` | Local in-process agent session |
+| `RemoteSession` | Remote stateful agent session |
+| `MCPStdioConfig` | Configuration for local MCP servers (stdio) |
+| `MCPSSEConfig` | Configuration for remote MCP servers (SSE) |
+| `MCPConfig` | Union type alias for `MCPStdioConfig \| MCPSSEConfig` |
+| `collect_mcp_tools` | Activity: collect tool definitions from one or more MCP servers |
+| `execute_mcp_tool` | Activity: execute a named tool on its MCP server |
+| [`get_mistral_client`](https://docs.mistral.ai/studio/workflows/building-workflows/mistral_client) | Dependency: returns a configured `mistralai.Mistral` client with workflow-aware auth, telemetry, and observability metadata |
+
+**Example — chat completion:**
+
+**Python**
+
+```python
+import mistralai.workflows as workflows
+from mistralai.workflows import workflow
+from mistralai.workflows.plugins.mistralai import (
+    ChatCompletionRequest,
+    UserMessage,
+    mistralai_chat_complete,
+)
+from pydantic import BaseModel
+
+
+class Input(BaseModel):
+    text: str
+
+
+@workflow.define(name="summarize")
+class SummarizeWorkflow:
+    @workflow.entrypoint
+    async def run(self, params: Input) -> str:
+        request = ChatCompletionRequest(
+            model="mistral-large-latest",
+            messages=[UserMessage(content=f"Summarize this text:\n\n{params.text}")],
+        )
+        result = await mistralai_chat_complete(request)
+        return result.choices[0].message.content
+```
+
+For full documentation on `Agent`, `Runner`, sessions, MCP, and multi-agent handoffs, see the [Durable Agents guide](https://docs.mistral.ai/studio/workflows/building-workflows/durable_agents).
+
+### Webhook Plugin {#webhook-plugin}
+
+**Package:** `mistralai-workflows-plugins-webhook`
+
+Provides HTTP/webhook routing and fan-out for building event-driven workflows. Use it to receive webhooks from external services (GitHub, Slack, Linear, etc.) and route them to running workflow instances.
+
+**Key components:**
+
+| Component | Description |
+|-----------|-------------|
+| `HTTPRouterWorkflow` | Base class for webhook router workflows |
+| `RouteDispatcher` | Dispatches incoming HTTP requests to handler methods |
+| `SearchableWorkflow` | Mixin to expose search attributes for workflow targeting |
+| `post` | Decorator to register a method as an HTTP POST handler |
+| `SearchAttribute` | Key/value pair used to target running workflow instances |
+| `search_workflow_execution_ids` | Find running workflow instance IDs matching search attributes |
+| `send_signal` | Fan out a signal to multiple workflow instances |
+| `WebhookFanOutResult` | Result of `send_signal` (list of target IDs and dispatched count) |
+| `HTTPRequest` / `HTTPResponse` | Request and response types |
+
+Provider-specific helpers (experimental) are available under `webhook.github`, `webhook.slack`, and `webhook.linear`.
+
+**Example:**
+
+**Python**
+
+```python
+from mistralai.workflows import workflow
+from mistralai.workflows.plugins.webhook import (
+    HTTPRouterWorkflow,
+    HTTPRequest,
+    HTTPResponse,
+    post,
+)
+
+@workflow.define(name="my-webhook-router")
+class MyWebhookRouter(HTTPRouterWorkflow):
+    @post("/")
+    async def handle(self, request: HTTPRequest) -> HTTPResponse:
+        return HTTPResponse(status_code=200, body={"ok": True})
+```
+
+## Installation {#installation}
+
+Install the plugins you need alongside the main SDK:
+
+**pip**
+
+```bash
+pip install mistralai-workflows
+pip install mistralai-workflows-plugins-mistralai
+pip install mistralai-workflows-plugins-webhook
+```
+
+## Creating Your Own Reusable Libraries {#creating-your-own-plugins}
+
+You can create custom packages to share reusable workflows, activities, and dependencies within your organization.
+
+> **Note**
+>
+> The `mistralai.workflows.plugins` namespace is reserved for Mistral-supported plugins. For your own reusable code, use your own top-level package name.
+
+**Directory structure:**
+
+```
+acme-workflows/
+├── pyproject.toml
+├── acme_workflows/
+│   ├── __init__.py
+│   ├── activities.py
+│   └── workflows.py
+└── tests/
+```
+
+**`pyproject.toml`:**
+
+```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "acme-workflows"
+version = "0.1.0"
+dependencies = [
+    "mistralai-workflows>=2.0.0",
+]
+```
+
+After installing your package, import directly:
+
+```python
+from acme_workflows.activities import my_custom_activity
+from acme_workflows.workflows import my_rag_pipeline
+```

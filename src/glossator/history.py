@@ -16,6 +16,10 @@ from glossator.corpus.snapshots import (
     DEFAULT_MANIFEST,
     SnapshotRecord,
     read_snapshot_manifest,
+    snapshot_corpus_dir,
+)
+from glossator.corpus.snapshots import (
+    SnapshotUnavailableError as SnapshotUnavailableError,
 )
 from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
@@ -69,9 +73,32 @@ def available_snapshots(manifest_path: Path = DEFAULT_MANIFEST) -> list[Snapshot
     return sorted(built, key=lambda row: row.date)
 
 
+def snapshot_availability(manifest_path: Path = DEFAULT_MANIFEST) -> dict[str, int]:
+    """Count snapshot corpora that the history service can read."""
+    try:
+        snapshots = read_snapshot_manifest(manifest_path)
+    except (OSError, ValueError):
+        return {"readable": 0, "total": 0}
+    readable = 0
+    for snapshot in snapshots:
+        if snapshot.status != "built":
+            continue
+        try:
+            snapshot_corpus_dir(snapshot)
+        except SnapshotUnavailableError:
+            continue
+        readable += 1
+    return {"readable": readable, "total": len(snapshots)}
+
+
 def _pages(snapshot: SnapshotRecord) -> list[CorpusPage]:
-    corpus_dir = Path(snapshot.corpus_dir).expanduser()
-    return [load_page(path) for path in iter_page_paths(corpus_dir)]
+    corpus_dir = snapshot_corpus_dir(snapshot)
+    try:
+        return [load_page(path) for path in iter_page_paths(corpus_dir)]
+    except OSError as exc:
+        raise SnapshotUnavailableError(
+            f"snapshot {snapshot.date} is unreadable at {corpus_dir}: {exc}"
+        ) from exc
 
 
 def phrase_history(

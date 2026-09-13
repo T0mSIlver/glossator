@@ -1,0 +1,2990 @@
+[
+  {
+    "url": "https://docs.mistral.ai/admin",
+    "path": "admin.md",
+    "title": "Admin",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d2244b035114f253e0fe9f0ee45bf7c9d1cc39f235c3545ebb9636a97ea8c1ef"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/admin-api",
+    "path": "admin/security-access/admin-api.md",
+    "title": "Admin API",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/admin-api/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "672e06c65e5a3d5232677392c7e3e8bf3d6a8d811711f1eeddd7ff933a1b9619"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/api-keys",
+    "path": "admin/security-access/api-keys.md",
+    "title": "API keys",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/api-keys/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "fbdc30075a66171066e7be414b878548fcdfdbb81eb227e1bf04556e5c923955"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/audit-logs",
+    "path": "admin/security-access/audit-logs.md",
+    "title": "Audit logs",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/audit-logs/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5eea840c9eb61535a7fb4a394306c75bc0bb4742a212bfe65d14255a520fb95a"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/back-office",
+    "path": "admin/security-access/back-office.md",
+    "title": "Admin Panel",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/back-office/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "cda38fd2e60597ec25298a1d02099feabf362026918692951e73bfb83b542b32"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/email-domain-auth",
+    "path": "admin/security-access/email-domain-auth.md",
+    "title": "Email domain authentication",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/email-domain-auth/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a254856891408e714ea323485f5bf23354662f99905d163fda77d9737570fdb0"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/organization",
+    "path": "admin/security-access/organization.md",
+    "title": "Organizations and Workspaces",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/organization/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2c3be46a944564ba5e61910628d64a632ac4452fc2c6b13016077c5f4cf7fc2e"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/privacy",
+    "path": "admin/security-access/privacy.md",
+    "title": "Privacy",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/privacy/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3c99b884f0b63e9b2c99d1555d55ec3f7609f97056ab5c7dadf5150df2af0185"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/security-access/sso",
+    "path": "admin/security-access/sso.md",
+    "title": "SSO",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/security-access/sso/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a5e7b33e3a9efe0ee38957eddb58f760b8fd0100555d66370d25f800efea47e8"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/user-management-finops/billing",
+    "path": "admin/user-management-finops/billing.md",
+    "title": "Billing",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/user-management-finops/billing/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "19320132d04ae7c985e4b70f14c632d2aad08d7f7a9e69c54e9d7e53280c3b32"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/user-management-finops/subscriptions",
+    "path": "admin/user-management-finops/subscriptions.md",
+    "title": "Subscriptions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/user-management-finops/subscriptions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0389de34fc98c697857608add9143351660cc75e4e38cfbc73b480e208892060"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/user-management-finops/tier",
+    "path": "admin/user-management-finops/tier.md",
+    "title": "Rate limits and usage tiers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/user-management-finops/tier/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6d83d27fe9fa069ad7163296a18abb72aa13cf3bbc44e30bb1c46b037d875922"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/user-management-finops/usage-limits",
+    "path": "admin/user-management-finops/usage-limits.md",
+    "title": "Usage limits",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/user-management-finops/usage-limits/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c346b096ce1f65162d63333b2c8531e8cb5b72523a5e75b3afd767dcfa1dbc01"
+  },
+  {
+    "url": "https://docs.mistral.ai/admin/user-management-finops/user-management",
+    "path": "admin/user-management-finops/user-management.md",
+    "title": "User management",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/admin/user-management-finops/user-management/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e556bebe56296cab128f856cf0e905afa83393890a4cad76afe342df2a9bd0b2"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/audio/speech",
+    "path": "api/endpoint/audio/speech.md",
+    "title": "Audio Speech API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "bc2170afc881d1a7fe9ec757bec2363af0f8cf67dfd4f007cff734692d1a0a69"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/audio/transcriptions",
+    "path": "api/endpoint/audio/transcriptions.md",
+    "title": "Audio Transcriptions API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "637e1735e08f807a259a7fa343beb1154746e5a2e07a9d869738e51a0a26ccd8"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/audio/voices",
+    "path": "api/endpoint/audio/voices.md",
+    "title": "Audio Voices API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "38263d76953d50173f7eee481e611b6a733dfff83d994ceaa44129fcdf459adc"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/batch",
+    "path": "api/endpoint/batch.md",
+    "title": "Batch API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4590f8710c378d2c9d30f78ea6084bf92947c9557779edf0d22cab1df10bc348"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/agents",
+    "path": "api/endpoint/beta/agents.md",
+    "title": "Beta Agents API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8fa0cc79b4cf8fcc4a77643f6354cf527097b888505a1d7fc968d2791899d072"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/connectors",
+    "path": "api/endpoint/beta/connectors.md",
+    "title": "Beta Connectors API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b02956e976dbe3ab0845554c9a391fda62a6ef0ce15defbfba04daddc3177f53"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/conversations",
+    "path": "api/endpoint/beta/conversations.md",
+    "title": "Beta Conversations API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c98ada374503503d8a78d4bc5936f119008c078184257280f664aac1bb4ea2a1"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/libraries",
+    "path": "api/endpoint/beta/libraries.md",
+    "title": "Beta Libraries API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "77982af8102a1d7cf80c7d36c86388caf477ecb4f449aaa475769e2f5d41920d"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/libraries/accesses",
+    "path": "api/endpoint/beta/libraries/accesses.md",
+    "title": "Beta Libraries Accesses API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "63c99becf87d0032595a532af21564a0a3ae286d4b83c87321e78d516bc54dc4"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/libraries/documents",
+    "path": "api/endpoint/beta/libraries/documents.md",
+    "title": "Beta Libraries Documents API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c2b10d29728a08ac3362152660cd1b19414a0fa8bbe8f96d0fdf58100684030d"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/observability/campaigns",
+    "path": "api/endpoint/beta/observability/campaigns.md",
+    "title": "Beta Observability Campaigns API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e55ee6cc4fd3cb45a830ef3c0edc54918464ea157b38b96e0f541c1d9203cad7"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events",
+    "path": "api/endpoint/beta/observability/chat_completion_events.md",
+    "title": "Beta Observability Chat Completion Events API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9a01c48e6af59ba2c114be113d06db088e3efdc5332fc3b8eaf2fd605f0d5157"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/observability/chat_completion_events/fields",
+    "path": "api/endpoint/beta/observability/chat_completion_events/fields.md",
+    "title": "Beta Observability Chat Completion Events Fields API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "28eac1daa58d92e6cb149f0773f7b5eddc676ff3d0d1d8b50b45b4dc02205bb3"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets",
+    "path": "api/endpoint/beta/observability/datasets.md",
+    "title": "Beta Observability Datasets API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "621d168e7e8205ec59f1224649b7836ed61589433eda1bb65604737dcf33d134"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/observability/datasets/records",
+    "path": "api/endpoint/beta/observability/datasets/records.md",
+    "title": "Beta Observability Datasets Records API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "361ec331b6104d6acc63be9c5cb905962f3e2bda3eddf4b3e69e16428f6f18cd"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/observability/judges",
+    "path": "api/endpoint/beta/observability/judges.md",
+    "title": "Beta Observability Judges API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3a3ff33eb2a5c4c0f39ddca98c145db92cb710c2ca7d501559f6a9fce6088ce1"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows",
+    "path": "api/endpoint/beta/workflows.md",
+    "title": "Beta Workflows API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4ffd3365efebc991b20dddea0c65772f0f4135e7744f224abbec983a93a666d1"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/deployments",
+    "path": "api/endpoint/beta/workflows/deployments.md",
+    "title": "Beta Workflows Deployments API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4586113641c69316583494c60532271b0a008acf7c58c19aa2804179c70cccd7"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/events",
+    "path": "api/endpoint/beta/workflows/events.md",
+    "title": "Beta Workflows Events API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4cba49d9bbf9bdb2e070d890208badce8e3053a76529c4ae623a43bbafff3399"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/executions",
+    "path": "api/endpoint/beta/workflows/executions.md",
+    "title": "Beta Workflows Executions API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "fa53539aac6c6079d48d9b6a6d546b6fe28a2888b8a6fb57dfe3e40ab9a502bf"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/metrics",
+    "path": "api/endpoint/beta/workflows/metrics.md",
+    "title": "Beta Workflows Metrics API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "02fcc6f142c893bf603ca6b9dcfa7eb6fdedd17b87b4972d1e0138d28feb0de4"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/runs",
+    "path": "api/endpoint/beta/workflows/runs.md",
+    "title": "Beta Workflows Runs API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "43462ac44beea6f34b597fcee4f8e3e060260b50b95eb03b3beeda33dc53664d"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/schedules",
+    "path": "api/endpoint/beta/workflows/schedules.md",
+    "title": "Beta Workflows Schedules API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "f1752c7180283c7f0e8a5a713d99e549d521f6d428a7c482bbcfe8d18f7e8887"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/beta/workflows/workers",
+    "path": "api/endpoint/beta/workflows/workers.md",
+    "title": "Beta Workflows Workers API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "014a3bf2f0250049c7b7e32cc44c55eabfb7faaef5d6d4921724abb4f99eb8bb"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/chat",
+    "path": "api/endpoint/chat.md",
+    "title": "Chat API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "de5ca7f2bb3f094165e23a6cea67e77c22e7b2513b2b35f9196d33172a73e2ce"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/classifiers",
+    "path": "api/endpoint/classifiers.md",
+    "title": "Classifiers API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6241554677471391c6e406456d3eb0a20da18fa74390520d187c2cf654449ce9"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/deprecated/agents",
+    "path": "api/endpoint/deprecated/agents.md",
+    "title": "Deprecated Agents API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b44a501eb923b203a328f50289468e2a7aa4ca91bc93c9b7e0fea0ce68c0ae83"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/deprecated/fine-tuning",
+    "path": "api/endpoint/deprecated/fine-tuning.md",
+    "title": "Deprecated Fine Tuning API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ad34f60d128ebea94fb6669e12ff09f9a5dc6e7766361d54d8d09d5c6cecdda4"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/embeddings",
+    "path": "api/endpoint/embeddings.md",
+    "title": "Embeddings API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "90983f1f041f71aafa3cfb0405d16990c7108c7ea942fd589949145aa5847e49"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/files",
+    "path": "api/endpoint/files.md",
+    "title": "Files API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1d84de22bbf0755506883c87953c8eec6a1340a35ade060aa0d287e840a0224a"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/fim",
+    "path": "api/endpoint/fim.md",
+    "title": "Fim API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3c7d0726e254b3f756d7298314c643888c13c001d4f5e521c20658a370a79801"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/models",
+    "path": "api/endpoint/models.md",
+    "title": "Models API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ba90260d70f0e9303bd58dba11ef2817cbc6efe99c255522a2821656bc33c521"
+  },
+  {
+    "url": "https://docs.mistral.ai/api/endpoint/ocr",
+    "path": "api/endpoint/ocr.md",
+    "title": "Ocr API",
+    "kind": "api",
+    "source_path": "openapi.yaml",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "952c4d8dbf4e855ca2386961cbecd10ac93f4a8933c0f0296573e82edd3b4225"
+  },
+  {
+    "url": "https://docs.mistral.ai/community",
+    "path": "community.md",
+    "title": "Community",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/community/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b04c417bf7a75b0ff56326813a37c5481c90daaedcc972ef251aab66a9f7ef91"
+  },
+  {
+    "url": "https://docs.mistral.ai/developers",
+    "path": "developers.md",
+    "title": "Developers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/developers/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a5f1cf471729d5c72b6639dda58c6a513d37e20df8e7404b4b0e4440eaa22697"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/glossary",
+    "path": "getting-started/glossary.md",
+    "title": "Glossary",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/glossary/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "cd14c2a9abb748e5587b2bd40c737d863359058355730d22bbed1a51da5f24fb"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/platform-overview",
+    "path": "getting-started/platform-overview.md",
+    "title": "Platform overview",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/platform-overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a895334c51c3bbb9fd2d2535d5b2a5e9fc4bfbe29ed6e265c148016b8fef9efb"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/admin/configure-sso",
+    "path": "getting-started/quickstarts/admin/configure-sso.md",
+    "title": "Configure SSO and domain verification",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/admin/configure-sso/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "dff7b395dd25c804d107b769d2a17cb1671d08d30ac5a510ceb30fbedec547bf"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/admin/create-organization",
+    "path": "getting-started/quickstarts/admin/create-organization.md",
+    "title": "Create your organization",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/admin/create-organization/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "deb08a857eeb49af2d65c8df91b56d7557951a858ccdc94e23b1e2e377681919"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/admin/manage-workspaces",
+    "path": "getting-started/quickstarts/admin/manage-workspaces.md",
+    "title": "Manage workspaces and API keys",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/admin/manage-workspaces/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9eb54cfd7cb5d6d1259cbd01b63ba14a60c31d2491549eee8531896404a77964"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/developer/build-a-workflow",
+    "path": "getting-started/quickstarts/developer/build-a-workflow.md",
+    "title": "Build a workflow",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/developer/build-a-workflow/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "793db116352d90eda3520618558172694d8665a00258b2e6ee61bf1508b14669"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/developer/build-an-agent",
+    "path": "getting-started/quickstarts/developer/build-an-agent.md",
+    "title": "Build an agent with tools",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/developer/build-an-agent/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c3ce58d8941248f5712b9cda4ee8a866769c1430b6fbf4fa65e2f30885fd1c27"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/developer/first-api-request",
+    "path": "getting-started/quickstarts/developer/first-api-request.md",
+    "title": "Send your first API request",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/developer/first-api-request/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e737c56ab7778e312bac5f5485407d7ab5794a9b76b31bc110d3c7f6e5748fc8"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/developer/rag-document-search",
+    "path": "getting-started/quickstarts/developer/rag-document-search.md",
+    "title": "Set up RAG with document search",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/developer/rag-document-search/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "96d12fbaf117304ce997e0c5b27df2a4cdb9fb71d3b9519c1a6c5e1a6da228a9"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/studio/activate-and-generate-api-key",
+    "path": "getting-started/quickstarts/studio/activate-and-generate-api-key.md",
+    "title": "Activate Studio and generate an API key",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/studio/activate-and-generate-api-key/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e2919246b339430f1a6b10c4b297475176f48104b5d1f7857b417c502804bd30"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/studio/create-reusable-prompt",
+    "path": "getting-started/quickstarts/studio/create-reusable-prompt.md",
+    "title": "Create a reusable Prompt",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/studio/create-reusable-prompt/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4882de0030da378fbd9a6a202815f23ccdd84f5cb6f95ae4d1521923e7f676a3"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/studio/create-skill",
+    "path": "getting-started/quickstarts/studio/create-skill.md",
+    "title": "Create a Skill in Studio",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/studio/create-skill/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8059347f7679305522d9a7798f5dc804dc9166ffa268b77698383a783bdeb3f3"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/studio/test-model-playground",
+    "path": "getting-started/quickstarts/studio/test-model-playground.md",
+    "title": "Test a model in the API playground",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/studio/test-model-playground/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8aba56c19d14caab71cfc347992774eda517de4b6ba86d766c30e942a0d396fc"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/install-cli",
+    "path": "getting-started/quickstarts/vibe-code/install-cli.md",
+    "title": "Install the Vibe CLI and send your first prompt",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/vibe-code/install-cli/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7a5ff8812bd822692ced9ba407fd5ffe1b64121204571dd0a61a9722fa7ce077"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-code/scaffold-a-project",
+    "path": "getting-started/quickstarts/vibe-code/scaffold-a-project.md",
+    "title": "Scaffold a project with Vibe Code",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/vibe-code/scaffold-a-project/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e78e43d97727b55b5d96bf012f03e148df9c115a5f24ece2c293c9beee9fb358"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/analyze-data",
+    "path": "getting-started/quickstarts/vibe-work/analyze-data.md",
+    "title": "Analyze a dataset",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/vibe-work/analyze-data/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "bd742027355e3ad36032f4ddb0d1442b2fcce84b22707dd112c7a3812e695294"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/create-first-skill",
+    "path": "getting-started/quickstarts/vibe-work/create-first-skill.md",
+    "title": "Create your first Skill",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/vibe-work/create-first-skill/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "20487ce46c25fdfd5a88acefa1ef1c077fb127fd4f7441459152eadf2257a861"
+  },
+  {
+    "url": "https://docs.mistral.ai/getting-started/quickstarts/vibe-work/first-task",
+    "path": "getting-started/quickstarts/vibe-work/first-task.md",
+    "title": "Run your first Vibe Work task",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/getting-started/quickstarts/vibe-work/first-task/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2c9b787d1065af03b49921bd2ae7e2cdbaa82725ae43ccfe366e534315d97deb"
+  },
+  {
+    "url": "https://docs.mistral.ai/models",
+    "path": "models.md",
+    "title": "Model capability matrix",
+    "kind": "model",
+    "source_path": "src/schema/models",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "975cc4581ede1715937751bbaab554cbea6ba6ba4de763c763ca5beed964fc0b"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/best-practices",
+    "path": "models/best-practices.md",
+    "title": "Best Practices",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/best-practices/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "42bf9075fbf28463c5b0a9a4f44c37a507196acb28bb616bda71808d9c3b42c0"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/best-practices/prompt-engineering",
+    "path": "models/best-practices/prompt-engineering.md",
+    "title": "Prompting",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/best-practices/prompt-engineering/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1aa022251fbde58500fe75c8ec1cf6740c55771b66fa0294948019e7e7213956"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/best-practices/sampling",
+    "path": "models/best-practices/sampling.md",
+    "title": "Sampling",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/best-practices/sampling/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e9ad3167ed6a45196f1716c1ea67dd0356aa93e8f189ab0974f4d6e672110081"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/codestral-24-05",
+    "path": "models/codestral-24-05.md",
+    "title": "Codestral",
+    "kind": "model",
+    "source_path": "src/schema/models/models/codestral-24-05.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "102aa3710486861278a08b5957789f59547d92e2f0b02f30213a0327fc7d322e"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/codestral-25-01",
+    "path": "models/codestral-25-01.md",
+    "title": "Codestral",
+    "kind": "model",
+    "source_path": "src/schema/models/models/codestral-25-01.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "62052e4530c901dd54215ba7921eea8ab036e0758912bf2f54cadddeef34e5ae"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/codestral-25-08",
+    "path": "models/codestral-25-08.md",
+    "title": "Codestral",
+    "kind": "model",
+    "source_path": "src/schema/models/models/codestral-25-08.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4db8f320957aa7aa210a168e07c233c9524c9c5c7103d098fded8827b001f342"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/codestral-embed-25-05",
+    "path": "models/codestral-embed-25-05.md",
+    "title": "Codestral Embed",
+    "kind": "model",
+    "source_path": "src/schema/models/models/codestral-embed-25-05.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3549a2a7f313618859e1c3772bc1827d90aa8d20891029db2478e5ef2aba9530"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/codestral-mamba-7b-0-1",
+    "path": "models/codestral-mamba-7b-0-1.md",
+    "title": "Codestral Mamba 7B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/codestral-mamba-7b-0-1.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2ec53d9276a3925584409e2ea671d2f5af792197ef01329cde7aa694dfdda91a"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment",
+    "path": "models/deployment.md",
+    "title": "Deployment",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "523e9d1a2d120ac7b52b9f6d4c910d18d7a98e1116f61116a615d14061f059bd"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments",
+    "path": "models/deployment/cloud-deployments.md",
+    "title": "Cloud",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "aafc8dafc6e4ebe86bd5e462fa34f3e72294c23946420432651f120a4be63aad"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments/amazon_bedrock",
+    "path": "models/deployment/cloud-deployments/amazon_bedrock.md",
+    "title": "Amazon Bedrock",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/amazon_bedrock/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d1cf1d71078981e106d603ada9259b3b24349141311616319315767717aa4ffb"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments/azure",
+    "path": "models/deployment/cloud-deployments/azure.md",
+    "title": "Azure AI",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/azure/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "868d011b26b7a59ab929f0247583e7a1947f1542dccce0092cc478506a84b13b"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments/ibm-watsonx",
+    "path": "models/deployment/cloud-deployments/ibm-watsonx.md",
+    "title": "IBM watsonx.ai",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/ibm-watsonx/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "689352e8b54a4ad6473f4df39651a07af8f1bef3f629c9e138fb845fc6116a48"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments/outscale",
+    "path": "models/deployment/cloud-deployments/outscale.md",
+    "title": "Outscale",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/outscale/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9db9ab9e7fdad929890af0d52e870d7d31da05f952e65c6bb4ec0a94392cb7ba"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments/sfcortex",
+    "path": "models/deployment/cloud-deployments/sfcortex.md",
+    "title": "Snowflake Cortex",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/sfcortex/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9bfeefa035b0e122501d85bbc31a50740d0b70ffc149be42bb93f1dd42341e24"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/cloud-deployments/vertex",
+    "path": "models/deployment/cloud-deployments/vertex.md",
+    "title": "Vertex AI",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/cloud-deployments/vertex/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ad4ae2b5e9d451005176d690125bdfaa66b2d501ad8a99b060f519a628977f88"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment",
+    "path": "models/deployment/local-deployment.md",
+    "title": "Self-Deployment",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "950575080fe91c549b405d76f4335bf781da06bce07e5bed19fb2cdf92aa6c8c"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment/cerebrium",
+    "path": "models/deployment/local-deployment/cerebrium.md",
+    "title": "Cerebrium",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/cerebrium/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "cd7b52c8555b5d136e3469f040c5c9974e43f7e5ff3f33e4bd20d0e695df7777"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment/cloudflare",
+    "path": "models/deployment/local-deployment/cloudflare.md",
+    "title": "Cloudflare Workers AI",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/cloudflare/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9ce067f67b788962657c80839923f62c73d6130bc930f59038cdc6f316579d0f"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment/skypilot",
+    "path": "models/deployment/local-deployment/skypilot.md",
+    "title": "SkyPilot",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/skypilot/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "172e6130a920a5eef48c6aab6934685b1f95debaefc7b74852305aa79d53083e"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment/tgi",
+    "path": "models/deployment/local-deployment/tgi.md",
+    "title": "TGI",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/tgi/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e2d512736804ec3c37227a451ee33ea833ee6d011d778a53c05398817f28b037"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment/trt",
+    "path": "models/deployment/local-deployment/trt.md",
+    "title": "TensorRT",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/trt/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a3a85a735edd176077bcb906eb96016195f994328d600130d3532e5fcbd772ba"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/deployment/local-deployment/vllm",
+    "path": "models/deployment/local-deployment/vllm.md",
+    "title": "vLLM",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/deployment/local-deployment/vllm/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a534b90fb3c3d880505a1bdd68ea880b2c060c0cb4c7e2b40a1610c614a859a0"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/devstral-2-25-12",
+    "path": "models/devstral-2-25-12.md",
+    "title": "Devstral 2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/devstral-2-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "494763c79a2c0ae92565723b3067c3541470b039178f9be69f357f20a939879a"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/devstral-medium-1-0-25-07",
+    "path": "models/devstral-medium-1-0-25-07.md",
+    "title": "Devstral Medium 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/devstral-medium-1-0-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7eab1e1c3d36f93da1d75482f652814e2212243bbbfe54581030026a7fee5c3d"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/devstral-small-1-0-25-05",
+    "path": "models/devstral-small-1-0-25-05.md",
+    "title": "Devstral Small 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/devstral-small-1-0-25-05.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "dc72fc5187fa297c07861b7e1729f3628fbe34e43ea13a7502c48e10b3b1607d"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/devstral-small-1-1-25-07",
+    "path": "models/devstral-small-1-1-25-07.md",
+    "title": "Devstral Small 1.1",
+    "kind": "model",
+    "source_path": "src/schema/models/models/devstral-small-1-1-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9f330e1c317bd4a46f46597fa521871b30a7268efd93fa977e8e516a222424e5"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/devstral-small-2-25-12",
+    "path": "models/devstral-small-2-25-12.md",
+    "title": "Devstral Small 2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/devstral-small-2-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5f2af3b85f5a9c4c536d4fc1a0a1ecad81bd156e54021513cef4369c31d16ab5"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/labs",
+    "path": "models/labs.md",
+    "title": "Labs",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/labs/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "773910f48b06e4edcc163c23ad4d189a069a15a4830117a582f862d01f5a026a"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/leanstral-26-03",
+    "path": "models/leanstral-26-03.md",
+    "title": "Leanstral",
+    "kind": "model",
+    "source_path": "src/schema/models/models/leanstral-26-03.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a3c7c2305cf28a631274141efdd25fcbdba640aca458346589a9bc3e5c995770"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/magistral-medium-1-0-25-06",
+    "path": "models/magistral-medium-1-0-25-06.md",
+    "title": "Magistral Medium 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/magistral-medium-1-0-25-06.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "dd7361545ddea395f4b87148c9829d25d3a6207682defd8b6d5575cf0d2843b5"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/magistral-medium-1-1-25-07",
+    "path": "models/magistral-medium-1-1-25-07.md",
+    "title": "Magistral Medium 1.1",
+    "kind": "model",
+    "source_path": "src/schema/models/models/magistral-medium-1-1-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5c3c0fe27e0068d4e7cf7c0fd6ee5d2cbbae859d5fd667bada2d24a2b41f769f"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/magistral-medium-1-2-25-09",
+    "path": "models/magistral-medium-1-2-25-09.md",
+    "title": "Magistral Medium 1.2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/magistral-medium-1-2-25-09.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d3eb951772d226f743f713c02d1b9cbd53d51402681b0b170656754dd4b8e333"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/magistral-small-1-0-25-06",
+    "path": "models/magistral-small-1-0-25-06.md",
+    "title": "Magistral Small 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/magistral-small-1-0-25-06.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "82f9cf6ec5bf7e5e07e4a65afa4860f000be77d26e44f801438c6d4bb3b360f4"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/magistral-small-1-1-25-07",
+    "path": "models/magistral-small-1-1-25-07.md",
+    "title": "Magistral Small 1.1",
+    "kind": "model",
+    "source_path": "src/schema/models/models/magistral-small-1-1-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d2d20123617eac6cf2a2088de5542ae544e760cb3bae7634dd97a2c2812f4512"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/magistral-small-1-2-25-09",
+    "path": "models/magistral-small-1-2-25-09.md",
+    "title": "Magistral Small 1.2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/magistral-small-1-2-25-09.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "716d26d8322f9f6dce2a75fc0f8fd0253d9ea28794d3e7c0e56b9e16908cd18d"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mathstral-7b-0-1",
+    "path": "models/mathstral-7b-0-1.md",
+    "title": "Mathstral 7B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mathstral-7b-0-1.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4dfcba40eb1ce82546e8de695ff2f00e5b3e0ab51939835f15a8b4737bd363b4"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ministral-3-14b-25-12",
+    "path": "models/ministral-3-14b-25-12.md",
+    "title": "Ministral 3 14B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ministral-3-14b-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5174435a120bcd8d469eaa5cadfa08c463c2d3cf54e43c8172ba2fcbca4379c2"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ministral-3-3b-25-12",
+    "path": "models/ministral-3-3b-25-12.md",
+    "title": "Ministral 3 3B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ministral-3-3b-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e90d9c3801fda96c26777e07e26e2a5a980aa99d155002d0a04ee18d3f261bfc"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ministral-3-8b-25-12",
+    "path": "models/ministral-3-8b-25-12.md",
+    "title": "Ministral 3 8B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ministral-3-8b-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1380b96e4d1ca664dadba65789faff9d3f7ba77fed35f1bcf969842889e6c780"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ministral-3b-24-1",
+    "path": "models/ministral-3b-24-1.md",
+    "title": "Ministral 3B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ministral-3b-24-1.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "38b23d9f2600d4d67ab42a870d1bb55e9c2b1391518a55bb3f7a782ea8caeb61"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ministral-8b-24-1",
+    "path": "models/ministral-8b-24-1.md",
+    "title": "Ministral 8B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ministral-8b-24-1.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b0aa0faeb87add16fc856e63a119bc3da4ea31f77a47e077d37254b97d4d69b7"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-7b-0-1",
+    "path": "models/mistral-7b-0-1.md",
+    "title": "Mistral 7B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-7b-0-1.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1220e587fb8910c9a05b2452e9f9df2bb7ca2fbe60cb815f182207b40f6fd425"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-7b-0-2",
+    "path": "models/mistral-7b-0-2.md",
+    "title": "Mistral 7B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-7b-0-2.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7d7c5a2b5f2431b405a64bbaae5c634f7b7fc9cf75dfaee64d4d6cb75a4ca89c"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-7b-0-3",
+    "path": "models/mistral-7b-0-3.md",
+    "title": "Mistral 7B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-7b-0-3.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "344ae4b7dd254b00fa67559875f74261e9a4077fc41158062102c7c2fa500d00"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-embed-23-12",
+    "path": "models/mistral-embed-23-12.md",
+    "title": "Mistral Embed",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-embed-23-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7d4ccbae3d28720767261740a1acae9613ee2f1c12615785508fbc0f94efe6e8"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-large-1-0-24-02",
+    "path": "models/mistral-large-1-0-24-02.md",
+    "title": "Mistral Large 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-large-1-0-24-02.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7974f9fd7ba1c963c24f3d1d9164cbd810c6b6b3cacbfefabb54debcd05e444a"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-large-2-0-24-07",
+    "path": "models/mistral-large-2-0-24-07.md",
+    "title": "Mistral Large 2.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-large-2-0-24-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0f69df1ffa3bab85c5088bf91a13e4cc4f5ae0c5087fd82fc65af05b796a1ad3"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-large-2-1-24-11",
+    "path": "models/mistral-large-2-1-24-11.md",
+    "title": "Mistral Large 2.1",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-large-2-1-24-11.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4889c41223b414b09f1ac21b87173700578877c2f3bb07055055c77aa9a976ec"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-large-3-25-12",
+    "path": "models/mistral-large-3-25-12.md",
+    "title": "Mistral Large 3",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-large-3-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6bda7b33aa393ed723374a8862e095fff13e62125a918ead49bcaaae74fbbbac"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-medium-1-0-23-12",
+    "path": "models/mistral-medium-1-0-23-12.md",
+    "title": "Mistral Medium 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-medium-1-0-23-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "81002dfd171cd76929befda4148ec6ad1b53cf50487da9225cadcc8386f311b7"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-medium-3-1-25-08",
+    "path": "models/mistral-medium-3-1-25-08.md",
+    "title": "Mistral Medium 3.1",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-medium-3-1-25-08.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1dffcc1c4bb8cd41451f90043dda9e776a34c45f505520681c4254897143bfb9"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-medium-3-25-05",
+    "path": "models/mistral-medium-3-25-05.md",
+    "title": "Mistral Medium 3",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-medium-3-25-05.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "59820b2361cb6f16e311df4af77258ee4a7a472afa21d5135aa027368c7950ad"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-medium-3-5-26-04",
+    "path": "models/mistral-medium-3-5-26-04.md",
+    "title": "Mistral Medium 3.5",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-medium-3-5-26-04.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "472dc9b20db1bfdf3ecc26e4877c0fed9f71ade0c0a0b18fc005a77b8d4d0f89"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-moderation-24-11",
+    "path": "models/mistral-moderation-24-11.md",
+    "title": "Mistral Moderation",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-moderation-24-11.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d5ba6ac7425cc03be478c01e08dab33c889eaf3514193abf374a9d8ba07411ed"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-moderation-26-03",
+    "path": "models/mistral-moderation-26-03.md",
+    "title": "Mistral Moderation 2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-moderation-26-03.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9a9d9da41b9e163f59d32eabdb004de04e3ac184fa853f303249f63d9afd3a25"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-nemo-12b-24-07",
+    "path": "models/mistral-nemo-12b-24-07.md",
+    "title": "Mistral Nemo 12B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-nemo-12b-24-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0f422f2f49bfebbb962930023dd2ece6a7c1b62e3da969db24a330aeb6889fd4"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-next",
+    "path": "models/mistral-next.md",
+    "title": "Mistral Next",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-next.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9789035a1efa0c57f5fc77115002615610b523d9fbddb88862b6f23a818ea03e"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-saba-25-02",
+    "path": "models/mistral-saba-25-02.md",
+    "title": "Mistral Saba",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-saba-25-02.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6ad95950de86979fcb978b635ff4e57d53c4054bfde27a98f1b863a1633ceae6"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-1-0-24-02",
+    "path": "models/mistral-small-1-0-24-02.md",
+    "title": "Mistral Small 1.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-1-0-24-02.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "524324db56a7aad7f552694ada9c24dc81bf3a056ce7da40eb8e7903fef29199"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-2-0-24-09",
+    "path": "models/mistral-small-2-0-24-09.md",
+    "title": "Mistral Small 2.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-2-0-24-09.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8e4e5f97ba847d38dad555d6ee17ab6cbe47a86aa040d1c0879cad9b61635d1e"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-3-0-25-01",
+    "path": "models/mistral-small-3-0-25-01.md",
+    "title": "Mistral Small 3.0",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-3-0-25-01.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2ccbbf2b15c3a97dcc4770f0a43b6639ab9de907d0e62a8814d7f10803d76f0c"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-3-1-25-03",
+    "path": "models/mistral-small-3-1-25-03.md",
+    "title": "Mistral Small 3.1",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-3-1-25-03.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "31507376e556200f648e67e6459c49b50a25be55a0f05bf9c420b9c602a6d532"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-3-2-25-06",
+    "path": "models/mistral-small-3-2-25-06.md",
+    "title": "Mistral Small 3.2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-3-2-25-06.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3aed0fd9e85932f9b0c579c334deb05c2ce1e00dfe7263ac051f83f6f7a811f1"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-4-0-26-03",
+    "path": "models/mistral-small-4-0-26-03.md",
+    "title": "Mistral Small 4",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-4-0-26-03.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "656f2d15f87a321b9bba18f95927249eafcaf22372621c8e23ce5f84fc102cea"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mistral-small-creative-25-12",
+    "path": "models/mistral-small-creative-25-12.md",
+    "title": "Mistral Small Creative",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mistral-small-creative-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4d3ffeef40d6c29821e4bee4f16b86855290a264c2a08c7abb11ea31d764eb9d"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mixtral-8x22b-0-1-0-3",
+    "path": "models/mixtral-8x22b-0-1-0-3.md",
+    "title": "Mixtral 8x22B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mixtral-8x22b-0-1-0-3.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e97e95d0abbbaec3730b988a157bab2ab66a149770ee4e56e45c6382dd2a614b"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/mixtral-8x7b-0-1",
+    "path": "models/mixtral-8x7b-0-1.md",
+    "title": "Mixtral 8x7B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/mixtral-8x7b-0-1.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c7043d58a70dbaff8c491393617a2fea956d6c39b94727aa5b92657349c38709"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/model-selection-guide",
+    "path": "models/model-selection-guide.md",
+    "title": "Model Selection Guide",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/models/model-selection-guide/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "f9935cb0cf354499fad618443ded88547780ca974a304237d3dc6a8f5be0383f"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ocr-2-25-05",
+    "path": "models/ocr-2-25-05.md",
+    "title": "OCR 2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ocr-2-25-05.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "216cabc96a9701b4e9d9caba02d7187a2a2c8a6405650db316c38713b219a4be"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ocr-25-03",
+    "path": "models/ocr-25-03.md",
+    "title": "OCR",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ocr-25-03.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8bf85a472ea5070f6e1a39cc000b77d2213de316e8b9b290752cb3f7cd489e59"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/ocr-3-25-12",
+    "path": "models/ocr-3-25-12.md",
+    "title": "OCR 3",
+    "kind": "model",
+    "source_path": "src/schema/models/models/ocr-3-25-12.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0664f003155381ba6ea956ad2eaedb36080b1ac1efa5b738771f51d3eeed6e15"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/pixtral-12b-24-09",
+    "path": "models/pixtral-12b-24-09.md",
+    "title": "Pixtral 12B",
+    "kind": "model",
+    "source_path": "src/schema/models/models/pixtral-12b-24-09.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "905e0285f0e6ace71c04e2a4d9a18d30478dd5577a2ddd44b1abf7bce924dfa1"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/pixtral-large-24-11",
+    "path": "models/pixtral-large-24-11.md",
+    "title": "Pixtral Large",
+    "kind": "model",
+    "source_path": "src/schema/models/models/pixtral-large-24-11.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6ef25b19326758ac41f875527efc067a2620f7806c90f31e0e9a9a1b96ddd124"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/voxtral-mini-25-07",
+    "path": "models/voxtral-mini-25-07.md",
+    "title": "Voxtral Mini",
+    "kind": "model",
+    "source_path": "src/schema/models/models/voxtral-mini-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "91aea29f48bf52907c717d27603e2105b86d6f9eacdf106739d5f457f384afce"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/voxtral-mini-transcribe-25-07",
+    "path": "models/voxtral-mini-transcribe-25-07.md",
+    "title": "Voxtral Mini Transcribe",
+    "kind": "model",
+    "source_path": "src/schema/models/models/voxtral-mini-transcribe-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "31d94bc4a0774e149924f8e7a073d4bbfc9a51995abfd60053e17448aaaf6cf6"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/voxtral-mini-transcribe-26-02",
+    "path": "models/voxtral-mini-transcribe-26-02.md",
+    "title": "Voxtral Mini Transcribe 2",
+    "kind": "model",
+    "source_path": "src/schema/models/models/voxtral-mini-transcribe-26-02.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c1738ba8bec7283ee50cab76b0a7f27bcf0fa736cbd4d0a8ce1d298a778002ef"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/voxtral-mini-transcribe-realtime-26-02",
+    "path": "models/voxtral-mini-transcribe-realtime-26-02.md",
+    "title": "Voxtral Mini Transcribe Realtime",
+    "kind": "model",
+    "source_path": "src/schema/models/models/voxtral-mini-transcribe-realtime-26-02.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6a03b11e9d04bebbfaab42ed57e4a383b30edbf37bd1e71c51c6cc2a501d9f59"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/voxtral-small-25-07",
+    "path": "models/voxtral-small-25-07.md",
+    "title": "Voxtral Small",
+    "kind": "model",
+    "source_path": "src/schema/models/models/voxtral-small-25-07.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "245f6c21887565915849fc89509523a4aa5220c307eedc31ab4a679b9dbec26f"
+  },
+  {
+    "url": "https://docs.mistral.ai/models/voxtral-tts-26-03",
+    "path": "models/voxtral-tts-26-03.md",
+    "title": "Voxtral TTS",
+    "kind": "model",
+    "source_path": "src/schema/models/models/voxtral-tts-26-03.ts",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6d05c85f4e2af9b052afb4bf7624d55cbb3cedddd9384ff06f0d56ecec8e6a7e"
+  },
+  {
+    "url": "https://docs.mistral.ai/products",
+    "path": "products.md",
+    "title": "Products",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/products/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d63bab27964a5ccfdff271a3780d7e9723d24559dfda11db25aa36cfb27f9f56"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/customization",
+    "path": "resources/deprecated/customization.md",
+    "title": "Fine-tuning API (legacy)",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/customization/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5e71bb9dcb6109b93dfae74e771c405be689e450323318487d19d0e960c75031"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/finetuning",
+    "path": "resources/deprecated/finetuning.md",
+    "title": "Finetuning",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/finetuning/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6588386398079c5ef86625bab7f960c96da96ebad0acddbda6f90b6c0f5f3742"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/finetuning/classifier_factory",
+    "path": "resources/deprecated/finetuning/classifier_factory.md",
+    "title": "Classifier Factory",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/finetuning/classifier_factory/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "947adbbdeb49b3bd30ebe300a4d952028ad349f6f107edecf14de86036f177f8"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/finetuning/text_vision_finetuning",
+    "path": "resources/deprecated/finetuning/text_vision_finetuning.md",
+    "title": "Text & Vision Fine-tuning",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/finetuning/text_vision_finetuning/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "23a2602874370d380ea547f163e595a78fea7686112348d27d8ca5378a2d638c"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/guardrailing/mistral_moderation_2411",
+    "path": "resources/deprecated/guardrailing/mistral_moderation_2411.md",
+    "title": "Mistral Moderation 2411",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/guardrailing/mistral_moderation_2411/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d91e9a9329d121433056967a777d523916b2a1b8d8c82dc425fee7e8e96f658e"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/guardrailing/safe_prompt",
+    "path": "resources/deprecated/guardrailing/safe_prompt.md",
+    "title": "Safe Prompt",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/guardrailing/safe_prompt/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ccef3fd482f0ac968f231b5e51a5f7c75f69ced9f6ce987aeace30fbb7a0d9fc"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/deprecated/native-reasoning",
+    "path": "resources/deprecated/native-reasoning.md",
+    "title": "Native reasoning (deprecated)",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/deprecated/native-reasoning/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1089b29a4818ac1ea4368d598e3c51077e2e8fc41c537792b77fbdd4f6abaf7a"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/error-glossary",
+    "path": "resources/error-glossary.md",
+    "title": "Error glossary",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/error-glossary/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8617816354d24d81e766865d03a1dc690bcf6f8d4ac20f0ebc5154709392cb35"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/known-limitations",
+    "path": "resources/known-limitations.md",
+    "title": "Known limitations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/known-limitations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "f2f46bd5d3ac11abea2dd2ce1d26f2a67c9a14979f13d2440d4fd12715ff7af6"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/languages",
+    "path": "resources/languages.md",
+    "title": "Supported languages",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/languages/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "515a25f8d958ba48f47952474d5913383b3ec1f11b410a0984aa90bae36f8adb"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/migration-guides",
+    "path": "resources/migration-guides.md",
+    "title": "Migration guides",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/migration-guides/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6a851e054e806e3fe4cab8a70453b15e77bcfacfa48a4153d523aaac92c5f2c2"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/observability-integrations",
+    "path": "resources/observability-integrations.md",
+    "title": "Observability integrations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/observability-integrations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0f1696f8e7d4c457a7854aa6d73c25c2f0c92ab03678344a0345ebd628025853"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/sdks",
+    "path": "resources/sdks.md",
+    "title": "SDKs",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/sdks/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "427ba1a3088c162772813662ab8f3cf696695812d29a0958b0bcf220f78a4f03"
+  },
+  {
+    "url": "https://docs.mistral.ai/resources/security-advisories",
+    "path": "resources/security-advisories.md",
+    "title": "Security advisories",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/resources/security-advisories/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "af0122e7e3ef66c5e8bf1d8284c17581b00469bbea44e83f35d97bfbf6d2d7a7"
+  },
+  {
+    "url": "https://docs.mistral.ai/robots",
+    "path": "robots.md",
+    "title": "Mistral AI Crawlers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/robots/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3ad4a384506916df457be725e95a1d75d9e1d7609a71c69b91ab1c994d0c9283"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/agent-tools",
+    "path": "studio-api/agents/agent-tools.md",
+    "title": "Agents Tools Overview",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/agent-tools/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e4c4b53be7b194f9a040515645c87f68518857ec20a67e9eaf60164425811e71"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/agent-tools/code_interpreter",
+    "path": "studio-api/agents/agent-tools/code_interpreter.md",
+    "title": "Code Interpreter",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/agent-tools/code_interpreter/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "bd9c051ff146ed6c89dd534b8b4eab6548f37dfd82662ad66441fb985fa910e3"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/agent-tools/function-calling",
+    "path": "studio-api/agents/agent-tools/function-calling.md",
+    "title": "Function Calling",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/agent-tools/function-calling/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "35e2439297537e5be8be81fea2816e9ad6a99e7e4bbf6dfecc08940ddadc7681"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/agent-tools/image_generation",
+    "path": "studio-api/agents/agent-tools/image_generation.md",
+    "title": "Image Generation",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/agent-tools/image_generation/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8a0da3306c78b8780cbc8c1e7b7f2e36395945b9d33fcd10b3354f26d36e5ade"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/agent-tools/websearch",
+    "path": "studio-api/agents/agent-tools/websearch.md",
+    "title": "Websearch",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/agent-tools/websearch/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3e33bbbb33a171b293e97ad2f0ba5f9d46670b7958192274f5e506c52de691b6"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/agents-api",
+    "path": "studio-api/agents/agents-api.md",
+    "title": "Agents & Conversations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/agents-api/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c76b83c38b91d65e9ac1b823c652bbb1933d6fc1a6149ee1dad1308df9ae2051"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/handoffs",
+    "path": "studio-api/agents/handoffs.md",
+    "title": "Handoffs",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/handoffs/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a6e7b7684ae5ffdb331b66ef9dc5e5c48d01f60bd9d735197e2889e5b6786b60"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/agents/introduction",
+    "path": "studio-api/agents/introduction.md",
+    "title": "Agents Introduction",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/agents/introduction/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6ab1363956b7290f67c5549aa533c8ac9e36aee4485c73efb453c35b446d9a67"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/overview",
+    "path": "studio-api/audio/overview.md",
+    "title": "Audio",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6fae8f086cc55812deb13db1837fc471211cddcb3d7d9136c7134f0464a53103"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/speech_to_text",
+    "path": "studio-api/audio/speech_to_text.md",
+    "title": "Speech to Text",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/speech_to_text/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7d530213c1df8b281aa1a8017dd568d1d134e88d061f431fb2bf2c29bf0f4eea"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription",
+    "path": "studio-api/audio/speech_to_text/offline_transcription.md",
+    "title": "Offline",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/speech_to_text/offline_transcription/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "cf0ae4cb7fa409957b192406a3264606b79decf752af0efb3e510887c72bb7c0"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/speech_to_text/realtime_transcription",
+    "path": "studio-api/audio/speech_to_text/realtime_transcription.md",
+    "title": "Realtime",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/speech_to_text/realtime_transcription/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7024b94e153a8f27e1c45eb555a30461084168fb9cd816f35750482a16ed73c2"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/text_to_speech",
+    "path": "studio-api/audio/text_to_speech.md",
+    "title": "Text to Speech",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/text_to_speech/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "48933c1edac20530ed5eb40fda72a60aaf6a991108560ff4e1ae0518f22547ef"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/text_to_speech/speech",
+    "path": "studio-api/audio/text_to_speech/speech.md",
+    "title": "Speech Generation",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/text_to_speech/speech/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "774b46b5b8b88cb014765f03f2d7563988255bec22464c87ba1ba997791f6732"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/audio/text_to_speech/voices",
+    "path": "studio-api/audio/text_to_speech/voices.md",
+    "title": "Voices",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/audio/text_to_speech/voices/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "17894f45da1582470e0439c6eedfb25b034ffb9dbc3afdbae63c00480898b4cb"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/batch-processing",
+    "path": "studio-api/batch-processing.md",
+    "title": "Batch Processing",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/batch-processing/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2de53ba80b17afad62d8c6e0adc1ad053ec983278a4593d847f2555f1e0fde9c"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/advanced/predicted-outputs",
+    "path": "studio-api/conversations/advanced/predicted-outputs.md",
+    "title": "Predicted outputs",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/advanced/predicted-outputs/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "83a6162f7a1bac0130dcc361ec5bf24219504905ac8e0ad6623f272d220ebcde"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/advanced/prompt-caching",
+    "path": "studio-api/conversations/advanced/prompt-caching.md",
+    "title": "Prompt caching",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/advanced/prompt-caching/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3326b32a6cf7c4da4e5a7d206e45189a8823db998252cff42851d8d14016c01e"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/chat-completion",
+    "path": "studio-api/conversations/chat-completion.md",
+    "title": "Chat completions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/chat-completion/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "52180ca7a7a00c93ec3f1fad4e7b41a9b9a667e3bc50a966af5457e8944d6e2d"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/chat-completion/prompting",
+    "path": "studio-api/conversations/chat-completion/prompting.md",
+    "title": "Prompting",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/chat-completion/prompting/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1e8db322eda23a11737f350ce9f9247d9bf1aa845dfd33e71c581e2304e114bd"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/citations",
+    "path": "studio-api/conversations/citations.md",
+    "title": "Citations & References",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/citations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "831518744657902c745b4778072d9c0bc51619757044bfb3f1176f21e424263c"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/function-calling",
+    "path": "studio-api/conversations/function-calling.md",
+    "title": "Function Calling",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/function-calling/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2252c7999f71f7b8b602dea7c65183922819aefb3ced24d2722ae67147a5b8fe"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/moderation",
+    "path": "studio-api/conversations/moderation.md",
+    "title": "Moderation & Guardrailing",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/moderation/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5e8261518940fb17d4577ac4c6c90fb155eca510fee932a9cca6849ec115df8f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/reasoning",
+    "path": "studio-api/conversations/reasoning.md",
+    "title": "Reasoning",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/reasoning/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "baafb54f41210a7d3c9a517af5b7518d90a7ca1509f333130e121e897713112c"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/structured-output",
+    "path": "studio-api/conversations/structured-output.md",
+    "title": "Structured Output",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/structured-output/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "29eba03ef9f4c84a0500a6a55922d1080f7da29a08f5f4a1d4b6ed2915a487ce"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/structured-output/custom",
+    "path": "studio-api/conversations/structured-output/custom.md",
+    "title": "Custom",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/structured-output/custom/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1f61c2e8545efea17567748021fc01c402a20b49e70d2fbbdc943b5c0ae70c60"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/structured-output/json_mode",
+    "path": "studio-api/conversations/structured-output/json_mode.md",
+    "title": "JSON Mode",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/structured-output/json_mode/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "25e8a9fc78e735691d39a944b2e908bdb20ef643ac9c84028d772fad53736993"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/conversations/vision",
+    "path": "studio-api/conversations/vision.md",
+    "title": "Vision",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/conversations/vision/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e702946a71c42c23c04a62b5a8905b8a102566872bd1547a76a0637b227b0a55"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/document-processing/annotations",
+    "path": "studio-api/document-processing/annotations.md",
+    "title": "Document Annotations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/document-processing/annotations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4432156d22a2e9dd2693fb90c02b69e8d4322efef7fa1bea84689c4bbe7e607c"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/document-processing/basic_ocr",
+    "path": "studio-api/document-processing/basic_ocr.md",
+    "title": "OCR Processor",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/document-processing/basic_ocr/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "32e81a14453138ac74351d18fb7f56920b813ae380b476ac49ba092f8eb5d4c9"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/document-processing/document_qna",
+    "path": "studio-api/document-processing/document_qna.md",
+    "title": "Document QnA",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/document-processing/document_qna/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "275ef9879b7bf5e7737e84a6094910024f17021a491ac9ba08f6d4ddb5b0e87a"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/document-processing/overview",
+    "path": "studio-api/document-processing/overview.md",
+    "title": "Document Processing",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/document-processing/overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "76701bbf032501b063dd360828092c75001a8f5100b76b2c038f05b7fff6ce5f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors",
+    "path": "studio-api/knowledge-rag/connectors.md",
+    "title": "Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/connectors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c5816f4a3f028d1a78e65e1ed0ececb902356c98547207095492487e5abb0c04"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/confirmation",
+    "path": "studio-api/knowledge-rag/connectors/confirmation.md",
+    "title": "Human-in-the-loop",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/connectors/confirmation/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3edb7cf7d23aa1f314e65ef70dcd97f76115451736a43834df4f127ad0f2aa07"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/conversations",
+    "path": "studio-api/knowledge-rag/connectors/conversations.md",
+    "title": "Using Connectors in conversations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/connectors/conversations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a1a5bf52a3207ccedf4133076d827fd0ac214f9f9460b258ca53a67aa4d08328"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/management",
+    "path": "studio-api/knowledge-rag/connectors/management.md",
+    "title": "Managing Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/connectors/management/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6a8a07d44ddeb63f9d772c50075b17f98b2b91a5c8f98d21107475ae1d3c0deb"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/connectors/tool_calling",
+    "path": "studio-api/knowledge-rag/connectors/tool_calling.md",
+    "title": "Direct tool calling with Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/connectors/tool_calling/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "87c3d5d67667e40142bd325beb2125d9757cbd439f797642c28545858ccb179b"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/embeddings",
+    "path": "studio-api/knowledge-rag/embeddings.md",
+    "title": "Embeddings",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/embeddings/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "baf29315a45550eb6e41fb6e7af2f86e4f46b5324bfe94ebefb16a2890d4d369"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/libraries",
+    "path": "studio-api/knowledge-rag/libraries.md",
+    "title": "Libraries",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/libraries/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "50e07f38ce5909d6847cf6fa1e3820fa9bbb3c1ad196629840d50b247c403a24"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/rag_quickstart",
+    "path": "studio-api/knowledge-rag/rag_quickstart.md",
+    "title": "RAG Quickstart",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/rag_quickstart/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "961e32133ec9ef358fea7a49275c1ba77962b221d77bc08126565b6fa4b12fe9"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit",
+    "path": "studio-api/knowledge-rag/search-toolkit.md",
+    "title": "Search Toolkit",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d03835a04a4c6b67f54e980778a94754e82490ce237c5399d0c6de73bab7fd40"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion",
+    "path": "studio-api/knowledge-rag/search-toolkit/ingestion.md",
+    "title": "Ingestion",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/ingestion/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "32cdcfa4fa9bff0977dbcb7b39e74aeee91dedf3195fd0cd67c24ebd3cc90624"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion/embedders",
+    "path": "studio-api/knowledge-rag/search-toolkit/ingestion/embedders.md",
+    "title": "Embedders",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/ingestion/embedders/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c61c87b56cc59fba1e77ea31b4adef2fb497a251fbccb8acf19b7b72e22da3bf"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion/enrichers",
+    "path": "studio-api/knowledge-rag/search-toolkit/ingestion/enrichers.md",
+    "title": "Chunk enrichers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/ingestion/enrichers/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "35f75578bfbe2fa198fa59e5b4c1c0068b854185de379185b9d083316b3a85fa"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion/extractors",
+    "path": "studio-api/knowledge-rag/search-toolkit/ingestion/extractors.md",
+    "title": "Document extractors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/ingestion/extractors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "dc56d442d97eaf5d5d9d14a888fc33daa7436aafa89fe4045246df4c3819e3b3"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion/loaders",
+    "path": "studio-api/knowledge-rag/search-toolkit/ingestion/loaders.md",
+    "title": "File loaders",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/ingestion/loaders/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "83f972a43f14dd9c7a991883de3914665c39254c34f69b9e9bc8c6cb298c615e"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion/splitters",
+    "path": "studio-api/knowledge-rag/search-toolkit/ingestion/splitters.md",
+    "title": "Text splitters",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/ingestion/splitters/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6325fedd51dc4a00feb76ebdbbe17532d85eddf64dfe70788f290ecd98b9eb9b"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/quickstart",
+    "path": "studio-api/knowledge-rag/search-toolkit/quickstart.md",
+    "title": "Quickstart",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/quickstart/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7031bf7fa455851f5da6df775cd9e52db48a628cb012581520f6a9c614c97582"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/retrieval",
+    "path": "studio-api/knowledge-rag/search-toolkit/retrieval.md",
+    "title": "Retrieval",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/retrieval/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "65abf1f8035d67243ae10d9bf5445090da559b2f987ac162ae0f13249a5769a6"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/retrieval/preprocessing",
+    "path": "studio-api/knowledge-rag/search-toolkit/retrieval/preprocessing.md",
+    "title": "Query preprocessing",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/retrieval/preprocessing/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6d84dbfb53a5da12b41981ed20bd8be965542d67f0914f61ce24c6c5b651be00"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/retrieval/rerankers",
+    "path": "studio-api/knowledge-rag/search-toolkit/retrieval/rerankers.md",
+    "title": "Rerankers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/retrieval/rerankers/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "f9acf7107b562a3010e28be92598f56196f32adba46c6902e8f8d59fa1dc21c8"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/retrieval/retrievers",
+    "path": "studio-api/knowledge-rag/search-toolkit/retrieval/retrievers.md",
+    "title": "Retrievers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/retrieval/retrievers/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9352a84bf64a76b248396ef7606ab58cbd03dca5f939d624baa0680e91f4e6ac"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/retrieval/semantic-cache",
+    "path": "studio-api/knowledge-rag/search-toolkit/retrieval/semantic-cache.md",
+    "title": "Semantic cache",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/retrieval/semantic-cache/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c25b34b8efa180db38431c6ab3197bdcdc9723866e0f8acca87670e52423f566"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/search-index",
+    "path": "studio-api/knowledge-rag/search-toolkit/search-index.md",
+    "title": "Search index",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/search-index/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "da9bec5a12a27d48522f96724bd6fb7d6c572e0bb8fd0d4f785f0ff34b561fae"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa.md",
+    "title": "Manage and deploy Vespa applications",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b97f2b79b27f85938eacd38d1e7fc6b1fb5b2b921cb0842304dad2761d08a057"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/anatomy",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa/anatomy.md",
+    "title": "Anatomy of a Vespa application",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/anatomy/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a0adb5797cbd0fbec1028502717fe9a0986c9f94c6a3baf10f746cbcef7c837f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/cli",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa/cli.md",
+    "title": "CLI reference",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/cli/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "42d240d8838af0a98c477abcc1fbdd5a407f824c82e15ede7f6e65e989d559f1"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/local-development",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa/local-development.md",
+    "title": "Local development",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/local-development/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2082ea8fe7bbedb82de02a733d854d7fdbe100c1523f36763112f1a7932a7564"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/migrations",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa/migrations.md",
+    "title": "Manage schema",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/migrations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5a43605e5bc917b34fe744cce897e9338ee12e5690696e17b4d260fdbf4ba387"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/operations",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa/operations.md",
+    "title": "Deploy and operate",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/operations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "85d56e9761097762d459e8dbd8407fa0a615cc93759f5552f4341560a8cd467e"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/vespa/query-profiles",
+    "path": "studio-api/knowledge-rag/search-toolkit/vespa/query-profiles.md",
+    "title": "Manage ranking",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/knowledge-rag/search-toolkit/vespa/query-profiles/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d05208676cac5ab8feca89f69ad0f6628e4e767332683e9547a16089792c854d"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/observability",
+    "path": "studio-api/observability.md",
+    "title": "Observability",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/observability/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1d366b6683979c61b0d227f2da1423079a2a434837902edf31891687b454bf3f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/observability/campaigns",
+    "path": "studio-api/observability/campaigns.md",
+    "title": "Campaigns",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/observability/campaigns/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "28b23b8a4d1429041be7f98d5d45cce218abec4d7be454067cd0e76221fb4229"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/observability/datasets",
+    "path": "studio-api/observability/datasets.md",
+    "title": "Datasets",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/observability/datasets/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2df11aad4c1bc0e7a8149f961d88070a7de7a4bced95e9a305f9e1d34282a900"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/observability/explorer",
+    "path": "studio-api/observability/explorer.md",
+    "title": "Explorer",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/observability/explorer/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d81baaaf86c5eda99aa2a808d6b3fd6c6a62bc7d507f286621cc12cb3c7da183"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/observability/judges",
+    "path": "studio-api/observability/judges.md",
+    "title": "Judges",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/observability/judges/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "cfb2414656219fe88e1555e0640d500fbc6322fcd316afbfcea4a4a2d1662822"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/observability/quickstart",
+    "path": "studio-api/observability/quickstart.md",
+    "title": "Quickstart",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/observability/quickstart/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "18b060a85423869d837620a69d87196fa73fd4ba198c83dd2feb4c4afac97fea"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/overview",
+    "path": "studio-api/overview.md",
+    "title": "Studio",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1edeb1715c77994d4d2eb6d1bd44b65a2a60a7219c427418d47d063f2bc9052c"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/safety-moderation",
+    "path": "studio-api/safety-moderation.md",
+    "title": "Moderation & Guardrailing",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/safety-moderation/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "06e57ec87ea6c26ef7c64b7a2db73bed90d4285aa638300f5c9fdcaf64fc8c0d"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities",
+    "path": "studio-api/workflows/building-workflows/activities.md",
+    "title": "Activities",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/activities/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "dd2fc8fe2db7cc7b2a3d2b6e5aa7b0b202af48c7d6d13be28ee2803221e97cfc"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/basics",
+    "path": "studio-api/workflows/building-workflows/activities/basics.md",
+    "title": "Basics",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/activities/basics/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "dbe13ef4bdf7b79e6b98c7582e2bccc6f627b1c50757855e86796569e910d8da"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/local_activities",
+    "path": "studio-api/workflows/building-workflows/activities/local_activities.md",
+    "title": "Local activities",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/activities/local_activities/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "92853321f0892cf3fe6fef0ca67272a0a014ee113507640b9d48069e2d9ddac9"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/activities/sticky_worker_sessions",
+    "path": "studio-api/workflows/building-workflows/activities/sticky_worker_sessions.md",
+    "title": "Sticky worker sessions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/activities/sticky_worker_sessions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "10a5022a83fc5d3d9f2b558d6db774373d171e5fc8aee1d202b5367ed05deb9f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/connectors",
+    "path": "studio-api/workflows/building-workflows/connectors.md",
+    "title": "Connectors in Workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/connectors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a7f8dc3d133cefcb214d40087aa43899bf9a06895de49cfd0a22fd43fe13d4b4"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/consuming_events",
+    "path": "studio-api/workflows/building-workflows/consuming_events.md",
+    "title": "Consuming Streaming Events",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/consuming_events/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "fb1b1f0dc962c3614b42dbbc96e983116e41793903c54840e0887adae3fc7e00"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/continue_as_new",
+    "path": "studio-api/workflows/building-workflows/continue_as_new.md",
+    "title": "Continue-As-New",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/continue_as_new/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9ba45052f50d7d2bde1e858068698d5b7631bc78b5bac69598cdc091103320ac"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/dependency_injection",
+    "path": "studio-api/workflows/building-workflows/dependency_injection.md",
+    "title": "Dependency Injection",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/dependency_injection/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ce6aea0e4e7a6613588e7d2056836bb023200cd009ae8e1d12eab07ded510ce9"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/durable_agents",
+    "path": "studio-api/workflows/building-workflows/durable_agents.md",
+    "title": "Durable Agents",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/durable_agents/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e832bc83e4e4090535b467f33ffcaab0ec56d2594d71cec3c79d3d7334d20833"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/encryption",
+    "path": "studio-api/workflows/building-workflows/encryption.md",
+    "title": "Encryption",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/encryption/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0f11ea1c4b974e0774e681ed047d7f50005b048fe26503b3a4575ff034cbd71d"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/on_behalf_of",
+    "path": "studio-api/workflows/building-workflows/on_behalf_of.md",
+    "title": "On-behalf-of workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/on_behalf_of/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "93e1690aa31be4c6629bfbc80f55df18ff0aaea075e9825aaa7dcc2edca12db0"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/payload_offloading",
+    "path": "studio-api/workflows/building-workflows/payload_offloading.md",
+    "title": "Payload offloading",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/payload_offloading/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "682145cab73f67d3927e8f36df4ac0f3419954621e4079c43e962e0a15bac1f6"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/plugins",
+    "path": "studio-api/workflows/building-workflows/plugins.md",
+    "title": "Plugins",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/plugins/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9f662cd94a42697af110222b4f028cc782f514765f8831c12c8d2abd5ab29e42"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/scheduling",
+    "path": "studio-api/workflows/building-workflows/scheduling.md",
+    "title": "Workflow Scheduling",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/scheduling/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "bbeb01061b16a9cc1770c55d4af2afd58158ceda3685fe7d16bb903ad7e8a9b8"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/streaming",
+    "path": "studio-api/workflows/building-workflows/streaming.md",
+    "title": "Streaming Events",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/streaming/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2cf1961d0ed4d224dd6e5ea3a84341efae39faaef5c2bbd285af1320e9299054"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/sub_workflows",
+    "path": "studio-api/workflows/building-workflows/sub_workflows.md",
+    "title": "Child workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/sub_workflows/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "330fe07c6f7c00e59338c995673833a849026536befc5befd6eb35a4c939abc7"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/waiting_for_conditions",
+    "path": "studio-api/workflows/building-workflows/waiting_for_conditions.md",
+    "title": "Waiting for Conditions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/waiting_for_conditions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1569790b304e83be78af884f88e86de56129640ceedd1388359ae5e45e42c7bc"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/workflow_exception",
+    "path": "studio-api/workflows/building-workflows/workflow_exception.md",
+    "title": "Workflows Exception",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/workflow_exception/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "259153c40685575cb8a390c494c694acb70527bf5b65eee6859e51040ecccf73"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/workflows",
+    "path": "studio-api/workflows/building-workflows/workflows.md",
+    "title": "Workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/workflows/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8b6ca7e2b4c1f408d4b438623b6db1fd2817cdac50643a46bd95e2764e149e8f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/building-workflows/workflows/determinism",
+    "path": "studio-api/workflows/building-workflows/workflows/determinism.md",
+    "title": "Determinism",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/building-workflows/workflows/determinism/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b8cad783de087051d0694436e7003b3fab8ec21016f5c09c3609750d0232ac59"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/cookbook_examples",
+    "path": "studio-api/workflows/getting-started/cookbook_examples.md",
+    "title": "Cookbook examples",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/cookbook_examples/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8c3caa529d8944de49c1dc8d5b68ff5cc62da6a8f10d947314255449f30dbc90"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts",
+    "path": "studio-api/workflows/getting-started/core_concepts.md",
+    "title": "Core concepts",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a7ddc5d0ec8355ef84807dd06104cebc9d3660283ed34adda347d073f7fc20b8"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/activities",
+    "path": "studio-api/workflows/getting-started/core_concepts/activities.md",
+    "title": "Activities",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/activities/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7ac8f58c8a425f731530dc5683d70b53cca09735113d7995b0b414de2c60b888"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/deployments",
+    "path": "studio-api/workflows/getting-started/core_concepts/deployments.md",
+    "title": "Deployments",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/deployments/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9c13136dafb90ceb6c8e61e9930e066a1f7912532c12fba5e3cfbfbe3c510bf9"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/events",
+    "path": "studio-api/workflows/getting-started/core_concepts/events.md",
+    "title": "Events",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/events/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0e9339d82dbedc582f1b9e11c0a5df4d01171e9e4ef58554e108e6335dc23e8f"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/executions",
+    "path": "studio-api/workflows/getting-started/core_concepts/executions.md",
+    "title": "Executions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/executions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c4d92802b0976cd00e9cadf02ce0a63d44fdf0a4fb8f83dd6c57686f78ef7551"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/workers",
+    "path": "studio-api/workflows/getting-started/core_concepts/workers.md",
+    "title": "Workers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/workers/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "cebaa50bc44894e5644867a986e591b762b40723a11b0b8ec0ba462a3e76ab24"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/core_concepts/workflows",
+    "path": "studio-api/workflows/getting-started/core_concepts/workflows.md",
+    "title": "Workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/core_concepts/workflows/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ba5df06ea0d74928246ffd78ef0d96bee475124ca2b85de357178792e4cc3223"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/installation",
+    "path": "studio-api/workflows/getting-started/installation.md",
+    "title": "Installation",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/installation/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "46db11c38ced2e61537d9a2c53cd956a98ffe80837026d5db487b77c468eac1b"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/overview",
+    "path": "studio-api/workflows/getting-started/overview.md",
+    "title": "Overview",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "81f05fa5d53db39625d884c98fd57a857f708e793728993dc4198622f2463a98"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/getting-started/your_first_workflow",
+    "path": "studio-api/workflows/getting-started/your_first_workflow.md",
+    "title": "Your first workflow",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/getting-started/your_first_workflow/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5c9907dbf02f711e4e459c3e44bee17c1b151a17509cf579fadd53ea9aef196a"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/conversational_workflows",
+    "path": "studio-api/workflows/interacting-with-workflows/conversational_workflows.md",
+    "title": "Conversational Workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/conversational_workflows/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5af1428b6cd1583c4d374f24d4eafe5fbf357e572024a4c9a8fa321afc5c9334"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/conversational_workflows/canvas",
+    "path": "studio-api/workflows/interacting-with-workflows/conversational_workflows/canvas.md",
+    "title": "Canvas",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/conversational_workflows/canvas/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "d4344b14ccc2aa2ebff577facf31a79ad071b63b0cb9eddf66b1544c9b2a2ada"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/conversational_workflows/forms_and_confirmations",
+    "path": "studio-api/workflows/interacting-with-workflows/conversational_workflows/forms_and_confirmations.md",
+    "title": "Forms and confirmations",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/conversational_workflows/forms_and_confirmations/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0b4c09b08dc8fa9a8055d8d5e60f0ba3e34a92faea175f7f5df43543a53e6f73"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/conversational_workflows/progress_tracking",
+    "path": "studio-api/workflows/interacting-with-workflows/conversational_workflows/progress_tracking.md",
+    "title": "Progress tracking",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/conversational_workflows/progress_tracking/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "3c4ae2a286386d4a231f97831442e06589dba245519bc51d1407de60d83e6910"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/conversational_workflows/publish_in_vibe",
+    "path": "studio-api/workflows/interacting-with-workflows/conversational_workflows/publish_in_vibe.md",
+    "title": "Publish in Vibe",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/conversational_workflows/publish_in_vibe/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "776b1f6e237d88c1f93cb656fc9916d918f466f382215f68509c055349bbf24a"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/conversational_workflows/tool_ui",
+    "path": "studio-api/workflows/interacting-with-workflows/conversational_workflows/tool_ui.md",
+    "title": "Tool UI",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/conversational_workflows/tool_ui/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9b657f5def16bd1e7d4e36206f764ca00ab5cb48c15701ed978397334868e257"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/queries",
+    "path": "studio-api/workflows/interacting-with-workflows/queries.md",
+    "title": "Queries",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/queries/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b5a1175ede93e334b2703bd8b3b33db961407f6569edcf040b1e552544ffd994"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/signals",
+    "path": "studio-api/workflows/interacting-with-workflows/signals.md",
+    "title": "Signals",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/signals/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a2b436bd9b4d6c85b75b6001e1d989bba9f9684b223f48ee554a0f2f42b65d01"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/interacting-with-workflows/updates",
+    "path": "studio-api/workflows/interacting-with-workflows/updates.md",
+    "title": "Updates",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/interacting-with-workflows/updates/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "793cdef0885fdd60d70c380be8caf1fcaf5da149ccfc32ebf74826118ae03079"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/concurrency",
+    "path": "studio-api/workflows/managing-workflows-in-production/concurrency.md",
+    "title": "Concurrency Patterns",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/concurrency/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "db9a070185787e5c18a077eb0473bf1cfa163931d33b65c6c9a1592c602f0660"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/deployments",
+    "path": "studio-api/workflows/managing-workflows-in-production/deployments.md",
+    "title": "Deployments",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/deployments/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "33ddd94d8084bca91fa6f5240fd396c36bd218ada629ed21e66709c2437ce37a"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/error_codes",
+    "path": "studio-api/workflows/managing-workflows-in-production/error_codes.md",
+    "title": "API Error Codes",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/error_codes/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9889ef6eb60af42bbbe188625fe9a685f8d1ad2b4fbffb76a47c5057482078f7"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/execution_context",
+    "path": "studio-api/workflows/managing-workflows-in-production/execution_context.md",
+    "title": "Execution Context",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/execution_context/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a5251c80c9c336ff137a4f3669dfb5b47d00d5770e1f871bcd9e0e2c838f0457"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/hardened_deployments",
+    "path": "studio-api/workflows/managing-workflows-in-production/hardened_deployments.md",
+    "title": "Hardened deployments",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/hardened_deployments/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "81b2a32fa54fcda2745b46a035008795616e336f3c8ecf5c1b9d9d2fc309c22e"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/rate_limiting",
+    "path": "studio-api/workflows/managing-workflows-in-production/rate_limiting.md",
+    "title": "Rate Limiting",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/rate_limiting/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6892db161a3198e6dd9194caa2ee26746ec32ce98a569bf9bf6d1f8a4ca4a2c6"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/managing-workflows-in-production/reset_workflow",
+    "path": "studio-api/workflows/managing-workflows-in-production/reset_workflow.md",
+    "title": "Resetting Workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/managing-workflows-in-production/reset_workflow/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6b365a36ab378bf9e2f584e419e8c325ed5ee8ac6a2b7c9f942e89c8f6d47a8c"
+  },
+  {
+    "url": "https://docs.mistral.ai/studio-api/workflows/observability",
+    "path": "studio-api/workflows/observability.md",
+    "title": "Observability",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/studio-api/workflows/observability/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e9cf5db1a9c7f742d825ef824e45b65ad1b887106e8b9b7a4e944b6be7d1d6ab"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/chat-legacy/agents",
+    "path": "vibe/chat-legacy/agents.md",
+    "title": "Agents",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/chat-legacy/agents/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ae7395dfef3546e410f641e897dd6a609331dd7f2a264ddf4e6b9dab9ac87057"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/chat-legacy/code-interpreter",
+    "path": "vibe/chat-legacy/code-interpreter.md",
+    "title": "Code Interpreter",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/chat-legacy/code-interpreter/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b57dc5202af61b9ab636dd3b9b8873d4286c6ba4f602e68aa67034de06f2830e"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/chat-legacy/deep-research",
+    "path": "vibe/chat-legacy/deep-research.md",
+    "title": "Deep Research",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/chat-legacy/deep-research/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "28efc50a528912d2bf2c9319900bbd9ef53d3b3b71d750fc7ee7e7a915a2ffd9"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/chat-legacy/memories",
+    "path": "vibe/chat-legacy/memories.md",
+    "title": "Memories",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/chat-legacy/memories/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "8fa1daa6c4fcefe3f39b480aa53d0b4fcdc51fbd05a074427647e639df1d1b5a"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/chat-legacy/think-mode",
+    "path": "vibe/chat-legacy/think-mode.md",
+    "title": "Think mode",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/chat-legacy/think-mode/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "f89bf0786982ca5077db01b7276062e9be0efe33d87fb3ac328869c2d4400780"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/choose-chat-work-code",
+    "path": "vibe/choose-chat-work-code.md",
+    "title": "Choose Chat, Work, or Code",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/choose-chat-work-code/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "83f796dfca652afa5e7b87edfc0d0f073eed7d556883f1a2d49baf9a564075dd"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/choose-cli-vscode-web-sessions",
+    "path": "vibe/code/choose-cli-vscode-web-sessions.md",
+    "title": "Choose CLI, VS Code, or web sessions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/choose-cli-vscode-web-sessions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "5ed64ddde50fd76851d5613ee6754f587836f9d33c7870f6417f8040507676b3"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/agents",
+    "path": "vibe/code/cli/agents.md",
+    "title": "Agents",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/agents/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "9a0bca019e46d91ad9e20e1ffc14e1a8da3568e6f68469da4cda7272de40f4f9"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/api-keys-profiles",
+    "path": "vibe/code/cli/api-keys-profiles.md",
+    "title": "API keys and profiles",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/api-keys-profiles/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "4983ab85b12e8615f8b0a85226439949b928ad2e6e7a0f9a4bafa7e7558969ab"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/commands-shortcuts",
+    "path": "vibe/code/cli/commands-shortcuts.md",
+    "title": "Commands and shortcuts",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/commands-shortcuts/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "182f024a7ed32bf339be33a0171b4815208e58a23069d6d5a0055d11298a8ab7"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/configuration",
+    "path": "vibe/code/cli/configuration.md",
+    "title": "Configuration",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/configuration/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "bd0a2076ec20660552d8c69867d804640573b6e774b19f89455a0622b3717089"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/connectors",
+    "path": "vibe/code/cli/connectors.md",
+    "title": "Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/connectors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "0632734ce894a1f6263075a541388fef7bc8cf83fcf6ae5b3f601af936908a81"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/install-setup",
+    "path": "vibe/code/cli/install-setup.md",
+    "title": "Install and setup",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/install-setup/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6f3e5841f562394c9f3df0066979ce6c881f1e09f19166ec76e1ffc2ab4ab7fa"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/mcp-servers",
+    "path": "vibe/code/cli/mcp-servers.md",
+    "title": "MCP servers",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/mcp-servers/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "635a341b0ffd9465cbb31e46b91e964029979f0521c9467ed6dd27152a0cf716"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/offline-models",
+    "path": "vibe/code/cli/offline-models.md",
+    "title": "Using offline models",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/offline-models/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "375d0e9883e9767f26458402119aeede72225341c424be02d2d72a982bf65dc5"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/skills",
+    "path": "vibe/code/cli/skills.md",
+    "title": "Skills",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/skills/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "844da44a918f10b096a64e93072f438aa2121dc05830d431024eb7305e439f7a"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/teleport-cli-web",
+    "path": "vibe/code/cli/teleport-cli-web.md",
+    "title": "Teleport from CLI to web",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/teleport-cli-web/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7a74d1a3fac9acbd966f54dc43ec2e384538852629b5e8bdc171fa6f09a041da"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/cli/work-with-cli",
+    "path": "vibe/code/cli/work-with-cli.md",
+    "title": "Work with the CLI",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/cli/work-with-cli/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ad8c718dc53d9baec0985b70c532c786773df017dea880234f59101dc76d0f57"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/overview",
+    "path": "vibe/code/overview.md",
+    "title": "Vibe Code",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6df807504cc660e4f0655b6b0f2fd31cc0973eeeea751013eab95647b4d76b8d"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/safety-approvals-permissions",
+    "path": "vibe/code/safety-approvals-permissions.md",
+    "title": "Safety, approvals, and permissions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/safety-approvals-permissions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e986e99d80aafd6b59dbff550487866fb47c73670a576cc69288b8da8bc2bea0"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/get-started",
+    "path": "vibe/code/vibe-code-web/get-started.md",
+    "title": "Get started",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/get-started/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "176b0fa6e13b66226baeefdffd311f4998ecb4fc2905ff7f75b8917c4fd6a055"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/github-repositories-permissions",
+    "path": "vibe/code/vibe-code-web/github-repositories-permissions.md",
+    "title": "GitHub repositories",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/github-repositories-permissions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c0ef1ec4f048cea91fcd1608c637826da2ce667f433a7b0093fcd441e21fa7b0"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle",
+    "path": "vibe/code/vibe-code-web/limits-and-lifecycle.md",
+    "title": "Limits and lifecycle",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/limits-and-lifecycle/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "fd1374716855f2d46e3016a3e313cb0ac97f7d129ad1cf79e00e05016b6fd213"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/projects",
+    "path": "vibe/code/vibe-code-web/projects.md",
+    "title": "Projects",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/projects/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b55a219639d461494ac6378554443443038f1816e01032a4fdac19ac5bc225bb"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/sandbox-environment",
+    "path": "vibe/code/vibe-code-web/sandbox-environment.md",
+    "title": "Sandbox environment",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/sandbox-environment/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6f1ee83d848c1782cccc9c7856cde503c2ca6034157363494f4959708a1869f6"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/security",
+    "path": "vibe/code/vibe-code-web/security.md",
+    "title": "Security",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/security/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7c04a3816ac71c8ee180b3c228d975db03e1667cdbefb6b87b0904af8e1b64a0"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/sessions",
+    "path": "vibe/code/vibe-code-web/sessions.md",
+    "title": "Sessions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/sessions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7845c0acc3bb3c76c11a98c1aeba0429bae92d82875b4cc45d3c6476a6efafe1"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/slack-integration",
+    "path": "vibe/code/vibe-code-web/slack-integration.md",
+    "title": "Vibe Code Web for Slack: Quickstart",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vibe-code-web/slack-integration/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "7b9ba64823dcaea11771e7fb7f91bc8c1d98f083a1588fc2c571c42b5ee1deca"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vs-code-extension/agents",
+    "path": "vibe/code/vs-code-extension/agents.md",
+    "title": "Agents",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vs-code-extension/agents/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "329606693473153d33bae4a1f1b4e196b66ae3c5e890609dd6904bbde2b02a54"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vs-code-extension/commands-slash-commands",
+    "path": "vibe/code/vs-code-extension/commands-slash-commands.md",
+    "title": "Commands and slash commands",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vs-code-extension/commands-slash-commands/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "b8c10bf8db7751aa7a74c7a5aa25a698bc1edee9b556c732dcda9f39144f1d1f"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vs-code-extension/install-authenticate",
+    "path": "vibe/code/vs-code-extension/install-authenticate.md",
+    "title": "Install and authenticate",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vs-code-extension/install-authenticate/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "da74491f604bce139257d8f07f1a1401f64cdd5468ae1f042aecf76666380b3f"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vs-code-extension/migration-mistral-code-enterprise",
+    "path": "vibe/code/vs-code-extension/migration-mistral-code-enterprise.md",
+    "title": "Migration from Mistral Code Enterprise",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vs-code-extension/migration-mistral-code-enterprise/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "f94e9db412f6b9ab25334b00c8a7aaf24e7add33566d9b82a8cfa589c6ebb185"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vs-code-extension/settings",
+    "path": "vibe/code/vs-code-extension/settings.md",
+    "title": "Extension settings",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vs-code-extension/settings/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1b76f99a4190e991c8ccfdd9cd90ac6d7019b999eab4b49b7171e9f21f08d3a8"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/code/vs-code-extension/work-with-extension",
+    "path": "vibe/code/vs-code-extension/work-with-extension.md",
+    "title": "Work with the extension",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/code/vs-code-extension/work-with-extension/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2921b073b6e6440c76dfddf8fef01fd8e1da1c1fe0e1002c6b89b4e4f454d2b4"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/overview",
+    "path": "vibe/overview.md",
+    "title": "Vibe",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/overview/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "6d18894b6b2625c6d6dc75ab00048045b7053c021c926126662d8e826a7c6e47"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/connectors",
+    "path": "vibe/work/connectors.md",
+    "title": "Connect tools with Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/connectors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "aa874356695cbced90c003d6a06bfb436b3b016be9f2248fce8737fcf82d5c39"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/connectors/knowledge-connectors",
+    "path": "vibe/work/connectors/knowledge-connectors.md",
+    "title": "Knowledge Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/connectors/knowledge-connectors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "caf62d55050e71498be49cd7c67a9c173dbaed6b1919002cb0f26c49ee32a0b0"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/connectors/mcp-connectors",
+    "path": "vibe/work/connectors/mcp-connectors.md",
+    "title": "MCP Connectors",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/connectors/mcp-connectors/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e68926ab1ea9edb9d32e972f3e8a10115efe487dc8db697891d51dcdcd7066d8"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/custom-instructions",
+    "path": "vibe/work/custom-instructions.md",
+    "title": "Set custom instructions",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/custom-instructions/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "98050e55d4a986bb6eb8fcd1e37125e60cecfaecdbbb68fd34930e1c6947d14b"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/files-and-canvas",
+    "path": "vibe/work/files-and-canvas.md",
+    "title": "Work with Files and Canvas",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/files-and-canvas/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "2f2564bcf169f13cd40c6a95bb8ed9e4080b44b0edd465145c4f62700684cc55"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/get-started",
+    "path": "vibe/work/get-started.md",
+    "title": "Get started with Work",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/get-started/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "05ca0161d2cf28c5ae41fc4dfaeecdc4b1a45eddc563a285af96f94e86e442ba"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/image-generation",
+    "path": "vibe/work/image-generation.md",
+    "title": "Generate images",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/image-generation/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "e751102aa0fa21b4ee7eaf7a32c7678b77cdb3adfcb01d7a70ddcf9b5254ee78"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/libraries",
+    "path": "vibe/work/libraries.md",
+    "title": "Add context with Libraries",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/libraries/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "ba3c59ae39bbdc448937b496a08080971a4c311be16d9bcc4a572d8ba17cbd2a"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/projects",
+    "path": "vibe/work/projects.md",
+    "title": "Group tasks with Projects",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/projects/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a1dec111a7dc1ccd6228d99a657089043232cfedb4d3796f3e2d0d8336b864c3"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/safety-and-approvals",
+    "path": "vibe/work/safety-and-approvals.md",
+    "title": "Safety and approvals",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/safety-and-approvals/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "90c81d0cbc16be91b2cf69c85a1d04a0bfd55087fb064c8c286ca0b6645e0b92"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/scheduled-tasks",
+    "path": "vibe/work/scheduled-tasks.md",
+    "title": "Schedule tasks",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/scheduled-tasks/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "50990710845ae8eec8cb83dcdfe9eaaf14962268cc03e0089e55e44db4d9d062"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/skills",
+    "path": "vibe/work/skills.md",
+    "title": "Reuse work with Skills",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/skills/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "c09fbaccb77b2f556c153a8bf1955d246c13398714ad345f6e4b53643a357182"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/switch-organization-workspace",
+    "path": "vibe/work/switch-organization-workspace.md",
+    "title": "Switch Organization or Workspace",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/switch-organization-workspace/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "036bccf882c6a6cd3cc42522939bd43fcd7f967f288605b5a177a68f90100d64"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/voice-mode",
+    "path": "vibe/work/voice-mode.md",
+    "title": "Use Voice mode",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/voice-mode/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "a53e994241b295844ab15f2fe3cf8b338229cffaf6377d5d4f6cd93011c33f58"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/web-search-open-url",
+    "path": "vibe/work/web-search-open-url.md",
+    "title": "Search the web",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/web-search-open-url/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "1e45034744d7eb38ca88a6fdd1b6bf394b58ff1066cff136d363bb5a3dfedc05"
+  },
+  {
+    "url": "https://docs.mistral.ai/vibe/work/workflows",
+    "path": "vibe/work/workflows.md",
+    "title": "Run Workflows",
+    "kind": "doc",
+    "source_path": "src/content/en/docs/vibe/work/workflows/page.mdx",
+    "source_commit": "5b47202ab46644bb5e7c7ca35d64b121b24c2b11",
+    "sha256": "32232e51d86d14096143cef2970d10b77f796cd2e0cf175d8e0606a6657d39fd"
+  }
+]

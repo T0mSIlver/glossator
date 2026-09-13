@@ -6,7 +6,13 @@ import pytest
 from mistralai.search.toolkit.context import RetrievalContext
 from mistralai.search.toolkit.embedding import Embedder, EmbeddingResult
 
-from glossator.history import UnknownPageError, phrase_history, section_history
+from glossator.history import (
+    SnapshotUnavailableError,
+    UnknownPageError,
+    phrase_history,
+    section_history,
+    snapshot_availability,
+)
 from glossator.ingest.pipeline import CachedEmbedder
 
 
@@ -77,6 +83,19 @@ def test_section_history_reports_a_changed_section_and_diff(tmp_path: Path) -> N
 def test_section_history_rejects_unknown_page(tmp_path: Path) -> None:
     with pytest.raises(UnknownPageError):
         section_history("/missing", None, _manifest(tmp_path))
+
+
+def test_missing_snapshot_directory_is_a_server_error(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    payload = json.loads(manifest.read_text())
+    missing = tmp_path / "missing"
+    payload["snapshots"][0]["corpus_dir"] = str(missing)
+    manifest.write_text(json.dumps(payload))
+
+    with pytest.raises(SnapshotUnavailableError, match="snapshot 2026-06-01 is unavailable"):
+        phrase_history("The limit is", manifest)
+
+    assert snapshot_availability(manifest) == {"readable": 1, "total": 2}
 
 
 def test_section_history_rejects_unknown_key(tmp_path: Path) -> None:

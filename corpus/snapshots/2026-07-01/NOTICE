@@ -1,0 +1,12 @@
+This directory contains documentation from Mistral AI's public documentation
+repository, https://github.com/mistralai/platform-docs-public.git, converted to normalized markdown.
+
+Source commit: 30f0c7c655287852d745d191f05e68a99d7a5b89
+Site: https://docs.mistral.ai
+Pages: 368
+
+The upstream repository is licensed under the Apache License 2.0; a copy is
+in this directory as LICENSE. Content here is derived from that repository,
+from the OpenAPI specification published at
+https://docs.mistral.ai/openapi.yaml, and from the model catalog in the same
+repository. Each page records its own upstream source path in frontmatter.

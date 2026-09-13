@@ -130,7 +130,8 @@ make mcp
 
 The API listens on `127.0.0.1:8080`. MCP uses `127.0.0.1:8000/mcp` by default;
 override it with `host=` and `port=`. Run the stdio transport with
-`uv run python -m entrypoints.mcp_server`.
+`uv run python -m entrypoints.mcp_server`. The history tool reads the vendored
+`corpus/snapshots/` directories, so the five-minute start needs no snapshot step.
 
 Mistral Medium 3.5 is the generation default. The project API key had zero
 quota for Medium 3.5 and Small 4 until 12 September 2026 (D-017a, D-049), so

@@ -1686,3 +1686,27 @@ The same census on the 57 reads the demo run actually made (420,322 characters):
 - Reading the run turned up a defect in the whole-page form that the section form did not have: `page_url=".../studio/conversations/reasoning"` without a section read `absent` before the August rename, because the backward search compared raw bodies and a folder rename rewrites the links inside a page. The page form now compares bodies as the changelog builder does, links reduced to their last path segment (D-048a), and, when the prose itself changed across the rename, follows the page by its last path segment and its headings in order. The reasoning page now reads `present at 2026-06-01`, `changed between 2026-07-01 and 2026-07-15` with the diff, `moved between 2026-08-01 and 2026-08-15`.
 
 **Reading.** The four calls D-050a recorded as errors are now answers, and the two folder-wide `under` calls that filled the budget are lists of pages. Five questions are too few for a correctness number to mean more than "nothing broke"; the number that moved is the shape of the calls, from guessing and retrying to one search and one history call.
+
+---
+
+## D-052 · The dated snapshot corpora are vendored
+
+**Status:** decided · 2026-09-13 · replaces the host-side snapshot mount in D-037d and D-045a
+
+**Facts.** The snapshot manifest named eight directories under
+`~/.cache/glossator/snapshots`. Those directories existed on the development
+machine but not in a fresh checkout or the application image. The MCP server
+still registered `mistral_docs_history`, so every history call failed with an
+`OSError` that the tool reported as `E_BAD_PARAM`. The eight corpora occupy 32
+MB together. Each is normalized Markdown from the same Apache-2.0 source as
+`corpus/mistral-docs`, and each copy matches the content digest already stored
+in the manifest.
+
+**Decision.** Store the eight corpora under `corpus/snapshots/<date>` and record
+repository-relative paths in the manifest. Snapshot readers resolve relative
+paths from the package's repository root while retaining absolute and
+home-relative path support. The image already copies `corpus/`, so deployment
+no longer mounts a machine-local snapshot directory. A missing or unreadable
+snapshot is an upstream failure, not a bad argument. Both health endpoints
+report readable snapshots against manifest entries. `make snapshots` rebuilds
+the set, and a new date is committed with its manifest row and changelog.

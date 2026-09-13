@@ -1,0 +1,510 @@
+---
+url: https://docs.mistral.ai/studio-api/connectors/management
+title: Managing Connectors
+breadcrumbs: [Studio, Connectors]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio-api/connectors/management/page.mdx
+source_commit: 7925ed1f1b7f02a453d3747e88aa58d1537c304c
+---
+
+# Managing Connectors
+
+Before you can use a Connector in conversations or call its tools, you need to register it. This page walks through the full Connector lifecycle:
+
+1. **Test** the MCP server in the [Connectors Debugger](https://docs.mistral.ai/studio-api/connectors/debugger) if you want to validate connectivity first.
+2. **Create** a Connector with the MCP server URL and visibility scope.
+3. **Authenticate** if the MCP server requires OAuth.
+4. **List tools** to discover what the Connector exposes.
+5. **Use** the Connector in [conversations](https://docs.mistral.ai/studio-api/connectors/conversations) or via [direct tool calls](https://docs.mistral.ai/studio-api/connectors/tool_calling).
+6. **Update** or **delete** when the Connector is no longer needed.
+
+## Create a Connector {#create}
+
+Register a new MCP Connector by providing a name, an MCP server URL, and a visibility scope.
+
+- `private`: only the creator can use it.
+- `shared_workspace`: anyone in the same Workspace.
+- `shared_org`: anyone in the organization. Only organization admins can create and manage these Connectors.
+
+You can reference a Connector by its name or its UUID, because Connector names are unique within a Workspace.
+
+The `name` accepts up to 64 characters, alphanumeric with underscores and dashes only.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    connector = await client.beta.connectors.create_async(
+        name="my_deepwiki",
+        description="DeepWiki MCP connector for code repository exploration",
+        server="https://mcp.deepwiki.com/mcp",
+        visibility="private",
+    )
+
+    print(f"ID:          {connector.id}")
+    print(f"Name:        {connector.name}")
+    print(f"Description: {connector.description}")
+    print(f"Server URL:  {connector.server}")
+    print(f"Auth type:   {connector.auth_type}")
+    print(f"Created at:  {connector.created_at}")
+    print(f"Modified at: {connector.modified_at}")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  const connector = await client.beta.connectors.create({
+    name: "my_deepwiki",
+    description: "DeepWiki MCP connector for code repository exploration",
+    server: "https://mcp.deepwiki.com/mcp",
+    visibility: "private",
+  });
+
+  console.log(`ID:          ${connector.id}`);
+  console.log(`Name:        ${connector.name}`);
+  console.log(`Description: ${connector.description}`);
+  console.log(`Server URL:  ${connector.server}`);
+  console.log(`Auth type:   ${connector.authType}`);
+  console.log(`Created at:  ${connector.createdAt}`);
+  console.log(`Modified at: ${connector.modifiedAt}`);
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+curl -X POST "https://api.mistral.ai/v1/connectors" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my_deepwiki",
+    "description": "DeepWiki MCP connector for code repository exploration",
+    "server": "https://mcp.deepwiki.com/mcp",
+    "visibility": "private"
+  }'
+```
+
+The `create` endpoint also accepts these optional fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `icon_url` | `string` | URL of the icon to associate with the Connector. |
+| `headers` | `object` | HTTP headers sent with every request to the MCP server, for example static API keys. |
+| `auth_data` | `object` | OAuth2 `client_id` and `client_secret`. Required when the MCP server uses OAuth. |
+| `system_prompt` | `string` | System prompt injected when the tools of this Connector are used. |
+
+## Authenticate a Connector {#get-auth-url}
+
+If the MCP server requires OAuth, retrieve the authorization URL and redirect the user so they can grant access. After the user completes the auth flow, they are redirected to `app_return_url`.
+
+> **Caution**
+>
+> Passing tokens programmatically is not supported. Use [Studio](https://console.mistral.ai/build/connectors) to authenticate Connectors instead.
+
+The response includes two fields:
+- `auth_url`: the URL to redirect the user to.
+- `ttl`: how long the URL remains valid, in seconds.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    result = await client.beta.connectors.get_auth_url_async(
+        connector_id_or_name="gmail",
+        app_return_url="https://myapp.example.com/oauth/callback",
+    )
+    print(f"Auth URL: {result.auth_url}")
+    print(f"TTL:      {result.ttl}s")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  const result = await client.beta.connectors.getAuthUrl({
+    connectorIdOrName: "gmail",
+    appReturnUrl: "https://myapp.example.com/oauth/callback",
+  });
+  console.log(`Auth URL: ${result.authUrl}`);
+  console.log(`TTL:      ${result.ttl}s`);
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+curl "https://api.mistral.ai/v1/connectors/gmail/auth_url?app_return_url=https://myapp.example.com/oauth/callback" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+```
+
+## Retrieve Connectors {#retrieve}
+
+### Get a single Connector
+
+Retrieve a Connector by its name or UUID. The response includes a `tools` array with the MCP tools the Connector exposes, if already discovered. To explicitly list or refresh tools, see the [list tools](https://docs.mistral.ai/studio-api/connectors/management#list-tools) section.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    # By name
+    connector_by_name = await client.beta.connectors.get_async(
+        connector_id_or_name="my_deepwiki"
+    )
+    print(f"Name: {connector_by_name.name}")
+    print(f"ID:   {connector_by_name.id}")
+
+    # By UUID (equivalent)
+    connector_by_id = await client.beta.connectors.get_async(
+        connector_id_or_name=str(connector_by_name.id)
+    )
+    print(f"Description: {connector_by_id.description}")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  // By name
+  const connector = await client.beta.connectors.get({
+    connectorIdOrName: "my_deepwiki",
+  });
+  console.log(`Name: ${connector.name}`);
+  console.log(`ID:   ${connector.id}`);
+
+  // By UUID (equivalent)
+  const connectorById = await client.beta.connectors.get({
+    connectorIdOrName: connector.id,
+  });
+  console.log(`Description: ${connectorById.description}`);
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+# By name
+curl "https://api.mistral.ai/v1/connectors/my_deepwiki" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+
+# By UUID
+curl "https://api.mistral.ai/v1/connectors/a1b2c3d4-5678-90ab-cdef-1234567890ab" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+```
+
+### List all Connectors
+
+List Connectors with cursor-based pagination. Use `next_cursor` to fetch subsequent pages.
+
+Pass `query_filters` to filter results. For example, `active: true` returns only Connectors that are active for your user and Workspace.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    # List all connectors (first page)
+    page = await client.beta.connectors.list_async(page_size=10)
+    all_connectors = list(page.items)
+
+    for c in page.items:
+        print(f"  - {c.name} ({c.id})")
+
+    # Fetch remaining pages
+    while page.pagination.next_cursor:
+        page = await client.beta.connectors.list_async(
+            page_size=10,
+            cursor=page.pagination.next_cursor,
+        )
+        all_connectors.extend(page.items)
+
+    print(f"Total: {len(all_connectors)} connectors")
+
+    # Filter active connectors only
+    active_page = await client.beta.connectors.list_async(
+        page_size=10,
+        query_filters={"active": True},
+    )
+    print(f"Active connectors: {len(active_page.items)}")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  // List all connectors (first page)
+  let page = await client.beta.connectors.list({ pageSize: 10 });
+  const allConnectors = [...(page.items ?? [])];
+
+  for (const c of page.items ?? []) {
+    console.log(`  - ${c.name} (${c.id})`);
+  }
+
+  // Fetch remaining pages
+  while (page.pagination?.nextCursor) {
+    page = await client.beta.connectors.list({
+      pageSize: 10,
+      cursor: page.pagination.nextCursor,
+    });
+    allConnectors.push(...(page.items ?? []));
+  }
+
+  console.log(`Total: ${allConnectors.length} connectors`);
+
+  // Filter active connectors only
+  const activePage = await client.beta.connectors.list({
+    pageSize: 10,
+    queryFilters: { active: true },
+  });
+  console.log(`Active connectors: ${(activePage.items ?? []).length}`);
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+# First page
+curl "https://api.mistral.ai/v1/connectors?page_size=10" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+
+# Next page (use next_cursor from previous response)
+curl "https://api.mistral.ai/v1/connectors?page_size=10&cursor=<next_cursor>" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+```
+
+## List tools {#list-tools}
+
+List the tools a Connector exposes. This helps verify available tool names before using them in [conversations](https://docs.mistral.ai/studio-api/connectors/conversations) or [calling them directly](https://docs.mistral.ai/studio-api/connectors/tool_calling).
+
+> **Note**
+>
+> If the Connector requires authentication, the user must complete the [auth flow](https://docs.mistral.ai/studio-api/connectors/management#get-auth-url) before listing or calling its tools.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    tools = await client.beta.connectors.list_tools_async(
+        connector_id_or_name="my_deepwiki",
+    )
+    for tool in tools:
+        print(f"  - {tool.name}: {tool.description}")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  const tools = await client.beta.connectors.listTools({
+    connectorIdOrName: "my_deepwiki",
+  });
+  for (const tool of tools) {
+    console.log(`  - ${tool.name}: ${tool.description}`);
+  }
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+curl "https://api.mistral.ai/v1/connectors/my_deepwiki/tools" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+
+# With pretty output (simplified schema with only name, description, and inputSchema)
+curl "https://api.mistral.ai/v1/connectors/my_deepwiki/tools?pretty=true" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+```
+
+The endpoint supports these query parameters:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `page` | `1` | Page number (offset-based pagination). |
+| `page_size` | `100` | Number of tools per page. |
+| `refresh` | `false` | Re-fetch tools from the MCP server instead of using the cache. |
+| `pretty` | `false` | Return a simplified payload with only `name`, `description`, `annotations`, and a compact `inputSchema`. |
+
+## Update a Connector {#update}
+
+Update one or more fields on a Connector. Only include the fields you want to change. The `connector_id` must be the UUID, not the name.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    connector_id = "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+
+    updated = await client.beta.connectors.update_async(
+        connector_id=connector_id,
+        description="Updated: DeepWiki connector for code exploration",
+    )
+    print(f"New description: {updated.description}")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  const connectorId = "a1b2c3d4-5678-90ab-cdef-1234567890ab";
+
+  // In the TS SDK, updatable fields go inside "updateConnectorRequest"
+  const updated = await client.beta.connectors.update({
+    connectorId,
+    updateConnectorRequest: {
+      description: "Updated: DeepWiki connector for code exploration",
+    },
+  });
+  console.log(`New description: ${updated.description}`);
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+curl -X PATCH "https://api.mistral.ai/v1/connectors/$CONNECTOR_ID" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"description": "Updated: DeepWiki connector for code exploration"}'
+```
+
+You can update these fields: `name`, `description`, `server`, `icon_url`, `system_prompt`, `headers`, and `auth_data`.
+
+## Delete a Connector {#delete}
+
+Delete a Connector permanently. Any Agents referencing it lose access to its tools.
+
+**Python**
+
+```python
+import asyncio
+from mistralai.client import Mistral
+
+client = Mistral(api_key="your-api-key")
+
+
+async def main() -> None:
+    connector_id = "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+
+    result = await client.beta.connectors.delete_async(
+        connector_id=connector_id,
+    )
+    print(f"Delete response: {result.message}")
+
+
+asyncio.run(main())
+```
+
+**TypeScript**
+
+```typescript
+import { Mistral } from "@mistralai/mistralai";
+
+const client = new Mistral({ apiKey: "your-api-key" });
+
+async function main(): Promise<void> {
+  const connectorId = "a1b2c3d4-5678-90ab-cdef-1234567890ab";
+
+  const result = await client.beta.connectors.delete({ connectorId });
+  console.log(`Delete response: ${result.message}`);
+}
+
+main();
+```
+
+**cURL**
+
+```bash
+curl -X DELETE "https://api.mistral.ai/v1/connectors/$CONNECTOR_ID" \
+  -H "Authorization: Bearer $MISTRAL_API_KEY"
+```

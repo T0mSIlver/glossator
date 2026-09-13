@@ -1,5 +1,5 @@
 .PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
-.PHONY: corpus-refresh corpus-check dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors failures
+.PHONY: corpus-refresh corpus-check snapshots dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors failures
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 .PHONY: deploy deploy-check
 
@@ -169,6 +169,10 @@ corpus-refresh:
 		--ref $(CORPUS_REF) \
 		--out $(CORPUS_DIR) \
 		--refresh-openapi
+
+## Rebuild the eight vendored documentation snapshots and their manifest
+snapshots:
+	uv run python -m glossator.corpus.snapshots build --out corpus/snapshots
 
 ## Check every corpus URL and anchor against docs.mistral.ai
 corpus-check:

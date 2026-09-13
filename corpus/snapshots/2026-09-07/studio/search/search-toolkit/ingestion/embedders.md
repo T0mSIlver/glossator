@@ -1,0 +1,122 @@
+---
+url: https://docs.mistral.ai/studio/search/search-toolkit/ingestion/embedders
+title: Embedders
+breadcrumbs: [Studio, Search, Search Toolkit, Ingestion]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio/search/search-toolkit/ingestion/embedders/page.mdx
+source_commit: 2e094f7bbe1395de4a738a3483def3573143d973
+---
+
+# Embedders
+
+Embedders convert text into vector embeddings for semantic search. Embeddings capture the semantic meaning of text, allowing similar concepts to be found even with different wording.
+
+## Embedder API {#embedder-api}
+
+All embedders implement the `Embedder` abstract base class, which provides three methods:
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `embed` | `(texts: list[str]) -> EmbeddingResult` | Core method: embed a batch of strings. |
+| `embed_chunks` | `(chunks: list[DocumentChunk]) -> list[DocumentChunk]` | Embed chunks and return copies with embeddings set. |
+| `embed_query` | `(text: str) -> list[float]` | Embed a single string and return the vector. |
+
+Only `embed` is abstract. `embed_chunks` and `embed_query` are concrete methods built on top of it.
+
+### `EmbeddingResult`
+
+Returned by `embed`:
+
+```python
+from pydantic import BaseModel
+
+class EmbeddingResult(BaseModel):
+    embeddings: list[list[float]]  # One embedding per input
+    total_tokens: int              # Total tokens consumed
+```
+
+## Mistral Embedder {#mistral-embedder}
+
+Use Mistral's embedding API for vectorizing text.
+
+**Installation**: Core library (no extra required)
+
+**Example**:
+
+```python
+from mistralai.client import Mistral
+from mistralai.search.toolkit.embedding import MistralEmbedder, MODEL_1024_EMBEDDING
+
+client = Mistral(api_key="your-api-key")
+embedder = MistralEmbedder(
+    client=client,
+    model_name=MODEL_1024_EMBEDDING,
+)
+embedded_chunks = await embedder.embed_chunks(chunks)
+```
+
+**Configuration**:
+
+| Option | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `model_name` | str | `MODEL_128_EMBEDDING` | Embedding model to use (see model constants below) |
+| `client` | Mistral | Required | Mistral API client (must be configured) |
+
+**Embedding model constants**:
+
+Use these predefined constants when configuring `MistralEmbedder`. The dimensions must match the `embedding_model` set on your index schema. Pair each constant with the matching `MistralEmbeddingPreset` (see [Embedding models](https://docs.mistral.ai/studio/search/search-toolkit/concepts/embedding-model)).
+
+| Constant | Model Name | Dimensions | Matching preset | Best for |
+|----------|-----------|-----------|-----------------|----------|
+| `MODEL_1024_EMBEDDING` | `"mistral-embed"` | 1024 | `MistralEmbeddingPreset.MISTRAL_EMBED_DIM_1024` | Default for Search Toolkit pipelines |
+| `MODEL_256_EMBEDDING` | `"mistral-embed-dim256-2510"` | 256 | `MistralEmbeddingPreset.MISTRAL_EMBED_DIM_256` | Low-latency, memory-constrained environments |
+| `MODEL_128_EMBEDDING` | `"mistral-embed-dim128-2510"` | 128 | `MistralEmbeddingPreset.MISTRAL_EMBED_DIM_128` | Minimum dimensions (default fallback) |
+
+**Import and usage**:
+
+```python
+from mistralai.search.toolkit.embedding import MistralEmbedder, MODEL_1024_EMBEDDING, MODEL_256_EMBEDDING, MODEL_128_EMBEDDING
+
+# Use MODEL_1024_EMBEDDING for Search Toolkit pipelines
+embedder = MistralEmbedder(client=client, model_name=MODEL_1024_EMBEDDING)
+
+# Or use a different model for specific use cases
+embedder_compact = MistralEmbedder(client=client, model_name=MODEL_256_EMBEDDING)
+```
+
+**Batch processing** (automatic):
+
+```python
+# Embed_chunks handles batching internally
+chunks_with_embeddings = await embedder.embed_chunks(chunks)
+
+# For custom batching
+embeddings = await embedder.embed([
+    "text 1",
+    "text 2",
+    "text 3",
+])
+```
+
+## Custom embedders {#custom-embedders}
+
+Implement the `Embedder` base class with a single `embed` method:
+
+```python
+from mistralai.search.toolkit.context import RetrievalContext
+from mistralai.search.toolkit.embedding import Embedder, EmbeddingResult
+
+
+class MyEmbedder(Embedder):
+    async def embed(self, texts: list[str], context: RetrievalContext = RetrievalContext()) -> EmbeddingResult:
+        embeddings = my_provider.embed(texts)
+        return EmbeddingResult(
+            embeddings=embeddings,
+            total_tokens=sum(len(t.split()) for t in texts),
+        )
+```
+
+`embed_chunks` and `embed_query` are inherited automatically.
+
+When you use a custom embedder, declare a `CustomEmbeddingModel` on your index schema with matching dimensions, data type, and distance metric. The schema describes the index, while the embedder produces the vectors. They must agree on the vector shape. See [Embedding models](https://docs.mistral.ai/studio/search/search-toolkit/concepts/embedding-model) for the distinction between `MistralEmbeddingModel` and `CustomEmbeddingModel`.

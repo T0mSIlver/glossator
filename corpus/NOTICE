@@ -1,0 +1,12 @@
+The directories corpus/mistral-docs and corpus/snapshots contain documentation
+from Mistral AI's public documentation repository,
+https://github.com/mistralai/platform-docs-public.git, converted to normalized
+Markdown at the commits recorded in their manifests.
+
+Site: https://docs.mistral.ai
+
+The upstream repository is licensed under the Apache License 2.0. Each corpus
+directory contains a copy as LICENSE. The content also derives from the OpenAPI
+specification published at https://docs.mistral.ai/openapi.yaml and the model
+catalog in the same repository. Each page records its upstream source path and
+commit in frontmatter.

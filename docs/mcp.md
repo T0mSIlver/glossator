@@ -37,6 +37,9 @@ The MCP server cannot ingest or delete content. Corpus changes go through the
 adapter, manifest checks and ingestion command. `GLOSSATOR_MCP_TOOLS` can
 register a subset of the three tools.
 
+History reads the vendored dated corpora under `corpus/snapshots/`; a fresh
+checkout needs no separate snapshot download or mount.
+
 The package and HTTP API retain generated answers, quote checks, model-based
 result reordering and the multi-search answer strategy. `POST /ask` and
 `POST /cite` expose that evaluated baseline (D-040b, D-017b). None is an MCP

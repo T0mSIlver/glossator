@@ -252,10 +252,11 @@ reaches the served index only through the refresh workflow's gate
 (`.github/workflows/refresh.yml`, D-045): the candidate is evaluated beside the
 served snapshot on the frozen question sets, a pull request moves the pointer
 and re-vendors the corpus on a pass, and `make deploy` after the merge rebuilds
-the index. The `history` tool gains the new date after the operator copies the
-merged `corpus/mistral-docs` into `SNAPSHOTS_DIR/<date>` on the deployment host,
-adds its manifest row, and runs `python -m glossator.changelog build`. The
-workflow runs on manual trigger at v1.0;
+the index. The `history` tool gains a new date after its corpus is added under
+`corpus/snapshots/<date>`, its manifest row is committed, and
+`python -m glossator.changelog build` updates the committed changelog. The next
+image carries the new snapshot without a host-side mount. The workflow runs on
+manual trigger at v1.0;
 its weekly schedule is commented out and costs about 1 USD per run on the
 shipped models.
 

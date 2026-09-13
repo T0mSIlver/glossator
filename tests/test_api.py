@@ -15,6 +15,7 @@ from entrypoints.api import app, registry
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer, Citation, Trace
 from glossator.answer.llm import TokenUsage
+from glossator.corpus.snapshots import SnapshotUnavailableError
 from glossator.index.variants import VARIANTS
 
 URL = "https://docs.mistral.ai/api/endpoint/chat"
@@ -365,6 +366,7 @@ def test_health_reports_counts_and_corpus() -> None:
     assert corpus["pages"] > 0
     assert corpus["source_commit"]
     assert corpus["kinds"]
+    assert body["snapshots"] == {"readable": 8, "total": 8}
     assert body["embedding_probe"]["status"] in {"not_run", "passed"}
 
 
@@ -813,3 +815,15 @@ def test_history_section_errors_become_bad_param(
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "E_BAD_PARAM"
+
+
+def test_missing_history_snapshot_is_a_typed_503(monkeypatch: pytest.MonkeyPatch) -> None:
+    def phrase_history(text: str, manifest: object, **scope: object) -> dict[str, object]:
+        raise SnapshotUnavailableError("snapshot is missing")
+
+    monkeypatch.setattr("glossator.history.phrase_history", phrase_history)
+
+    response = _request("GET", "/history?text=rate+limits")
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "E_UPSTREAM"

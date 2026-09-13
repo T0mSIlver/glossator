@@ -15,7 +15,13 @@ from urllib.parse import urlsplit
 
 from glossator.answer.citations import find_span, normalize
 from glossator.citing import citation_link, page_search_text, section_keys
-from glossator.corpus.snapshots import DEFAULT_MANIFEST, SnapshotRecord, read_snapshot_manifest
+from glossator.corpus.snapshots import (
+    DEFAULT_MANIFEST,
+    SnapshotRecord,
+    SnapshotUnavailableError,
+    read_snapshot_manifest,
+    snapshot_corpus_dir,
+)
 from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 
@@ -99,7 +105,13 @@ def _built(path: Path) -> list[SnapshotRecord]:
 
 
 def _records(snapshot: SnapshotRecord) -> tuple[list[_SectionRecord], list[CorpusPage]]:
-    pages = [load_page(path) for path in iter_page_paths(Path(snapshot.corpus_dir).expanduser())]
+    corpus_dir = snapshot_corpus_dir(snapshot)
+    try:
+        pages = [load_page(path) for path in iter_page_paths(corpus_dir)]
+    except OSError as exc:
+        raise SnapshotUnavailableError(
+            f"snapshot {snapshot.date} is unreadable at {corpus_dir}: {exc}"
+        ) from exc
     records: list[_SectionRecord] = []
     for page in pages:
         sections = parse_sections(page.body, page_title=page.title)
@@ -414,7 +426,7 @@ def _stored_page_urls(corpora: tuple[tuple[str, str], ...]) -> frozenset[str]:
     """
     urls: set[str] = set()
     for corpus_dir, _digest in corpora:
-        for path in iter_page_paths(Path(corpus_dir).expanduser()):
+        for path in iter_page_paths(Path(corpus_dir)):
             urls.add(load_page(path).url.rstrip("/"))
     return frozenset(urls)
 
@@ -444,7 +456,9 @@ def history_under(
     snapshots = _built(manifest_path)
     if not snapshots:
         raise ValueError("the snapshot manifest has no built snapshots")
-    pages = _stored_page_urls(tuple((row.corpus_dir, row.content_digest) for row in snapshots))
+    pages = _stored_page_urls(
+        tuple((str(snapshot_corpus_dir(row)), row.content_digest or "") for row in snapshots)
+    )
     if not any(is_under(page, prefix) for page in pages):
         ancestor = _nearest_ancestor(prefix, pages)
         hint = f' nearest path with pages: "{ancestor}".' if ancestor else ""

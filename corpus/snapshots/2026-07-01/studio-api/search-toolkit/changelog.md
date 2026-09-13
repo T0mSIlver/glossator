@@ -1,0 +1,67 @@
+---
+url: https://docs.mistral.ai/studio-api/search-toolkit/changelog
+title: Changelog
+breadcrumbs: [Studio, Search Toolkit]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio-api/search-toolkit/changelog/page.mdx
+source_commit: 30f0c7c655287852d745d191f05e68a99d7a5b89
+---
+
+# Changelog
+
+All notable changes to Search Toolkit are documented here.
+
+## 0.0.9 {#0-0-9}
+
+**Breaking changes**
+
+_Document model_
+
+Search Toolkit now uses a unified document model built around `Document` and `DocumentChunk`, with a deterministic identity derived from a `source_id` and a `locator`. See the [Document model](https://docs.mistral.ai/studio-api/search-toolkit/document-model) page for full details.
+
+- Extractors now produce `DocumentChunk` objects directly; the separate *page* representation has been removed.
+- `Document.id` and `DocumentChunk.id` are now computed deterministically from `source_id` (plus `locator` for chunks), making indexing idempotent. The explicit `id` field on `File` and `document_id` on `DocumentChunk` have been removed.
+- Added `source_id`, `locator`, `parent_ref`, and `chunk_type` as first-class fields, along with typed, extensible metadata models. The same identity contract is mirrored on `SearchResultChunk`.
+
+_Vespa indexing model_
+
+Vespa now indexes one chunk per document via the new `DOCUMENT_PER_CHUNK` indexing mode, which becomes the recommended model. The previous single-document model is deprecated.
+
+- Added the `DOCUMENT_PER_CHUNK` indexing mode, including default fields, ranking profiles, and the full write, delete, and search paths.
+- Added an `IndexingMode` to the schema definition with deprecation hooks for migrating existing schemas.
+- The index API is split into a base `VespaSearchIndex` and a dedicated `SingleDocumentSearchIndex`; the single-document model is deprecated in favor of `DOCUMENT_PER_CHUNK`.
+- The schema `id_field` is deprecated and is no longer allowed for `DOCUMENT_PER_CHUNK` indexes.
+
+_Other_
+
+- Renamed the `indices` module to `search`. Update imports accordingly.
+
+**Improvements**
+
+- Added blob-storage `FileLoader` implementations for S3, Azure, and GCS, plus a `storage-s3` extra.
+- Added a `language-detection-fasttext` plugin.
+- Added OCR model literals and constants.
+- Vespa: extracted a dedicated `VespaClient` with improved error handling.
+- Vespa: added a backend-agnostic services definition, topology v2, and a translator, with automatic v2 topology generation for single-node Docker deployments.
+- Vespa: added Vespa-to-Vespa copy and index-to-streaming migration workflows.
+- Vespa: emit a metrics consumer in `services.xml`.
+- Vespa: warn when rank2 features are configured without rank1, and when ranking weights default to 0.
+
+**Security**
+
+- Updated `langchain-core` to `~=1.4`.
+
+**Bugfixes**
+
+- Vespa: rank by cosine similarity instead of euclidean distance.
+- Vespa: fix retrieval of the document count.
+- Vespa: thread `distribute_across_groups` into `load_topology_file`.
+- Vespa CLI: lazy-import index registration SDK models.
+- Treat truncated LLM responses as retryable and enrich `LLMException` / `SummaryGenerationError` for structured logging.
+- OCR extractor: use mimetype metadata for filetype detection.
+- Added `text/x-file` and `text/x-script.python` MIME types to the registry.
+
+## 0.0.8 {#0-0-8}
+
+Initial release of Search Toolkit as a tech preview.

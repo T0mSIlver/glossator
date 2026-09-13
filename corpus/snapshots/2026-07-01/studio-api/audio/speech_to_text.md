@@ -1,0 +1,58 @@
+---
+url: https://docs.mistral.ai/studio-api/audio/speech_to_text
+title: Speech to Text
+breadcrumbs: [Studio, Audio]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio-api/audio/speech_to_text/page.mdx
+source_commit: 30f0c7c655287852d745d191f05e68a99d7a5b89
+---
+
+# Speech Transcription
+
+This page covers Mistral's Speech Transcription capabilities, including Offline and Realtime transcription. You'll learn how to integrate these features into your applications and understand their use cases.
+
+![audio_graph](https://docs.mistral.ai/img/audio.png)
+
+## Overview
+
+Mistral's Speech Transcription services enable you to convert speech to text (STT) with high accuracy and low latency. We offer two main models tailored for different use cases:
+
+### Voxtral Mini Transcribe V2
+
+Voxtral Mini Transcribe V2 is designed for batch transcription. It provides:
+
+- **High accuracy**: Industry-leading transcription quality with low word error rates.
+- **Speaker diarization**: Automatically identifies and labels different speakers in your audio.
+- **Context biasing**: Allows you to guide the model with custom vocabulary for accurate transcription of domain-specific terms.
+- **Word-Level timestamps**: Provides precise timestamps for each word, useful for subtitle generation and audio search.
+- **Multilingual support**: Supports transcription in 13 languages, including English, Chinese, Hindi, Spanish, Arabic, French, Portuguese, Russian, German, Japanese, Korean, Italian, and Dutch.
+- **Noise robustness**: Maintains high accuracy in challenging acoustic environments.
+- **Long audio support**: Processes recordings up to 3 hours in a single request.
+
+### Voxtral Realtime
+
+Voxtral Realtime is built for live applications. It offers:
+
+- **Ultra-Low latency**: Configurable latency down to sub-200ms, ideal for voice agents and real-time applications.
+- **Streaming architecture**: Transcribes audio as it arrives, enabling natural and responsive voice interactions.
+- **Multilingual support**: Strong performance in 13 languages, ensuring global reach.
+- **Edge deployment**: Can be deployed on edge devices for privacy-first applications with a 4B parameter footprint.
+- **Open weights**: Available under the Apache 2.0 license on the [Hugging Face Hub](https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602), offering flexibility and transparency.
+
+> **Note**
+>
+> **Security & Privacy**: All models support GDPR and HIPAA-compliant deployments through secure on-premise or private cloud setups, ensuring your data remains protected.
+
+## Speech Transcription Services {#document-ai-services}
+
+## Getting Started
+
+Explore the features of Mistral's Speech Transcription services with our comprehensive guides:
+
+- **[Offline Transcription](https://docs.mistral.ai/studio-api/audio/speech_to_text/offline_transcription)**: Learn how to use Voxtral Mini Transcribe V2 for batch transcription, including speaker diarization, context biasing, and word-level timestamps.
+- **[Realtime Transcription](https://docs.mistral.ai/studio-api/audio/speech_to_text/realtime_transcription)**: Learn how to integrate Voxtral Realtime for live transcription with ultra-low latency, perfect for voice agents and real-time applications.
+
+> **Info**
+>
+> Looking for translating more than one file at a time? Check our [Batch feature](https://docs.mistral.ai/studio-api/batch-processing) (via API)

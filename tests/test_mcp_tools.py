@@ -599,6 +599,20 @@ def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
     assert "since requires under" in text
 
 
+def test_missing_history_snapshot_is_an_upstream_error(
+    mcp_server: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(*args: object, **kwargs: object) -> dict[str, object]:
+        raise mcp_server.history_service.SnapshotUnavailableError("snapshot is missing")
+
+    monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
+
+    text = _call_error(mcp_server, "mistral_docs_history", {"text": "a phrase"})
+
+    assert "E_UPSTREAM" in text
+    assert "stored snapshots" in text
+
+
 def test_history_text_prints_first_last_and_count(
     mcp_server: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -799,6 +813,7 @@ def test_health_lists_pages_chunks_and_the_three_tools(
     assert body["status"] == "ok"
     assert body["chunks"] == 4430
     assert body["pages"] == len(mcp_server._PAGE_SIZES) > 0
+    assert body["snapshots"] == {"readable": 8, "total": 8}
     assert body["tools"] == [
         "mistral_docs_search",
         "mistral_docs_read_page",

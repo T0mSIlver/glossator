@@ -1,0 +1,246 @@
+---
+url: https://docs.mistral.ai/studio-api/search-toolkit/retrieval/preprocessing
+title: Query preprocessing
+breadcrumbs: [Studio, Search Toolkit, Retrieval]
+kind: doc
+locale: en
+source_path: src/content/en/docs/studio-api/search-toolkit/retrieval/preprocessing/page.mdx
+source_commit: 6e06c6cfc14e66e45ddf1f06445146314cff5393
+---
+
+# Query preprocessing
+
+Query preprocessing improves user queries before retrieval. Techniques like rewriting and expansion can significantly improve retrieval quality, though they increase latency and cost.
+
+## LLM Query Rewriter {#llm-query-rewriter}
+
+Uses an LLM to reformulate queries into forms more likely to match indexed content. Converts informal language into structured queries, expands abbreviations, and clarifies intent.
+
+**Installation**: Core library (no extra required)
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.retrieval.pre_processors import LLMQueryRewriter
+from mistralai.search.toolkit.llm import MistralChat, LLMConfig
+from mistralai.client import Mistral
+
+llm = MistralChat(
+    client=Mistral(api_key="your-api-key"),
+    config=LLMConfig(model="mistral-small-latest"),
+)
+
+rewriter = LLMQueryRewriter(llm_provider=llm)
+
+# Original: "rag mistral"
+rewritten = await rewriter.rewrite("rag mistral")
+# Result: "What is Retrieval-Augmented Generation with Mistral AI?"
+
+# Use in QueryEngine
+query_engine = QueryEngine(
+    retriever=vector_retriever,
+    query_rewriter=rewriter,
+)
+
+result = await query_engine.search(query="rag mistral")
+# Query is rewritten before retrieval
+```
+
+**Configuration options**:
+
+| Option | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `llm_provider` | LLMProvider | Required | LLM to use for rewriting (MistralChat, etc.) |
+
+**Custom rewriting prompt**:
+
+```python
+from mistralai.search.toolkit.retrieval.pre_processors import LLMQueryRewriter
+from mistralai.search.toolkit.llm import MistralChat, LLMConfig
+
+llm = MistralChat(
+    client=Mistral(api_key="your-api-key"),
+    config=LLMConfig(model="mistral-small-latest"),
+)
+
+# With custom prompt
+rewriter = LLMQueryRewriter(
+    llm_provider=llm,
+    prompt="Reformulate this query for a technical documentation search engine: ",
+)
+
+rewritten = await rewriter.rewrite("how to set up django")
+```
+
+**When to use**:
+- Short or informal queries that need expansion
+- Queries with acronyms or domain-specific abbreviations
+- Improving recall for vague user input
+- Converting questions into keyword combinations
+
+**Cost considerations**:
+- 1 LLM call per query
+- Adds 100-500ms latency
+- Use strategically, not for every query
+
+## LLM Query Extension {#llm-query-extension}
+
+Breaks a query into multiple sub-queries exploring different facets. Each sub-query runs an independent retrieval pass; results are combined for broader recall.
+
+**Installation**: Core library (no extra required)
+
+**Example**:
+
+```python
+from mistralai.search.toolkit.retrieval.pre_processors import LLMQueryExtension
+from mistralai.search.toolkit.llm import MistralChat, LLMConfig
+from mistralai.client import Mistral
+
+llm = MistralChat(
+    client=Mistral(api_key="your-api-key"),
+    config=LLMConfig(model="mistral-small-latest"),
+)
+
+extender = LLMQueryExtension(
+    llm_provider=llm,
+    num_queries=3,  # Generate 3 sub-queries
+)
+
+# Original: "How does RAG work?"
+extended = await extender.extend("How does RAG work?")
+# Results in:
+# - "What is RAG?"
+# - "How does retrieval work in RAG?"
+# - "How does generation work in RAG?"
+
+# Use in QueryEngine
+query_engine = QueryEngine(
+    retriever=vector_retriever,
+    query_rewriter=extender,
+)
+
+result = await query_engine.search(query="How does RAG work?")
+# All 3 sub-queries are retrieved and results combined
+```
+
+**Configuration options**:
+
+| Option | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `llm_provider` | LLMProvider | Required | LLM to use for extension (MistralChat, etc.) |
+| `num_queries` | int | 3 | Number of sub-queries to generate |
+
+**Cost and performance**:
+
+```python
+# num_queries=3 means:
+# - 1 LLM call to generate sub-queries
+# - 3 retrieval passes (3x slower)
+# - 3x embedding calls (for each sub-query)
+# - Results combined/deduplicated
+
+# Choose based on tolerance:
+extender = LLMQueryExtension(llm_provider=llm, num_queries=2)  # Faster, lower recall
+extender = LLMQueryExtension(llm_provider=llm, num_queries=5)  # Slower, higher recall
+```
+
+**When to use**:
+- Complex queries with multiple aspects
+- Improving recall across different facets
+- Multi-faceted questions that need broad coverage
+- When latency tolerance allows for multiple retrievals
+
+**Best practice - combine with reranking**:
+
+```python
+query_engine = QueryEngine(
+    retriever=vector_retriever,
+    query_rewriter=LLMQueryExtension(llm_provider=llm, num_queries=3),
+    rerankers=[LLMReRanker(llm_provider=llm, top_k=10)],
+)
+
+# Flow:
+# 1. 1 query → 3 sub-queries (LLM call)
+# 2. 3 retrieval passes (3x embedding + vector search)
+# 3. ~30 results combined
+# 4. LLM reranking narrows to top 10 (1 more LLM call)
+# Total: 2 LLM calls + 3 vector searches + deduplication + reranking
+result = await query_engine.search(query="...", top_k=10)
+```
+
+## Custom query preprocessors {#custom-preprocessors}
+
+Query preprocessors are plain classes. No base class is required. `QueryEngine` accepts any object exposing `rewrite(query, context=RetrievalContext())` for its `query_rewriter` (or `extend(...)` for `query_extension`):
+
+```python
+from mistralai.search.toolkit.context import RetrievalContext
+
+class DomainSpecificRewriter:
+    """Rewrite queries for a specific domain."""
+
+    async def rewrite(self, query: str, context: RetrievalContext = RetrievalContext()) -> str:
+        """Rewrite the query."""
+        # 1. Normalize
+        normalized = query.lower().strip()
+
+        # 2. Expand domain-specific abbreviations
+        expansions = {
+            "ml": "machine learning",
+            "nlp": "natural language processing",
+            "ai": "artificial intelligence",
+        }
+        for abbr, expansion in expansions.items():
+            normalized = normalized.replace(f" {abbr} ", f" {expansion} ")
+
+        # 3. Add domain context if needed
+        if "algorithm" in normalized:
+            normalized += " implementation approach"
+
+        return normalized
+
+
+rewriter = DomainSpecificRewriter()
+query_engine = QueryEngine(
+    retriever=vector_retriever,
+    query_rewriter=rewriter,
+)
+```
+
+## When to use query preprocessing {#when-to-use}
+
+**Use preprocessing if**:
+- User queries are short/vague (e.g., "rag" instead of full questions)
+- Your index has highly specific terminology
+- You need better recall for multi-faceted questions
+- Latency tolerance allows for extra LLM calls
+
+**Skip preprocessing if**:
+- User queries are already well-formed
+- Latency is critical (real-time chat)
+- Cost is a concern (each LLM call adds up)
+- Vector retrieval alone gives good results
+
+**Hybrid approach**:
+
+```python
+# Optional preprocessing based on query length
+class OptionalRewriter:
+    async def rewrite(self, query: str, context: RetrievalContext = RetrievalContext()) -> str:
+        # Only rewrite short queries
+        if len(query.split()) < 3:
+            # Expand short query
+            return await llm.rewrite(query)
+        return query
+
+query_engine = QueryEngine(
+    retriever=vector_retriever,
+    query_rewriter=OptionalRewriter(),
+)
+```
+
+## See also {#see-also}
+
+- [Retrieval overview](https://docs.mistral.ai/studio-api/search-toolkit/retrieval): retrieval pipeline architecture
+- [Retrievers](https://docs.mistral.ai/studio-api/search-toolkit/retrieval/retrievers): vector and keyword search
+- [Rerankers](https://docs.mistral.ai/studio-api/search-toolkit/retrieval/rerankers): refine results after retrieval
+- [Semantic cache](https://docs.mistral.ai/studio-api/search-toolkit/retrieval/semantic-cache): cache preprocessed queries

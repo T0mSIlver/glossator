@@ -184,11 +184,11 @@ def _busy() -> ToolError:
     )
 
 
-def _upstream(operation: str, cause: Exception) -> ToolError:
+def _upstream(operation: str, cause: Exception, *, target: str = "the search index") -> ToolError:
     logger.warning("Upstream failure", operation=operation, error=str(cause))
     return _error(
         "E_UPSTREAM",
-        f"{operation} failed against the search index: {cause}",
+        f"{operation} failed against {target}: {cause}",
         "retry the identical call; if it repeats, say the documentation server is down.",
     )
 
@@ -777,6 +777,8 @@ async def mistral_docs_history(
             )
     except history_service.UnknownPageError as exc:
         raise _unknown_page(str(exc)) from exc
+    except history_service.SnapshotUnavailableError as exc:
+        raise _upstream("history", exc, target="the stored snapshots") from exc
     except (OSError, ValueError) as exc:
         raise _bad_param(str(exc), "pass one documented history form.") from exc
     if name == "under":
@@ -1026,6 +1028,7 @@ async def _mcp_health(request: Request) -> Response:
             "variant": _variant_name,
             "pages": len(_PAGE_SIZES),
             "chunks": chunks,
+            "snapshots": history_service.snapshot_availability(SNAPSHOT_MANIFEST),
             "embedding_probe": {"passed": probe_passed, **probe_detail},
             "tools": [name for name in _TOOL_ORDER if name in _ENABLED_TOOLS],
             "version": package_version(),
