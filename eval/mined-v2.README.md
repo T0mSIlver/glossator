@@ -97,7 +97,7 @@ requests, and posts unrelated to any Mistral product.
 ## Where the sessions came from
 
 The consumer-evaluation transcripts under `eval/runs/consumer-eval-v2/transcripts/` and the
-scratch root `/home/dev/.local/share/glossator-mcp-eval/`, which hold the same sessions.
+scratch root `~/.local/share/glossator-mcp-eval/`, which hold the same sessions.
 The questions put to those agents came from the existing sets; what is mined here is what
 each agent went looking for next and where it misread what it found — the queries it wrote
 for itself, and the sentences in which it declared something undocumented. Both were
@@ -108,7 +108,7 @@ python3 .agent-runs/mined-v2/consumer_queries.py eval/runs/consumer-eval-v2/tran
 python3 .agent-runs/mined-v2/consumer_probe.py  eval/runs/consumer-eval-v2/transcripts
 ```
 
-Claude Code transcripts under `/home/dev/.claude/projects/` newer than 2026-09-09 12:00
+Claude Code transcripts under `~/.claude/projects/` newer than 2026-09-09 12:00
 were listed (82 files across 20 directories) and searched with fixed-string patterns and
 match caps. They yielded nothing: the sessions on this repository are the evaluation
 pipeline's own work, and the Mistral-product text in them is the first mined set's own
