@@ -14,6 +14,7 @@ from entrypoints import api as api_module
 from entrypoints.api import app, registry
 from glossator.answer import service as answer_service
 from glossator.answer.citations import Answer, Citation, Trace
+from glossator.answer.config import AnswerConfig
 from glossator.answer.llm import TokenUsage
 from glossator.index.variants import VARIANTS
 
@@ -487,6 +488,23 @@ def test_ask_forwards_the_requested_model(fake_ask: list[dict[str, Any]]) -> Non
     _request("POST", "/ask", json={"question": "q", "model": "ministral-14b-2512"})
 
     assert fake_ask[0]["config"].model == "ministral-14b-2512"
+
+
+def test_ask_defaults_to_the_configured_model(
+    fake_ask: list[dict[str, Any]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GLOSSATOR_MODEL", "ministral-14b-2512")
+    _request("POST", "/ask", json={"question": "q"})
+    _request("POST", "/ask", json={"question": "q", "model": "mistral-medium-2604"})
+    # Compose passes the variable blank when the operator leaves it unset.
+    monkeypatch.setenv("GLOSSATOR_MODEL", "")
+    _request("POST", "/ask", json={"question": "q"})
+
+    assert [call["config"].model for call in fake_ask] == [
+        "ministral-14b-2512",
+        "mistral-medium-2604",
+        AnswerConfig().model,
+    ]
 
 
 def test_ask_generation_failures_are_a_typed_503_upstream(

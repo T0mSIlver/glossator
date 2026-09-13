@@ -1,6 +1,7 @@
 """The generated-answer path behind ``POST /ask`` and ``POST /cite``: the model
 choice, the failures that are upstream's fault, and the response payload."""
 
+import os
 from typing import Any
 
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
@@ -37,15 +38,18 @@ error after the service layer has exhausted its own retries."""
 def answer_config(model: str | None) -> AnswerConfig:
     """Build a validated answer configuration for one request.
 
+    The request's model wins; otherwise ``GLOSSATOR_MODEL``, which deployment
+    compose passes blank when unset, so a blank value means the shipped default.
     A model the price table does not know is refused at the door, unless a local
     chat server is configured, whose ids the table has never seen (D-035c).
     """
-    if model is not None and not known_serving_model(model):
+    chosen = model if model is not None else os.environ.get("GLOSSATOR_MODEL") or None
+    if chosen is not None and not known_serving_model(chosen):
         raise ValueError(
-            f"no price for model {model!r}; priced models: {sorted(PRICES)} "
+            f"no price for model {chosen!r}; priced models: {sorted(PRICES)} "
             "(or set GLOSSATOR_CHAT_SERVER_URL to serve from a local server)"
         )
-    return AnswerConfig(model=model) if model is not None else AnswerConfig()
+    return AnswerConfig(model=chosen) if chosen is not None else AnswerConfig()
 
 
 async def ask(
