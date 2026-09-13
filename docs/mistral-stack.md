@@ -58,16 +58,17 @@ separate clients when generation is local (D-035c;
 |---|---|---|
 | Shipped embeddings | `mistral-embed`, 1,024 dimensions | `mistral-embed`; baseline variants also used `mistral-embed-dim128-2510` at 128 dimensions (`src/glossator/index/variants.py:48-70`; `mistralai/search/toolkit/embedding/models.py:110-113`) |
 | Answer generation | `mistral-medium-2604`, the fixed Medium 3.5 id | Early smoke: `ministral-8b-2512`; primary API evaluations: `ministral-14b-2512`; Medium 3.5 was later measured by exact prompt replay on Mistral's API (D-017a, D-017c; `src/glossator/answer/config.py:16-19,103`) |
-| Reranking | `mistral-small-2603` | Retrieval and answer evaluations used `ministral-14b-2512`; Small 4 remains an untested default because its quota is zero (`src/glossator/retrieval/config.py:18-19`; `docs/eval-status.md:52-54`) |
+| Reranking | `mistral-small-2603` | Retrieval and answer evaluations used `ministral-14b-2512`; Small 4, the default, has never been run: the key had no quota for it until 12 September 2026 (`src/glossator/retrieval/config.py:18-19`; `docs/eval-status.md:52-54`) |
 | Translation, rewrite and search loop | Same model as answer generation | Evaluations used `ministral-14b-2512` or the local `llamacpp/ministral3-14b`; all calls share `MistralLLM` (`src/glossator/answer/service.py:59`; `src/glossator/answer/language.py:167-176,216-225`; D-035c) |
 | Dataset generation and answer judge | No shipped model | GLM models behind the swappable offline provider; these are evaluation dependencies, not serving dependencies (D-020, D-021) |
 
-The project key listed 46 models, but every Medium, Small and Magistral request returned
+The project key listed 46 models, but until 12 September 2026 every Medium, Small and Magistral request returned
 HTTP 429 with `x-ratelimit-limit-req-minute: 0`. Ministral 3, Codestral and
-`mistral-embed` worked on the same key, so retries cannot solve the Medium and Small
+`mistral-embed` worked on the same key, so retries could not solve the Medium and Small
 failures. No Mistral Large id was available (D-017a). The shipped defaults
-remain Medium 3.5 for generation and Small 4 for reranking; deployment must point
-chat at a reachable server or those calls fail (`docs/eval-status.md:219-223`).
+remain Medium 3.5 for generation and Small 4 for reranking; before that date,
+deployment had to point chat at a reachable server or those calls failed
+(`docs/eval-status.md:52-54,219-222`).
 
 ## Search Toolkit and Vespa plugin
 

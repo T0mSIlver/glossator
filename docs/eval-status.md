@@ -217,10 +217,10 @@ credited.
   to 0.59 to 0.17 to 0.19, quote verification is 0.90 to 0.92, and 0.0045 to
   0.0061 USD per question; judged correctness is pending until the z.ai window
   allows. Still unmeasured: the search loop on Medium,
-  and Small 4 as the reranker. The key's quota for both models is still zero,
-  so before the Work test check which model the deployed server is pointed at
-  (`GLOSSATOR_MODEL`, `GLOSSATOR_CHAT_SERVER_URL`), or `mistral_docs_answer`
-  will fail on the default.
+  and Small 4 as the reranker. The key had no quota for either model until
+  12 September 2026 (D-017a, D-049), so before the Work test check which model
+  the deployed server is pointed at (`GLOSSATOR_MODEL`,
+  `GLOSSATOR_CHAT_SERVER_URL`).
 - **`mined-v2` is not comparable** with the first mined set (local reasoning
   model at the card's sampling, not the API instruct model) and its rows are not
   yet validated by hand.
