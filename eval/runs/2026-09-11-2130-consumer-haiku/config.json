@@ -73,6 +73,6 @@
     "dev-245"
   ],
   "run_dir": "eval/runs/2026-09-11-2130-consumer-haiku",
-  "scratch_root": "/tmp/claude-1000/-home-dev-work-glossator/a214d92f-ee47-44a3-8f07-510f875101fd/scratchpad/consumer-scratch",
+  "scratch_root": "/tmp/claude-1000/-home-user-work-glossator/a214d92f-ee47-44a3-8f07-510f875101fd/scratchpad/consumer-scratch",
   "unanswerable_count": 7
 }
