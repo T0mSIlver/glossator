@@ -42,12 +42,12 @@ page, history) where the agent does its own retrieval and writes the answer
 (D-044). On 60 generated
 development questions the shipped path scores 0.93 judged correctness with
 Ministral 3 14B generating and GLM 5.3 judging; on 85 questions mined from real
-GitHub issues it scores 0.76 under the same models, and the failure analysis
-puts the gap on the prompt and the strictness of the reference answers, not on
-retrieval or on the generator's capacity. Medium 3.5, the
-product's default answer model, was measured on the single pass by replaying
-the recorded prompts (D-017b): correctness is unchanged within the interval and
-the answers are cleaner. Small 4, the default reranker, has never been run: the
+GitHub issues it scores 0.76 under the same models. The failure analysis puts
+the gap in generation, not retrieval, and the replay on Medium 3.5, the
+product's default answer model, shows it is the prompt and the strictness of
+the reference answers, not model capacity (D-017b): replaying the recorded
+prompts leaves correctness unchanged within the interval, and the answers are
+cleaner. Small 4, the default reranker, has never been run: the
 key's quota for both models is zero (D-017a).
 
 ## The shipped pipeline, stage by stage
@@ -146,7 +146,8 @@ extension is generated and thrown away, and its seams do not reach Vespa);
 - Lexical-heavy weights: lose everywhere. D-034.
 - The toolkit's reranker, RRF, `QueryEngine`, query extension, semantic cache:
   see the toolkit section. D-013, D-014, D-015.
-- A rehosted docs mirror with generated anchors: the product links to the live documentation pages, not to a mirror. D-036.
+- A rehosted docs mirror with generated anchors: the product links to the live
+  documentation pages, not to a mirror. D-036.
 - Copying the Vespa data volume to deploy: ZooKeeper rejects its own copied
   state; rebuild from the embedding cache takes four minutes. D-037d.
 - A French index: deferred, since rendering the question in English closes

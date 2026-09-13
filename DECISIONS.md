@@ -182,7 +182,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 
 **Status:** decided by Tom · 2026-09-08
 
-**Facts.** Prices (USD per M tokens, input/output, pricing page 2026-09-08): Mistral Medium 3.5 1.50/7.50; Mistral Large 3 0.50/1.50; Mistral Small 4 0.15/0.60; Ministral 3 8B 0.15/0.15; `mistral-embed` 0.10 input. Spend ceiling: 20 USD.
+**Facts.** Prices (USD per M tokens, input/output, pricing page 2026-09-08): Mistral Medium 3.5 1.50/7.50; Mistral Large 3 0.50/1.50; Mistral Small 4 0.15/0.60; Ministral 3 8B 0.15/0.15; `mistral-embed` 0.10 input. Credits: 20 USD.
 
 **Decision.** Generation on Mistral Medium 3.5. Cheaper Mistral models may serve reranking, dataset generation, and judging; each such use is recorded with its cost.
 
@@ -882,7 +882,7 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Status:** decided · 2026-09-09 · snapshot evaluation and history tool; the docs repository history was fetched in full on 2026-09-09 (1,294 commits since 2023-12-22)
 
 **Facts.**
-- The corpus adapter (D-002) turns one commit of `mistralai/platform-docs-public` into the corpus, and the evaluation runs in minutes, so both can run at any commit. A pipeline tuned on one commit and never run on another has no evidence that it survives the next docs release; the product asks for retrieval evaluation, so depth on evaluation over time is in scope.
+- The corpus adapter (D-002) turns one commit of `mistralai/platform-docs-public` into the corpus, and the evaluation runs in minutes, so both can run at any commit. A pipeline tuned on one commit and never run on another has no evidence that it survives the next docs release; retrieval evaluation is part of the product, so evaluation over time belongs in it.
 - The repository has had three layouts: Docusaurus `docs/` until 20 October 2025 (27 to 87 Markdown files), a Next.js `src/app` tree until 28 May 2026 (267 to 373), and the current `src/content/<locale>/docs` tree since (1,256 to 1,419 files including French). The adapter reads the current layout only.
 - Between two snapshots a fortnight apart most chunks are unchanged, so embeddings cached by content hash make a new snapshot cost a fraction of a full ingestion (a full sec1024 ingestion is about 1,033 chunks).
 - Whether a question was answerable at an older snapshot must be decided on content, not on the page: sections move. The verifier's whitespace-normalized span search over the whole snapshot decides "present" (same page or moved) deterministically; a span found nowhere goes to a judged step (reference answer against the top five lexically retrieved pages of the snapshot: same fact, different value, or not stated), with a second judge and a human sample, and the tables report the two kinds of cells separately.
