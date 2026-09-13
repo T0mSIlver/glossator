@@ -57,7 +57,7 @@ separate clients when generation is local (D-035c;
 | Component | Configured model | Models used in evidence |
 |---|---|---|
 | Shipped embeddings | `mistral-embed`, 1,024 dimensions | `mistral-embed`; baseline variants also used `mistral-embed-dim128-2510` at 128 dimensions (`src/glossator/index/variants.py:48-70`; `mistralai/search/toolkit/embedding/models.py:110-113`) |
-| Answer generation | `mistral-medium-2604`, the fixed Medium 3.5 id | Early smoke: `ministral-8b-2512`; primary API evaluations: `ministral-14b-2512`; Medium 3.5 was later measured by exact prompt replay through a work gateway (D-017a, D-017b; `src/glossator/answer/config.py:19-27,104-111`) |
+| Answer generation | `mistral-medium-2604`, the fixed Medium 3.5 id | Early smoke: `ministral-8b-2512`; primary API evaluations: `ministral-14b-2512`; Medium 3.5 was later measured by exact prompt replay on Mistral's API (D-017a, D-017c; `src/glossator/answer/config.py:19-27,104-111`) |
 | Reranking | `mistral-small-2603` | Retrieval and answer evaluations used `ministral-14b-2512`; Small 4 remains an untested default because its quota is zero (`src/glossator/retrieval/config.py:18-23`; `docs/eval-status.md:20-23,31-35`) |
 | Translation, rewrite and search loop | Same model as answer generation | Evaluations used `ministral-14b-2512` or the local `llamacpp/ministral3-14b`; all calls share `MistralLLM` (`src/glossator/answer/service.py:61-68`; `src/glossator/answer/language.py:182-190,231-240`; D-035c) |
 | Dataset generation and answer judge | No shipped model | GLM models behind the swappable offline provider; these are evaluation dependencies, not serving dependencies (D-020, D-021) |

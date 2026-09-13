@@ -43,11 +43,13 @@ page, history) where the agent does its own retrieval and writes the answer
 development questions the shipped path scores 0.93 judged correctness with
 Ministral 3 14B generating and GLM 5.3 judging; on 85 questions mined from real
 GitHub issues it scores 0.76 under the same models. The failure analysis puts
-the gap in generation, not retrieval, and the replay on Medium 3.5, the
+the gap in generation, not retrieval, and the first replay on Medium 3.5, the
 product's default answer model, shows it is the prompt and the strictness of
 the reference answers, not model capacity (D-017b): replaying the recorded
 prompts leaves correctness unchanged within the interval, and the answers are
-cleaner. Small 4, the default reranker, has never been run: the
+cleaner. The same prompts replayed on Mistral's API, now the reported Medium 3.5
+number, bring fabricated quotes per answer to 0.17 to 0.19; their judged
+correctness is pending (D-017c). Small 4, the default reranker, has never been run: the
 key's quota for both models is zero (D-017a).
 
 ## The shipped pipeline, stage by stage
@@ -207,13 +209,13 @@ credited.
 
 ## What is not measured, and matters for shipping
 
-- **Medium 3.5 is now measured on the single pass, by replay** (D-017b, added
-  the evening of 10 September): the recorded prompts of the four reporting runs
-  were sent to Medium through a gateway and scored on identical retrieval and
-  context. Judged correctness does not move (0.93 → 0.91, 0.84 → 0.84,
-  0.76 → 0.80, 0.64 → 0.62 with GLM 5.3), fabricated quotes halve, and the
-  partial-answer shape on real questions survives the swap, so it is the prompt
-  and the references, not the 14B. Still unmeasured: the search loop on Medium,
+- **Medium 3.5 is now measured on the single pass, by replay on Mistral's API**
+  (D-017c, 13 September): the recorded prompts of the four reporting runs were
+  sent to `mistral-medium-2604` on `https://api.mistral.ai` and scored on
+  identical retrieval and context. Fabricated quotes per answer fall from 0.40
+  to 0.59 to 0.17 to 0.19, quote verification is 0.90 to 0.92, and 0.0045 to
+  0.0061 USD per question; judged correctness is pending until the z.ai window
+  allows. Still unmeasured: the search loop on Medium,
   and Small 4 as the reranker. The key's quota for both models is still zero,
   so before the Work test check which model the deployed server is pointed at
   (`GLOSSATOR_MODEL`, `GLOSSATOR_CHAT_SERVER_URL`), or `mistral_docs_answer`
