@@ -443,7 +443,7 @@ Add it to the Vibe CLI, in config.toml:
   url = "$base/mcp"
   headers = { "Authorization" = "Bearer <token>" }
 
-Add it to Mistral Work: Connectors > + Add Connector > Custom MCP Connector,
+Add it to Vibe Work: Connectors > + Add Connector > Custom MCP Connector,
 Server URL $base/mcp. deploy/README.md has the tunnel and Connector steps.
 EOF
 }

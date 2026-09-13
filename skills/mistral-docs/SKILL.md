@@ -1,6 +1,6 @@
 ---
 name: mistral-docs
-description: Use when the user asks any question about Mistral products, models, pricing, rate limits, the API, SDKs, Mistral Work, Vibe, Studio, or La Plateforme, or when something in Mistral's documentation changed. Answers from the documentation through the mistral-docs connector, with a link to the section behind every claim, never from memory.
+description: Use when the user asks any question about Mistral products, models, pricing, rate limits, the API, SDKs, Vibe Work, Vibe, Studio, or La Plateforme, or when something in Mistral's documentation changed. Answers from the documentation through the mistral-docs connector, with a link to the section behind every claim, never from memory.
 ---
 
 # Answer from the Mistral documentation

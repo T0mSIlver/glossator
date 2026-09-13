@@ -1,4 +1,4 @@
-# Custom instructions for Mistral Work
+# Custom instructions for Vibe Work
 
 Paste these three sentences into `Context` > `Instructions`:
 

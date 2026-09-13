@@ -51,7 +51,7 @@ def render_readme(
     lines = [
         "# Work proxy evaluation",
         "",
-        "A Conversations-API agent stood in for a Mistral Work session: model",
+        "A Conversations-API agent stood in for a Vibe Work session: model",
         f"`{config['model']}` at `reasoning_effort: {config['reasoning_effort']}`, the",
         "mistral-docs Skill body plus the Work custom instructions as its",
         "instructions, and the `mistral_docs` Connector as its only tool. One",

@@ -174,7 +174,7 @@ version and rejects a response outside the same supported list
 negotiate `2025-11-25`; an older compatible client can negotiate an older listed
 revision.
 
-Mistral Work's Connectors debugger reports a passing server as `Protocol 2025-11-25`.
+Vibe Work's Connectors debugger reports a passing server as `Protocol 2025-11-25`.
 The deployment probe now requests the same revision, prints the server's returned
 revision and fails if it is missing or different (`docs/improvement-axes.md:415-419`;
 `deploy/probe.py:16-30,48-74,92-111`). A newer specification revision, `2026-07-28`,
@@ -197,9 +197,9 @@ authentication and both transports. If that support first appears in `mcp` 2.x,
 FastMCP must first remove or raise its current `<2.0` bound
 (`fastmcp_slim-3.4.7.dist-info/METADATA:37,49,63`).
 
-## Mistral Work and Connector constraints
+## Work and Connector constraints
 
-Mistral Work does not expose MCP resources, prompt templates or dynamic tool
+Work does not expose MCP resources, prompt templates or dynamic tool
 discovery. The current server therefore exposes only the three D-044 tools; shared
 rules fit in server instructions, individual tool descriptions and the workspace
 Skill (D-037a, D-029a, D-044;

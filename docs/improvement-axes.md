@@ -4,9 +4,9 @@
 
 Where the documentation server loses value between the index and the consumer, ordered by how much
 each change is expected to move the product as it is actually used: from a custom Connector in
-Mistral Work, and from a coding agent such as Claude Code.
+Vibe Work, and from a coding agent such as Claude Code.
 
-The evidence is three runs against the deployed server. A Mistral Work session on 2026-09-09 asked
+The evidence is three runs against the deployed server. A Work session on 2026-09-09 asked
 two questions through the Connector. A Claude Code session on the same evening asked one question
 with the connector attached. A blind consumer run
 (`eval/runs/2026-09-09-1905-consumer-eval/records.jsonl`) put a small model at its lowest reasoning

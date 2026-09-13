@@ -1,4 +1,4 @@
-"""The Mistral Work stand-in: the Conversations API's Connector tool loop.
+"""The Vibe Work stand-in: the Conversations API's Connector tool loop.
 
 Work has no API, but a Work session is a Connector-attached agent, and the
 Conversations API runs the same server-side tool loop with the same model and

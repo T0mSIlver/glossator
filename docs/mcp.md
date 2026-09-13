@@ -56,7 +56,7 @@ The D-040b consumer run predates D-044. Its retrieval configuration included
 the retired quote-verification tool. It motivated the three-tool design but did
 not evaluate this exact tool set.
 
-## Mistral Work
+## Vibe Work
 
 Serve the MCP endpoint over HTTPS, then register it as a custom MCP Connector:
 

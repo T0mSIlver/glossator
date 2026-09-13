@@ -7,7 +7,16 @@ It searches sections, reads pages and compares dated snapshots through three rea
 ## Try it
 
 The deployed server is `https://glossator.tomvaucourt.com/mcp` (Streamable HTTP; the bearer token is supplied on request).
-It announces itself as `mistral-docs` and its tools as `mistral_docs_*`.
+It announces itself as `mistral-docs` and its tools as `mistral_docs_*`; `https://glossator.tomvaucourt.com/health` is open and needs no token.
+
+In Vibe Work, add that URL as a `Custom MCP Connector` under `Connectors` and pre-authorise the three read functions; [`docs/mcp.md`](docs/mcp.md) has the full setup, the workspace Skill, the health endpoint and other clients.
+The workspace Skill in [`skills/mistral-docs/`](skills/mistral-docs/) is what makes Work search first and cite; install it under `Context > Skills > New Skill` as [`skills/mistral-docs/README.md`](skills/mistral-docs/README.md) describes.
+
+| Tool | Purpose |
+|---|---|
+| `mistral_docs_search(q, max_hits=5, under)` | The sections that state something: one hit per section with its key, heading path, snippet and the link to cite. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
+| `mistral_docs_read_page(page_url, section, lang="python")` | A whole page in reading order, or one section of a large page with its neighbours. |
+| `mistral_docs_history(text [+ page_url \| under] \| page_url + section \| under + since)` | When a phrase appeared, how a page or section changed across the dated snapshots, or what changed under a path between stored dates. Every change is a bound between two snapshot dates, never a day. |
 
 In the Vibe CLI, append a server to `config.toml`; `name` becomes the prefix of the tool names ([MCP servers](https://docs.mistral.ai/vibe/code/cli/mcp-servers#add)):
 
@@ -19,16 +28,9 @@ url = "https://glossator.tomvaucourt.com/mcp"
 headers = { "Authorization" = "Bearer <token>" }
 ```
 
-In the Vibe CLI the tools appear as `glossator_mistral_docs_search`, `glossator_mistral_docs_read_page` and `glossator_mistral_docs_history`; Mistral Work shows the tool names as they are.
+In the Vibe CLI the tools appear as `glossator_mistral_docs_search`, `glossator_mistral_docs_read_page` and `glossator_mistral_docs_history`; Work shows the tool names as they are.
 
-In Mistral Work, add that URL as a `Custom MCP Connector` under `Connectors` and pre-authorise the three read functions; [`docs/mcp.md`](docs/mcp.md) has the full setup, the workspace Skill, the health endpoint and other clients.
-The workspace Skill in [`skills/mistral-docs/`](skills/mistral-docs/) is what makes Work search first and cite; install it under `Context > Skills > New Skill` as [`skills/mistral-docs/README.md`](skills/mistral-docs/README.md) describes.
-
-| Tool | Purpose |
-|---|---|
-| `mistral_docs_search(q, max_hits=5, under)` | The sections that state something: one hit per section with its key, heading path, snippet and the link to cite. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
-| `mistral_docs_read_page(page_url, section, lang="python")` | A whole page in reading order, or one section of a large page with its neighbours. |
-| `mistral_docs_history(text [+ page_url \| under] \| page_url + section \| under + since)` | When a phrase appeared, how a page or section changed across the dated snapshots, or what changed under a path between stored dates. Every change is a bound between two snapshot dates, never a day. |
+Any other MCP client, such as MCP Inspector, uses the Streamable HTTP transport against the same URL with an `Authorization: Bearer <token>` header.
 
 ## Why this shape
 

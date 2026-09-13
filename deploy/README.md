@@ -1,7 +1,7 @@
 # Deploying glossator
 
 One command from this repository puts the MCP server on a Linux host you reach
-over SSH. A Cloudflare tunnel gives it an HTTPS hostname, and Mistral Work
+over SSH. A Cloudflare tunnel gives it an HTTPS hostname, and Vibe Work
 registers that hostname as a custom MCP Connector.
 
 The host needs docker with the compose plugin and an SSH account in the `docker`
@@ -111,7 +111,7 @@ These are the steps to do by hand, in order, on the deployment host.
 7. Put the hostname in `deploy/.env.deploy` as `GLOSSATOR_PUBLIC_HOSTNAME` and
    redeploy, so the script prints the real URLs instead of a placeholder.
 
-## Register the Connector in Mistral Work
+## Register the Connector in Work
 
 The Connector URL is the tunnel hostname plus `/mcp`, for example
 `https://glossator.example.com/mcp`. From the documentation page on MCP

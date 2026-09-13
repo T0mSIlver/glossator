@@ -3,7 +3,7 @@
 - [`alternatives.md`](alternatives.md): the decisions that shaped the product and the alternatives measured against it.
 - [`evaluation.md`](evaluation.md): the evaluation story, dataset by dataset, with every run linked; [`eval-status.md`](eval-status.md) is the stage-by-stage table.
 - [`failure-classes.md`](failure-classes.md): the four classes of question still answered wrong, with causes, fixes and costs.
-- [`mcp.md`](mcp.md): the tool contract and the Mistral Work setup.
+- [`mcp.md`](mcp.md): the tool contract and the Vibe Work setup.
 - [`architecture.md`](architecture.md): the pipeline in ten lines.
 - [`upstream.md`](upstream.md): the defects found in Mistral's packages and documentation, ranked, with where each fix goes.
 - [`search-toolkit.md`](search-toolkit.md): the Mistral Search Toolkit kept, wrapped, replaced, skipped.
@@ -35,7 +35,7 @@ src/entrypoints/  FastAPI and MCP servers over glossator.surface (CLIs are pytho
 corpus/           vendored corpus, manifest, license, notice
 eval/             datasets, committed run directories, corpus stats, replay exports
 docs/             architecture, evaluation, retrieval, corpus, stack notes
-skills/           the mistral-docs workspace Skill for Mistral Work
+skills/           the mistral-docs workspace Skill for Work
 deploy/           image, compose file, deploy script, tunnel templates
 tests/            offline tests and optional backend integration tests
 ```
