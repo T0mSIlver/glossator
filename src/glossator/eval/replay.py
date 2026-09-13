@@ -206,7 +206,7 @@ class _ChunkText:
 def _chunk_texts(corpus_dir: Path, chunking: ChunkStrategy) -> Mapping[str, _ChunkText]:
     """Every chunk one chunking of the corpus produces, with its stored content.
 
-    Same walk as `glossator.eval.failures.chunk_index`, keeping the text: the
+    Same walk as `glossator.eval.failures.corpus.chunk_index`, keeping the text: the
     verifier needs each merged source's chunk boundaries to name the chunk a
     quote came from, and the run's trace stores chunk ids, not offsets.
     """
