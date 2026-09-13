@@ -1,179 +1,87 @@
 # Evaluation
 
-Every number names the model that produced it; run names are directories under
-[`../eval/runs/`](../eval/runs/). `D-0xx` is a `DECISIONS.md` entry. The full
-stage-by-stage table is [`eval-status.md`](eval-status.md).
+Three questions decide whether the tool ships. Each has a number, a set, a model that produced it and a judge. `D-0xx` is the `DECISIONS.md` entry that took the decision. Run directories live under [`../eval/runs/`](../eval/runs/), one per run, with every model call recorded. The stage-by-stage table of every shipped choice is [`eval-status.md`](eval-status.md).
 
-## The story in one page
+| Question | Number | Set | Produced by | Judged by | Entry |
+|---|---|---|---|---|---|
+| Does search return the section that states the fact? | section recall@1 0.73, 0.87 with the reranker | 294 generated questions | `mistral-embed`, Ministral 3 14B reranking | code | D-034 |
+| Is the generated answer right, with a link that lands? | correctness 0.84 on held-out questions, 0.76 on real ones | 60 held-out, 85 mined | Ministral 3 14B | GLM 5.3, blind | D-035a, D-038 |
+| Is a stronger generator better? | correctness unchanged within the interval, fabricated quotes halved | the same 288 prompts | Medium 3.5 on Mistral's API | GLM 5.3, blind | D-017c |
+| Does an agent do as well with the tools as with a served answer? | 0.77 with the tools, 0.78 with the served answer at three times the latency | 30 questions | Claude Sonnet, low effort | GLM 5.3, blind | D-040b |
+| Does it hold where it runs? | correctness 0.60, history rows 0.80, unanswerable rows 0.40 | 30 questions | Medium 3.5 through the Work Connector and the Skill | GLM 5.3, blind | D-049b |
 
-The retrieval grid ran 294 generated questions through 13 configurations. It
-varied chunking, ranking weights and whether a second model reordered results
-([`2026-09-09-0136-dev-grid-v2`](../eval/runs/2026-09-09-0136-dev-grid-v2/),
-D-034). The selected configuration uses section chunks and 1,024-dimensional
-`mistral-embed` vectors. Vespa combines keyword and embedding scores, weighted
-towards embeddings.
+## The question sets
 
-Ministral 3 14B reordered the best 20 results in that grid. This raised the
-share of questions with the expected page first from 0.60 to 0.71. Whole-page
-chunks have no section anchors, so they cannot return an exact section link.
+Nothing reported was tuned on. `dev.jsonl` tuned retrieval and the answer prompt; the reporting sets are the held-out slice and the mined questions.
 
-The 294 questions in `dev.jsonl` were written by GLM 5.3 Flash. All 294 tuned
-retrieval. A balanced 60-question slice had not appeared in an answer evaluation
-before the fresh run. The reporting data also includes 85 questions from real
-GitHub issues. Of those, 54 came from SDK users (D-038, D-039).
+| Set | Count | Source | Role |
+|---|---:|---|---|
+| `dev.jsonl` | 294 | written by GLM 5.3 Flash from one page each, six question types | tuning only |
+| `dev-fresh60.jsonl` | 60 | a balanced slice of `dev.jsonl` never used for tuning | held-out reporting |
+| `mined.jsonl` | 85 | GitHub issues on the SDK and docs repositories, and agent transcripts, each checked by hand against the corpus | reporting on real questions |
+| `demo.jsonl` | 30 | 25 mined questions on agents, MCP and the Vibe CLI, 5 written for the history tool | the Work measurement |
 
-Another 84 questions came from Vibe CLI, client-ts and Stack Overflow issues, and one Work session.
-They await hand validation (D-038b). There are also 36 French translations and
-105 degraded versions of a 120-question development subset.
+Secondary sets, used once each: 36 French translations (D-008b), 105 badly worded rewrites (D-035b), 84 more mined questions not yet checked by hand (D-038b).
 
-Ministral 3 14B generated the main API results. GLM 5.3 judged each answer
-without seeing its configuration. Correctness was 0.93 on the tuned 60
-([`2026-09-09-0312-dev60-rerank`](../eval/runs/2026-09-09-0312-dev60-rerank/)),
-0.84 on the fresh 60
-([`2026-09-09-1211-fresh60-shipped`](../eval/runs/2026-09-09-1211-fresh60-shipped/)),
-and 0.76 on the 85 mined questions
-([`2026-09-09-1253-mined-shipped`](../eval/runs/2026-09-09-1253-mined-shipped/)).
+## How a number is produced
 
-Correctness fell to 0.68 on degraded questions
-([`2026-09-09-1228-noisy-single`](../eval/runs/2026-09-09-1228-noisy-single/)).
-It reached 0.94 on French questions after translating the query into English
-([`2026-09-09-0420-devfr-translated`](../eval/runs/2026-09-09-0420-devfr-translated/)).
+Code checks what code can check: whether a cited URL and anchor is the expected one, whether every quoted span exists in the chunk it names, whether a link resolves on the live page. A model judges correctness, groundedness and citation relevance without seeing which configuration produced the answer.
 
-The judge comparisons use weighted kappa, an agreement score adjusted for
-chance. Across 492 answers, GLM 5.3 Flash and the primary GLM 5.3 judge scored
-0.87 (D-021a). On a separate 120-answer comparison, Qwen 3.8 27B scored 0.72
-against GLM 5.3 (D-021c). Ministral 3 14B was the stricter judge.
+The judge is GLM 5.3, chosen so that a Mistral model does not grade Mistral answers. Four judges were compared: GLM 5.3 Flash agrees with it at weighted kappa 0.87 over 492 answers, a local Qwen at 0.72, Ministral 3 14B is stricter than both (D-021a, D-021c). Against 40 answers labelled by hand, GLM 5.3 agreed on 35 and never accepted an answer the reader rejected, so judged correctness is a floor (D-021b).
 
-The author also labelled 40 answers. GLM 5.3 agreed on 35. When they differed,
-GLM 5.3 never accepted an answer that the author rejected (D-021b).
+Sixty questions give an interval of about ±0.09, thirty about ±0.17. Only larger gaps are read as differences.
 
-The failure analysis covers 575 answers generated by Ministral 3 14B. GLM 5.3
-provided the verdicts. Generation caused 82 of 177 failures, or 46% (D-042). Retrieval
-misses affected 1% to 3% of well-written questions and 12% of degraded ones.
-No retrieved evidence was lost during context assembly.
+## Retrieval
 
-Of the 82 generation failures, 55 quoted the expected section correctly. The
-answer still omitted or misstated part of the reference
-([`2026-09-09-2028-failure-analysis`](../eval/runs/2026-09-09-2028-failure-analysis/),
-D-042). [`failure-classes.md`](failure-classes.md) turns the attribution into
-four named classes of question the system still gets wrong, each with question
-ids, the cause, the fix and its cost.
+A grid ran the 294 tuning questions through 13 configurations: page chunks against section chunks, 128 against 1,024 embedding dimensions, four ranking weight sets, and a listwise reranker on or off (`2026-09-09-0136-dev-grid-v2`, D-034).
 
-D-017c replaces only the answer-writing model while preserving each recorded
-prompt, with Medium 3.5 reached through Mistral's API. The four Ministral 3 14B
-to Medium 3.5 pairs of judged correctness and of fabricated quotes per answer
-are:
+Section chunks with anchors won because page chunks cannot return a section link at all. Vector-heavy weights won over the starter's, whose phase-one vector weight was zero (D-012). The reranker was the largest single gain, section recall@1 0.732 to 0.873, and it stays in the answer path only: it is 91% of a search's latency and an agent reads several hits anyway (D-015b). 128 dimensions were not worse without the reranker, and 1,024 ships because the reranker was only run on 1,024.
 
-- tuned 60: correctness 0.93 to 0.90, fabricated quotes 0.40 to 0.17
-- fresh 60: correctness 0.84 to 0.82, fabricated quotes 0.53 to 0.18
-- mined 85: correctness 0.76 to 0.73, fabricated quotes 0.59 to 0.18
-- mined-v2 83: correctness 0.64 to 0.65, fabricated quotes 0.41 to 0.19
+## The answer path
 
-Every correctness change is inside the ±0.09 interval these set sizes allow.
+`POST /ask` retrieves, reranks, assembles context, generates a structured answer with one marker per claim, verifies every quoted span, and refuses when nothing verifies.
 
-The four replay runs are
-[`dev60-rerank`](../eval/runs/2026-09-13-1148-medium35-api-replay-dev60-rerank/),
-[`fresh60-shipped`](../eval/runs/2026-09-13-1148-medium35-api-replay-fresh60-shipped/),
-[`mined-shipped`](../eval/runs/2026-09-13-1148-medium35-api-replay-mined-shipped/)
-and [`mined-v2-shipped`](../eval/runs/2026-09-13-1148-medium35-api-replay-mined-v2-shipped/).
-Quote verification is 0.90 to 0.92 and answers cost 0.0045 to 0.0061 USD per
-question at Medium 3.5's prices.
+| Set | Correctness | Correct refusal | Reference URL cited | Run |
+|---|---:|---:|---:|---|
+| tuned 60 | 0.93 | 0.92 | 0.82 | `2026-09-09-0312-dev60-rerank` |
+| held-out 60 | 0.84 | 0.87 | 0.84 | `2026-09-09-1211-fresh60-shipped` |
+| mined 85 | 0.76 | 0.92 | 0.86 | `2026-09-09-1253-mined-shipped` |
 
-The consumer run predates the three-tool MCP server. Its retrieval configuration
-included the retired citation-verification tool. Sonnet at low effort scored
-0.50 without tools and 0.77 with retrieval tools. Its links resolved 0.35 and
-0.92 of the time, respectively. Server-side generation scored 0.78 and took
-74 seconds at the median, against 21 seconds for retrieval tools
-([`consumer-eval-v2`](../eval/runs/consumer-eval-v2/), D-040b).
+Ministral 3 14B generated these, because the key had no Medium 3.5 quota until 12 September. Replaying the same 288 prompts on Medium 3.5 through Mistral's API moved correctness by −3, −2, −3 and +1 points on the four sets, all inside the interval, and halved fabricated quotes per answer, 0.40 to 0.59 down to 0.17 to 0.19 (D-017c). The generator is not the ceiling.
 
-GPT luna had built-in web search. It never called the MCP server in the 60 cells
-where one was available.
+The failure analysis over 575 answers puts 82 of 177 failures on generation, 55 of them with the right passage quoted; retrieval misses are 1% to 3% on well-written questions and context assembly lost nothing (D-042). [`failure-classes.md`](failure-classes.md) names the four classes still failing, with question ids and the fix for each.
 
-History uses eight snapshots of the documentation repository, starting on 1
-June 2026
-([`2026-09-09-1929-snapshot-labels`](../eval/runs/2026-09-09-1929-snapshot-labels/),
-D-041a). The labels found 357 moved sections. Of those, 300 kept the same content
-while their paths changed from `/studio-api/...` to `/studio/...` in August.
+Two smaller findings decided defaults. A single pass over reranked retrieval scores within two points of a search loop at a third of the latency and a fifth of the cost, so single pass is the default (D-035). Rendering a French question in English for retrieval raises correctness on 36 French questions from 0.75 to 0.94 (D-008b). Badly worded questions cost 19 points; a query rewrite recovers 4 and loses 5 on clean questions, so it stays off (D-035b).
 
-The snapshot evaluation used local Ministral 3 14B Reasoning for generation and
-GLM 5.3 for judging. Correctness ranged from 0.76 to 0.82 on questions answered
-by each snapshot
-([`2026-09-09-1949-snapshot-eval`](../eval/runs/2026-09-09-1949-snapshot-eval/)).
+## The agent path
 
-Each committed run stores its questions, retrieved hits, prompts, responses,
-citations, token usage, latency and errors (D-023). Cost ledgers before
-2026-09-09 omit model-based result reordering and all embedding calls (D-023b).
+Two agents answered the same 30 questions blind, with no mention of the server in their prompts (`consumer-eval-v2`, D-040b). Sonnet at low effort scored 0.50 from memory, 0.77 with search and read, and 0.78 when it asked the server for a finished answer, at 74 seconds against 21. Its links resolved 0.92 of the time with the tools against 0.35 without. GPT, which carries its own web search, never called the server in 60 cells: a consumer with a competing habit needs to be told the server exists, which is what the Work Skill does. This run decided that the agent writes the answer and the served answer stays as the API baseline (D-044).
 
-## In depth
+The Work measurement drives the same server-side loop Work runs: Medium 3.5 at high reasoning, the Skill as instructions, the Connector as the only tool, one conversation per question (D-049). Three runs on `demo.jsonl`:
 
-### Answer evaluation
+| Run | Correctness | History rows | Unanswerable rows | Characters per read | Entry |
+|---|---:|---:|---:|---:|---|
+| first, 12 Sep | 0.60 | 0.80 | 0.20 | 7,374 | D-049a |
+| reads contained | 0.62 | 0.90 | 0.30 | 4,735 | D-050a |
+| shipped server, 13 Sep | 0.60 | 0.80 | 0.40 | 5,410 | D-049b |
 
-The answer evaluator runs each question through the selected strategies. Code
-checks source matches, quote verification, refusal behaviour, usage, latency, and
-cost. A blinded model judge scores correctness, groundedness, and citation
-relevance.
+The history rows answer through the tool in one or two calls. The unanswerable rows are where the model fills a gap the documentation leaves; the stop rules in the Skill halved the searches on those questions and the listing form gives the model a proof of absence (D-044a, D-046).
+
+## The time axis
+
+Eight snapshots of the documentation repository, one every two weeks from 1 June 2026, are labelled for which questions each can answer (`2026-09-09-1929-snapshot-labels`, D-041a). The labels found the August rename of `/studio-api` to `/studio`: 300 sections moved unchanged. The history tool reads those snapshots and a precomputed changelog; the five history rows of the demo set are answered as a bound between two dates, never a day (D-048).
+
+## Not measured
+
+Mistral Small 4 is the shipped reranker default and has never run in an evaluation; every reranker number names Ministral 3 14B. No consumer arm had grep over the docs repository. The 84 second-pass mined questions are not checked by hand. Whether a text-fragment link survives a click from Work is open (D-047c).
+
+## Reproduce
 
 ```bash
-make eval-answers dataset=eval/dev.jsonl name=answers-dev
-make eval-answers dataset=tests/fixtures/answer-questions.jsonl \
-  name=answers-fixture strategies=single_pass variant=sec128 limit=4
+make eval-retrieval dataset=eval/dev.jsonl name=grid          # the retrieval grid
+make eval-answers dataset=eval/dev-fresh60.jsonl name=fresh    # the answer path
+make failures runs="eval/runs/<run> ..."                       # the failure analysis
+uv run python -m glossator.eval.work_proxy run --dataset eval/demo.jsonl --name demo   # the Work measurement
 ```
 
-Three run directories compare answer strategies on the same 60 questions
-(D-033, D-033a, D-035). `ministral-14b-2512` generated the answers. `glm-5.3`
-judged them without seeing the strategy. D-017c reports Medium 3.5 replays of
-the recorded single-pass prompts on Mistral's API.
-
-| Run directory | Retrieval | Strategy | Correctness | Groundedness | Correct refusal | Reference URL cited | Reference anchor cited | Median latency | Prompt tokens | USD per question at Medium 3.5 prices |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| `2026-09-08-2305-dev60-baseline` | original weights, no result-reordering model | `single_pass` | 0.79 | 0.75 | 0.82 | 0.72 | 0.52 | 3.0 s | 1.9k | 0.005 |
-| `2026-09-08-2305-dev60-baseline` | original weights, no result-reordering model | `search_loop` | 0.93 | 0.84 | 0.88 | 0.80 | 0.42 | 7.4 s | 16.0k | 0.028 |
-| `2026-09-08-2305-dev60-baseline` | original weights, no result-reordering model | `outline` | 0.64 | 0.64 | 0.72 | 0.46 | 0.22 | 3.7 s | 8.9k | 0.016 |
-| `2026-09-09-0232-dev60-anchors` | original weights, improved anchor fallback | `single_pass` | 0.82 | 0.79 | 0.87 | 0.76 | 0.58 | 3.0 s | 2.0k | 0.005 |
-| `2026-09-09-0312-dev60-rerank` | shipped weights and result reordering | `single_pass` | 0.93 | 0.82 | 0.92 | 0.82 | 0.62 | 7.2 s | 2.0k | 0.005 |
-| `2026-09-09-0312-dev60-rerank` | shipped weights and result reordering | `search_loop` | 0.94 | 0.83 | 0.90 | 0.82 | 0.54 | 20.7 s | 14.8k | 0.026 |
-
-Reranked single-pass retrieval closed most of the gap to the search loop, which
-remains available as the thorough mode of `ask`.
-
-Questions in another language are translated into English for retrieval. The
-answer remains in the question's language (D-008b). On 36 French questions,
-reference-URL citation rose from 0.47 to 0.80. Correctness rose from 0.75 to
-0.94. The English results on the same questions were 0.82 and 0.93.
-
-The runs are
-[`2026-09-09-0401-devfr-shipped`](../eval/runs/2026-09-09-0401-devfr-shipped/)
-and
-[`2026-09-09-0420-devfr-translated`](../eval/runs/2026-09-09-0420-devfr-translated/).
-
-Generated questions are well written, so a separate set measures poor wording.
-`../eval/dev-noisy.jsonl` contains 105 degraded versions from a 120-question
-development subset. It includes typos, bare keywords, vague wording, wrong
-product terms and requests buried in surrounding context. Reference sources and
-answers remain unchanged.
-
-Degradation lowers single-pass correctness from 0.87 to 0.68. The search loop
-falls from 0.90 to 0.74. Its lead therefore grows from three points to six, at
-about three times the latency and seven times the prompt tokens.
-
-Optional query rewriting recovers four of the 19 lost single-pass points. Its
-model call has 275 prompt tokens and 0.66-second median latency. Rewriting costs
-five correctness points on clean questions, so it remains off by default.
-
-The six paired runs are
-[`2026-09-09-1228-noisy-single`](../eval/runs/2026-09-09-1228-noisy-single/),
-[`2026-09-09-1230-clean-single`](../eval/runs/2026-09-09-1230-clean-single/),
-[`2026-09-09-1306-noisy-rewrite`](../eval/runs/2026-09-09-1306-noisy-rewrite/),
-[`2026-09-09-1306-clean-rewrite`](../eval/runs/2026-09-09-1306-clean-rewrite/),
-[`2026-09-09-1344-noisy-loop`](../eval/runs/2026-09-09-1344-noisy-loop/)
-and [`2026-09-09-1353-clean-loop`](../eval/runs/2026-09-09-1353-clean-loop/).
-
-Recorded spend is a lower bound for runs made before 2026-09-09. Their call
-ledgers omit the model that reordered search results. Embedding calls are not
-priced per run. The provider console is therefore the spending record.
-
-Later runs share one recorder between retrieval and answer generation. Their
-`calls.jsonl` files include result-reordering calls.
-
-The stage-by-stage table of every shipped choice with its evidence is in
-[`eval-status.md`](eval-status.md).
+A run directory holds the questions, every retrieved hit, every prompt and response, the citations, token usage, latency, cost and a README with its tables (D-023). Ledgers before 9 September omit the reranker's calls and embeddings, so their totals are a lower bound (D-023b).
