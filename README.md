@@ -107,15 +107,14 @@ lists each Mistral dependency, its version and known defects.
 ## Evaluation in five lines
 
 Every number below names its model; the runs and the judge study are in
-[`docs/evaluation.md`](docs/evaluation.md).
+[`docs/evaluation.md`](docs/evaluation.md), and each directory under
+`eval/runs/` stores its inputs, model calls, records, metrics and figures.
 
-- The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration.
-- Medium 3.5 replay changed correctness by -2, 0, +4 and -2 points. Fabricated quotes per answer fell by about half on all four sets.
+- The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration. Medium 3.5 replay changed correctness by -2, 0, +4 and -2 points; fabricated quotes per answer fell by about half on all four sets.
 - Sonnet scored 0.77 with the retrieval tools and 0.78 with server-side generation, which took three times as long. The run predates the three-tool cut.
 - Across 575 answers, generation caused 77 of 164 failures. Retrieval misses were 1% to 3% on well-written questions; no context misses occurred.
 - The demo itself, measured where it runs: Medium 3.5 at high reasoning through the Work Connector and the Skill scored 0.60 on thirty questions, 0.80 on the five that need the history tool and 0.20 on the five the documentation cannot answer, where it fills the gap; GLM 5.3 judged (D-049a).
 - Tool results are most of a session's tokens, so a read prints one language tab, no repeated sample and no pasted output beyond its head: 36% fewer characters per read on the same thirty questions, correctness 0.62 against 0.60, inside the noise of two runs (D-050, D-050a).
-- Each directory under `eval/runs/` stores its inputs, model calls, records, metrics and figures.
 
 ## Five-minute start
 
