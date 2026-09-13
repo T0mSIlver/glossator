@@ -5,7 +5,7 @@ from pathlib import Path
 
 from glossator.answer.citations import Citation, Trace, TracedSource
 from glossator.answer.llm import TokenUsage
-from glossator.eval.answer_eval import QuestionRecord
+from glossator.eval.answer_eval.models import QuestionRecord
 from glossator.eval.fragments import (
     PageResponse,
     check_run,

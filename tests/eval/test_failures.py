@@ -16,7 +16,7 @@ from mistralai.search.toolkit.common.text import sanitize_text
 from mistralai.search.toolkit.document import compute_char_locator, compute_id
 
 from glossator.answer.citations import Citation, Trace, TracedSource, TraceEvent
-from glossator.eval.answer_eval import JudgeRecord, JudgeVerdict, QuestionRecord
+from glossator.eval.answer_eval.models import JudgeRecord, JudgeVerdict, QuestionRecord
 from glossator.eval.charts import stacked_bar_chart
 from glossator.eval.failures import (
     FAILURES_KIND,

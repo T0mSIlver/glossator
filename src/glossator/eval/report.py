@@ -15,7 +15,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from glossator.eval import answer_eval, failures, loop_grid, perturb
+from glossator.eval import failures, loop_grid, perturb
+from glossator.eval.answer_eval.rebuild import regenerate as regenerate_answer_eval
 from glossator.eval.charts import bar_chart
 from glossator.eval.run_records import regenerate
 
@@ -72,7 +73,7 @@ def rebuild(run_dir: Path) -> dict[str, Any]:
     """Regenerate metrics.json, README.md and figures/ for one run directory."""
     kind = run_kind(run_dir)
     if kind == ANSWER_EVAL_KIND:
-        return answer_eval.regenerate(run_dir)
+        return regenerate_answer_eval(run_dir)
     if kind == FAILURES_KIND:
         return failures.regenerate(run_dir)
     if kind == LOOP_GRID_KIND:

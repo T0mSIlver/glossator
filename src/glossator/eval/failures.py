@@ -54,12 +54,9 @@ from glossator.eval.agreement import (
     labels_for_run,
     read_human_labels,
 )
-from glossator.eval.answer_eval import (
-    CORRECTNESS_SCORE,
-    QuestionRecord,
-    accepts_model_card,
-    read_records,
-)
+from glossator.eval.answer_eval.matching import accepts_model_card
+from glossator.eval.answer_eval.models import CORRECTNESS_SCORE, QuestionRecord
+from glossator.eval.answer_eval.run_dir import read_records
 from glossator.eval.charts import stacked_bar_chart
 from glossator.eval.datasets import QuestionType
 from glossator.eval.providers import (

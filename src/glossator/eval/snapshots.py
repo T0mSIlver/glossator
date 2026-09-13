@@ -25,15 +25,12 @@ from glossator.answer.llm import MistralLLM
 from glossator.clients import chat_client, chat_reasoning_effort, chat_server_url
 from glossator.corpus.snapshots import DEFAULT_MANIFEST, SnapshotRecord, read_snapshot_manifest
 from glossator.eval.agreement import agreement_report
-from glossator.eval.answer_eval import (
+from glossator.eval.answer_eval.judge import judge_with_models, make_judge_providers
+from glossator.eval.answer_eval.models import JudgeModel, QuestionRecord, parse_judge_models
+from glossator.eval.answer_eval.run import answer_one
+from glossator.eval.answer_eval.run_dir import (
     AnswerCallRecorder,
-    JudgeModel,
-    QuestionRecord,
     RunDirectory,
-    answer_one,
-    judge_with_models,
-    make_judge_providers,
-    parse_judge_models,
     resolve_run_directory,
 )
 from glossator.eval.corpus import CorpusDocument, block_text, load_documents

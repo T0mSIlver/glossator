@@ -46,14 +46,10 @@ from glossator.answer.context import AssembledContext, Source, SourcePiece, _mer
 from glossator.answer.generation import GeneratedAnswer
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.answer.llm import _parse
-from glossator.eval.answer_eval import (
-    QuestionRecord,
-    RunDirectory,
-    parse_judge_models,
-    read_records,
-    rejudge,
-    source_texts,
-)
+from glossator.eval.answer_eval.judge import source_texts
+from glossator.eval.answer_eval.models import QuestionRecord, parse_judge_models
+from glossator.eval.answer_eval.rejudge import rejudge
+from glossator.eval.answer_eval.run_dir import RunDirectory, read_records
 from glossator.eval.run_records import create_run_directory
 from glossator.index.variants import VARIANTS, ChunkStrategy
 from glossator.ingest.chunker import PageFacts, build_chunker

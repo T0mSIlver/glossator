@@ -32,22 +32,18 @@ from dotenv import load_dotenv
 
 from glossator.answer.config import PRICES, AnswerConfig, ModelPrice, aliased_price
 from glossator.clients import chat_reasoning_effort, chat_server_url
-from glossator.eval.answer_eval import (
+from glossator.eval.answer_eval.judge import JUDGE_MAX_TOKENS, JUDGE_TEMPERATURE
+from glossator.eval.answer_eval.metrics import REFERENCE_PRICING_MODEL, UNPRICED_MODELS
+from glossator.eval.answer_eval.models import (
     DEFAULT_GENERATION_MODEL,
     DEFAULT_JUDGE_MODEL,
-    JUDGE_MAX_TOKENS,
-    JUDGE_PROMPT_HASHES,
-    JUDGE_TEMPERATURE,
-    JUDGE_VERSION,
-    REFERENCE_PRICING_MODEL,
-    UNPRICED_MODELS,
     JudgeModel,
-    RunDirectory,
-    apply_answer_config,
     parse_judge_models,
-    resolve_run_directory,
 )
-from glossator.eval.answer_eval import run as run_answer_eval
+from glossator.eval.answer_eval.overrides import apply_answer_config
+from glossator.eval.answer_eval.prompts import JUDGE_PROMPT_HASHES, JUDGE_VERSION
+from glossator.eval.answer_eval.run import run as run_answer_eval
+from glossator.eval.answer_eval.run_dir import RunDirectory, resolve_run_directory
 from glossator.eval.charts import bar_chart
 from glossator.eval.datasets import EvalQuestion, dataset_hash, read_jsonl, stratified_subset
 from glossator.retrieval.config import RERANK_MODEL

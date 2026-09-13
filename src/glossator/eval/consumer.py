@@ -30,21 +30,18 @@ import structlog
 from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 
-from glossator.eval.answer_eval import (
+from glossator.eval.answer_eval.judge import JUDGE_MAX_TOKENS, JUDGE_TEMPERATURE
+from glossator.eval.answer_eval.models import (
     CORRECTNESS_SCORE,
-    JUDGE_MAX_TOKENS,
-    JUDGE_PROMPT_HASHES,
-    JUDGE_SYSTEM,
-    JUDGE_TEMPERATURE,
-    JUDGE_VERSION,
     JudgedCitation,
     JudgeInput,
     JudgeModel,
     JudgeRecord,
     JudgeVerdict,
     parse_judge_models,
-    wait_for_quota,
 )
+from glossator.eval.answer_eval.prompts import JUDGE_PROMPT_HASHES, JUDGE_SYSTEM, JUDGE_VERSION
+from glossator.eval.answer_eval.quota import wait_for_quota
 from glossator.eval.charts import bar_chart
 from glossator.eval.datasets import EvalQuestion, read_jsonl, stratified_subset
 from glossator.eval.fragments import PageCache, visible_text
