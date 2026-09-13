@@ -8,40 +8,42 @@ from pathlib import Path
 
 import pytest
 
-from glossator.eval import consumer as consumer_module
-from glossator.eval.consumer import (
-    ConsumerRecord,
-    ConsumerSpec,
-    HarnessTokens,
-    ToolCallRecord,
-    aggregate,
-    build_question_set,
-    cite_verdicts,
+from glossator.eval.consumer.answers import cite_verdicts, extract_links, is_quota_error, refused
+from glossator.eval.consumer.claude import (
     claude_command,
     claude_failure,
-    codex_command,
-    collect_defects,
-    copy_transcript,
-    corpus_page_urls,
-    extract_links,
-    is_quota_error,
-    is_server_tool,
-    is_verify_tool,
-    judged_citations,
-    load_records,
-    opencode_command,
     parse_claude_events,
     parse_claude_tokens,
-    parse_codex_events,
-    parse_codex_tokens,
-    parse_opencode_events,
-    parse_opencode_tokens,
-    prompt_for,
-    record_metrics,
-    refused,
-    render_samples,
     write_claude_mcp_config,
 )
+from glossator.eval.consumer.codex import (
+    codex_command,
+    codex_failure,
+    parse_codex_events,
+    parse_codex_tokens,
+)
+from glossator.eval.consumer.collect import copy_transcript, run_collection
+from glossator.eval.consumer.consumers import ConsumerSpec
+from glossator.eval.consumer.defects import collect_defects
+from glossator.eval.consumer.harness import CollectedAnswer, _run_harness
+from glossator.eval.consumer.judge import judged_citations
+from glossator.eval.consumer.links import corpus_page_urls
+from glossator.eval.consumer.metrics import aggregate, record_metrics
+from glossator.eval.consumer.models import (
+    ConsumerRecord,
+    HarnessTokens,
+    ToolCallRecord,
+    load_records,
+)
+from glossator.eval.consumer.opencode import (
+    opencode_command,
+    parse_opencode_events,
+    parse_opencode_tokens,
+)
+from glossator.eval.consumer.questions import build_question_set, prompt_for
+from glossator.eval.consumer.report import render_samples
+from glossator.eval.consumer.run_dir import merge_config
+from glossator.eval.consumer.tools import is_server_tool, is_verify_tool
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, QuestionType
 
 STREAMS = Path(__file__).parent.parent / "fixtures" / "consumer-streams"
@@ -327,7 +329,7 @@ def test_the_judge_ledger_keeps_usage_as_numbers(tmp_path: Path) -> None:
     """Token counts written as a Python repr cannot be summed, which is the
     whole point of the ledger (D-023b)."""
     from glossator.answer.llm import TokenUsage
-    from glossator.eval.consumer import _CallsRecorder
+    from glossator.eval.consumer.judge import _CallsRecorder
 
     recorder = _CallsRecorder(tmp_path)
     recorder.record_call(
@@ -598,7 +600,7 @@ def test_parse_codex_events() -> None:
     tokens, cost = parse_codex_tokens(lines)
     assert tokens.input_tokens == 137819 + 103936
     assert (tokens.output_tokens, tokens.reasoning_tokens, cost) == (535, 138, 0.0)
-    assert consumer_module.codex_failure(lines) is None
+    assert codex_failure(lines) is None
 
 
 def test_a_codex_tool_call_refused_for_want_of_approval_is_an_error_row() -> None:
@@ -621,7 +623,7 @@ def test_an_exhausted_codex_window_is_an_error_row_not_a_crash() -> None:
     lines = _stream("codex-quota.jsonl")
 
     answer, calls = parse_codex_events(lines)
-    failure = consumer_module.codex_failure(lines)
+    failure = codex_failure(lines)
 
     assert (answer, calls) == ("", [])
     assert failure is not None
@@ -653,7 +655,7 @@ def test_a_harness_reads_the_prompt_and_never_the_terminal(tmp_path: Path) -> No
     prompt = cell / "prompt.md"
     prompt.write_text("the question\n")
 
-    run = consumer_module._run_harness(
+    run = _run_harness(
         ["/bin/sh", "-c", "cat; echo late >&2"], cell, timeout_s=30.0, stdin_path=prompt
     )
     assert run.lines == ["the question"]
@@ -661,7 +663,7 @@ def test_a_harness_reads_the_prompt_and_never_the_terminal(tmp_path: Path) -> No
     assert run.timed_out is False
     assert run.events_path == cell / "events.jsonl"
 
-    slow = consumer_module._run_harness(["/bin/sh", "-c", "sleep 30"], cell, timeout_s=0.5)
+    slow = _run_harness(["/bin/sh", "-c", "sleep 30"], cell, timeout_s=0.5)
     assert slow.timed_out is True
 
 
@@ -703,7 +705,7 @@ def test_a_second_consumer_joins_the_run_it_is_added_to() -> None:
         "judge_model": None,
     }
 
-    merged = consumer_module.merge_config(first, second)
+    merged = merge_config(first, second)
 
     assert merged["consumers"] == ["claude-sonnet-low", "codex-gpt-luna-low"]
     assert merged["consumer_models"] == {
@@ -712,12 +714,12 @@ def test_a_second_consumer_joins_the_run_it_is_added_to() -> None:
     }
     assert merged["arms"] == ["A0", "A1", "A2"]
     assert merged["judge_model"] == "zai:glm-5.3"
-    assert consumer_module.merge_config({}, second) == second
+    assert merge_config({}, second) == second
 
 
 def test_a_run_directory_refuses_a_different_question_set() -> None:
     with pytest.raises(SystemExit):
-        consumer_module.merge_config({"questions": ["mined-001"]}, {"questions": ["mined-002"]})
+        merge_config({"questions": ["mined-001"]}, {"questions": ["mined-002"]})
 
 
 def test_corpus_page_urls_empty_without_manifest(tmp_path: Path) -> None:
@@ -730,11 +732,11 @@ class _FakeHarness:
     def __init__(self, events: list[str]) -> None:
         self.events = events
 
-    def __call__(self, *args: object, **kwargs: object) -> consumer_module.CollectedAnswer:
+    def __call__(self, *args: object, **kwargs: object) -> CollectedAnswer:
         del args, kwargs
         answer, calls = parse_opencode_events(self.events)
         tokens, cost = parse_opencode_tokens(self.events)
-        return consumer_module.CollectedAnswer(
+        return CollectedAnswer(
             answer_text=answer,
             tool_calls=calls,
             tokens=tokens,
@@ -777,7 +779,7 @@ def test_run_collection_skips_recorded_cells(tmp_path: Path) -> None:
             model="opencode/muse-spark-1.3-contributor-free",
             variant="minimal",
         )
-        return await consumer_module.run_collection(
+        return await run_collection(
             [_question("mined-001"), _question("mined-002")],
             [spec],
             ["A1"],
@@ -797,7 +799,7 @@ def test_a_collection_run_directory_is_self_describing_from_the_start(
 ) -> None:
     """Collecting, judging and scoring are three commands, so a run interrupted
     between them has to say what it is and what it still owes (D-023)."""
-    from glossator.eval.consumer import _start_run_directory
+    from glossator.eval.consumer.cli import _start_run_directory
 
     _start_run_directory(tmp_path)
 

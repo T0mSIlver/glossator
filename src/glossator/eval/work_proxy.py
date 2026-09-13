@@ -30,23 +30,20 @@ from mistralai.client.models.conversationresponse import ConversationResponse
 from mistralai.client.models.customconnector import CustomConnector
 from mistralai.client.models.messageinputentry import MessageInputEntry
 
-from glossator.eval.consumer import (
-    NAMESPACED_TOOLS,
-    RUNS_ROOT,
+from glossator.eval.consumer.answers import extract_links
+from glossator.eval.consumer.links import corpus_page_urls
+from glossator.eval.consumer.metrics import aggregate
+from glossator.eval.consumer.models import (
     ConsumerRecord,
     HarnessTokens,
     ToolCallRecord,
-    _fmt,
-    _text_blocks,
-    _tool_call_record,
-    aggregate,
     append_record,
-    corpus_page_urls,
-    extract_links,
-    is_server_tool,
-    is_verify_tool,
     load_records,
 )
+from glossator.eval.consumer.report import cells_table
+from glossator.eval.consumer.run_dir import RUNS_ROOT
+from glossator.eval.consumer.tools import NAMESPACED_TOOLS, is_server_tool, is_verify_tool
+from glossator.eval.consumer.transcript import text_blocks, tool_call_record
 from glossator.eval.datasets import EvalQuestion, dataset_hash, read_jsonl
 from glossator.eval.pricing import estimate_usd
 from glossator.eval.providers import TokenUsage
@@ -164,7 +161,7 @@ def tool_execution_result(entry: Mapping[str, Any]) -> str:
     if isinstance(result, str):
         return result
     if isinstance(result, list):
-        return _text_blocks(result)
+        return text_blocks(result)
     return ""
 
 
@@ -257,7 +254,7 @@ def tool_call_records(calls: Sequence[ParsedToolExecution]) -> list[ToolCallReco
         return loaded if isinstance(loaded, dict) else call.arguments
 
     return [
-        _tool_call_record(call.name, arguments_of(call), call.result, call.failed) for call in calls
+        tool_call_record(call.name, arguments_of(call), call.result, call.failed) for call in calls
     ]
 
 
@@ -706,20 +703,8 @@ def render_readme(
         "",
         "## Cells",
         "",
-        "| cell | n | correctness | refusal | links resolve | on gold | mcp called "
-        "| rerank asked | cite verified | tool calls | bad params | p50 s |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        *cells_table(metrics),
     ]
-    for name in sorted(metrics["cells"]):
-        cell = metrics["cells"][name]
-        lines.append(
-            f"| {name} | {cell['n']} | {_fmt(cell.get('correctness'))} | "
-            f"{_fmt(cell.get('refusal_correct'))} | {_fmt(cell.get('links_resolve'))} | "
-            f"{_fmt(cell.get('links_on_gold'))} | {_fmt(cell.get('mcp_called'))} | "
-            f"{_fmt(cell.get('rerank_asked'))} | {_fmt(cell.get('cite_verified'))} | "
-            f"{_fmt(cell.get('tool_calls'))} | {_fmt(cell.get('bad_param_errors'))} | "
-            f"{_fmt(cell.get('latency_p50'))} |"
-        )
     if size:
         lines += [
             "",

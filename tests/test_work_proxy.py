@@ -8,7 +8,8 @@ from typing import Any
 
 import pytest
 
-from glossator.eval.consumer import ConsumerRecord, is_server_tool
+from glossator.eval.consumer.models import ConsumerRecord
+from glossator.eval.consumer.tools import is_server_tool
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, QuestionType
 from glossator.eval.work_proxy import (
     ParsedConversation,
