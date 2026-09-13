@@ -25,7 +25,7 @@ plugin (migrations that generate `DOCUMENT_PER_CHUNK` schemas —
 `plugins/vespa/app/schemas/app.py:60` — one Vespa document per chunk, a generated
 two-phase `weighted-rank2` ranking profile whose first phase selects candidates
 and whose second phase reranks 100 per node,
-`plugins/vespa/app/schemas/base.py:235-266` and `.../app.py:464-476`, plus
+`plugins/vespa/app/schemas/base.py:235-266` and `.../schemas/app.py:464-476`, plus
 navigate/read/grep positional operations), retrieval (`VectorRetriever`,
 `KeywordRetriever`, `RRFRanker`, `LLMReRanker`, `CrossEncoderReRanker`, a
 `QueryEngine` that chains rewrite, extension, retrieval and reranking, and an
@@ -44,20 +44,21 @@ or parameter. The package also disagrees with itself about its own version:
 The short answer, for anyone who asks: the toolkit is a retrieval framework and
 the product is a documentation surface for agents. Retrieval is one of its five
 layers, and it is the layer where the toolkit is the spine. Measured on the
-source tree at commit `145cebd`:
+source tree at commit `00d542f`, counting `wc -l` over the Python files under `src/`:
 
 | Layer | Lines | Toolkit's part |
 |---|---:|---|
-| Corpus adapter (`corpus/`): docs repo at a commit to normalized pages, URLs, anchors, redirects, snapshots | 4,226 | none; the extractors drop heading ids (D-002, D-003) |
+| Corpus adapter (`corpus/`): docs repo at a commit to normalized pages, URLs, anchors, redirects, snapshots | 4,254 | none; the extractors drop heading ids (D-002, D-003) |
 | Ingest and index (`ingest/`, `index/`): sections, chunks with heading metadata, embeddings, Vespa schema | 1,973 | `Pipeline`, `Document`, `MistralEmbedder`, migrations and `DOCUMENT_PER_CHUNK` as is; the splitter replaced |
 | Retrieval (`retrieval/`): hybrid query, weights, filters, reranker, page navigation, embedding probe | 1,835 | `VespaSearchQuery`, `exclude_ids`, `extra_yql_filter`, `NavigableIndex` as is; `VectorRetriever` and `LLMReRanker` replaced |
 | Answer and citations (`answer/`, `citing.py`) | 3,860 | none; the package has no answer, citation or groundedness type (D-016) |
-| Time axis (`history.py`, `changelog.py`): eight snapshots, section identity across dates, the changelog | 753 | none; reads the snapshot corpora as files (D-048) |
-| Containment (`containing.py`): one language tab, no repeated sample, outputs cut | 387 | none (D-050) |
-| MCP server and API (`entrypoints/`): three tools, keys, `cite:` lines, budgets, bearer auth | 1,827 | FastMCP as the starter uses it; the starter's seven tools replaced by three (D-044) |
-| Evaluation (`eval/`): datasets, mining, judges, consumer and Work-proxy runs, snapshot labels, corpus map | 17,131 | `MetricsCalculator` and `RetrieverEvaluator` behind a wrapper (D-016a); nothing for answers |
+| Time axis (`history.py`, `changelog.py`): eight snapshots, section identity across dates, the changelog | 899 | none; reads the snapshot corpora as files (D-048) |
+| Containment (`surface/containing.py`): one language tab, no repeated sample, outputs cut | 387 | none (D-050) |
+| Tool behaviour (`surface/`, without `containing.py`): search, page reads, history forms, `cite:` lines, budgets, typed errors, the parameter guard | 1,411 | none; FastMCP as the starter uses it is the entrypoint's |
+| MCP server and API (`entrypoints/`): configuration, tool registration, routes, bearer auth | 754 | FastMCP as the starter uses it; the starter's seven tools replaced by three (D-044) |
+| Evaluation (`eval/`): datasets, mining, judges, consumer and Work-proxy runs, snapshot labels, corpus map | 18,026 | `MetricsCalculator` and `RetrieverEvaluator` behind a wrapper (D-016a); nothing for answers |
 
-Twenty-one of the 102 source files import the toolkit; the index package is the
+Twenty-one of the 235 source files import the toolkit; the index package is the
 one place every file does. Three reasons follow from the table.
 
 **The toolkit stops where the product starts.** It has no notion of an answer,
@@ -73,8 +74,8 @@ check names the unset weight in its log (D-012); a named query profile, the star
 way to set weights, disables `exclude_ids` and every filter
 (D-014); per-query weights are silently ignored without a suffix nothing
 validates (D-025); the LLM reranker runs one call per candidate and discards
-its own score (D-015). The replacements are small (a 139-line retriever, a
-336-line listwise reranker) and the reranker alone was the largest measured
+its own score (D-015). The replacements are small (a 136-line retriever, a
+327-line listwise reranker) and the reranker alone was the largest measured
 retrieval gain (section recall@1 0.732 to 0.873).
 
 **What is good is used unchanged.** The migrations and schema generator with
@@ -642,7 +643,7 @@ untrained embeddings put every text at the same distance from every other.
   (`plugins/vespa/app/schemas/app.py:579`), while the copier template accepts an
   underscore, so a freshly generated starter cannot run `make setup-vespa`
   (D-022a). Schema document types allow `^[a-z_]+$` but no digits
-  (`app.py:414`), which is why the variants are named `docs_section_fulldim`
+  (`plugins/vespa/app/schemas/app.py:414`), which is why the variants are named `docs_section_fulldim`
   rather than `docs_section_1024`.
 - **HNSW is always euclidean.**
   `RankingType2Defaults[RankingType.EMBEDDING]["ann"] == HNSW(distance_metric="euclidean")`

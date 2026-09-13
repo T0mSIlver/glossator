@@ -7,13 +7,13 @@ Repository versions come from `uv.lock`, not import-time version strings.
 
 | Component | Exact installed version or revision | Role |
 |---|---:|---|
-| `mistralai` | 2.9.4 | Mistral API client for chat and embeddings (`uv.lock:1614-1623`) |
-| `mistral-common` | 1.11.7 | Token counting and token-bounded truncation (`uv.lock:1589-1598`) |
-| `mistralai-search-toolkit` | 0.0.13 | Ingestion and retrieval abstractions (`uv.lock:1633-1642`) |
-| `mistralai-search-toolkit-plugins-vespa` | 0.0.13 | Vespa schema, index, queries and navigation (`uv.lock:1664-1673`) |
+| `mistralai` | 2.9.4 | Mistral API client for chat and embeddings (`uv.lock:1616-1625`) |
+| `mistral-common` | 1.11.7 | Token counting and token-bounded truncation (`uv.lock:1591-1600`) |
+| `mistralai-search-toolkit` | 0.0.13 | Ingestion and retrieval abstractions (`uv.lock:1635-1644`) |
+| `mistralai-search-toolkit-plugins-vespa` | 0.0.13 | Vespa schema, index, queries and navigation (`uv.lock:1666-1675`) |
 | `mistralai/search-starter-app` | upstream commit `919f2a6` | Copier origin of the Vespa and FastMCP scaffold (`docs/search-toolkit.md:32-35`) |
-| `fastmcp` and `fastmcp-slim` | 3.4.7 | MCP server framework and installed implementation (`uv.lock:700-713`) |
-| `mcp` | 1.29.1 | MCP wire types, transports and version negotiation, pulled by FastMCP (`uv.lock:1555-1563`) |
+| `fastmcp` and `fastmcp-slim` | 3.4.7 | MCP server framework and installed implementation (`uv.lock:700-714`) |
+| `mcp` | 1.29.1 | MCP wire types, transports and version negotiation, pulled by FastMCP (`uv.lock:1557-1565`) |
 | Documentation corpus | `mistralai/platform-docs-public` commit `2e094f7` | Pinned source material for answers (D-001, D-009) |
 
 The toolkit core and Vespa plugin are intentionally pinned to the same version. The plugin declares no lower bound on core, so independently resolved releases can import names missing from the older package (`pyproject.toml:10-14`). The toolkit's `__version__` incorrectly says `0.1.0`; its distribution metadata and lock both say `0.0.13` (`mistralai/search/toolkit/__init__.py:34`; `mistralai_search_toolkit-0.0.13.dist-info/METADATA:1-4`).
@@ -22,32 +22,32 @@ The toolkit core and Vespa plugin are intentionally pinned to the same version. 
 
 The serving path constructs two `Mistral` clients. `chat_client()` uses the SDK's default Mistral endpoint unless `GLOSSATOR_CHAT_SERVER_URL` is set; then `server_url` points all chat work at that Mistral-compatible endpoint. `embedding_client()` always uses `MISTRAL_API_URL`, defaulting to `https://api.mistral.ai`, because the local llama.cpp chat server does not expose `mistral-embed` (`src/glossator/clients.py:32-39,73-94`; D-035c).
 
-`MistralLLM` calls `client.chat.complete_async` for answer generation, the search-loop turns, query translation and rewrite, and the repository's listwise reranker. Requests carry messages, tools, `tool_choice`, sampling, reasoning effort, timeout and structured-output format; responses supply text, tool calls, usage and finish reason (`src/glossator/answer/llm.py:202-296,322-350`; `src/glossator/answer/service.py:61-68`; `src/glossator/retrieval/reranker.py:241-252`).
+`MistralLLM` calls `client.chat.complete_async` for answer generation, the search-loop turns, query translation and rewrite, and the repository's listwise reranker. Requests carry messages, tools, `tool_choice`, sampling, reasoning effort, timeout and structured-output format; responses supply text, tool calls, usage and finish reason (`src/glossator/answer/llm.py:195-296,322-344`; `src/glossator/answer/service.py:59`; `src/glossator/retrieval/reranker.py:152-170,232-243`).
 
 For Pydantic output, `response_format_from_pydantic_model()` converts the model
 to the SDK's `json_schema` payload. Glossator still validates the returned JSON
 and makes one repair call if it is invalid. A local server that cannot enforce a
 schema can use `json_object`; that mode, and fenced JSON returned by llama.cpp,
-are handled and recorded explicitly (`src/glossator/answer/llm.py:251-263,402-411,441-470`;
-`src/glossator/answer/config.py:167-172`). Structured output is used for grounded
+are handled and recorded explicitly (`src/glossator/answer/llm.py:244-251,395-404,430-466`;
+`src/glossator/answer/config.py:161-166`). Structured output is used for grounded
 answers, reranker rankings, English renderings and optional query rewrites
-(`src/glossator/answer/generation.py:60`; `src/glossator/retrieval/reranker.py:255-268`;
-`src/glossator/answer/language.py:164-190,213-240`).
+(`src/glossator/answer/generation.py:53-60`; `src/glossator/retrieval/reranker.py:73-78,246-259`;
+`src/glossator/answer/language.py:88-101,167-176,216-225`).
 
-Embeddings reach the same SDK through the toolkit's `MistralEmbedder`, which calls `client.embeddings.create_async`. Both ingestion and retrieval inject the dedicated embedding client and raise the toolkit's default three retries to eight (`mistralai/search/toolkit/embedding/mistral_embedder.py:520-560`; `src/glossator/ingest/pipeline.py:316-329`; `src/glossator/retrieval/engine.py:220-233`; D-011a).
+Embeddings reach the same SDK through the toolkit's `MistralEmbedder`, which calls `client.embeddings.create_async`. Both ingestion and retrieval inject the dedicated embedding client and raise the toolkit's default three retries to eight (`mistralai/search/toolkit/embedding/mistral_embedder.py:520-560`; `src/glossator/ingest/pipeline.py:316-320`; `src/glossator/retrieval/engine.py:218-226`; D-011a).
 
 The direct SDK surface in `src/` is confined to the two client factories, serving chat
 wrapper, type injection into ingestion and the embedding probe. Offline dataset generation and judging use a small `httpx`
 OpenAI-compatible provider instead of the SDK
-(`src/glossator/clients.py:17,73-94`; `src/glossator/answer/llm.py:23-32`;
+(`src/glossator/clients.py:17,73-94`; `src/glossator/answer/llm.py:16-25`;
 `src/glossator/ingest/pipeline.py:18,298-320`;
-`src/glossator/retrieval/probe.py:27-35`;
+`src/glossator/retrieval/probe.py:12-13,142`;
 `src/glossator/eval/providers/wire.py:13-42`).
 
 Two SDK behaviours required explicit handling. Connection failures can escape as
 `httpx.TransportError`, while `NoResponseError` is a plain `Exception`; neither
 is caught by a `MistralError` handler alone. The wrapper classifies and records
-all three families (`src/glossator/answer/llm.py:50-61`). Also, `server_url`
+all three families (`src/glossator/answer/llm.py:51-54`). Also, `server_url`
 routes the whole client rather than one API group, so chat and embeddings need
 separate clients when generation is local (D-035c;
 `tests/test_clients.py:65-76`).
@@ -57,9 +57,9 @@ separate clients when generation is local (D-035c;
 | Component | Configured model | Models used in evidence |
 |---|---|---|
 | Shipped embeddings | `mistral-embed`, 1,024 dimensions | `mistral-embed`; baseline variants also used `mistral-embed-dim128-2510` at 128 dimensions (`src/glossator/index/variants.py:48-70`; `mistralai/search/toolkit/embedding/models.py:110-113`) |
-| Answer generation | `mistral-medium-2604`, the fixed Medium 3.5 id | Early smoke: `ministral-8b-2512`; primary API evaluations: `ministral-14b-2512`; Medium 3.5 was later measured by exact prompt replay on Mistral's API (D-017a, D-017c; `src/glossator/answer/config.py:19-27,104-111`) |
-| Reranking | `mistral-small-2603` | Retrieval and answer evaluations used `ministral-14b-2512`; Small 4 remains an untested default because its quota is zero (`src/glossator/retrieval/config.py:18-23`; `docs/eval-status.md:20-23,31-35`) |
-| Translation, rewrite and search loop | Same model as answer generation | Evaluations used `ministral-14b-2512` or the local `llamacpp/ministral3-14b`; all calls share `MistralLLM` (`src/glossator/answer/service.py:61-68`; `src/glossator/answer/language.py:182-190,231-240`; D-035c) |
+| Answer generation | `mistral-medium-2604`, the fixed Medium 3.5 id | Early smoke: `ministral-8b-2512`; primary API evaluations: `ministral-14b-2512`; Medium 3.5 was later measured by exact prompt replay on Mistral's API (D-017a, D-017c; `src/glossator/answer/config.py:16-19,103`) |
+| Reranking | `mistral-small-2603` | Retrieval and answer evaluations used `ministral-14b-2512`; Small 4 remains an untested default because its quota is zero (`src/glossator/retrieval/config.py:18-19`; `docs/eval-status.md:52-54`) |
+| Translation, rewrite and search loop | Same model as answer generation | Evaluations used `ministral-14b-2512` or the local `llamacpp/ministral3-14b`; all calls share `MistralLLM` (`src/glossator/answer/service.py:59`; `src/glossator/answer/language.py:167-176,216-225`; D-035c) |
 | Dataset generation and answer judge | No shipped model | GLM models behind the swappable offline provider; these are evaluation dependencies, not serving dependencies (D-020, D-021) |
 
 The project key listed 46 models, but every Medium, Small and Magistral request returned
@@ -67,7 +67,7 @@ HTTP 429 with `x-ratelimit-limit-req-minute: 0`. Ministral 3, Codestral and
 `mistral-embed` worked on the same key, so retries cannot solve the Medium and Small
 failures. No Mistral Large id was available (D-017a). The shipped defaults
 remain Medium 3.5 for generation and Small 4 for reranking; deployment must point
-chat at a reachable server or those calls fail (`docs/eval-status.md:183-193`).
+chat at a reachable server or those calls fail (`docs/eval-status.md:219-223`).
 
 ## Search Toolkit and Vespa plugin
 
@@ -80,7 +80,7 @@ a de-duplication wrapper. Glossator replaces the extractor, section chunker,
 retriever, reranker, answer layer and ingestion safety check. It does not use
 `QueryEngine`, `KeywordRetriever`, `RRFRanker`, either toolkit reranker, query
 extension, or the in-memory semantic cache because their contracts do not fit
-the Vespa and served-answer path (`docs/search-toolkit.md:50-114,595-644`).
+the Vespa and served-answer path (`docs/search-toolkit.md:128-201,603-617`).
 
 Defects and omissions that affected the project:
 
@@ -119,8 +119,8 @@ Defects and omissions that affected the project:
 The chunker, answer-context budget and listwise-reranker candidate truncation all
 load the bundled `MistralTokenizer.v1()` and encode text without BOS or EOS
 tokens (`src/glossator/ingest/chunker.py:246-277`;
-`src/glossator/answer/context.py:101-145`;
-`src/glossator/retrieval/reranker.py:222-238`). The toolkit also uses v1 for every
+`src/glossator/answer/context.py:129-137`;
+`src/glossator/retrieval/reranker.py:227-229`). The toolkit also uses v1 for every
 embedding model's request-size accounting
 (`mistralai/search/toolkit/embedding/mistral_embedder.py:42-44`). Keeping these
 four counters aligned makes chunk caps, prompt budgets and billed-token estimates
@@ -141,14 +141,14 @@ application and migrations, and a FastMCP surface for search, navigation, ingest
 deletion (`docs/search-toolkit.md:17-35`). Glossator kept the pipeline abstraction,
 Vespa migration and CLI machinery,
 `DOCUMENT_PER_CHUNK`, custom metadata fields, `MistralEmbedder`, positional
-navigation, and the retrieval metric arithmetic (`docs/search-toolkit.md:595-610`).
+navigation, and the retrieval metric arithmetic (`docs/search-toolkit.md:202-297`).
 
 The collection name moved from inconsistent environment defaults into the index
 package (D-022). The Vespa application is named `glossator`, separately from
 underscore-bearing schema names, because the generated `mistral_docs` name fails
 the toolkit's lowercase-letters-only validator (D-022a). The starter migration,
 `get_index()`, chunker, retriever and MCP functions were rewritten around cited
-section chunks and the query-builder path (`docs/search-toolkit.md:102-114`). The
+section chunks and the query-builder path (`docs/search-toolkit.md:89-117,359-393`). The
 MCP `ingest` and `delete` tools were removed: they admitted arbitrary page-level
 chunks without URL, anchor or kind metadata into the serving index. Corpus writes
 now go through the vendored adapter, manifest and link checks (D-026).
@@ -159,7 +159,7 @@ now go through the vendored adapter, manifest and link checks (D-026).
 middleware and registers only `mistral_docs_search`, `mistral_docs_read_page` and
 `mistral_docs_history` (D-044). It exposes stdio and Streamable HTTP and passes no
 protocol revision. No MCP resources, answer tool or verification tool are registered
-(`src/glossator/surface/names.py:4-6`; `src/entrypoints/mcp_server.py:125-153,193-207,264-276`).
+(`src/glossator/surface/names.py:4-6`; `src/entrypoints/mcp_server.py:126,154,204-208,266-278`).
 FastMCP delegates initialisation to the official `mcp` low-level server
 (`fastmcp/server/low_level.py:178-195`; `fastmcp/server/http.py:440-450`).
 
@@ -185,7 +185,7 @@ The protocol revision is not pinned by the starter template, FastMCP, or
 glossator. The `mcp` SDK performs negotiation. FastMCP constrains that SDK to
 `mcp>=1.24.0,<2.0`; `uv.lock` fixes the resolved installation at 1.29.1
 (`fastmcp_slim-3.4.7.dist-info/METADATA:33-39,54-63`;
-`uv.lock:1555-1557`). Glossator selects a client revision only in its deployment
+`uv.lock:1557-1559`). Glossator selects a client revision only in its deployment
 probe; that does not pin the server.
 
 Supporting a later wire revision requires an `mcp` release whose generated types
@@ -213,7 +213,7 @@ When Work asks for confirmation, it adds the undeclared
 allowed a retry. `_ParamGuard` now removes underscore-prefixed host metadata before
 validation; every tool also advertises read-only,
 non-destructive, idempotent and closed-world annotations (D-037b;
-`src/glossator/surface/params.py:61-80`; `src/entrypoints/mcp_server.py:128-153,193-207`).
+`src/glossator/surface/params.py:61-80`; `src/entrypoints/mcp_server.py:129-154,194-208`).
 
 ## Outdated Mistral material excluded or corrected
 
