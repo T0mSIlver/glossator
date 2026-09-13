@@ -751,7 +751,7 @@ def test_history_under_returns_grouped_intervals(monkeypatch: pytest.MonkeyPatch
         del manifest
         return {"form": "under", "under": under, "since": since, "intervals": []}
 
-    monkeypatch.setattr("glossator.changelog.history_under", history_under)
+    monkeypatch.setattr("glossator.history.history_under", history_under)
     response = _request("GET", "/history?under=/vibe&since=2026-07-01")
 
     assert response.status_code == 200

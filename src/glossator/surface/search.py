@@ -7,13 +7,14 @@ from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from pydantic import ValidationError
 
 from glossator.answer.context import chunk_body
+from glossator.doc_paths import under_prefix
 from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import Hit
 from glossator.surface.context import Surface
 from glossator.surface.engines import EngineRegistry
 from glossator.surface.errors import api_upstream, bad_param, upstream
 from glossator.surface.names import READ_PAGE, SEARCH
-from glossator.surface.pages import PageCatalog, prefix_from
+from glossator.surface.pages import PageCatalog
 
 MAX_HITS = 20
 SNIPPET_CHARS = 400
@@ -88,7 +89,7 @@ async def search(surface: Surface, q: str, max_hits: int, under: str | None) -> 
     the page listing when ``q`` is empty or ``under`` names no page."""
     pages = surface.pages
     try:
-        prefix = prefix_from(under) if under and under.strip() else None
+        prefix = under_prefix(under) if under and under.strip() else None
     except ValueError as exc:
         raise bad_param(
             f"{exc}.", f'{SEARCH}(q="question", under="/path") with a docs path.'

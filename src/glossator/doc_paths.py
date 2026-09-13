@@ -38,4 +38,17 @@ def split_docs_location(value: str, name: str) -> tuple[str, str]:
     return parsed.path.rstrip("/"), parsed.fragment
 
 
-__all__ = ["DOCS_HOST", "SITE", "split_docs_location"]
+def under_prefix(under: str) -> str:
+    """The page URL an ``under`` argument names, with no trailing slash.
+
+    The search and history tools both scope by it. A foreign host raises
+    ``ValueError``, and so does an empty value: an empty prefix would silently
+    widen the scope to the whole site.
+    """
+    if not under.strip():
+        raise ValueError("under must contain a documentation path")
+    path, _fragment = split_docs_location(under, "under")
+    return SITE + path
+
+
+__all__ = ["DOCS_HOST", "SITE", "split_docs_location", "under_prefix"]

@@ -17,11 +17,13 @@ In the Vibe CLI, append a server to `config.toml`; `name` becomes the prefix of 
 
 ```toml
 [[mcp_servers]]
-name = "mistral_docs"
+name = "glossator"
 transport = "streamable-http"
 url = "https://glossator.tomvaucourt.com/mcp"
 headers = { "Authorization" = "Bearer <token>" }
 ```
+
+In the Vibe CLI the tools appear as `glossator_mistral_docs_search`, `glossator_mistral_docs_read_page` and `glossator_mistral_docs_history`; Mistral Work shows the tool names as they are.
 
 In Mistral Work, add that URL as a `Custom MCP Connector` under `Connectors` and pre-authorise the three read functions; [`docs/mcp.md`](docs/mcp.md) has the full setup, the workspace Skill, the health endpoint and other clients.
 
@@ -47,7 +49,7 @@ The runs and the judge study are in [`docs/evaluation.md`](docs/evaluation.md); 
 
 - The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration. Medium 3.5 replayed on Mistral's API cut fabricated quotes per answer from 0.40–0.59 to 0.17–0.19 on all four sets, at 0.0045 to 0.0061 USD per question; judged correctness is 0.90, 0.82, 0.73 and 0.65, inside the interval of the 14B's (D-017c).
 - Sonnet scored 0.77 with the retrieval tools and 0.78 with server-side generation, which took three times as long. The run predates the three-tool cut.
-- Across 575 answers, generation caused 77 of 164 failures. Retrieval misses were 1% to 3% on well-written questions; no context misses occurred.
+- Across 575 answers, generation caused 82 of 177 failures (D-042). Retrieval misses were 1% to 3% on well-written questions; no context misses occurred.
 - The demo itself, measured where it runs: Medium 3.5 at high reasoning through the Work Connector and the Skill scored 0.60 on thirty questions, 0.80 on the five that need the history tool and 0.20 on the five the documentation cannot answer, where it fills the gap; GLM 5.3 judged (D-049a).
 - Tool results are most of a session's tokens, so a read prints one language tab, no repeated sample and no pasted output beyond its head: 36% fewer characters per read on the same thirty questions, correctness 0.62 against 0.60, inside the noise of two runs (D-050, D-050a). On the shipped server with the scoped history forms and vendored snapshots the thirty score 0.60 again: 0.80 on the history rows, 0.40 on the unanswerable ones, 4,309 characters per tool result (D-049b).
 

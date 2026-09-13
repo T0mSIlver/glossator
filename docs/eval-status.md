@@ -1,6 +1,7 @@
-# Evaluation status, 12 September 2026
+# Evaluation status, 13 September 2026
 
-Where the evaluation stands at the ship of the Work demo. Every number names
+Where the evaluation stands with the demo measured on the shipped server and the
+Medium 3.5 API replay judged (D-049b, D-017c). Every number names
 the model that produced it. `D-0xx` is a `DECISIONS.md` entry; run names are
 directories under `eval/runs/`.
 
@@ -192,10 +193,10 @@ blind unless stated.**
 | mined-v2 83, local Ministral 3 14B Reasoning | 0.65 | 0.78 | 0.57 | `mined-v2-shipped` |
 | fresh 60 across eight snapshots, local Ministral 3 14B Reasoning | 0.76 to 0.82 on present cells | 0.33 to 0.80 on absent cells | | `snapshot-eval` |
 
-**Where failures sit.** Over 575 answers from five runs, generation is 47% of
-failures and retrieval misses are 1 to 3% on well-formed questions. Context
-misses are zero everywhere. 53 of 77 generation failures quoted the gold section
-verbatim and still answered short. D-042, refreshed in `failure-analysis-v2`.
+**Where failures sit.** Over 575 answers from five runs, generation is 46% of
+failures (82 of 177) and retrieval misses are 1 to 3% on well-formed questions.
+Context misses are zero everywhere. 55 of 82 generation failures quoted the gold
+section verbatim and still answered short. D-042, refreshed in `failure-analysis-v2`.
 
 **Judges.** Four models and one human. GLM 5.3 primary, GLM 5.3 Flash second,
 Qwen 3.8 27B on the local server as the free third opinion (kappa 0.72 with the

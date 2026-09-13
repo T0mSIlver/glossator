@@ -3,12 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from glossator.changelog import (
-    StaleChangelogError,
-    build_changelog,
-    history_under,
-    read_changelog,
-)
+from glossator.changelog import StaleChangelogError, build_changelog, read_changelog
+from glossator.history import history_under
 
 
 def _page(root: Path, name: str, url: str, body: str, *, title: str | None = None) -> None:

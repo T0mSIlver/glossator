@@ -4,6 +4,7 @@ cut to a budget with the call that continues it, and the API's section list."""
 from mistralai.search.toolkit.search.errors import IndexException, SourceNotFoundError
 
 from glossator.answer.context import chunk_body
+from glossator.doc_paths import SITE, split_docs_location
 from glossator.retrieval.engine import Hit
 from glossator.surface.containing import LANGS, contain
 from glossator.surface.context import Surface
@@ -16,7 +17,7 @@ from glossator.surface.errors import (
     upstream,
 )
 from glossator.surface.names import READ_PAGE, SEARCH
-from glossator.surface.pages import SITE, PageCatalog
+from glossator.surface.pages import PageCatalog
 from glossator.surface.search import PREFIX_LIST_MAX
 
 READ_MAX_CHARS = 24_000
@@ -66,9 +67,15 @@ def _contained_bodies(hits: list[Hit], keys: list[str], lang: str) -> list[str]:
 
 async def read_page(surface: Surface, page_url: str, section: str | None, lang: str) -> str:
     """The ``mistral_docs_read_page`` result."""
-    page_url = page_url.split("#", 1)[0].strip()
-    if not page_url:
+    if not page_url.split("#", 1)[0].strip():
         raise bad_param("page_url is empty.", f"pass a page URL from a {SEARCH} hit.")
+    try:
+        path, _fragment = split_docs_location(page_url, "page_url")
+    except ValueError as exc:
+        raise bad_param(f"{exc}.", f"pass a page URL from a {SEARCH} hit.") from exc
+    # The search and history tools accept the same four forms of a location, so
+    # a path one of them printed or took reads here too.
+    page_url = f"{SITE}{path or '/'}"
     if lang not in LANGS:
         raise bad_param(
             f'lang "{lang}" is not one of python, typescript, curl.',

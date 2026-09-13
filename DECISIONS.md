@@ -1491,7 +1491,7 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 
 ## D-048 · `mistral_docs_history` takes a page and a key, loses the `question` form, gains `under`, and reads every change as a bound between two dates
 
-**Status:** decided by Tom · 2026-09-12 · implementation on branch `agent/history-under` (codex, in progress at the time of writing); evidence: the Work session export `GLM 5.2 Vibe Code Availability.html` (2026-09-12, 10:46 to 10:49, three turns over the D-047 server, kept in the worktree), `src/glossator/history.py`, `src/entrypoints/mcp_server.py`, the eight snapshot corpora, D-041, D-041a, D-044, D-045a, D-047 · revises D-041 (the third history form, "for a question the top retrieved section per date"), D-044 point 1 (the `text | section | question` signature) and D-047 point 3 ("`mistral_docs_history` keeps taking `url#anchor`")
+**Status:** decided by Tom · 2026-09-12 · evidence: a Work session export (2026-09-12, 10:46 to 10:49, three turns over the D-047 server), `src/glossator/history.py`, `src/entrypoints/mcp_server.py`, the eight snapshot corpora, D-041, D-041a, D-044, D-045a, D-047 · revises D-041 (the third history form, "for a question the top retrieved section per date"), D-044 point 1 (the `text | section | question` signature) and D-047 point 3 ("`mistral_docs_history` keeps taking `url#anchor`")
 
 **The export.** "Is GLM 5.2 officially available for vibe coding in vibe for code?", then "When did the model appear?", then "But when did it get available in vibe code CLI?". The third turn made two `mistral_docs_history(question=…)` calls; the first is the one to read.
 
@@ -1526,7 +1526,7 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 
 ## D-049 · The demo is measured where it runs: Medium 3.5 with reasoning through the Conversations API and the Work Connector, on thirty questions
 
-**Status:** decided by Tom · 2026-09-12 · `eval/demo.jsonl` (sha256 `739c1066…`), `eval/demo.README.md`, `QuestionType.HISTORY` and `GoldSource.between` in `glossator.eval.datasets`, `glossator.eval.work_proxy` (branch `agent/work-proxy-eval`, GLM 5.3 in opencode, in progress at the time of writing); evidence: quota probes at 09:58 and 10:32 today, the Connectors and Conversations pages read through the deployed server, `resources/mcp`, D-017a, D-040b, D-044a, D-046 point 5, D-047a, D-047b
+**Status:** decided by Tom · 2026-09-12 · `eval/demo.jsonl` (sha256 `739c1066…`), `eval/demo.README.md`, `QuestionType.HISTORY` and `GoldSource.between` in `glossator.eval.datasets`, `glossator.eval.work_proxy`; evidence: quota probes at 09:58 and 10:32 today, the Connectors and Conversations pages read through the deployed server, `resources/mcp`, D-017a, D-040b, D-044a, D-046 point 5, D-047a, D-047b
 
 **Facts.**
 - The product is demoed as a workspace Skill plus the `mistral-docs` Connector in Mistral Work, on a Mistral model that reasons. Nothing drives a Work session from outside: the documentation's own MCP server at `api.mistral.ai/mcp` exposes Studio Skills and nothing else, and every Work sample in this file is a hand-run export (D-044a, D-047a, D-047b, D-048). Tom will not paste thirty questions and thirty exports.

@@ -56,10 +56,6 @@ key, `GLOSSATOR_CHAT_REASONING_EFFORT` to set or disable its thinking, and
 pairs) to override the pipeline's sampling. Embeddings always go to the Mistral API. Every run records which server and
 which effort it used.
 
-Mistral Medium 3.5 is the shipped generation default. The project key had a zero
-request quota for that model until 12 September 2026, so most recorded checks and
-evaluations use `ministral-14b-2512` (D-017a).
-
 ## Running locally
 
 The project runs on Python 3.12 to 3.14; on a first run `uv sync` downloads the

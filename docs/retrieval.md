@@ -68,7 +68,7 @@ narrow to use and no separation for unanswerable questions, so floors stay off
 | `../eval/runs/2026-09-09-0136-dev-grid-v2/` | 294 questions, 13 configurations | Chose section chunks, vector-heavy weights, reranker on. |
 | `../eval/runs/2026-09-09-0115-dev-floors/` | similarity calibration over 294 real, 15 junk, 50 unanswerable questions | Corridor 0.017 wide; floors stay off. |
 | `../eval/runs/2026-09-08-2305-dev60-baseline/`, `2026-09-09-0232-dev60-anchors/`, `2026-09-09-0312-dev60-rerank/` | 60 questions, answer strategies | See `evaluation.md`. |
-| `eval/runs/<held-out-run>/` | held-out questions | Pending. |
+| `../eval/runs/2026-09-09-1211-fresh60-shipped/` | 60 held-out questions, shipped configuration | Correctness 0.84, Ministral 3 14B generating, GLM 5.3 judging; see `evaluation.md`. |
 
 Dataset generation and judging use GLM through the z.ai API. Serving uses only
 Mistral models. Every run names its models and prompt hashes.

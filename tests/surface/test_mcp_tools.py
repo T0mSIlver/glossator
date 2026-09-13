@@ -9,7 +9,6 @@ from fastmcp.exceptions import ToolError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import SourceNotFoundError
 
-from glossator import changelog as changelog_service
 from glossator import history as history_service
 from glossator.retrieval.engine import Hit
 from glossator.surface.pages import LARGE_PAGE_CHARS
@@ -499,6 +498,36 @@ def test_read_page_strips_an_anchor_from_the_url(mcp_server: Any) -> None:
     assert text.startswith(f'page: {PAGE} | "Page"')
 
 
+def test_read_page_accepts_every_form_of_the_docs_location(mcp_server: Any) -> None:
+    opened: list[str] = []
+
+    class RecordingEngine(FakeEngine):
+        def navigation_at(self, page_url: str, start: int = 0, end: int = 0) -> FakeNavigation:
+            opened.append(page_url)
+            return super().navigation_at(page_url, start, end)
+
+    mcp_server._engine = RecordingEngine()
+    for page_url in (
+        "docs.mistral.ai/page",
+        f"{PAGE}/",
+        "/page",
+        "page",
+        "site:docs.mistral.ai/page",
+    ):
+        text = _call(mcp_server, "mistral_docs_read_page", {"page_url": page_url})
+        assert text.startswith(f'page: {PAGE} | "Page"')
+    assert opened == [PAGE] * 5
+
+
+def test_read_page_on_another_host_is_a_bad_parameter(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+
+    text = _call_error(mcp_server, "mistral_docs_read_page", {"page_url": "example.com/page"})
+
+    assert "E_BAD_PARAM" in text
+    assert "page_url must be on docs.mistral.ai" in text
+
+
 def test_read_page_prints_one_header_per_section_not_per_chunk(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine([_hit("c1", "first half"), _hit("c2", "second half")])
     text = _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
@@ -764,7 +793,7 @@ def test_history_under_renders_grouped_intervals(
             ],
         }
 
-    monkeypatch.setattr(changelog_service, "history_under", fake)
+    monkeypatch.setattr(history_service, "history_under", fake)
     text = _call(
         mcp_server,
         "mistral_docs_history",
@@ -800,7 +829,7 @@ def test_history_under_truncation_keeps_every_summary(
             "intervals": intervals,
         }
 
-    monkeypatch.setattr(changelog_service, "history_under", fake)
+    monkeypatch.setattr(history_service, "history_under", fake)
     monkeypatch.setattr(mcp_server, "HISTORY_MAX_CHARS", 500)
     text = _call(mcp_server, "mistral_docs_history", {"under": PAGE})
 
@@ -936,7 +965,7 @@ def test_history_under_renders_page_rows_without_cite_lines(
             ],
         }
 
-    monkeypatch.setattr(changelog_service, "history_under", fake)
+    monkeypatch.setattr(history_service, "history_under", fake)
     text = _call(mcp_server, "mistral_docs_history", {"under": "/vibe"})
 
     assert "between 2026-07-01 and 2026-07-15: 1 page changed, 1 page moved" in text

@@ -16,10 +16,13 @@ make snapshots
 against the live site. CI runs the live check weekly.
 
 The eight dated corpora used by the history tool live under
-`corpus/snapshots/`. To add a stored date, add it to `SNAPSHOT_DATES` in
-`glossator.corpus.snapshots`, run `make snapshots`, review the new manifest row,
-then run `uv run python -m glossator.changelog build` and commit the corpus,
-manifest, and changelog together.
+`corpus/snapshots/`. `corpus/snapshots/2026-09-07` is byte-identical to
+`corpus/mistral-docs`, the served snapshot named in `eval/refresh/served.json`,
+and is kept under its date so the manifest addresses all eight the same way. To
+add a stored date, add it to `SNAPSHOT_DATES` in `glossator.corpus.snapshots`,
+run `make snapshots`, review the new manifest row, then run
+`uv run python -m glossator.changelog build` and commit the corpus, manifest,
+and changelog together.
 
 Page sizes in Mistral Medium 3.5 tokens, which decided how `read_page` reads a
 large page, are measured in `../eval/corpus-stats/`.

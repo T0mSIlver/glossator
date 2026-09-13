@@ -6,7 +6,7 @@ from pathlib import Path
 
 from glossator.answer.context import chunk_body
 from glossator.citing import SectionKey, citation_link, page_search_text, section_keys
-from glossator.doc_paths import SITE, split_docs_location
+from glossator.doc_paths import SITE
 from glossator.ingest.pages import iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 from glossator.retrieval.engine import Hit
@@ -116,15 +116,4 @@ class PageCatalog:
         return None
 
 
-def prefix_from(under: str) -> str:
-    """The page URL ``under`` names, whatever form the model wrote it in.
-
-    Models write the URL, a ``site:`` form of it, the bare host, or a bare
-    path; a Work session used three of the four (D-044a, D-046). A foreign host
-    raises ``ValueError``, as it does in the history tool.
-    """
-    path, _fragment = split_docs_location(under, "under")
-    return SITE + path
-
-
-__all__ = ["LARGE_PAGE_CHARS", "SITE", "Page", "PageCatalog", "prefix_from"]
+__all__ = ["LARGE_PAGE_CHARS", "Page", "PageCatalog"]

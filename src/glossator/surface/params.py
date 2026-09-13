@@ -6,7 +6,7 @@ from typing import Any
 
 from glossator.surface.errors import SurfaceError, bad_param
 
-_COUNTS = ("max_hits", "max_chunks", "max_matches", "steps", "top_k")
+_COUNTS = ("max_hits", "top_k")
 
 ALIASES: dict[str, tuple[str, ...]] = {
     "q": ("query",),
@@ -28,11 +28,8 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "page": ("page_url", "source_id"),
     "page_url": ("source_id",),
     "source_id": ("page_url",),
-    "format": ("response_format",),
     "start": ("start_offset",),
     "end": ("end_offset",),
-    "window_size": ("window",),
-    "dir": ("direction",),
     "filter": ("kinds",),
     "lang": ("locales",),
     "language": ("locales",),

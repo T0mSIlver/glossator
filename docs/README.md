@@ -14,15 +14,20 @@
 - [`../deploy/README.md`](../deploy/README.md): deployment, the tunnel, Connector registration; the refresh gate is D-045.
 - [`../DECISIONS.md`](../DECISIONS.md): every choice with the facts that decided it; append an entry when a change reverses one.
 
+## Superseded, kept for the record
+
+- [`context-surface-audit.md`](context-surface-audit.md): describes the eight-tool surface D-044 replaced.
+- [`improvement-axes.md`](improvement-axes.md): describes the eight-tool surface D-044 replaced.
+
 ## Repository layout
 
 ```text
 src/glossator/    corpus adapter, ingest, index, retrieval, answer, surface (what the tools and routes do), eval
   citing.py       section keys and citation links, shared by the surface and the snapshot tools
   doc_paths.py    the docs.mistral.ai path a tool argument names, in any form a model writes it
-  history.py      phrase and section history over the stored snapshots (the snapshot diff;
-                  surface/history.py only resolves the tool's argument forms onto it)
-  changelog.py    the precomputed snapshot changelog and changes under a path
+  history.py      phrase, section and under-a-path history over the stored snapshots (the
+                  snapshot diff; surface/history.py only resolves the tool's argument forms onto it)
+  changelog.py    builds and reads the precomputed snapshot changelog
   clients.py      the chat and embedding Mistral clients every model call is built on
   surface/pages.py  page sizes, section keys and paths the tools read without the index;
                   ingest/pages.py is the unrelated reader of the vendored corpus files

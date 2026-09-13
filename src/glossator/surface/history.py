@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from glossator import changelog as changelog_service
 from glossator import history as history_service
 from glossator.surface.errors import bad_param, unknown_page, upstream
 from glossator.surface.names import HISTORY
@@ -84,7 +83,7 @@ async def query_history(form: HistoryForm, manifest: Path) -> dict[str, Any]:
                 history_service.section_history, form.value, form.section, manifest
             )
         return await asyncio.to_thread(
-            changelog_service.history_under, form.value, form.since, manifest
+            history_service.history_under, form.value, form.since, manifest
         )
     # UnknownPageError is a ValueError, so it is caught first.
     except history_service.UnknownPageError as exc:

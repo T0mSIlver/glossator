@@ -7,8 +7,6 @@ import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
-from datetime import date
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -22,12 +20,10 @@ from glossator.corpus.snapshots import (
     read_snapshot_manifest,
     snapshot_corpus_dir,
 )
-from glossator.doc_paths import split_docs_location
 from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 
 DEFAULT_CHANGELOG_DIR = Path("eval/snapshots/changelog")
-SITE_ORIGIN = "https://docs.mistral.ai"
 _HEADING_ANCHOR = re.compile(r"(?m)(^#{1,6} .+?)\s+\{#[^}]+\}(\s*$)")
 _INTERNAL_LINK = re.compile(
     r"https://docs\.mistral\.ai/(?P<path>[^#\s)>\]}'\"]+)"
@@ -81,7 +77,8 @@ def _contains_body(haystack: str, needle: str) -> bool:
     return find_span(comparable_body(haystack), comparable_body(needle)) is not None
 
 
-def _shared_path_tail(left: str, right: str) -> int:
+def shared_path_tail(left: str, right: str) -> int:
+    """How many trailing path segments two URLs share: a moved page keeps its last ones."""
     left_parts = urlsplit(left).path.rstrip("/").split("/")
     right_parts = urlsplit(right).path.rstrip("/").split("/")
     shared = 0
@@ -94,7 +91,7 @@ def _shared_path_tail(left: str, right: str) -> int:
 
 def _best_page_match(reference: str, candidates: list[int], records: list[_SectionRecord]) -> int:
     return max(
-        candidates, key=lambda index: (_shared_path_tail(reference, records[index].page), -index)
+        candidates, key=lambda index: (shared_path_tail(reference, records[index].page), -index)
     )
 
 
@@ -194,7 +191,7 @@ def _match_pair(
             continue
         destination_page = max(
             destination_pages,
-            key=lambda page: _shared_path_tail(old.page, page.url),
+            key=lambda page: shared_path_tail(old.page, page.url),
         )
         for new_index in sorted(available):
             new = after[new_index]
@@ -219,7 +216,7 @@ def _match_pair(
         ]
         if not source_pages:
             continue
-        source_page = max(source_pages, key=lambda page: _shared_path_tail(new.page, page))
+        source_page = max(source_pages, key=lambda page: shared_path_tail(new.page, page))
         for old_index in unmatched_old:
             old = before[old_index]
             if old.page == source_page and _contains_body(old.body, new.body):
@@ -262,7 +259,7 @@ def _match_whole_pages(
             continue
         new_indexes = max(
             candidates,
-            key=lambda indexes: _shared_path_tail(old_records[0].page, after[indexes[0]].page),
+            key=lambda indexes: shared_path_tail(old_records[0].page, after[indexes[0]].page),
         )
         new_pages.pop(after[new_indexes[0]].page)
         for old_index, new_index in zip(old_indexes, new_indexes, strict=True):
@@ -405,140 +402,6 @@ def read_changelog(
         rows = json.loads((directory / pair["file"]).read_text())
         intervals.append({**pair, "rows": rows})
     return intervals
-
-
-def under_prefix(under: str) -> str:
-    raw = under.strip()
-    if not raw:
-        raise ValueError("under must contain a documentation path")
-    path, _fragment = split_docs_location(raw, "under")
-    return f"{SITE_ORIGIN}{path}"
-
-
-@lru_cache(maxsize=4)
-def _stored_page_urls(corpora: tuple[tuple[str, str], ...]) -> frozenset[str]:
-    """Every page URL any stored snapshot holds, read once per process.
-
-    Keyed on the corpus directories and their manifest digests, so a refreshed
-    snapshot set invalidates it and a call never re-reads eight corpora to
-    validate one prefix.
-    """
-    urls: set[str] = set()
-    for corpus_dir, _digest in corpora:
-        for path in iter_page_paths(Path(corpus_dir)):
-            urls.add(load_page(path).url.rstrip("/"))
-    return frozenset(urls)
-
-
-def is_under(page: str, prefix: str) -> bool:
-    return prefix == SITE_ORIGIN or page == prefix or page.startswith(prefix + "/")
-
-
-def _nearest_ancestor(prefix: str, pages: frozenset[str]) -> str | None:
-    parent = prefix
-    while parent.startswith(SITE_ORIGIN + "/"):
-        parent = parent.rsplit("/", 1)[0]
-        if parent == SITE_ORIGIN:
-            return None
-        if any(is_under(page, parent) for page in pages):
-            return parent
-    return None
-
-
-def history_under(
-    under: str,
-    since: str | None = None,
-    manifest_path: Path = DEFAULT_MANIFEST,
-    changelog_dir: Path | None = None,
-) -> dict[str, Any]:
-    prefix = under_prefix(under)
-    snapshots = _built(manifest_path)
-    if not snapshots:
-        raise ValueError("the snapshot manifest has no built snapshots")
-    pages = _stored_page_urls(
-        tuple((str(snapshot_corpus_dir(row)), row.content_digest or "") for row in snapshots)
-    )
-    if not any(is_under(page, prefix) for page in pages):
-        ancestor = _nearest_ancestor(prefix, pages)
-        hint = f' nearest path with pages: "{ancestor}".' if ancestor else ""
-        raise ValueError(f'no stored page exists under "{prefix}".{hint}')
-    try:
-        requested = date.fromisoformat(since) if since else date.fromisoformat(snapshots[0].date)
-    except ValueError as exc:
-        raise ValueError("since must be a date in YYYY-MM-DD form") from exc
-    snapped = next(
-        (row.date for row in snapshots if date.fromisoformat(row.date) >= requested), None
-    )
-    if snapped is None:
-        raise ValueError(f"since is after the last stored date {snapshots[-1].date}")
-    intervals = []
-    for interval in read_changelog(manifest_path, changelog_dir):
-        if interval["before"] < snapped:
-            continue
-        rows = [
-            row
-            for row in interval["rows"]
-            if is_under(row["page"], prefix)
-            or (row.get("old_page") and is_under(row["old_page"], prefix))
-        ]
-        intervals.append(
-            {
-                "before": interval["before"],
-                "after": interval["after"],
-                "rows": _two_levels(rows, prefix),
-            }
-        )
-    return {
-        "form": "under",
-        "under": prefix,
-        "since": snapped,
-        "intervals": intervals,
-        "changes": sum(len(interval["rows"]) for interval in intervals),
-    }
-
-
-_STATES = ("added", "removed", "changed", "moved")
-
-
-def _two_levels(rows: list[dict[str, Any]], prefix: str) -> list[dict[str, Any]]:
-    """Sections for the prefix page itself, one row per page for everything
-    beneath it. A folder-wide call then reads as a list of pages, and the page
-    form or ``under`` on one page gives the sections (D-051)."""
-    own: list[dict[str, Any]] = []
-    beneath: dict[str, list[dict[str, Any]]] = {}
-    for row in rows:
-        pages = {row["page"].rstrip("/"), (row.get("old_page") or "").rstrip("/")}
-        if prefix in pages:
-            own.append({**row, "level": "section"})
-        else:
-            beneath.setdefault(row["page"].rstrip("/"), []).append(row)
-    collapsed: list[dict[str, Any]] = []
-    for _page, page_rows in sorted(beneath.items()):
-        whole = next((row for row in page_rows if row.get("sections") is not None), None)
-        if whole is not None and len(page_rows) == 1:
-            collapsed.append(
-                {
-                    "level": "page",
-                    "state": whole["state"],
-                    "page": whole["page"],
-                    "sections": whole["sections"],
-                    "old_page": whole.get("old_page"),
-                    "cite": whole["page"],
-                }
-            )
-            continue
-        counts = Counter(row["state"] for row in page_rows)
-        collapsed.append(
-            {
-                "level": "page",
-                "state": "changed",
-                "page": page_rows[0]["page"],
-                "counts": {state: counts[state] for state in _STATES if counts[state]},
-                "old_page": None,
-                "cite": page_rows[0]["page"],
-            }
-        )
-    return own + collapsed
 
 
 def _parser() -> argparse.ArgumentParser:
