@@ -82,8 +82,9 @@ both calls.
 
 `make api` and `make mcp` take `host=` and `port=` to override their addresses.
 Connect an MCP client to the server rather than writing the Streamable HTTP
-handshake by hand, for example Claude Code or
-`npx @modelcontextprotocol/inspector` pointed at `http://127.0.0.1:8000/mcp`. The
+handshake by hand, for example the Vibe CLI's `[[mcp_servers]]` entry from the
+README with `url = "http://127.0.0.1:8000/mcp"`, or
+`npx @modelcontextprotocol/inspector` pointed at that URL. The
 local MCP server accepts any client until `GLOSSATOR_MCP_TOKEN` is set, which
 matters once it listens on anything but `127.0.0.1`. Run the stdio transport with
 `uv run python -m entrypoints.mcp_server`. The history tool reads the vendored

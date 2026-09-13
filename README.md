@@ -1,17 +1,13 @@
 # glossator
 
 glossator is a Model Context Protocol (MCP) server that gives agents Mistral's documentation: 411 pages from a pinned [docs.mistral.ai](https://docs.mistral.ai) commit.
-The agent you already use, in Work, the Vibe CLI, Claude Code, or a bot, queries the documentation mid-task instead of going through a separate RAG system or a copy of the docs uploaded into every agent and every chat.
+The agent you already use, in Work, the Vibe CLI, or any MCP client, queries the documentation mid-task instead of going through a separate RAG system or a copy of the docs uploaded into every agent and every chat.
 It searches sections, reads pages and compares dated snapshots through three read-only tools, then writes the answer and cites the link each tool prints beside the text.
 
 ## Try it
 
 The deployed server is `https://glossator.tomvaucourt.com/mcp` (Streamable HTTP; the bearer token is supplied on request).
 It announces itself as `mistral-docs` and its tools as `mistral_docs_*`.
-
-```bash
-claude mcp add --transport http mistral-docs https://glossator.tomvaucourt.com/mcp --header "Authorization: Bearer <token>"
-```
 
 In the Vibe CLI, append a server to `config.toml`; `name` becomes the prefix of the tool names ([MCP servers](https://docs.mistral.ai/vibe/code/cli/mcp-servers#add)):
 
@@ -26,6 +22,7 @@ headers = { "Authorization" = "Bearer <token>" }
 In the Vibe CLI the tools appear as `glossator_mistral_docs_search`, `glossator_mistral_docs_read_page` and `glossator_mistral_docs_history`; Mistral Work shows the tool names as they are.
 
 In Mistral Work, add that URL as a `Custom MCP Connector` under `Connectors` and pre-authorise the three read functions; [`docs/mcp.md`](docs/mcp.md) has the full setup, the workspace Skill, the health endpoint and other clients.
+The workspace Skill in [`skills/mistral-docs/`](skills/mistral-docs/) is what makes Work search first and cite; install it under `Context > Skills > New Skill` as [`skills/mistral-docs/README.md`](skills/mistral-docs/README.md) describes.
 
 | Tool | Purpose |
 |---|---|
@@ -65,12 +62,13 @@ make ingest corpus=corpus/mistral-docs variant=sec1024
 make ask question="How do I stream a chat completion?" model=ministral-14b-2512
 ```
 
-The API and the MCP server run in the foreground, so start each in its own terminal (`make api` on `http://127.0.0.1:8080`, `make mcp` on `http://127.0.0.1:8000/mcp`), then ask the API and connect a client:
+The API and the MCP server run in the foreground, so start each in its own terminal (`make api` on `http://127.0.0.1:8080`, `make mcp` on `http://127.0.0.1:8000/mcp`), then ask the API:
 
 ```bash
 curl -s -X POST http://127.0.0.1:8080/ask -H 'content-type: application/json' \
   -d '{"question": "How do I stream a chat completion?", "model": "ministral-14b-2512"}'
-claude mcp add --transport http mistral-docs http://127.0.0.1:8000/mcp
 ```
+
+A local client points at `http://127.0.0.1:8000/mcp`: the same Vibe CLI `[[mcp_servers]]` entry as above with that `url` and no header, or MCP Inspector (`npx @modelcontextprotocol/inspector`).
 
 Everything else, including the repository layout and deployment, is indexed in [`docs/README.md`](docs/README.md).

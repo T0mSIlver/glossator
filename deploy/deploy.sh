@@ -435,9 +435,13 @@ with <token> replaced by the GLOSSATOR_MCP_TOKEN value:
   # /health needs no header
   curl -s $base/health
 
-Add it to Claude Code:
+Add it to the Vibe CLI, in config.toml:
 
-  claude mcp add --transport http glossator $base/mcp --header "Authorization: Bearer <token>"
+  [[mcp_servers]]
+  name = "glossator"
+  transport = "streamable-http"
+  url = "$base/mcp"
+  headers = { "Authorization" = "Bearer <token>" }
 
 Add it to Mistral Work: Connectors > + Add Connector > Custom MCP Connector,
 Server URL $base/mcp. deploy/README.md has the tunnel and Connector steps.

@@ -147,7 +147,7 @@ def test_instructions_assembled_from_skill_files() -> None:
 
     block = custom_instructions_block()
     assert block.startswith("When I ask about Mistral products")
-    assert block.endswith("say so.")
+    assert block.endswith("name the paths you listed.")
 
     assert agent_instructions() == f"{body}\n\n{block}"
 

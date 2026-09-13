@@ -1362,6 +1362,8 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 2. The missing page is upstream row 16, with the session as evidence. The question the session could not answer is `mined2-084`, typed `unanswerable`, so the over-reach is measured from now on.
 3. A URL-prefix form of search (a `q` that is a page URL lists the pages under it) is the candidate answer to the two listing attempts. It is not the `outline` strategy of D-033, which handed the model the whole site outline instead of retrieval; it would be a scoped listing after a search has named the neighbourhood. Tom decides whether it ships; nothing is built until then.
 
+**Added 2026-09-13.** A Work session answered that Mistral has no text-to-speech model although `studio/audio/text_to_speech` (Voxtral TTS) is in the corpus and a search for "text-to-speech model" returns it second. Step 5 of the Skill and the custom instructions now require a listing before a denial: `mistral_docs_search(q="", under=...)` on `https://docs.mistral.ai/models` and the `studio` section the thing would live in, then the absence stated with the paths listed.
+
 ---
 
 ## D-044b · A page URL in `q` lists the pages under it
