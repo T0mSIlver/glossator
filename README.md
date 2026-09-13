@@ -1,34 +1,17 @@
 # glossator
 
-glossator gives agents Mistral's documentation through a Model Context Protocol
-(MCP) server. It exposes three read-only tools over 411 pages from a pinned
-[docs.mistral.ai](https://docs.mistral.ai) commit. Search results name sections by
-key and print the link to cite; the other tools read pages by key and compare
-dated snapshots.
-The calling agent researches and writes the answer.
-
-A separate FastAPI service retains the evaluated generated-answer baseline. It
-checks each numbered citation and quote against the retrieved documentation.
+glossator is a Model Context Protocol (MCP) server that gives agents Mistral's documentation: 411 pages from a pinned [docs.mistral.ai](https://docs.mistral.ai) commit.
+It is for agents with no filesystem or `grep`, such as those in Mistral Work, Le Chat and chat bots. The agent searches sections, reads pages and compares dated snapshots through three read-only tools, then writes the answer and cites the links the tools print.
 
 ## Try it
 
-The deployed server is at `https://glossator.tomvaucourt.com/mcp` (Streamable
-HTTP; the bearer token is supplied on request). The health endpoint
-`https://glossator.tomvaucourt.com/health` is open and reports the served
-variant, the index counts and the embedding probe.
+The deployed server is `https://glossator.tomvaucourt.com/mcp` (Streamable HTTP; the bearer token is supplied on request).
 
-- Mistral Work: open `Connectors`, click `+ Add Connector`, and select
-  `Custom MCP Connector`. Enter the server URL above. Work detects bearer
-  authentication automatically. Pre-authorise the three read functions. See
-  [`docs/mcp.md`](docs/mcp.md) for setup and the workspace Skill.
-- Claude Code:
+```bash
+claude mcp add --transport http mistral-docs https://glossator.tomvaucourt.com/mcp --header "Authorization: Bearer <token>"
+```
 
-  ```bash
-  claude mcp add --transport http mistral-docs https://glossator.tomvaucourt.com/mcp --header "Authorization: Bearer <token>"
-  ```
-
-- Any other MCP client (for example MCP Inspector): Streamable HTTP transport
-  against the URL above with an `Authorization: Bearer <token>` header.
+In Mistral Work, add that URL as a `Custom MCP Connector` under `Connectors` and pre-authorise the three read functions; [`docs/mcp.md`](docs/mcp.md) has the full setup, the workspace Skill, the health endpoint and other clients.
 
 | Tool | Purpose |
 |---|---|
@@ -36,80 +19,19 @@ variant, the index counts and the embedding probe.
 | `mistral_docs_read_page(page_url, section, lang="python")` | A whole page in reading order, or one section of a large page with its neighbours. |
 | `mistral_docs_history(text [+ page_url \| under] \| page_url + section \| under + since)` | When a phrase appeared, how a page or section changed across the dated snapshots, or what changed under a path between stored dates. Every change is a bound between two snapshot dates, never a day. |
 
-## Why an MCP server, and what decided its shape
+## Why this shape
 
-Agents inside Mistral Work, Le Chat, scheduled tasks and chat bots have no
-filesystem or `grep`. They can reach external systems through Connectors. A
-coding agent can search an SDK checkout for a parameter name, but product facts
-often live elsewhere.
+- The corpus is the docs repo at a commit, because all 75 `llms.txt` links return 404 and rendered HTML is 1.7% text (D-001).
+- Search returns section chunks with tested anchors and prints a `cite:` line beside every hit, because 1,823 of 4,016 headings have no anchor on the live site (D-034, D-047).
+- The agent writes the answer. Server-side generation stays as the measured baseline, scoring 0.78 against 0.77 at three times the latency (D-040b, D-044).
+- The three tools take no ids and carry read-only annotations, without which Work asks for approval on every call (D-044, D-037b, D-037c).
+- Eight biweekly snapshots and a history tool answer when a fact changed (D-041, D-048).
 
-This gap appears in `eval/mined.jsonl`. Of its 85 real questions, 54 came from
-public GitHub issues, 40 on the SDK repositories and 14 on the documentation
-and cookbook (`DECISIONS.md` D-038, D-039). The server
-provides documentation from a pinned commit and prints, beside every section,
-the link a reader opens. Snapshot search also shows when a fact changed.
-
-Every choice is in `DECISIONS.md` with the run that decided it. The ones that
-shaped the product:
-
-| Decision | Evidence | Entry |
-|---|---|---|
-| Source the docs repo at a commit, not `llms.txt` or HTML | all 75 `llms.txt` links return 404; rendered HTML is 1.7% text with empty tab panels | D-001 |
-| Section chunks with tested anchors, not whole pages | whole-page chunks cannot return an exact section link and use twice the answer prompt tokens | D-034, D-035a |
-| Vector-heavy hybrid ranking inside Vespa | best exact-section retrieval on a 13-configuration grid over 294 questions | D-034 |
-| The agent writes the answer; nothing generates inside the server | with retrieval tools a capable agent scored 0.77, against 0.78 for server-side generation at three times the latency and with a second model | D-040b, D-044 |
-| No reranker on the agent path | it accounted for 91% of search latency and mainly improved which result ranked first, which an agent that reads several hits does not need | D-015b |
-| Medium 3.5 as the answer model | replayed on Mistral's API, fabricated quotes per answer fell to 0.17 to 0.19 on four sets, less than half Ministral 3 14B's; judged correctness pending | D-017c |
-| Three tools, no ids | 97% of pages fit one read under 8,000 tokens; the Work session never used the other five tools | D-043, D-044 |
-| Every section has a key, and the link to cite is printed beside it | 1,823 of 4,016 headings have no anchor on the live site, so anchors alone collapse sibling sections and land a click far from the text; a text fragment is printed only when it moves the landing | D-047 |
-| Read-only tool annotations | without them Work asks for approval on every call and a headless consumer never calls at all | D-037b, D-037c |
-| A time axis: eight biweekly snapshots and a history tool | the docs renamed their API section in August; `-latest` aliases moved under users' feet | D-041, D-041a |
-| GLM 5.3 as the primary judge | four judges were compared; the primary agreed with 35 of 40 labels by the author | D-021a, D-021b, D-021c |
-
-### Why not the alternatives
-
-#### Put the whole documentation in a one-million-token context
-
-The corpus contains 765,646 Medium 3.5 tokens (`eval/corpus-stats/`). It exceeds
-Medium 3.5's 256,000-token context window. It fits Z.ai GLM 5.2's one-million-token
-window. The vendored model card prices input at 1.4 USD per million tokens, or
-0.14 USD for cached input. Reading the corpus would therefore cost about 1.07
-USD uncached or 0.11 USD cached per question. Search returns a much smaller
-passage with its exact section link.
-
-#### Generate inside the server
-
-The FastAPI `POST /ask` route implements retrieval-augmented generation. The
-repository keeps it as the measured baseline. On the same questions, Sonnet
-scored 0.77 with the retrieval tools and 0.78 with `answer`. The
-server-side answer took three times as long and required a second model
-(D-040b). Replayed on Mistral's API in place of Ministral 3 14B, Medium 3.5
-halved fabricated quotes on the same prompts; its judged correctness is pending
-(D-017c).
-
-The MCP server now provides the parts that calling agents lack: a pinned
-corpus, tested section anchors and dated history. Agents can reformulate a
-search with their own reasoning.
-
-#### Use Libraries or web search
-
-Libraries index uploaded files for the `document_library` tool and cite the
-document. They do not retain docs.mistral.ai section anchors, source commits or
-dated changes. In the consumer run, built-in web search resolved 0.86 of its
-links. Its correctness was 0.52 to 0.58, compared with 0.77 for the retrieval
-tools (D-040b). The live site has no history, and all 75
-links in its `llms.txt` returned 404 (D-001).
-
-[`docs/search-toolkit.md`](docs/search-toolkit.md) records what the project kept,
-wrapped, replaced or skipped. [`docs/mistral-stack.md`](docs/mistral-stack.md)
-lists each Mistral dependency, its version and known defects.
-[`docs/eval-status.md`](docs/eval-status.md) summarises the evaluation.
+Every choice is in `DECISIONS.md` with the run that decided it; the alternatives considered are in [`docs/alternatives.md`](docs/alternatives.md).
 
 ## Evaluation in five lines
 
-Every number below names its model; the runs and the judge study are in
-[`docs/evaluation.md`](docs/evaluation.md), and each directory under
-`eval/runs/` stores its inputs, model calls, records, metrics and figures.
+The runs and the judge study are in [`docs/evaluation.md`](docs/evaluation.md); the stage-by-stage table is in [`docs/eval-status.md`](docs/eval-status.md).
 
 - The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration. Medium 3.5 replayed on Mistral's API cut fabricated quotes per answer from 0.40–0.59 to 0.17–0.19 on all four sets, at 0.0045 to 0.0061 USD per question; its judged correctness is pending (D-017c).
 - Sonnet scored 0.77 with the retrieval tools and 0.78 with server-side generation, which took three times as long. The run predates the three-tool cut.
@@ -119,11 +41,7 @@ Every number below names its model; the runs and the judge study are in
 
 ## Five-minute start
 
-You need `uv`, `make`, `curl`, docker with the compose plugin and about 4 GB of
-memory for the Vespa container (`docker-compose.yaml`), network access, and a
-`MISTRAL_API_KEY`. The project runs on Python 3.12 to 3.14; on a first run
-`uv sync` downloads the packages and, if none of those Pythons is installed, an
-interpreter, which the five minutes do not include.
+You need `uv`, `make`, `curl`, docker with the compose plugin and about 4 GB of memory for the Vespa container (`docker-compose.yaml`), network access, and a `MISTRAL_API_KEY`. What each step does and costs, the models behind `make ask`, the tests and the local server's options are in [`docs/api.md`](docs/api.md#running-locally).
 
 ```bash
 make installdeps
@@ -133,66 +51,17 @@ make ingest corpus=corpus/mistral-docs variant=sec1024
 make ask question="How do I stream a chat completion?" model=ministral-14b-2512
 ```
 
-`make setup-vespa` starts Vespa with its query API on `localhost:18080` and its
-config server on `localhost:19072`, deploys the schemas, then waits for the
-query API, which comes up a minute or so after the config server on a new
-container. `make ingest` splits the 411 pages into 4,440 section chunks and
-embeds them with `mistral-embed`: about one million tokens, about 0.10 USD
-(D-011a). On the free tier the embedding API rate-limits the run, so it takes a
-few minutes; embeddings are cached under `~/.cache/glossator/embeddings`, or
-`GLOSSATOR_EMBEDDING_CACHE`, so a re-run after a rate-limit failure only embeds
-what is missing. Add `verbose=1` for the chunker's debug log. A second checkout
-on the same machine sets its own `VESPA_CONTAINER`, `VESPA_QUERY_PORT` and
-`VESPA_CONFIG_PORT` in `.env`.
-
-`make ask` calls two models: the generation model named by `model=` (Mistral
-Medium 3.5 when omitted) and the reranker, `mistral-small-2603` by default and
-overridable with `GLOSSATOR_RERANK_MODEL`. A key without Mistral Small quota sets
-`GLOSSATOR_RERANK_MODEL=ministral-14b-2512` in `.env`. The printed cost covers
-both calls.
-
-The API and the MCP server run in the foreground, so start them in a second and
-third terminal:
-
-```bash
-make api    # http://127.0.0.1:8080
-make mcp    # http://127.0.0.1:8000/mcp
-```
-
-Override either address with `host=` and `port=`. Then ask the API the same
-question:
+The API and the MCP server run in the foreground, so start each in its own terminal (`make api` on `http://127.0.0.1:8080`, `make mcp` on `http://127.0.0.1:8000/mcp`), then ask the API and connect a client:
 
 ```bash
 curl -s -X POST http://127.0.0.1:8080/ask -H 'content-type: application/json' \
   -d '{"question": "How do I stream a chat completion?", "model": "ministral-14b-2512"}'
+claude mcp add --transport http mistral-docs http://127.0.0.1:8000/mcp
 ```
-
-and connect an MCP client to the server rather than writing the Streamable HTTP
-handshake by hand, for example Claude Code with
-`claude mcp add --transport http mistral-docs http://127.0.0.1:8000/mcp`, or
-`npx @modelcontextprotocol/inspector` pointed at the same URL. The local MCP server
-accepts any client until `GLOSSATOR_MCP_TOKEN` is set, which matters once it
-listens on anything but `127.0.0.1`. Run the stdio transport with
-`uv run python -m entrypoints.mcp_server`. The history tool reads the vendored
-`corpus/snapshots/` directories, so the five-minute start needs no snapshot step.
-
-`make test` runs the offline tests; `make test-all` adds the container image
-build. With Vespa up and `MISTRAL_API_KEY` set, `make test` also runs the
-integration tests: they embed a fixture corpus, a fraction of a cent per run, and
-write its pages into the `sec128` and `page128` schemas of the Vespa on
-`localhost:18080`. Without Vespa or the key those tests skip.
-
-Mistral Medium 3.5 is the generation default. The project API key had zero
-quota for Medium 3.5 and Small 4 until 12 September 2026 (D-017a, D-049), so
-the reported API runs use `ministral-14b-2512`, D-017c measures Medium 3.5 by
-replay on the API, and the demo run of D-049a is the first on Medium 3.5 end to end. See
-[`docs/api.md`](docs/api.md) for environment variables and local model servers.
 
 ## Deployment
 
-`deploy/` puts the server on a Linux host behind a Cloudflare tunnel in one
-command (`make deploy HOST=<ssh-host>`). Modes, checks and the manual steps:
-[`deploy/README.md`](deploy/README.md).
+`deploy/` puts the server on a Linux host behind a Cloudflare tunnel in one command (`make deploy HOST=<ssh-host>`); modes, checks and manual steps are in [`deploy/README.md`](deploy/README.md).
 
 ## Repository layout
 
@@ -216,14 +85,16 @@ tests/            offline tests and optional backend integration tests
 
 ## Read next
 
+- [`docs/alternatives.md`](docs/alternatives.md): the decisions that shaped the product and the alternatives measured against it.
 - [`docs/evaluation.md`](docs/evaluation.md): the evaluation story, dataset by dataset, with every run linked; [`docs/eval-status.md`](docs/eval-status.md) is the stage-by-stage table.
-- [`docs/failure-classes.md`](docs/failure-classes.md): the four classes of question still answered wrong, with question ids, causes, fixes and costs; the refresh gate that decides whether a new docs commit is served is D-045 and `deploy/README.md`.
-- [`docs/mcp.md`](docs/mcp.md): the tool contract and the Mistral Work setup; [`docs/architecture.md`](docs/architecture.md): the pipeline in ten lines.
+- [`docs/failure-classes.md`](docs/failure-classes.md): the four classes of question still answered wrong, with causes, fixes and costs.
+- [`docs/mcp.md`](docs/mcp.md): the tool contract and the Mistral Work setup.
+- [`docs/architecture.md`](docs/architecture.md): the pipeline in ten lines.
 - [`docs/upstream.md`](docs/upstream.md): the defects found in Mistral's packages and documentation, ranked, with where each fix goes.
 - [`docs/search-toolkit.md`](docs/search-toolkit.md): the Mistral Search Toolkit kept, wrapped, replaced, skipped.
 - [`docs/mistral-stack.md`](docs/mistral-stack.md): every Mistral component with its version, defects and constraints.
-- [`docs/api.md`](docs/api.md): the HTTP routes, environment variables and local model servers.
+- [`docs/api.md`](docs/api.md): the HTTP routes, environment variables, local model servers and running locally.
 - [`docs/retrieval.md`](docs/retrieval.md): index variants, the retrieval grid, ingestion guards.
 - [`docs/corpus.md`](docs/corpus.md): where the corpus comes from and how it is checked.
-- [`deploy/README.md`](deploy/README.md): deployment, the tunnel, Connector registration.
+- [`deploy/README.md`](deploy/README.md): deployment, the tunnel, Connector registration; the refresh gate is D-045.
 - [`DECISIONS.md`](DECISIONS.md): every choice with the facts that decided it; append an entry when a change reverses one.

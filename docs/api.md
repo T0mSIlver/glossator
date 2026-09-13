@@ -59,3 +59,47 @@ which effort it used.
 Mistral Medium 3.5 is the shipped generation default. The project key had a zero
 request quota for that model until 12 September 2026, so most recorded checks and
 evaluations use `ministral-14b-2512` (D-017a).
+
+## Running locally
+
+The project runs on Python 3.12 to 3.14; on a first run `uv sync` downloads the
+packages and, if none of those Pythons is installed, an interpreter, which the
+five minutes do not include.
+
+`make setup-vespa` starts Vespa with its query API on `localhost:18080` and its
+config server on `localhost:19072`, deploys the schemas, then waits for the
+query API, which comes up a minute or so after the config server on a new
+container. `make ingest` splits the 411 pages into 4,440 section chunks and
+embeds them with `mistral-embed`: about one million tokens, about 0.10 USD
+(D-011a). On the free tier the embedding API rate-limits the run, so it takes a
+few minutes; embeddings are cached under `~/.cache/glossator/embeddings`, or
+`GLOSSATOR_EMBEDDING_CACHE`, so a re-run after a rate-limit failure only embeds
+what is missing. Add `verbose=1` for the chunker's debug log. A second checkout
+on the same machine sets its own `VESPA_CONTAINER`, `VESPA_QUERY_PORT` and
+`VESPA_CONFIG_PORT` in `.env`.
+
+`make ask` calls two models: the generation model named by `model=` (Mistral
+Medium 3.5 when omitted) and the reranker, `mistral-small-2603` by default and
+overridable with `GLOSSATOR_RERANK_MODEL`. A key without Mistral Small quota sets
+`GLOSSATOR_RERANK_MODEL=ministral-14b-2512` in `.env`. The printed cost covers
+both calls.
+
+`make api` and `make mcp` take `host=` and `port=` to override their addresses.
+Connect an MCP client to the server rather than writing the Streamable HTTP
+handshake by hand, for example Claude Code or
+`npx @modelcontextprotocol/inspector` pointed at `http://127.0.0.1:8000/mcp`. The
+local MCP server accepts any client until `GLOSSATOR_MCP_TOKEN` is set, which
+matters once it listens on anything but `127.0.0.1`. Run the stdio transport with
+`uv run python -m entrypoints.mcp_server`. The history tool reads the vendored
+`corpus/snapshots/` directories, so the five-minute start needs no snapshot step.
+
+`make test` runs the offline tests; `make test-all` adds the container image
+build. With Vespa up and `MISTRAL_API_KEY` set, `make test` also runs the
+integration tests: they embed a fixture corpus, a fraction of a cent per run, and
+write its pages into the `sec128` and `page128` schemas of the Vespa on
+`localhost:18080`. Without Vespa or the key those tests skip.
+
+Mistral Medium 3.5 is the generation default. The project API key had zero
+quota for Medium 3.5 and Small 4 until 12 September 2026 (D-017a, D-049), so
+the reported API runs use `ministral-14b-2512`, D-017c measures Medium 3.5 by
+replay on the API, and the demo run of D-049a is the first on Medium 3.5 end to end.

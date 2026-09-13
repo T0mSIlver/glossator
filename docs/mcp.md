@@ -7,6 +7,13 @@
 uv run python -m entrypoints.mcp_server
 ```
 
+The deployed server is at `https://glossator.tomvaucourt.com/mcp` (Streamable
+HTTP; the bearer token is supplied on request). The health endpoint
+`https://glossator.tomvaucourt.com/health` is open and reports the served
+variant, the index counts and the embedding probe. Any MCP client other than
+Work or Claude Code (for example MCP Inspector) uses the Streamable HTTP
+transport against that URL with an `Authorization: Bearer <token>` header.
+
 The server is named `mistral-docs` and exposes three read-only tools. The calling
 agent researches and writes the answer. No model writes an answer inside the
 MCP server (D-044).
