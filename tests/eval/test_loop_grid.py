@@ -18,16 +18,15 @@ from glossator.answer.config import (
     PRICES,
     AnswerConfig,
 )
-from glossator.eval.loop_grid import (
+from glossator.eval.loop_grid.models import (
     AXIS_VALUES,
     FULL_PREVIEWS,
     SHIPPED_POINT,
     configurations,
-    eval_prices,
-    figure_name,
-    regenerate,
-    summarize,
 )
+from glossator.eval.loop_grid.report import figure_name
+from glossator.eval.loop_grid.run import eval_prices
+from glossator.eval.loop_grid.summary import regenerate, summarize
 
 
 def test_the_grid_is_one_axis_at_a_time_with_the_shipped_point_once() -> None:
