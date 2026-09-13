@@ -1,6 +1,6 @@
 # Evaluation
 
-Three questions decide whether the tool ships. Each has a number, a set, a model that produced it and a judge. `D-0xx` is the `DECISIONS.md` entry that took the decision. Run directories live under [`../eval/runs/`](../eval/runs/), one per run, with every model call recorded. The stage-by-stage table of every shipped choice is [`eval-status.md`](eval-status.md).
+Five questions decide whether the tool ships. Each has a number, a set, a model that produced it and a judge. `D-0xx` is the `DECISIONS.md` entry that took the decision. Run directories live under [`../eval/runs/`](../eval/runs/), one per run, with every model call recorded. The stage-by-stage table of every shipped choice is [`eval-status.md`](eval-status.md).
 
 | Question | Number | Set | Produced by | Judged by | Entry |
 |---|---|---|---|---|---|
