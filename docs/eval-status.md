@@ -49,8 +49,9 @@ the reference answers, not model capacity (D-017b): replaying the recorded
 prompts leaves correctness unchanged within the interval, and the answers are
 cleaner. The same prompts replayed on Mistral's API, now the reported Medium 3.5
 number, bring fabricated quotes per answer to 0.17 to 0.19; their judged
-correctness is pending (D-017c). Small 4, the default reranker, has never been run: the
-key's quota for both models is zero (D-017a).
+correctness is pending (D-017c). Small 4, the default reranker, has never been run:
+the key had no quota for Medium 3.5 or Small 4 until 12 September 2026 (D-017a,
+D-049).
 
 ## The shipped pipeline, stage by stage
 
