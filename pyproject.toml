@@ -18,6 +18,8 @@ dependencies = [
     "pyyaml>=6.0.3",
     # Also a toolkit dependency, but called directly, so declared rather than inherited.
     "structlog>=25.1",
+    # `make api` serves the FastAPI app with it; it arrives through mcp too, but is run directly.
+    "uvicorn>=0.52",
 ]
 
 [dependency-groups]

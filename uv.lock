@@ -862,6 +862,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "structlog" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -883,6 +884,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=0.9.9" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "structlog", specifier = ">=25.1" },
+    { name = "uvicorn", specifier = ">=0.52" },
 ]
 
 [package.metadata.requires-dev]
