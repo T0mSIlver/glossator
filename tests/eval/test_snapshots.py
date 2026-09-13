@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from glossator.answer.config import LOCAL_MINISTRAL_3_14B, AnswerConfig
-from glossator.eval.snapshots import generation_target
+from glossator.eval.snapshots.evaluate import generation_target
 
 
 def test_without_a_server_generation_runs_the_shipped_api_model(
