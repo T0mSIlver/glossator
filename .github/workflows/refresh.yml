@@ -177,6 +177,18 @@ jobs:
           # The vendored corpus becomes the candidate exactly as it was
           # evaluated, not a fresh build against live inputs.
           rsync -a --delete "${{ steps.candidate.outputs.corpus }}/" corpus/mistral-docs/
+          # The history tool reads dated corpora from the repository (D-052):
+          # vendor the same corpus under its date, point the manifest row the
+          # build appended at that copy instead of the runner's cache, and
+          # rebuild the committed changelog so the new pair is served.
+          snapshot="corpus/snapshots/${{ steps.candidate.outputs.date }}"
+          mkdir -p "$snapshot"
+          rsync -a --delete "${{ steps.candidate.outputs.corpus }}/" "$snapshot/"
+          jq --arg date "${{ steps.candidate.outputs.date }}" --arg dir "$snapshot" \
+            '.snapshots |= map(if .date == $date then .corpus_dir = $dir else . end)' \
+            eval/snapshots/manifest.json > manifest.json.tmp
+          mv manifest.json.tmp eval/snapshots/manifest.json
+          uv run python -m glossator.changelog build
           sed -i 's/^PINNED_REF = ".*"/PINNED_REF = "${{ steps.candidate.outputs.commit }}"/' \
             src/glossator/corpus/mistral_docs/__init__.py
           sed -i 's/^CORPUS_REF := $(or $(REF),.*)/CORPUS_REF := $(or $(REF),${{ steps.candidate.outputs.commit }})/' Makefile
@@ -184,7 +196,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add corpus eval/snapshots/manifest.json eval/refresh/served.json Makefile \
+          git add corpus eval/snapshots/manifest.json eval/snapshots/changelog eval/refresh/served.json Makefile \
             src/glossator/corpus/mistral_docs/__init__.py \
             eval/runs/*-refresh-labels-* eval/runs/*-refresh-eval-*
           git commit -m "Accept the ${{ steps.candidate.outputs.date }} docs snapshot after the refresh gate passed"
@@ -192,7 +204,7 @@ jobs:
           {
             echo "Docs commit \`${{ steps.candidate.outputs.commit }}\` passed the refresh gate against the served snapshot ${{ steps.candidate.outputs.served_snapshot }}."
             echo "Merging moves the served pointer and re-vendors the corpus; \`make deploy\` after the merge rebuilds the served index from the embedding cache (D-037d)."
-            echo "The \`history\` tool gains the new date only after the operator copies \`corpus/mistral-docs\` into \`SNAPSHOTS_DIR/<date>\` on the deployment host and ingests it with \`python -m glossator.ingest --variant snap1024 --snapshot <date> --corpus <that path>\`, the same steps as for the existing eight dates."
+            echo "The corpus is also vendored under \`corpus/snapshots/${{ steps.candidate.outputs.date }}\` with its manifest row and a rebuilt changelog, so the \`history\` tool serves the new date from the next image; nothing is copied on the deployment host (D-052)."
             echo
             cat "${{ steps.eval.outputs.path }}/gate/gate.md"
           } > pr.md
