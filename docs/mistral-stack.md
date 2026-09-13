@@ -169,7 +169,7 @@ and requires `uv sync --extra workflows` (`src/examples/workflows/search/workflo
 middleware and registers only `mistral_docs_search`, `mistral_docs_read_page` and
 `mistral_docs_history` (D-044). It exposes stdio and Streamable HTTP and passes no
 protocol revision. No MCP resources, answer tool or verification tool are registered
-(`src/entrypoints/mcp_server.py:61-64,208-243,548-572,708-725`).
+(`src/glossator/surface/names.py:4-6`; `src/entrypoints/mcp_server.py:125-153,193-207,264-276`).
 FastMCP delegates initialisation to the official `mcp` low-level server
 (`fastmcp/server/low_level.py:178-195`; `fastmcp/server/http.py:440-450`).
 
@@ -212,7 +212,7 @@ Mistral Work does not expose MCP resources, prompt templates or dynamic tool
 discovery. The current server therefore exposes only the three D-044 tools; shared
 rules fit in server instructions, individual tool descriptions and the workspace
 Skill (D-037a, D-029a, D-044;
-`src/entrypoints/mcp_server.py:188-208,548-572`).
+`src/glossator/surface/descriptions.py:7-89`).
 
 Work bills tool descriptions against every message's context and renders every
 result verbatim. D-044 reduced that permanent surface to search, page reading and
@@ -223,7 +223,7 @@ When Work asks for confirmation, it adds the undeclared
 allowed a retry. `_ParamGuard` now removes underscore-prefixed host metadata before
 validation; every tool also advertises read-only,
 non-destructive, idempotent and closed-world annotations (D-037b;
-`src/entrypoints/mcp_server.py:211-243,558-572`).
+`src/glossator/surface/params.py:61-80`; `src/entrypoints/mcp_server.py:128-153,193-207`).
 
 ## Outdated Mistral material excluded or corrected
 
