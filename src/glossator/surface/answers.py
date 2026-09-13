@@ -22,7 +22,7 @@ from glossator.answer.cite import (
 from glossator.answer.config import PRICES, AnswerConfig, known_serving_model
 from glossator.answer.llm import CALL_ERRORS
 from glossator.surface.engines import EngineRegistry
-from glossator.surface.errors import SurfaceError, bad_param
+from glossator.surface.errors import api_upstream, bad_param
 
 _ASK_UPSTREAM_ERRORS: tuple[type[Exception], ...] = (
     RetrieverException,
@@ -77,11 +77,7 @@ async def ask(
         # 429 included, D-017a); they reach here only after the service layer
         # exhausted its retries, so the caller hears 503, not a 500 the
         # /health dashboard cannot explain.
-        raise SurfaceError(
-            "E_UPSTREAM",
-            f"answer generation failed: {exc}",
-            "retry the identical request; if it repeats, check GET /health",
-        ) from exc
+        raise api_upstream("answer generation", exc) from exc
 
 
 def _citation_url(url: str, anchor: str | None) -> str:
@@ -129,11 +125,7 @@ async def cite(
             "search hit printed it) or a page url with an optional #anchor",
         ) from exc
     except (RetrieverException, IndexException) as exc:
-        raise SurfaceError(
-            "E_UPSTREAM",
-            f"citation check failed: {exc}",
-            "retry the identical request; if it repeats, check GET /health",
-        ) from exc
+        raise api_upstream("citation check", exc) from exc
 
 
 __all__ = ["answer_config", "answer_payload", "ask", "cite"]

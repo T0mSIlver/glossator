@@ -8,7 +8,13 @@ from glossator.retrieval.engine import Hit
 from glossator.surface.containing import LANGS, contain
 from glossator.surface.context import Surface
 from glossator.surface.engines import EngineRegistry
-from glossator.surface.errors import SurfaceError, bad_param, unknown_page, upstream
+from glossator.surface.errors import (
+    api_unknown_page,
+    api_upstream,
+    bad_param,
+    unknown_page,
+    upstream,
+)
 from glossator.surface.names import READ_PAGE, SEARCH
 from glossator.surface.pages import SITE, PageCatalog
 from glossator.surface.search import PREFIX_LIST_MAX
@@ -155,30 +161,17 @@ async def page_sections(
     """The URL and the sections ``GET /pages`` returns, from ``start_offset`` on."""
     clean = page_path.strip("/")
     if not clean:
-        raise SurfaceError(
-            "E_UNKNOWN_PAGE",
-            "no page path given",
-            "page paths look like 'api/endpoint/chat'; POST /search finds the right one",
-        )
+        raise api_unknown_page(clean)
     url = f"{SITE}/{clean}"
     engine = registry.get(variant)
-    missing = SurfaceError(
-        "E_UNKNOWN_PAGE",
-        f"no indexed page at /{clean}",
-        "use the url exactly as a search hit printed it; POST /search to find pages",
-    )
     try:
         sections = await engine.navigation_at(url).read(start_offset or None, None, top_k=top_k)
     except SourceNotFoundError as exc:
-        raise missing from exc
+        raise api_unknown_page(clean) from exc
     except IndexException as exc:
-        raise SurfaceError(
-            "E_UPSTREAM",
-            f"page read failed: {exc}",
-            "retry the identical request; if it repeats, check GET /health",
-        ) from exc
+        raise api_upstream("page read", exc) from exc
     if not sections:
-        raise missing
+        raise api_unknown_page(clean)
     return url, sections
 
 

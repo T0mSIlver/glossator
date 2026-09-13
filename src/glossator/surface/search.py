@@ -11,7 +11,7 @@ from glossator.retrieval.config import KINDS, RetrievalConfig
 from glossator.retrieval.engine import Hit
 from glossator.surface.context import Surface
 from glossator.surface.engines import EngineRegistry
-from glossator.surface.errors import SurfaceError, bad_param, upstream
+from glossator.surface.errors import api_upstream, bad_param, upstream
 from glossator.surface.names import READ_PAGE, SEARCH
 from glossator.surface.pages import PageCatalog, prefix_from
 
@@ -176,11 +176,7 @@ async def search_hits(
             locales=locales or None,
         )
     except RetrieverException as exc:
-        raise SurfaceError(
-            "E_UPSTREAM",
-            f"search failed: {exc}",
-            "retry the identical request; if it repeats, check GET /health",
-        ) from exc
+        raise api_upstream("search", exc) from exc
 
 
 __all__ = [

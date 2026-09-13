@@ -51,4 +51,36 @@ def upstream(operation: str, cause: Exception, target: str = "the search index")
     )
 
 
-__all__ = ["ErrorCode", "SurfaceError", "bad_param", "busy", "unknown_page", "upstream"]
+# The HTTP routes get their own two factories because their caller is a program
+# or its operator, not an agent reading tool text: the next step names the HTTP
+# routes (POST /search, GET /health) that caller can reach, where the MCP hints
+# name the tools and tell the agent what to say to the user.
+
+
+def api_unknown_page(page_path: str) -> SurfaceError:
+    return SurfaceError(
+        "E_UNKNOWN_PAGE",
+        f"no indexed page at /{page_path}" if page_path else "no page path given",
+        "page paths look like 'api/endpoint/chat', the url a POST /search hit printed",
+    )
+
+
+def api_upstream(operation: str, cause: Exception) -> SurfaceError:
+    logger.warning("Upstream failure", operation=operation, error=str(cause))
+    return SurfaceError(
+        "E_UPSTREAM",
+        f"{operation} failed: {cause}",
+        "retry the identical request; if it repeats, check GET /health",
+    )
+
+
+__all__ = [
+    "ErrorCode",
+    "SurfaceError",
+    "api_unknown_page",
+    "api_upstream",
+    "bad_param",
+    "busy",
+    "unknown_page",
+    "upstream",
+]

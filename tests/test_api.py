@@ -9,6 +9,7 @@ import pytest
 from httpx import ASGITransport
 from mistralai.client.errors import MistralError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
+from structlog.testing import capture_logs
 
 from entrypoints import api as api_module
 from entrypoints.api import app, registry
@@ -460,6 +461,24 @@ def test_search_upstream_failures_are_a_typed_503() -> None:
     error = response.json()["error"]
     assert error["code"] == "E_UPSTREAM"
     assert "retry the identical request" in error["next"]
+
+
+def test_search_upstream_failures_are_logged() -> None:
+    _engine().fail = RetrieverException("vespa down")
+
+    with capture_logs() as logs:
+        response = _request("POST", "/search", json={"query": "streaming"})
+
+    assert response.status_code == 503
+    warnings = [log for log in logs if log["event"] == "Upstream failure"]
+    assert warnings == [
+        {
+            "event": "Upstream failure",
+            "log_level": "warning",
+            "operation": "search",
+            "error": "vespa down",
+        }
+    ]
 
 
 def test_unhandled_failures_keep_the_typed_shape() -> None:
