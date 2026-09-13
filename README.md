@@ -118,9 +118,13 @@ Every number below names its model; the runs and the judge study are in
 
 ## Five-minute start
 
+You need `uv`, `make`, `curl`, docker with the compose plugin and about 4 GB of
+memory for the Vespa container (`docker-compose.yaml`), network access, and a
+`MISTRAL_API_KEY`.
+
 ```bash
 make installdeps
-# Add MISTRAL_API_KEY=... to .env.
+cp .env.example .env    # then fill in MISTRAL_API_KEY
 make setup-vespa
 make ingest corpus=corpus/mistral-docs variant=sec1024
 make ask question="How do I stream a chat completion?" model=ministral-14b-2512
@@ -128,9 +132,23 @@ make api
 make mcp
 ```
 
+`make setup-vespa` starts Vespa with its query API on `localhost:18080` and its
+config server on `localhost:19072`, then deploys the schemas. `make ingest`
+splits the 411 pages into 4,440 section chunks and embeds them with
+`mistral-embed`: about one million tokens, about 0.10 USD (D-011a). On the free
+tier the embedding API rate-limits the run, so it takes a few minutes; embeddings
+are cached, so a re-run after a rate-limit failure only embeds what is missing.
+
+`make ask` calls two models: the generation model named by `model=` (Mistral
+Medium 3.5 when omitted) and the reranker, `mistral-small-2603` by default and
+overridable with `GLOSSATOR_RERANK_MODEL`. A key without Mistral Small quota sets
+`GLOSSATOR_RERANK_MODEL=ministral-14b-2512` in `.env`.
+
+`make api` and `make mcp` are foreground servers; run each in its own terminal.
 The API listens on `127.0.0.1:8080`. MCP uses `127.0.0.1:8000/mcp` by default;
-override it with `host=` and `port=`. Run the stdio transport with
-`uv run python -m entrypoints.mcp_server`.
+override either with `host=` and `port=`. Run the stdio transport with
+`uv run python -m entrypoints.mcp_server`. `make test` runs the offline tests;
+`make test-all` adds the container image build.
 
 Mistral Medium 3.5 is the generation default. The project API key had zero
 quota for Medium 3.5 and Small 4 until 12 September 2026 (D-017a, D-049), so

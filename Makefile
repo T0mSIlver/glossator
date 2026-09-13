@@ -1,4 +1,4 @@
-.PHONY: installdeps install-workflows ingest search ask api mcp test start-examples execute-ingestion
+.PHONY: installdeps ingest search ask api mcp test test-all
 .PHONY: corpus-refresh corpus-check dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors failures
 .PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 .PHONY: deploy deploy-check
@@ -78,9 +78,13 @@ api:
 mcp:
 	uv run python -m entrypoints.mcp_server --http --host $(MCP_HOST) --port $(MCP_PORT)
 
-## Round-trip a document through the configured backend (skips unless it is set up)
+## Run the offline tests; Vespa and API-key tests skip when unconfigured
 test:
-	uv run pytest tests/ -q
+	uv run pytest tests -q -m "not slow"
+
+## Run every test, including the container image build
+test-all:
+	uv run pytest tests -q
 
 ## Generate the 300-question development set
 dev-set:
@@ -148,19 +152,6 @@ generate-vespa-lock:
 	uv run mistral-vespa generate \
 		--app-dir src/glossator/index \
 		--path ./vespa.lock
-
-## Install optional workflows dependency (required for examples/workflows/)
-install-workflows:
-	uv sync --extra workflows
-
-## Start a worker that registers the example workflows (requires install-workflows)
-start-examples: install-workflows
-	uv run python -m examples.workflows.worker
-
-## Execute the ingestion workflow via the Mistral Workflows API
-## Usage: make execute-ingestion input='{"file_path": "sample_data/hello.txt", "collection_name": "mydocs"}'
-execute-ingestion: install-workflows
-	uv run python -m examples.workflows.start --workflow document-ingestion $(if $(input),--input '$(input)',--input '{"file_path":"sample_data/hello.txt"}')
 
 ## Rebuild the vendored documentation corpus from the docs repo
 ## Usage: make corpus-refresh [REF=<commit|tag|branch>]
