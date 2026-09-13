@@ -145,7 +145,7 @@ async def answer(
     collected: dict[str, Hit] = {}
 
     query = await run.prepare(question, llm=llm, config=config)
-    seed = await engine.search(query.text, top_k=config.top_k)
+    seed = await run.search(engine, query.text, top_k=config.top_k)
     _collect(collected, seed)
     run.event(
         "retrieval",
@@ -204,7 +204,9 @@ async def answer(
                 messages.append(_tool_message(invocation, note))
                 continue
 
-            result = await _invoke(invocation, engine=engine, config=config, seen=collected)
+            result = await _invoke(
+                invocation, run=run, engine=engine, config=config, seen=collected
+            )
             fresh = _collect(collected, result.hits)
             run.event(
                 "tool",
@@ -229,6 +231,7 @@ async def answer(
 async def _invoke(
     invocation: ToolInvocation,
     *,
+    run: AnswerRun,
     engine: DocsIndex,
     config: AnswerConfig,
     seen: dict[str, Hit],
@@ -241,7 +244,7 @@ async def _invoke(
             # A round trip costs the same whether it returns one chunk or eight,
             # so the model's own top_k only ever widens the result.
             top_k, notes = _clamp(arguments, "top_k", config.tool_top_k, config.max_tool_top_k)
-            hits = await engine.search(query, exclude_ids=set(seen), top_k=top_k)
+            hits = await run.search(engine, query, exclude_ids=set(seen), top_k=top_k)
             return ToolResult(
                 hits=hits,
                 message=None if hits else f"No results for that query: {query!r}.",

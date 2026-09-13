@@ -5,7 +5,7 @@ from typing import Protocol
 from mistralai.search.toolkit.search import GrepMode
 
 from glossator.retrieval.config import RetrievalConfig
-from glossator.retrieval.engine import Hit
+from glossator.retrieval.engine import Hit, SearchTrace
 
 
 class PageReader(Protocol):
@@ -33,6 +33,13 @@ class DocsIndex(Protocol):
         exclude_ids: set[str] | None = None,
         top_k: int | None = None,
     ) -> list[Hit]: ...
+
+    async def search_with_trace(
+        self,
+        query: str,
+        exclude_ids: set[str] | None = None,
+        top_k: int | None = None,
+    ) -> tuple[list[Hit], SearchTrace]: ...
 
     def navigation_at(
         self, source_id: str, start_offset: int = 0, end_offset: int = 0

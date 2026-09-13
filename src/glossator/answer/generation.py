@@ -2,7 +2,7 @@
 
 import time
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 import structlog
 from pydantic import BaseModel, ConfigDict, Field
@@ -37,6 +37,10 @@ from glossator.answer.prompts import (
     GROUNDED_ANSWER_VERSION,
 )
 from glossator.retrieval.engine import Hit
+
+if TYPE_CHECKING:
+    # The reranker imports the answer layer's client and config back.
+    from glossator.retrieval.reranker import RerankTrace
 
 logger = structlog.get_logger(__name__)
 
@@ -82,6 +86,10 @@ class AnswerRun:
     started: float = field(default_factory=time.perf_counter)
     events: list[TraceEvent] = field(default_factory=list)
     completions: list[Completion] = field(default_factory=list)
+    reranks: "list[RerankTrace]" = field(default_factory=list)
+    """The engine's reranker calls. They go through the engine's own client, not
+    the strategy's, so they reach the run through the search trace instead."""
+
     rounds: int = 0
     question_language: str = ENGLISH
     retrieval_query: str = ""
@@ -127,6 +135,35 @@ class AnswerRun:
             note=query.note,
         )
 
+    async def search(
+        self,
+        engine: DocsIndex,
+        query: str,
+        *,
+        exclude_ids: set[str] | None = None,
+        top_k: int | None = None,
+    ) -> list[Hit]:
+        """Search ``engine`` and bill the rerank call the search made to this run.
+
+        Without this the answer's cost and trace covered generation only, while
+        the rerank call often costs more than the generation it feeds.
+        """
+        hits, trace = await engine.search_with_trace(query, exclude_ids=exclude_ids, top_k=top_k)
+        rerank = trace.rerank
+        if rerank is not None and rerank.called_model:
+            self.reranks.append(rerank)
+            self.event(
+                "rerank",
+                rerank.model,
+                arguments={
+                    "query": query,
+                    "candidates": rerank.candidates,
+                    "cost_usd": round(rerank.cost_usd, 8),
+                },
+                note=rerank.error,
+            )
+        return hits
+
     def event(
         self,
         kind: str,
@@ -153,11 +190,19 @@ class AnswerRun:
 
     @property
     def usage(self) -> TokenUsage:
-        return sum((completion.usage for completion in self.completions), TokenUsage())
+        return sum(
+            (
+                *(completion.usage for completion in self.completions),
+                *(rerank.usage for rerank in self.reranks),
+            ),
+            TokenUsage(),
+        )
 
     @property
     def cost_usd(self) -> float:
-        return sum(completion.cost_usd for completion in self.completions)
+        return sum(completion.cost_usd for completion in self.completions) + sum(
+            rerank.cost_usd for rerank in self.reranks
+        )
 
     @property
     def latency_ms(self) -> float:
