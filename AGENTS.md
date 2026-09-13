@@ -1,53 +1,15 @@
 # Working in this repository
 
-glossator gives agents Mistral's documentation through three read-only MCP tools (search, read a page, history) over the vendored corpus at a pinned commit; the agent does the research and writes the answer (D-044). A FastAPI service keeps the generated-answer path, with verified citations, as the evaluated baseline behind `POST /ask` and `POST /cite`. Read `DECISIONS.md` before changing behaviour: every choice is recorded there with the facts behind it, and a change that reverses one gets a new entry. If `.local/AGENTS.md` exists, read it first: it holds machine-local context and is never committed.
+Read `DECISIONS.md` before changing behaviour: every choice is recorded there with the facts behind it, and a change that reverses one gets a new entry. If `.local/AGENTS.md` exists, read it first; it is machine-local and never committed.
 
-## Layout
+`mistralai-search-toolkit` is pinned at 0.0.13 and has no public source: the installed package under `.venv` is the only reference. Never guess a class or parameter name; read `.agents/skills/search/SKILL.md` and the package. Its traps are D-012 to D-016.
 
-```
-src/glossator/
-  corpus/mistral_docs/   corpus adapter: docs repo MDX → normalized markdown pages (corpus-specific)
-  ingest/                pages → sections → chunks with url/anchor/heading_path metadata → index
-  index/                 Vespa app and migrations
-  retrieval/             retriever over Vespa, reranker, query rewriting
-  answer/                context assembly, grounded generation, citation verification, search loop
-  surface/               what the three MCP tools and the HTTP routes do and print: search, page reads,
-                         history forms and rendering, typed errors, the parameter guard;
-                         its pages.py is page sizes, section keys and paths the tools read
-                         without the index, unrelated to ingest/pages.py (the corpus file reader)
-  eval/                  datasets, retrieval metrics, answer judge, experiment grid, reports
-  citing.py              section keys and citation links, shared by the surface and the snapshot tools
-  paragraphs.py          Markdown cut into the blocks a page renders, so a text fragment never spans two
-  doc_paths.py           the docs.mistral.ai path a tool argument names, in any form a model writes it
-  history.py             phrase and section history over the stored snapshots (the snapshot diff;
-                         surface/history.py only resolves the tool's argument forms onto it)
-  changelog.py           the precomputed snapshot changelog and changes under a path
-  clients.py             the chat and embedding Mistral clients every model call is built on
-src/entrypoints/         api (FastAPI) and mcp_server (FastMCP): configuration, routes and tool
-                         registration over glossator.surface; CLIs are python -m glossator.{corpus,ingest,retrieval,answer}
-corpus/                  vendored normalized corpus + manifest + upstream LICENSE
-eval/                    datasets, committed run directories, corpus-stats, replay exports
-docs/                    architecture, evaluation, retrieval, corpus, stack notes; docs/README.md indexes them
-skills/                  the mistral-docs workspace Skill for Mistral Work
-deploy/                  image, compose, deploy script, Cloudflare tunnel templates
-tests/                   offline tests; tests that need Vespa or an API key skip when unconfigured
-```
+Entrypoints (`src/entrypoints/`) only parse arguments and call `glossator.surface`; behaviour lives in the package.
 
-## Toolkit
+Pydantic models are frozen; update with `model_copy(update=...)`.
 
-`mistralai-search-toolkit` is pinned at 0.0.13 and its only readable source is the installed package under `.venv`. Never guess a class or parameter: read `.agents/skills/search/SKILL.md` and the source. Known traps are listed in `DECISIONS.md` (D-012 to D-016).
+Every LLM call goes through `glossator.eval.providers` (offline tools) or `glossator.answer` (serving path): cached on disk by content hash, token usage logged. Do not call a model client directly.
 
-## Conventions
+`make test` is the offline suite (`pytest -m "not slow"`); tests needing Vespa or an API key skip when unconfigured; `make test-all` adds the container image build. Before a commit: `uv run ruff format . && uv run ruff check --fix . && uv run mypy`. `mypy` takes its file list from `pyproject.toml`; `eval/replay/run_replay.py` is outside it on purpose (standard library only, copied to other machines).
 
-- Python 3.12+, `uv` for everything (`uv run`, `uv add`). Async I/O for toolkit calls.
-- Pydantic models are frozen; update with `model_copy(update=...)`.
-- `structlog` for logging in library code; no `print` outside CLI output.
-- Every module has one job; entrypoints only parse arguments and call `glossator.surface`, which calls the engine.
-- `make test` runs the offline tests (`pytest -m "not slow"`); tests that need Vespa or an API key skip when they are not configured. `make test-all` also runs the `slow` container image build.
-- `uv run ruff format . && uv run ruff check --fix . && uv run mypy` before a commit. Bare `mypy` uses the file list in `pyproject.toml` (src, tests, deploy and `eval/corpus-map`), matching CI; `eval/replay/run_replay.py` stays outside on purpose (standard library only, copied to other machines).
-- Comments explain why, not what. No commented-out code, no TODOs without an owner.
-- All LLM calls go through `glossator.eval.providers` (offline tools) or `glossator.answer` (serving path), are cached on disk by content hash, and log token usage.
-
-## Commit messages
-
-Describe the product change. Imperative mood, no scope prefixes, no attribution lines.
+Commit messages describe the product change, imperative, no scope prefixes, no attribution lines.
