@@ -35,22 +35,25 @@ curl -s http://127.0.0.1:8080/ask \
 
 ## Environment and local servers
 
-`.env` holds secrets, ports, and service endpoints only. Recognised settings are
-`MISTRAL_API_KEY`, `VESPA_QUERY_PORT`, `VESPA_CONFIG_PORT`, `VESPA_ENDPOINT`,
-`VESPA_CONFIG_URL`, and `WORKSPACE_ROOT` (used by the Bruno API export). The
+`.env` holds secrets, ports, and service endpoints only; `.env.example` lists
+every variable with its default. Recognised settings are `MISTRAL_API_KEY`,
+`MISTRAL_API_URL` (the embedding endpoint), `VESPA_QUERY_PORT`,
+`VESPA_CONFIG_PORT`, `VESPA_ENDPOINT`, `VESPA_CONFIG_URL`, and `WORKSPACE_ROOT`
+(used by the Bruno API export). The retrieval engine reads
+`GLOSSATOR_RERANK_MODEL` for the reranker (default `mistral-small-2603`). The
 API server also reads `GLOSSATOR_CORPUS_DIR`, and the MCP server reads
-`GLOSSATOR_VARIANT`, `GLOSSATOR_MODEL`, `GLOSSATOR_CORPUS_DIR`,
-`GLOSSATOR_MCP_TOKEN`, and `GLOSSATOR_MCP_TOOLS`. Both read
-`GLOSSATOR_SNAPSHOT_MANIFEST` for the `history` forms. Do not put
-schema names in `.env`.
+`GLOSSATOR_VARIANT`, `GLOSSATOR_CORPUS_DIR`, `GLOSSATOR_MCP_TOKEN`, and
+`GLOSSATOR_MCP_TOOLS`. Both read `GLOSSATOR_SNAPSHOT_MANIFEST` for the `history`
+forms. Do not put schema names in `.env`.
 
 Chat completions -- the answer model, the listwise reranker, and the translation
 and rewrite calls -- go to a local OpenAI-compatible server when
 `GLOSSATOR_CHAT_SERVER_URL` is set, with `GLOSSATOR_CHAT_API_KEY` if it wants a
-key and `GLOSSATOR_CHAT_REASONING_EFFORT` to set or disable its thinking.
-Embeddings always go to the Mistral API. Every run records which server and
+key, `GLOSSATOR_CHAT_REASONING_EFFORT` to set or disable its thinking, and
+`GLOSSATOR_CHAT_SAMPLING` (`temperature`, `top_p` and `min_tokens` as `key=value`
+pairs) to override the pipeline's sampling. Embeddings always go to the Mistral API. Every run records which server and
 which effort it used.
 
-Mistral Medium 3.5 is the shipped generation default. The current free-tier key
-has a zero request quota for that model, so recorded checks and evaluations use
-`ministral-14b-2512`.
+Mistral Medium 3.5 is the shipped generation default. The project key had a zero
+request quota for that model until 12 September 2026, so most recorded checks and
+evaluations use `ministral-14b-2512` (D-017a).

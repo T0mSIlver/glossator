@@ -7,14 +7,13 @@ Repository versions come from `uv.lock`, not import-time version strings.
 
 | Component | Exact installed version or revision | Role |
 |---|---:|---|
-| `mistralai` | 2.9.4 | Mistral API client for chat and embeddings (`uv.lock:1706-1715`) |
-| `mistral-common` | 1.11.7 | Token counting and token-bounded truncation (`uv.lock:1681-1690`) |
-| `mistralai-search-toolkit` | 0.0.13 | Ingestion and retrieval abstractions (`uv.lock:1732-1741`) |
-| `mistralai-search-toolkit-plugins-vespa` | 0.0.13 | Vespa schema, index, queries and navigation (`uv.lock:1763-1772`) |
-| `mistralai-workflows` and its Mistral plugin | 3.13.0 | Optional starter workflow examples only (`pyproject.toml:23-27`; `uv.lock:1786-1789,1822-1830`) |
+| `mistralai` | 2.9.4 | Mistral API client for chat and embeddings (`uv.lock:1614-1623`) |
+| `mistral-common` | 1.11.7 | Token counting and token-bounded truncation (`uv.lock:1589-1598`) |
+| `mistralai-search-toolkit` | 0.0.13 | Ingestion and retrieval abstractions (`uv.lock:1633-1642`) |
+| `mistralai-search-toolkit-plugins-vespa` | 0.0.13 | Vespa schema, index, queries and navigation (`uv.lock:1664-1673`) |
 | `mistralai/search-starter-app` | upstream commit `919f2a6` | Copier origin of the Vespa and FastMCP scaffold (`docs/search-toolkit.md:32-35`) |
-| `fastmcp` and `fastmcp-slim` | 3.4.7 | MCP server framework and installed implementation (`uv.lock:719-732`) |
-| `mcp` | 1.29.1 | MCP wire types, transports and version negotiation, pulled by FastMCP (`uv.lock:1647-1655`) |
+| `fastmcp` and `fastmcp-slim` | 3.4.7 | MCP server framework and installed implementation (`uv.lock:700-713`) |
+| `mcp` | 1.29.1 | MCP wire types, transports and version negotiation, pulled by FastMCP (`uv.lock:1555-1563`) |
 | Documentation corpus | `mistralai/platform-docs-public` commit `2e094f7` | Pinned source material for answers (D-001, D-009) |
 
 The toolkit core and Vespa plugin are intentionally pinned to the same version. The plugin declares no lower bound on core, so independently resolved releases can import names missing from the older package (`pyproject.toml:10-14`). The toolkit's `__version__` incorrectly says `0.1.0`; its distribution metadata and lock both say `0.0.13` (`mistralai/search/toolkit/__init__.py:34`; `mistralai_search_toolkit-0.0.13.dist-info/METADATA:1-4`).
@@ -38,13 +37,11 @@ answers, reranker rankings, English renderings and optional query rewrites
 Embeddings reach the same SDK through the toolkit's `MistralEmbedder`, which calls `client.embeddings.create_async`. Both ingestion and retrieval inject the dedicated embedding client and raise the toolkit's default three retries to eight (`mistralai/search/toolkit/embedding/mistral_embedder.py:520-560`; `src/glossator/ingest/pipeline.py:316-329`; `src/glossator/retrieval/engine.py:220-233`; D-011a).
 
 The direct SDK surface in `src/` is confined to the two client factories, serving chat
-wrapper, type injection into ingestion and the embedding probe, plus the optional
-workflow examples. Offline dataset generation and judging use a small `httpx`
+wrapper, type injection into ingestion and the embedding probe. Offline dataset generation and judging use a small `httpx`
 OpenAI-compatible provider instead of the SDK
 (`src/glossator/clients.py:17,73-94`; `src/glossator/answer/llm.py:23-32`;
 `src/glossator/ingest/pipeline.py:18,298-320`;
 `src/glossator/retrieval/probe.py:27-35`;
-`src/examples/workflows/search/activities.py:19-32,46-62`;
 `src/glossator/eval/providers.py:28-41,441-463`).
 
 Two SDK behaviours required explicit handling. Connection failures can escape as
@@ -156,13 +153,6 @@ MCP `ingest` and `delete` tools were removed: they admitted arbitrary page-level
 chunks without URL, anchor or kind metadata into the serving index. Corpus writes
 now go through the vendored adapter, manifest and link checks (D-026).
 
-The optional `mistralai-workflows` 3.13.0 example remains under `src/examples`.
-It registers a durable document-ingestion workflow and separates file/API/Vespa
-I/O into activities; it is excluded from the product's strict type-check scope
-and requires `uv sync --extra workflows` (`src/examples/workflows/search/workflow.py:1-35`;
-`src/examples/workflows/search/activities.py:109-165`;
-`pyproject.toml:98-101`).
-
 ## MCP protocol stack
 
 `src/entrypoints/mcp_server.py` creates a plain `FastMCP` instance, adds parameter
@@ -195,7 +185,7 @@ The protocol revision is not pinned by the starter template, FastMCP, or
 glossator. The `mcp` SDK performs negotiation. FastMCP constrains that SDK to
 `mcp>=1.24.0,<2.0`; `uv.lock` fixes the resolved installation at 1.29.1
 (`fastmcp_slim-3.4.7.dist-info/METADATA:33-39,54-63`;
-`uv.lock:1647-1649`). Glossator selects a client revision only in its deployment
+`uv.lock:1555-1557`). Glossator selects a client revision only in its deployment
 probe; that does not pin the server.
 
 Supporting a later wire revision requires an `mcp` release whose generated types

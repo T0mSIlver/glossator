@@ -17,7 +17,6 @@
 **/*.py[cod]
 tests
 skills
-sample_data
 eval/runs
 eval/configs
 eval/*.jsonl
