@@ -237,7 +237,7 @@ credited.
   yet validated by hand.
 - **The consumer evaluation is 30 questions**, so a cell moves by about ±0.17.
   The up-front-instruction arm (a sentence naming the server, which is what the
-  Work Skill and the CLAUDE.md block do), the rerank-on arm and the host-fidelity
+  Work Skill does), the rerank-on arm and the host-fidelity
   arm are the three arms not run.
 - **Prompt rules from the human labels** (prose for factual questions, one
   marker per list item, state the exact value first) are decided, D-021b and
