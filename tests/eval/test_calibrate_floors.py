@@ -8,17 +8,14 @@ import json
 from pathlib import Path
 from typing import Any
 
-from glossator.eval.calibrate_floors import (
+from glossator.eval.calibrate_floors.models import (
     DEPTHS,
     JUNK_QUESTIONS,
     RUN_KIND,
     QuerySimilarities,
-    propose,
-    recompute,
-    render_readme,
-    summarize,
-    write_report,
 )
+from glossator.eval.calibrate_floors.proposal import propose, recompute, summarize
+from glossator.eval.calibrate_floors.report import render_readme, write_report
 
 
 def row(

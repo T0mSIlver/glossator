@@ -28,9 +28,9 @@ def write_report(run_dir: Path, config: Mapping[str, Any], metrics: Mapping[str,
 
 def rebuild_by_kind(kind: str, run_dir: Path) -> dict[str, Any]:
     """Regenerate a run of a known kind from the rows it recorded."""
-    from glossator.eval.calibrate_floors import RUN_KIND as FLOOR_KIND
-    from glossator.eval.calibrate_floors import recompute as recompute_floors
-    from glossator.eval.calibrate_floors import write_report as write_floor_report
+    from glossator.eval.calibrate_floors.models import RUN_KIND as FLOOR_KIND
+    from glossator.eval.calibrate_floors.proposal import recompute as recompute_floors
+    from glossator.eval.calibrate_floors.report import write_report as write_floor_report
     from glossator.eval.retrieval_grid.metrics import recompute as recompute_grid
     from glossator.eval.retrieval_grid.models import RUN_KIND as GRID_KIND
 
