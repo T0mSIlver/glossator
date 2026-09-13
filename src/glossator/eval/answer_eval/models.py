@@ -10,7 +10,7 @@ from glossator.answer.citations import Citation, Trace
 from glossator.answer.llm import TokenUsage as AnswerTokenUsage
 from glossator.eval.answer_eval.prompts import JUDGE_CITATION, JUDGE_NO_CITATIONS, JUDGE_USER
 from glossator.eval.datasets import QuestionType
-from glossator.eval.providers import ProviderName, TokenUsage
+from glossator.eval.providers.models import ProviderName, TokenUsage
 
 DEFAULT_GENERATION_MODEL = "ministral-14b-2512"
 """The largest Mistral model this key can reach (D-017a): every `mistral-medium-*`,

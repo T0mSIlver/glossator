@@ -34,15 +34,14 @@ from pydantic import BaseModel, ConfigDict
 
 from glossator.eval.charts import bar_chart
 from glossator.eval.datasets import EvalQuestion, read_jsonl, stratified_subset, write_jsonl
-from glossator.eval.providers import (
+from glossator.eval.providers.client import OpenAICompatibleProvider
+from glossator.eval.providers.models import (
     ChatProvider,
-    OpenAICompatibleProvider,
     ProviderCallError,
     ProviderName,
     ThinkingMode,
-    call_scope,
-    candidate_scope,
 )
+from glossator.eval.providers.scopes import call_scope, candidate_scope
 from glossator.eval.run_records import RunRecorder, create_run_directory
 
 PROMPT_VERSION = "perturb-v1"

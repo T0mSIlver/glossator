@@ -41,7 +41,8 @@ from glossator.eval.generate.prompts import (
     SINGLE_SECTION_INSTRUCTIONS,
     UNANSWERABLE_INSTRUCTIONS,
 )
-from glossator.eval.providers import Completion, call_scope
+from glossator.eval.providers.models import Completion
+from glossator.eval.providers.scopes import call_scope
 
 # A generated question naming one of these is about somebody else's product; the
 # filter model has been observed to pass such a question (review finding H5), so

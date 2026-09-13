@@ -20,13 +20,9 @@ from glossator.eval.answer_eval.models import (
 from glossator.eval.answer_eval.prompts import JUDGE_SYSTEM, JUDGE_VERSION
 from glossator.eval.answer_eval.run_dir import JudgeCallRecorder, RunDirectory
 from glossator.eval.datasets import EvalQuestion
-from glossator.eval.providers import (
-    OpenAICompatibleProvider,
-    ProviderCallError,
-    ProviderName,
-    call_scope,
-    candidate_scope,
-)
+from glossator.eval.providers.client import OpenAICompatibleProvider
+from glossator.eval.providers.models import ProviderCallError, ProviderName
+from glossator.eval.providers.scopes import call_scope, candidate_scope
 
 logger = structlog.get_logger(__name__)
 

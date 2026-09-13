@@ -24,7 +24,7 @@ from glossator.eval.generate.models import (
 from glossator.eval.generate.planning import plan_attempts
 from glossator.eval.generate.run import generate_questions, type_allocations
 from glossator.eval.generate.sampling import cross_page_groups, sample_sections
-from glossator.eval.providers import Completion, ProviderCallError, TokenUsage
+from glossator.eval.providers.models import Completion, ProviderCallError, TokenUsage
 from glossator.eval.run_records import RunRecorder
 
 FIXTURE_CORPUS = Path("tests/fixtures/corpus")

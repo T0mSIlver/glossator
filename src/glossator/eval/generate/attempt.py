@@ -31,7 +31,8 @@ from glossator.eval.generate.models import (
     SourceContribution,
 )
 from glossator.eval.generate.prompts import PROMPT_HASHES, PROMPT_VERSION
-from glossator.eval.providers import ProviderCallError, candidate_scope
+from glossator.eval.providers.models import ProviderCallError
+from glossator.eval.providers.scopes import candidate_scope
 
 logger = structlog.get_logger(__name__)
 

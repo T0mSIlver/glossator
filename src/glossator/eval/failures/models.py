@@ -11,7 +11,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from glossator.eval.agreement import CorrectnessLabel
-from glossator.eval.providers import ProviderName, TokenUsage
+from glossator.eval.providers.models import ProviderName, TokenUsage
 
 ANSWER_EVAL_KIND = "answer_eval"
 FAILURES_KIND = "failure_analysis"

@@ -11,7 +11,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from glossator.eval.datasets import EvalQuestion
-from glossator.eval.providers import OpenAICompatibleProvider
+from glossator.eval.providers.client import OpenAICompatibleProvider
 from glossator.eval.snapshots.models import PRIMARY_JUDGE, SECONDARY_JUDGE, FactVerdict
 from glossator.eval.snapshots.prompts import JUDGE_SYSTEM
 

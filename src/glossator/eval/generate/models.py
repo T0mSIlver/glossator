@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from glossator.eval.corpus import CorpusDocument
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionType
 from glossator.eval.lexical import LexicalIndex
-from glossator.eval.providers import ChatProvider, ThinkingMode
+from glossator.eval.providers.models import ChatProvider, ThinkingMode
 from glossator.eval.run_records import RunRecorder
 
 GENERATED_TYPES: tuple[QuestionType, ...] = tuple(

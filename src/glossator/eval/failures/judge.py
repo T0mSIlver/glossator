@@ -22,13 +22,9 @@ from glossator.eval.failures.models import (
     FailureRecord,
 )
 from glossator.eval.failures.prompts import DEFECT_SYSTEM, DEFECT_USER, DEFECT_VERSION
-from glossator.eval.providers import (
-    OpenAICompatibleProvider,
-    ProviderCallError,
-    ProviderName,
-    call_scope,
-    candidate_scope,
-)
+from glossator.eval.providers.client import OpenAICompatibleProvider
+from glossator.eval.providers.models import ProviderCallError, ProviderName
+from glossator.eval.providers.scopes import call_scope, candidate_scope
 from glossator.index.variants import VARIANTS
 
 DEFECT_MAX_TOKENS = 500

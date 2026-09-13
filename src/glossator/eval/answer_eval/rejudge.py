@@ -20,7 +20,8 @@ from glossator.eval.answer_eval.models import JudgeModel, QuestionRecord
 from glossator.eval.answer_eval.prompts import JUDGE_PROMPT_HASHES, JUDGE_VERSION
 from glossator.eval.answer_eval.quota import QUOTA_CEILING_PERCENT, wait_for_quota
 from glossator.eval.answer_eval.run_dir import RunDirectory
-from glossator.eval.providers import OpenAICompatibleProvider, ProviderName
+from glossator.eval.providers.client import OpenAICompatibleProvider
+from glossator.eval.providers.models import ProviderName
 
 logger = structlog.get_logger(__name__)
 

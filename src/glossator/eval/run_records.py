@@ -19,7 +19,7 @@ from typing import Any, Self
 from pydantic import BaseModel
 
 from glossator.eval.pricing import estimate_usd, price_for
-from glossator.eval.providers import Message, ProviderName, ThinkingMode, TokenUsage
+from glossator.eval.providers.models import Message, ProviderName, ThinkingMode, TokenUsage
 
 RUN_NAME_RE = re.compile(r"[^a-z0-9-]+")
 STATUS_IN_PROGRESS = "in progress"

@@ -49,8 +49,8 @@ from glossator.eval.datasets import (
     QuestionType,
     stratified_subset,
 )
-from glossator.eval.providers import TokenUsage as ProviderTokenUsage
-from glossator.eval.providers import extract_json_object
+from glossator.eval.providers.models import TokenUsage as ProviderTokenUsage
+from glossator.eval.providers.structured import extract_json_object
 from glossator.eval.report import rebuild, run_kind
 
 PAGE = "https://docs.mistral.ai/capabilities/function-calling"

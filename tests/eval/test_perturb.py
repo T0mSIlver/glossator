@@ -29,7 +29,7 @@ from glossator.eval.perturb import (
     run,
     typo_variant,
 )
-from glossator.eval.providers import Completion, ProviderCallError, TokenUsage
+from glossator.eval.providers.models import Completion, ProviderCallError, TokenUsage
 
 QUESTION_TEXT = "How do I set the temperature parameter on a chat completion request?"
 

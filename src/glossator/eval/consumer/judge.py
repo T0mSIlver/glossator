@@ -24,12 +24,9 @@ from glossator.eval.answer_eval.prompts import JUDGE_SYSTEM, JUDGE_VERSION
 from glossator.eval.answer_eval.quota import wait_for_quota
 from glossator.eval.consumer.models import ConsumerRecord, load_records
 from glossator.eval.consumer.tools import is_verify_tool
-from glossator.eval.providers import (
-    OpenAICompatibleProvider,
-    ProviderCallError,
-    call_scope,
-    candidate_scope,
-)
+from glossator.eval.providers.client import OpenAICompatibleProvider
+from glossator.eval.providers.models import ProviderCallError
+from glossator.eval.providers.scopes import call_scope, candidate_scope
 
 
 class _CallsRecorder:

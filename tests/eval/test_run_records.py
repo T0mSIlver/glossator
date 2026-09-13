@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from glossator.eval.generate.models import GenerationAttempt
-from glossator.eval.providers import TokenUsage
+from glossator.eval.providers.models import TokenUsage
 from glossator.eval.report import rebuild, render_figures
 from glossator.eval.run_records import (
     STATUS_IN_PROGRESS,

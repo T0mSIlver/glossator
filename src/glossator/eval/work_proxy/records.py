@@ -7,7 +7,7 @@ from glossator.eval.consumer.models import ConsumerRecord
 from glossator.eval.consumer.tools import is_server_tool, is_verify_tool
 from glossator.eval.datasets import EvalQuestion
 from glossator.eval.pricing import estimate_usd
-from glossator.eval.providers import TokenUsage
+from glossator.eval.providers.models import TokenUsage
 from glossator.eval.work_proxy.models import ParsedConversation
 from glossator.eval.work_proxy.parsing import connector_call_count, tool_call_records
 

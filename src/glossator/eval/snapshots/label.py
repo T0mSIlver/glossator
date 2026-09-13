@@ -14,7 +14,7 @@ from glossator.corpus.snapshots import DEFAULT_MANIFEST
 from glossator.eval.corpus import load_documents
 from glossator.eval.datasets import dataset_hash
 from glossator.eval.lexical import LexicalIndex
-from glossator.eval.providers import OpenAICompatibleProvider
+from glossator.eval.providers.client import OpenAICompatibleProvider
 from glossator.eval.snapshots.evidence import (
     best_matching_pages,
     exact_cell,
