@@ -22,9 +22,20 @@ generator's alone (D-042).
       --output eval/replay/medium-3-5/prompts.jsonl --temperature 0.2 --max-tokens 1600
   ```
 
+- `medium-3-5/results.jsonl`: the 288 completions from Medium 3.5 behind an
+  OpenAI-compatible gateway, the first measurement (D-017b).
+
+- `medium-3-5-api/results.jsonl`: the same 288 prompts completed on Mistral's
+  API (`https://api.mistral.ai/v1`, `mistral-medium-2604`) on 13 September 2026.
+  This directory holds the reported Medium 3.5 number (D-017c); its run
+  directories are `eval/runs/2026-09-13-1148-medium35-api-replay-*`.
+
 - `run_replay.py`: standard-library runner for any OpenAI-compatible chat
   endpoint. Resumable, retries 429 and 5xx, falls back from `json_schema` to
   `json_object` to no response format and records which mode each row used.
+  It is kept outside the repository's ruff and mypy gates on purpose: it
+  imports nothing but the standard library so it can be copied alone to a
+  machine without this project installed.
 
 ## Running it elsewhere
 
