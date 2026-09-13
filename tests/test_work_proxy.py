@@ -8,22 +8,22 @@ from typing import Any
 
 import pytest
 
-from glossator.eval.consumer import ConsumerRecord, is_server_tool
+from glossator.eval.consumer.models import ConsumerRecord
+from glossator.eval.consumer.tools import is_server_tool
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, QuestionType
-from glossator.eval.work_proxy import (
-    ParsedConversation,
+from glossator.eval.work_proxy.instructions import (
     agent_instructions,
-    answered_ids,
-    connector_call_count,
     custom_instructions_block,
-    parse_conversation_response,
-    record_for,
-    render_transcript,
-    resolve_run_directory,
-    select_pending,
     skill_body,
+)
+from glossator.eval.work_proxy.models import ParsedConversation
+from glossator.eval.work_proxy.parsing import (
+    connector_call_count,
+    parse_conversation_response,
     strip_connector_prefix,
 )
+from glossator.eval.work_proxy.records import record_for, render_transcript
+from glossator.eval.work_proxy.run_dir import answered_ids, resolve_run_directory, select_pending
 
 FIXTURES = Path(__file__).parent / "fixtures" / "work_proxy"
 """The first real smoke response, key-free, as the SDK dumped it, plus the

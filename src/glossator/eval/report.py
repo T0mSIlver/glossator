@@ -15,12 +15,15 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from glossator.eval import answer_eval, failures, loop_grid, perturb
+from glossator.eval.answer_eval.rebuild import regenerate as regenerate_answer_eval
 from glossator.eval.charts import bar_chart
-from glossator.eval.run_records import regenerate
+from glossator.eval.failures.models import FAILURES_KIND
+from glossator.eval.failures.run_dir import regenerate as regenerate_failures
+from glossator.eval.loop_grid.summary import regenerate as regenerate_loop_grid
+from glossator.eval.perturb.run import render_figures as render_perturb_figures
+from glossator.eval.run_records.summary import regenerate
 
 ANSWER_EVAL_KIND = "answer_eval"
-FAILURES_KIND = failures.FAILURES_KIND
 LOOP_GRID_KIND = "loop_grid"
 PERTURB_KIND = "perturb"
 
@@ -72,14 +75,14 @@ def rebuild(run_dir: Path) -> dict[str, Any]:
     """Regenerate metrics.json, README.md and figures/ for one run directory."""
     kind = run_kind(run_dir)
     if kind == ANSWER_EVAL_KIND:
-        return answer_eval.regenerate(run_dir)
+        return regenerate_answer_eval(run_dir)
     if kind == FAILURES_KIND:
-        return failures.regenerate(run_dir)
+        return regenerate_failures(run_dir)
     if kind == LOOP_GRID_KIND:
-        return loop_grid.regenerate(run_dir)
+        return regenerate_loop_grid(run_dir)
     if kind == PERTURB_KIND:
         metrics = regenerate(run_dir)
-        perturb.render_figures(metrics, run_dir / "figures")
+        render_perturb_figures(metrics, run_dir / "figures")
         return metrics
     if kind not in ("generate", "translate"):
         from glossator.eval.retrieval_report import rebuild_by_kind

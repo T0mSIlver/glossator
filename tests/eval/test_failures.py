@@ -16,28 +16,22 @@ from mistralai.search.toolkit.common.text import sanitize_text
 from mistralai.search.toolkit.document import compute_char_locator, compute_id
 
 from glossator.answer.citations import Citation, Trace, TracedSource, TraceEvent
-from glossator.eval.answer_eval import JudgeRecord, JudgeVerdict, QuestionRecord
+from glossator.eval.answer_eval.models import JudgeRecord, JudgeVerdict, QuestionRecord
 from glossator.eval.charts import stacked_bar_chart
-from glossator.eval.failures import (
+from glossator.eval.failures.analyse import analyse_run
+from glossator.eval.failures.classify import classify
+from glossator.eval.failures.corpus import ChunkFacts, ChunkIndex, chunk_index
+from glossator.eval.failures.evidence import is_failure, rerank_candidates
+from glossator.eval.failures.judge import defect_input, parse_judge_model
+from glossator.eval.failures.models import (
     FAILURES_KIND,
     AnalysedRun,
-    ChunkFacts,
-    ChunkIndex,
     DefectSignal,
     FailureClass,
     SkippedRun,
     SubLabel,
-    analyse_run,
-    chunk_index,
-    classify,
-    defect_input,
-    is_failure,
-    parse_judge_model,
-    regenerate,
-    rerank_candidates,
-    resolve_run_directory,
-    write_run,
 )
+from glossator.eval.failures.run_dir import regenerate, resolve_run_directory, write_run
 from glossator.eval.report import rebuild, run_kind
 from glossator.index.variants import ChunkStrategy
 from glossator.ingest.chunker import PageFacts, build_chunker
@@ -547,7 +541,9 @@ def test_a_run_of_another_kind_is_skipped_with_its_kind_named(tmp_path: Path) ->
 def test_a_run_directory_holds_one_row_per_failure_and_a_readme_that_counts_them(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("glossator.eval.failures.chunk_index", lambda corpus_dir, chunking: INDEX)
+    monkeypatch.setattr(
+        "glossator.eval.failures.corpus.chunk_index", lambda corpus_dir, chunking: INDEX
+    )
     records = [
         record(question_id="q1", verdict="correct"),
         record(question_id="q2", trace_value=trace(retrieved=[OTHER_CHUNK])),
@@ -585,7 +581,9 @@ def test_a_run_directory_holds_one_row_per_failure_and_a_readme_that_counts_them
 def test_the_readme_and_metrics_regenerate_from_the_rows_alone(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("glossator.eval.failures.chunk_index", lambda corpus_dir, chunking: INDEX)
+    monkeypatch.setattr(
+        "glossator.eval.failures.corpus.chunk_index", lambda corpus_dir, chunking: INDEX
+    )
     records = [
         record(question_id="q1", trace_value=trace(retrieved=[OTHER_CHUNK])),
         record(question_id="q2", citations=[cite(GOLD, anchor="tools")]),
@@ -603,7 +601,9 @@ def test_the_readme_and_metrics_regenerate_from_the_rows_alone(
 def test_the_report_cli_dispatches_on_the_run_kind(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("glossator.eval.failures.chunk_index", lambda corpus_dir, chunking: INDEX)
+    monkeypatch.setattr(
+        "glossator.eval.failures.corpus.chunk_index", lambda corpus_dir, chunking: INDEX
+    )
     analysed = analysed_run(tmp_path, [record(question_id="q1")])
     out = tmp_path / "out"
     write_run(out, [analysed], [], {"kind": FAILURES_KIND, "corpus": "c", "run_dir": str(out)})

@@ -11,25 +11,21 @@ import pytest
 from pydantic import BaseModel
 
 from glossator.eval.datasets import EvalQuestion, GoldSource, QuestionSource, QuestionType
-from glossator.eval.perturb import (
+from glossator.eval.perturb.models import (
     CHATTY,
-    KEYBOARD_NEIGHBOURS,
     KEYWORDS,
     KINDS,
-    MAX_TYPOS,
-    MIN_TYPOS,
     TYPOS,
     VAGUE,
     WRONG_TERM,
     NoisyQuestion,
     SameQuestion,
     WrongTermQuestion,
-    assign_kinds,
-    perturb_one,
-    run,
-    typo_variant,
 )
-from glossator.eval.providers import Completion, ProviderCallError, TokenUsage
+from glossator.eval.perturb.run import run
+from glossator.eval.perturb.typos import KEYBOARD_NEIGHBOURS, MAX_TYPOS, MIN_TYPOS, typo_variant
+from glossator.eval.perturb.variants import assign_kinds, perturb_one
+from glossator.eval.providers.models import Completion, ProviderCallError, TokenUsage
 
 QUESTION_TEXT = "How do I set the temperature parameter on a chat completion request?"
 

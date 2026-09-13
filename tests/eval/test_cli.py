@@ -9,7 +9,8 @@ import pytest
 
 from glossator.eval.corpus import load_documents
 from glossator.eval.datasets import QuestionType
-from glossator.eval.generate import _dry_run, _run, plan_attempts
+from glossator.eval.generate.cli import _dry_run, _run
+from glossator.eval.generate.planning import plan_attempts
 
 FIXTURE_CORPUS = Path("tests/fixtures/corpus")
 

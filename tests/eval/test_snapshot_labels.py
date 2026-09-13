@@ -3,7 +3,8 @@ import json
 from pathlib import Path
 
 from glossator.corpus.snapshots import SnapshotRecord
-from glossator.eval.snapshots import label, score_snapshot_records
+from glossator.eval.snapshots.eval_report import score_snapshot_records
+from glossator.eval.snapshots.label import label
 
 
 def _page(path: Path, url: str, body: str) -> None:

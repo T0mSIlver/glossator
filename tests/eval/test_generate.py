@@ -12,22 +12,20 @@ from pydantic import BaseModel
 
 from glossator.eval.corpus import estimate_tokens, load_documents
 from glossator.eval.datasets import QuestionType
-from glossator.eval.generate import (
+from glossator.eval.generate.attempt import normalize_question
+from glossator.eval.generate.calls import foreign_vendors_named
+from glossator.eval.generate.models import (
     CapabilityOutput,
     CorpusCheckOutput,
     CrossPageOutput,
     FilterOutput,
     PageAloneOutput,
-    _allocations,
-    cross_page_groups,
-    foreign_vendors_named,
-    generate_questions,
-    normalize_question,
-    plan_attempts,
-    sample_sections,
 )
-from glossator.eval.providers import Completion, ProviderCallError, TokenUsage
-from glossator.eval.run_records import RunRecorder
+from glossator.eval.generate.planning import plan_attempts
+from glossator.eval.generate.run import generate_questions, type_allocations
+from glossator.eval.generate.sampling import cross_page_groups, sample_sections
+from glossator.eval.providers.models import Completion, ProviderCallError, TokenUsage
+from glossator.eval.run_records.recorder import RunRecorder
 
 FIXTURE_CORPUS = Path("tests/fixtures/corpus")
 
@@ -218,7 +216,7 @@ def test_planning_is_deterministic_for_one_seed(documents: list[Any]) -> None:
 
 
 def test_allocations_spread_a_remainder_over_the_types() -> None:
-    allocations = _allocations(20)
+    allocations = type_allocations(20)
 
     assert sum(allocations.values()) == 20
     assert max(allocations.values()) - min(allocations.values()) <= 1

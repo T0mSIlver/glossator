@@ -9,13 +9,11 @@ import httpx
 import pytest
 from pydantic import BaseModel
 
-from glossator.eval.providers import (
-    OpenAICompatibleProvider,
-    ProviderCallError,
-    candidate_scope,
-    extract_json_object,
-)
-from glossator.eval.run_records import RunRecorder
+from glossator.eval.providers.client import OpenAICompatibleProvider
+from glossator.eval.providers.models import ProviderCallError
+from glossator.eval.providers.scopes import candidate_scope
+from glossator.eval.providers.structured import extract_json_object
+from glossator.eval.run_records.recorder import RunRecorder
 
 CONFIG = {
     "model": "glm-test",

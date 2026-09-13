@@ -77,11 +77,11 @@ ignore = [
 "tests/corpus/*" = ["E501"]
 # One paragraph per line: these are prompts sent to a model, and their text is
 # hashed into every question generated from them, so rewrapping rewrites data.
-"src/glossator/eval/prompts.py" = ["E501"]
+"src/glossator/eval/generate/prompts.py" = ["E501"]
 # Same reason: the judge's instructions are hashed into every verdict, so their
-# line breaks are data. Only the prompt constants are long here.
-"src/glossator/eval/answer_eval.py" = ["E501"]
-"src/glossator/eval/failures.py" = ["E501"]
+# line breaks are data.
+"src/glossator/eval/answer_eval/prompts.py" = ["E501"]
+"src/glossator/eval/failures/prompts.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

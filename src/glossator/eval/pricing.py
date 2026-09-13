@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from glossator.eval.providers import TokenUsage
+from glossator.eval.providers.models import TokenUsage
 
 
 @dataclass(frozen=True, slots=True)

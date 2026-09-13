@@ -19,7 +19,8 @@ from urllib.parse import unquote, urlsplit
 import httpx
 
 from glossator.answer.citations import fragment_link, matched_source_quote
-from glossator.eval.answer_eval import QuestionRecord, source_texts
+from glossator.eval.answer_eval.judge import source_texts
+from glossator.eval.answer_eval.models import QuestionRecord
 
 DEFAULT_SAMPLE = 60
 DEFAULT_SEED = 0

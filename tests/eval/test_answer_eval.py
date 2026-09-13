@@ -22,29 +22,26 @@ from glossator.answer.citations import (
 )
 from glossator.answer.config import MINISTRAL_3_14B, AnswerConfig
 from glossator.answer.llm import TokenUsage
-from glossator.eval.answer_eval import (
-    JUDGE_VERSION,
+from glossator.eval.answer_eval.judge import judge_input, source_texts
+from glossator.eval.answer_eval.metrics import aggregate, cell, question_metrics
+from glossator.eval.answer_eval.models import (
     CitationVerdict,
     JudgeRecord,
     JudgeVerdict,
     QuestionRecord,
-    RunDirectory,
-    aggregate,
+    parse_judge_models,
+)
+from glossator.eval.answer_eval.overrides import (
     apply_answer_config,
-    cell,
-    judge_input,
     parse_answer_config,
     parse_answer_config_value,
-    parse_judge_models,
-    question_metrics,
-    recost,
-    regenerate,
-    rejudge,
-    render_readme,
-    resolve_run_directory,
-    run,
-    source_texts,
 )
+from glossator.eval.answer_eval.prompts import JUDGE_VERSION
+from glossator.eval.answer_eval.rebuild import recost, regenerate
+from glossator.eval.answer_eval.rejudge import rejudge
+from glossator.eval.answer_eval.report import render_readme
+from glossator.eval.answer_eval.run import run
+from glossator.eval.answer_eval.run_dir import RunDirectory, resolve_run_directory
 from glossator.eval.datasets import (
     EvalQuestion,
     GoldSource,
@@ -52,8 +49,8 @@ from glossator.eval.datasets import (
     QuestionType,
     stratified_subset,
 )
-from glossator.eval.providers import TokenUsage as ProviderTokenUsage
-from glossator.eval.providers import extract_json_object
+from glossator.eval.providers.models import TokenUsage as ProviderTokenUsage
+from glossator.eval.providers.structured import extract_json_object
 from glossator.eval.report import rebuild, run_kind
 
 PAGE = "https://docs.mistral.ai/capabilities/function-calling"
@@ -787,12 +784,12 @@ async def test_rejudge_keeps_answers_and_archives_the_old_judge(
             for judge in judges
         }
 
-    monkeypatch.setattr("glossator.eval.answer_eval.wait_for_quota", no_quota_wait)
+    monkeypatch.setattr("glossator.eval.answer_eval.rejudge.wait_for_quota", no_quota_wait)
     monkeypatch.setattr(
-        "glossator.eval.answer_eval.make_judge_providers",
+        "glossator.eval.answer_eval.rejudge.make_judge_providers",
         lambda judges, run_dir: {"zai": FakeProvider()},
     )
-    monkeypatch.setattr("glossator.eval.answer_eval.judge_with_models", fake_judges)
+    monkeypatch.setattr("glossator.eval.answer_eval.rejudge.judge_with_models", fake_judges)
 
     metrics = await rejudge(path, judge_models=parse_judge_models("zai:new"))
     rewritten = json.loads((path / "records.jsonl").read_text())
@@ -965,10 +962,10 @@ async def test_retry_errors_regenerates_error_rows_and_keeps_answered_rows(
     class FakeEngine:
         pass
 
-    monkeypatch.setattr("glossator.eval.answer_eval.SearchEngine", lambda *a, **k: FakeEngine())
-    monkeypatch.setattr("glossator.eval.answer_eval.chat_client", lambda: object())
-    monkeypatch.setattr("glossator.eval.answer_eval.MistralLLM", lambda *a, **k: object())
-    monkeypatch.setattr("glossator.eval.answer_eval.answer_one", fake_answer_one)
+    monkeypatch.setattr("glossator.eval.answer_eval.run.SearchEngine", lambda *a, **k: FakeEngine())
+    monkeypatch.setattr("glossator.eval.answer_eval.run.chat_client", lambda: object())
+    monkeypatch.setattr("glossator.eval.answer_eval.run.MistralLLM", lambda *a, **k: object())
+    monkeypatch.setattr("glossator.eval.answer_eval.run.answer_one", fake_answer_one)
 
     await run(
         questions,

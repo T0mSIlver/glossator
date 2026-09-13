@@ -8,21 +8,21 @@ only feeds.
 
 from pathlib import Path
 
-from glossator.eval.corpus_stats import (
+from glossator.eval.corpus_stats.figure import histogram_svg
+from glossator.eval.corpus_stats.measure import (
     MARKERS,
     THRESHOLDS,
     PageStats,
     distribution,
-    histogram_svg,
     largest_pages,
     measure_page,
     percentile,
     read_page_fits,
-    render_readme,
     shares_under,
     summarize,
     totals_by_kind,
 )
+from glossator.eval.corpus_stats.report import render_readme
 from glossator.index.variants import ChunkStrategy
 from glossator.ingest.chunker import build_chunker
 from glossator.ingest.pages import parse_page
