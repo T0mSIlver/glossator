@@ -67,9 +67,10 @@ on the sentence, does the claim hold, when did the fact change, how often is the
 answer right. Each had to be built, and each is measured in `eval/runs/`.
 
 **Where it reaches, four defects sit on the path a documentation product needs**,
-each reproduced below with package line numbers: the generated ranking profile
-switches the vector term off in phase 1 (D-012); a named query profile, the
-starter's only way to set weights, disables `exclude_ids` and every filter
+each reproduced below with package line numbers: the starter ships a ranking
+profile with the vector term at zero in phase 1, and the toolkit's own build
+check only warns about it (D-012); a named query profile, the starter's only
+way to set weights, disables `exclude_ids` and every filter
 (D-014); per-query weights are silently ignored without a suffix nothing
 validates (D-025); the LLM reranker runs one call per candidate and discards
 its own score (D-015). The replacements are small (a 139-line retriever, a

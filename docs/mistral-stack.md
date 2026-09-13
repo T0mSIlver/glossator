@@ -87,8 +87,8 @@ the Vespa and served-answer path (`docs/search-toolkit.md:50-114,595-644`).
 
 Defects and omissions that affected the project:
 
-- The starter leaves phase-one vector closeness at zero, making candidate
-  selection BM25-only (D-012).
+- The starter leaves phase-one vector closeness at zero, ignoring the build
+  check that names it, so candidate selection is BM25-only (D-012).
 - Vespa implements only `VectorStoreIndex`, so the documented
   `KeywordRetriever` plus `RRFRanker` path cannot run (D-013).
 - A named query profile makes `exclude_ids` and `extra_yql_filter` error, although

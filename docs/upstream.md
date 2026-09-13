@@ -11,7 +11,7 @@ Documentation fixes belong in `mistralai/platform-docs-public`.
 
 | # | Where | What | Evidence | Fix |
 |---|---|---|---|---|
-| 1 | toolkit plugin | Phase-one vector weight defaults to 0. Candidate selection therefore uses only keyword search (BM25). Queries without shared words may never reach the second phase. | `plugins/vespa/app/schemas/base.py`, `_generate_closeness_function`; D-012 | Use a non-zero default, or fail the build instead of logging. |
+| 1 | starter app | Ships a ranking profile with the phase-one vector weight at 0; the toolkit's build check names the unset weight but only logs it. Candidate selection therefore uses only keyword search (BM25). Queries without shared words may never reach the second phase. | `plugins/vespa/app/schemas/base.py`, `_generate_closeness_function`; D-012 | Ship a non-zero vector weight, or fail the build instead of logging. |
 | 2 | toolkit plugin | `ranking_weights` keys require a `_weight` suffix, but invalid keys are accepted and ignored. Four configurations then produced identical scores. | `search/bodies.py:33-34`; D-025 | Validate keys against the ranking profile inputs. |
 | 3 | toolkit plugin | Named query profiles reject `exclude_ids` and `extra_yql_filter`. The starter always sets a profile, so exclusion fails. | `search/query_builder.py:128-135`; D-014 | Allow profiles on the query-builder path, or omit the starter's profile. |
 | 4 | toolkit | Normalised discounted cumulative gain (nDCG) assumes each relevant ID appears once. URL-based scoring produced an impossible value of 1.220. | `evals/metrics.py:186`; D-016a | Remove duplicate URLs from the ranked list before scoring. |
