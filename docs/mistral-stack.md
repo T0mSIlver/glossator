@@ -22,7 +22,7 @@ The toolkit core and Vespa plugin are intentionally pinned to the same version. 
 
 The serving path constructs two `Mistral` clients. `chat_client()` uses the SDK's default Mistral endpoint unless `GLOSSATOR_CHAT_SERVER_URL` is set; then `server_url` points all chat work at that Mistral-compatible endpoint. `embedding_client()` always uses `MISTRAL_API_URL`, defaulting to `https://api.mistral.ai`, because the local llama.cpp chat server does not expose `mistral-embed` (`src/glossator/clients.py:32-39,73-94`; D-035c).
 
-`MistralLLM` calls `client.chat.complete_async` for answer generation, the search-loop turns, query translation and rewrite, and the repository's listwise reranker. Requests carry messages, tools, `tool_choice`, sampling, reasoning effort, timeout and structured-output format; responses supply text, tool calls, usage and finish reason (`src/glossator/answer/llm.py:195-296,322-344`; `src/glossator/answer/service.py:59`; `src/glossator/retrieval/reranker.py:152-170,232-243`).
+`MistralLLM` calls `client.chat.complete_async` for answer generation, the search-loop turns, query translation and rewrite, and the repository's listwise reranker. Requests carry messages, tools, `tool_choice`, sampling, reasoning effort, timeout and structured-output format; responses supply text, tool calls, usage and finish reason (`src/glossator/answer/llm.py:195-296,322-344`; `src/glossator/answer/service.py:59`; `src/glossator/retrieval/reranker.py:161-179,241-252`).
 
 For Pydantic output, `response_format_from_pydantic_model()` converts the model
 to the SDK's `json_schema` payload. Glossator still validates the returned JSON
@@ -31,16 +31,16 @@ schema can use `json_object`; that mode, and fenced JSON returned by llama.cpp,
 are handled and recorded explicitly (`src/glossator/answer/llm.py:244-251,395-404,430-466`;
 `src/glossator/answer/config.py:161-166`). Structured output is used for grounded
 answers, reranker rankings, English renderings and optional query rewrites
-(`src/glossator/answer/generation.py:53-60`; `src/glossator/retrieval/reranker.py:73-78,246-259`;
+(`src/glossator/answer/generation.py:57-64`; `src/glossator/retrieval/reranker.py:73-78,255-268`;
 `src/glossator/answer/language.py:88-101,167-176,216-225`).
 
-Embeddings reach the same SDK through the toolkit's `MistralEmbedder`, which calls `client.embeddings.create_async`. Both ingestion and retrieval inject the dedicated embedding client and raise the toolkit's default three retries to eight (`mistralai/search/toolkit/embedding/mistral_embedder.py:520-560`; `src/glossator/ingest/pipeline.py:316-320`; `src/glossator/retrieval/engine.py:218-226`; D-011a).
+Embeddings reach the same SDK through the toolkit's `MistralEmbedder`, which calls `client.embeddings.create_async`. Both ingestion and retrieval inject the dedicated embedding client and raise the toolkit's default three retries to eight (`mistralai/search/toolkit/embedding/mistral_embedder.py:520-560`; `src/glossator/ingest/pipeline.py:330-334`; `src/glossator/retrieval/engine.py:218-226`; D-011a).
 
 The direct SDK surface in `src/` is confined to the two client factories, serving chat
 wrapper, type injection into ingestion and the embedding probe. Offline dataset generation and judging use a small `httpx`
 OpenAI-compatible provider instead of the SDK
 (`src/glossator/clients.py:17,73-94`; `src/glossator/answer/llm.py:16-25`;
-`src/glossator/ingest/pipeline.py:18,298-320`;
+`src/glossator/ingest/pipeline.py:19,312-334`;
 `src/glossator/retrieval/probe.py:12-13,142`;
 `src/glossator/eval/providers/wire.py:13-42`).
 
@@ -121,7 +121,7 @@ The chunker, answer-context budget and listwise-reranker candidate truncation al
 load the bundled `MistralTokenizer.v1()` and encode text without BOS or EOS
 tokens (`src/glossator/ingest/chunker.py:246-277`;
 `src/glossator/answer/context.py:129-137`;
-`src/glossator/retrieval/reranker.py:227-229`). The toolkit also uses v1 for every
+`src/glossator/retrieval/reranker.py:236-238`). The toolkit also uses v1 for every
 embedding model's request-size accounting
 (`mistralai/search/toolkit/embedding/mistral_embedder.py:42-44`). Keeping these
 four counters aligned makes chunk caps, prompt budgets and billed-token estimates
