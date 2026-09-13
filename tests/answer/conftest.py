@@ -12,7 +12,8 @@ from pydantic import BaseModel
 from glossator.answer.config import AnswerConfig
 from glossator.answer.llm import Completion, LLMCall, Message, TokenUsage, ToolInvocation, ToolSpec
 from glossator.retrieval.config import RetrievalConfig
-from glossator.retrieval.engine import Hit
+from glossator.retrieval.engine import Hit, SearchTrace
+from glossator.retrieval.reranker import RerankTrace
 
 PAGE = "https://docs.mistral.ai/capabilities/function-calling"
 
@@ -130,6 +131,8 @@ class FakeIndex:
         self._raises = raises
         self._pages = {url: FakePage(hits, raises=raises) for url, hits in (pages or {}).items()}
         self.queries: list[tuple[str, int | None, frozenset[str]]] = []
+        self.rerank: RerankTrace | None = None
+        """Attached to every search trace, to stand for the engine's reranker call."""
 
     async def search(
         self,
@@ -140,6 +143,23 @@ class FakeIndex:
         self.queries.append((query, top_k, frozenset(exclude_ids or ())))
         batch = self._results.pop(0) if self._results else []
         return [hit for hit in batch if hit.chunk_id not in (exclude_ids or set())]
+
+    async def search_with_trace(
+        self,
+        query: str,
+        exclude_ids: set[str] | None = None,
+        top_k: int | None = None,
+    ) -> tuple[list[Hit], SearchTrace]:
+        hits = await self.search(query, exclude_ids=exclude_ids, top_k=top_k)
+        trace = SearchTrace(
+            query=query,
+            variant=self.config.variant,
+            considered=len(hits),
+            kept=len(hits),
+            latency_ms=0.0,
+            rerank=self.rerank,
+        )
+        return hits, trace
 
     def navigation_at(self, source_id: str, start_offset: int = 0, end_offset: int = 0) -> FakePage:
         return self._pages.setdefault(source_id, FakePage([], raises=self._raises))

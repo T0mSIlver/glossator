@@ -1,6 +1,6 @@
 .PHONY: installdeps ingest search ask api mcp test test-all
 .PHONY: corpus-refresh corpus-check snapshots dev-set dev-noisy eval-report eval-answers eval-retrieval calibrate-floors failures
-.PHONY: setup-vespa start-vespa verify-vespa stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
+.PHONY: setup-vespa start-vespa verify-vespa wait-vespa-query stop-vespa reset-vespa migrate-vespa bruno generate-vespa-lock
 .PHONY: deploy deploy-check
 
 ifneq (,$(wildcard .env))
@@ -12,11 +12,13 @@ MCP_HOST := $(or $(host),127.0.0.1)
 MCP_PORT := $(or $(port),8000)
 API_HOST := $(or $(host),127.0.0.1)
 API_PORT := $(or $(port),8080)
-VESPA_CONTAINER := glossator-vespa
+VESPA_CONTAINER := $(or $(VESPA_CONTAINER),glossator-vespa)
 VESPA_QUERY_PORT := $(or $(VESPA_QUERY_PORT),18080)
 VESPA_CONFIG_PORT := $(or $(VESPA_CONFIG_PORT),19072)
 VESPA_ENDPOINT := $(or $(VESPA_ENDPOINT),http://localhost:$(VESPA_QUERY_PORT))
 VESPA_CONFIG_URL := $(or $(VESPA_CONFIG_URL),http://localhost:$(VESPA_CONFIG_PORT))
+# Seconds `make migrate-vespa` waits for the query API after activating the application.
+VESPA_QUERY_WAIT := $(or $(VESPA_QUERY_WAIT),180)
 
 # Docs repo commit the vendored corpus is built from (DECISIONS.md D-001, D-009).
 CORPUS_REF := $(or $(REF),2e094f7bbe1395de4a738a3483def3573143d973)
@@ -52,11 +54,28 @@ migrate-vespa: verify-vespa
 	uv run mistral-vespa migrate --app-dir src/glossator/index \
 		--config-server $(VESPA_CONFIG_URL) \
 		--query-port $(VESPA_QUERY_PORT)
+	@$(MAKE) --no-print-directory wait-vespa-query
+
+# The config server is healthy well before the query API: that one only comes up
+# some tens of seconds after the application is activated, and an ingest started
+# in between fails in its embedding probe.
+wait-vespa-query:
+	@if ! curl -sf http://localhost:$(VESPA_QUERY_PORT)/state/v1/health 2>/dev/null | grep -q '"up"'; then \
+		echo "Waiting up to $(VESPA_QUERY_WAIT)s for the Vespa query API on localhost:$(VESPA_QUERY_PORT)..."; \
+		waited=0; \
+		until curl -sf http://localhost:$(VESPA_QUERY_PORT)/state/v1/health 2>/dev/null | grep -q '"up"'; do \
+			if [ $$waited -ge $(VESPA_QUERY_WAIT) ]; then \
+				echo "error: Vespa query API not up at localhost:$(VESPA_QUERY_PORT) after $(VESPA_QUERY_WAIT)s"; exit 1; \
+			fi; \
+			sleep 2; waited=$$((waited + 2)); \
+		done; \
+	fi
+	@echo "Vespa query API up: http://localhost:$(VESPA_QUERY_PORT)"
 
 ## Ingest a corpus directory into one index variant
-## Usage: make ingest corpus=corpus/mistral-docs variant=sec1024
+## Usage: make ingest corpus=corpus/mistral-docs variant=sec1024 [verbose=1]
 ingest:
-	uv run python -m glossator.ingest --corpus $(corpus) --variant $(variant)
+	uv run python -m glossator.ingest --corpus $(corpus) --variant $(variant) $(if $(verbose),--verbose,)
 
 ## Search one index variant
 ## Usage: make search query="how do I stream a response" [variant=sec1024] [top_k=10]

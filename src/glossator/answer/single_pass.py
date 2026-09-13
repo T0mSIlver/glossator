@@ -23,7 +23,7 @@ async def answer(
     run = AnswerRun(strategy=NAME, variant=engine.config.variant)
     run.rounds = 1
     query = await run.prepare(question, llm=llm, config=config)
-    hits = await engine.search(query.text, top_k=config.top_k)
+    hits = await run.search(engine, query.text, top_k=config.top_k)
     run.event(
         "retrieval",
         "search",

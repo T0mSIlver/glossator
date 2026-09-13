@@ -8,6 +8,7 @@ so a second run over an unchanged corpus leaves the index exactly as it was.
 import asyncio
 import hashlib
 import json
+import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -43,6 +44,7 @@ logger = structlog.get_logger(__name__)
 
 DEFAULT_CONCURRENCY = 4
 DEFAULT_EMBEDDING_CACHE = Path.home() / ".cache" / "glossator" / "embeddings"
+EMBEDDING_CACHE_ENV = "GLOSSATOR_EMBEDDING_CACHE"
 
 # The embedding API rate-limits a full-corpus run. The toolkit's embedder retries a
 # 429 with exponential backoff, but only three times by default, which a handful of
@@ -54,6 +56,18 @@ _EMBEDDER_MAX_RETRY = 8
 # smaller-dimension variants have no published price; they are billed as embeddings,
 # so the same rate is the honest estimate to report rather than a silent zero.
 _EMBEDDING_USD_PER_MTOK = 0.10
+
+
+def embedding_cache_dir() -> Path:
+    """Where embeddings are cached: ``GLOSSATOR_EMBEDDING_CACHE``, else the default.
+
+    Read at call time rather than import time, so a value loaded from ``.env``
+    after import still counts. The same variable tells ``deploy.sh`` which
+    directory to sync, so the cache an ingest fills is the one a deployment
+    carries. A blank value counts as unset, as it does in the shell script.
+    """
+    configured = os.environ.get(EMBEDDING_CACHE_ENV, "").strip()
+    return Path(configured).expanduser() if configured else DEFAULT_EMBEDDING_CACHE
 
 
 class PartialIngestError(RuntimeError):
@@ -300,7 +314,7 @@ def build_pipeline(
     client: Mistral | None = None,
     *,
     snapshot: str | None = None,
-    embedding_cache: Path = DEFAULT_EMBEDDING_CACHE,
+    embedding_cache: Path | None = None,
 ) -> Pipeline:
     """The ingestion pipeline for one variant.
 
@@ -318,7 +332,9 @@ def build_pipeline(
         model_name=variant.embedding_model_name,
         max_retry=_EMBEDDER_MAX_RETRY,
     )
-    embedder: Embedder = CachedEmbedder(inner, variant.embedding_dimensions, embedding_cache)
+    embedder: Embedder = CachedEmbedder(
+        inner, variant.embedding_dimensions, embedding_cache or embedding_cache_dir()
+    )
     return Pipeline(
         loader=None,
         extractor=CorpusPageExtractor(),
@@ -336,7 +352,7 @@ async def ingest_corpus(
     client: Mistral | None = None,
     allow_partial: bool = False,
     snapshot: str | None = None,
-    embedding_cache: Path = DEFAULT_EMBEDDING_CACHE,
+    embedding_cache: Path | None = None,
 ) -> IngestReport:
     """Index every page of ``corpus_dir`` into ``variant``'s schema.
 

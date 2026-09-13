@@ -94,6 +94,15 @@ class RerankTrace:
     error: str | None = None
     """Why the retrieval order was kept. ``None`` when the ranking was applied."""
 
+    @property
+    def called_model(self) -> bool:
+        """Whether a model call was made, and so billed, for this result set.
+
+        Fewer than two candidates have only one order, so the reranker skips the
+        call; every other trace stands for a request, a failed one included.
+        """
+        return self.candidates >= 2
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "model": self.model,

@@ -1,13 +1,15 @@
 """Ingest a corpus directory into one index variant.
 
 Usage:
-    python -m glossator.ingest --corpus corpus/mistral-docs --variant sec1024
+    python -m glossator.ingest --corpus corpus/mistral-docs --variant sec1024 [--verbose]
 """
 
 import argparse
 import asyncio
+import logging
 from pathlib import Path
 
+import structlog
 from dotenv import load_dotenv
 
 from glossator.index.variants import ALL_VARIANTS
@@ -49,7 +51,20 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Index without checking the embedding model first (D-031)",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Log debug events too, such as every oversized block the chunker keeps whole",
+    )
     return parser.parse_args()
+
+
+def _configure_logging(verbose: bool) -> None:
+    # A full-corpus run logs thousands of per-chunk debug events, which bury the
+    # summary line a reader is looking for; they are there on request.
+    level = logging.DEBUG if verbose else logging.INFO
+    structlog.configure(wrapper_class=structlog.make_filtering_bound_logger(level))
 
 
 def _summary(report: IngestReport) -> str:
@@ -63,6 +78,7 @@ def _summary(report: IngestReport) -> str:
 async def main() -> None:
     load_dotenv()
     args = _parse_args()
+    _configure_logging(args.verbose)
     if not args.skip_probe:
         # Before anything is embedded, not after: a corpus indexed with a broken
         # embedding model looks exactly like a corpus indexed correctly, and the
