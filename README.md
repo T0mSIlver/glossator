@@ -166,8 +166,8 @@ command (`make deploy HOST=<ssh-host>`). Modes, checks and the manual steps:
 ## Repository layout
 
 ```text
-src/glossator/    corpus adapter, ingest, index, retrieval, answer, eval
-src/entrypoints/  FastAPI and MCP servers (CLIs are python -m glossator.{corpus,ingest,retrieval,answer})
+src/glossator/    corpus adapter, ingest, index, retrieval, answer, surface (what the tools and routes do), eval
+src/entrypoints/  FastAPI and MCP servers over glossator.surface (CLIs are python -m glossator.{corpus,ingest,retrieval,answer})
 corpus/           vendored corpus, manifest, license, notice
 eval/             datasets, committed run directories, corpus stats, replay exports
 docs/             architecture, evaluation, retrieval, corpus, stack notes

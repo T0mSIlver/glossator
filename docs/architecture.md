@@ -8,7 +8,7 @@
 6. Vespa combines BM25 and vector features in a two-phase ranking profile.
 7. The MCP server exposes search, whole-page reads and history; every hit and section prints its key and the link to cite, and history reads a precomputed changelog of the dated snapshots.
 8. The answer layer gathers context, generates structured output and verifies quoted citations, behind the HTTP API.
-9. FastAPI and MCP both use `SearchEngine`; each entry point constructs its own instances.
+9. FastAPI and MCP are thin adapters over `glossator.surface`, which holds what each tool and route does and prints; each entry point constructs its own `SearchEngine` instances.
 10. Evaluation records every query, model call, hit, score, citation, cost, and latency.
 
 [`retrieval.md`](retrieval.md) covers index variants and the retrieval grid.

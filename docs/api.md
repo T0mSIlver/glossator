@@ -9,7 +9,7 @@ schema.
 | `POST /search` | `query`; optional `top_k`, `kinds`, `locales`, `exclude_ids`, `variant` | ranked hits with citation URL, heading path, preview, score, ID, and offsets |
 | `POST /cite` | `draft`, `quotes` (`n`, `quote`, plus `chunk_id` or page `url`); optional `variant` | per-quote verdicts, uncovered markers, deduplicated sources, the rendered `sources_markdown` block |
 | `GET /pages/{path}` | documentation path; optional `variant`, `start_offset`, `top_k` | up to 100 page sections in reading order; `truncated` says whether more exist |
-| `GET /history` | `text` with an optional page or path, `page_url` with an optional section, or `under` with an optional date | a phrase's first and last stored snapshot, a page or section's state and diff, or changes below a path |
+| `GET /history` | one form: `text` (optionally with `page_url` or `under`), `page_url` (optionally with `section`), or `under` (optionally with `since`) | a phrase's first and last stored snapshot, a page or section's state and diff, or changes below a path, validated by the same rules as `mistral_docs_history` |
 | `GET /health` | none | Vespa counts, corpus commit, readable snapshot count, and embedding-probe status |
 | `GET /version` | none | package version, variants, and allowed generation models |
 
@@ -41,10 +41,12 @@ every variable with its default. Recognised settings are `MISTRAL_API_KEY`,
 `VESPA_CONFIG_PORT`, `VESPA_ENDPOINT`, `VESPA_CONFIG_URL`, and `WORKSPACE_ROOT`
 (used by the Bruno API export). The retrieval engine reads
 `GLOSSATOR_RERANK_MODEL` for the reranker (default `mistral-small-2603`). The
-API server also reads `GLOSSATOR_CORPUS_DIR`, and the MCP server reads
-`GLOSSATOR_VARIANT`, `GLOSSATOR_CORPUS_DIR`, `GLOSSATOR_MCP_TOKEN`, and
-`GLOSSATOR_MCP_TOOLS`. Both read `GLOSSATOR_SNAPSHOT_MANIFEST` for the `history`
-forms. Do not put schema names in `.env`.
+API server also reads `GLOSSATOR_CORPUS_DIR` and `GLOSSATOR_MODEL` (the
+generation model for `POST /ask` when the request names none; blank uses the
+shipped default), and the MCP server reads `GLOSSATOR_VARIANT`,
+`GLOSSATOR_CORPUS_DIR`, `GLOSSATOR_MCP_TOKEN`, and `GLOSSATOR_MCP_TOOLS`. Both read
+`GLOSSATOR_SNAPSHOT_MANIFEST` for the `history` forms. Do not put schema names in
+`.env`.
 
 Chat completions -- the answer model, the listwise reranker, and the translation
 and rewrite calls -- go to a local OpenAI-compatible server when
