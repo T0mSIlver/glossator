@@ -347,6 +347,7 @@ def test_under_accepts_site_host_and_bare_path_forms(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
     for under in (
         "site:docs.mistral.ai/models",
+        "docs.mistral.ai/models",
         "/models/",
         "models",
         "https://docs.mistral.ai/models#x",
@@ -355,6 +356,15 @@ def test_under_accepts_site_host_and_bare_path_forms(mcp_server: Any) -> None:
         assert "- https://docs.mistral.ai/models\n    Model capability matrix" in text
         assert "- https://docs.mistral.ai/models/mistral-medium" in text
         assert "Results: 2 pages" in text
+
+
+def test_under_on_another_host_is_a_bad_parameter(mcp_server: Any) -> None:
+    mcp_server._engine = FakeEngine()
+
+    text = _call_error(mcp_server, "mistral_docs_search", {"q": "", "under": "example.com/models"})
+
+    assert "E_BAD_PARAM" in text
+    assert "under must be on docs.mistral.ai" in text
 
 
 def test_under_with_no_page_names_the_nearest_parent_even_with_words(mcp_server: Any) -> None:

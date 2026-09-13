@@ -6,11 +6,11 @@ from pathlib import Path
 
 from glossator.answer.context import chunk_body
 from glossator.citing import SectionKey, citation_link, page_search_text, section_keys
+from glossator.doc_paths import SITE, split_docs_location
 from glossator.ingest.pages import iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 from glossator.retrieval.engine import Hit
 
-SITE = "https://docs.mistral.ai"
 LARGE_PAGE_CHARS = 32_000
 """A page this long is read by section: a hit on it says so, and read_page
 without a section returns the first part with the remaining sections named."""
@@ -120,19 +120,11 @@ def prefix_from(under: str) -> str:
     """The page URL ``under`` names, whatever form the model wrote it in.
 
     Models write the URL, a ``site:`` form of it, the bare host, or a bare
-    path; a Work session used three of the four (D-044a, D-046).
+    path; a Work session used three of the four (D-044a, D-046). A foreign host
+    raises ``ValueError``, as it does in the history tool.
     """
-    text = under.strip()
-    if text.startswith("site:"):
-        text = text[len("site:") :].strip()
-    for lead in (SITE, "http://docs.mistral.ai", "docs.mistral.ai"):
-        if text.startswith(lead):
-            text = text[len(lead) :]
-            break
-    path = text.split("#", 1)[0].split("?", 1)[0].strip()
-    if path and not path.startswith("/"):
-        path = "/" + path
-    return SITE + path.rstrip("/")
+    path, _fragment = split_docs_location(under, "under")
+    return SITE + path
 
 
 __all__ = ["LARGE_PAGE_CHARS", "SITE", "Page", "PageCatalog", "prefix_from"]

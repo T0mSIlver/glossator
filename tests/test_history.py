@@ -255,3 +255,30 @@ def test_phrase_history_scoped_to_a_page_and_a_path(tmp_path: Path) -> None:
         phrase_history("The limit is", manifest, page_url="/missing")
     with pytest.raises(ValueError, match="page_url or under, not both"):
         phrase_history("The limit is", manifest, page_url="/page", under="/")
+
+
+@pytest.mark.parametrize(
+    "page_url",
+    [
+        "docs.mistral.ai/page#limits",
+        "https://docs.mistral.ai/page#limits",
+        "/page#limits",
+        "page#limits",
+    ],
+)
+def test_section_history_accepts_every_form_of_the_docs_location(
+    tmp_path: Path, page_url: str
+) -> None:
+    result = section_history(page_url, None, _manifest(tmp_path))
+
+    assert result["page_url"] == "https://docs.mistral.ai/page"
+    assert result["section"] == "limits"
+
+
+def test_page_url_on_another_host_is_refused(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+
+    with pytest.raises(ValueError, match="page_url must be on docs.mistral.ai"):
+        section_history("example.com/page", None, manifest)
+    with pytest.raises(ValueError, match="page_url must be on docs.mistral.ai"):
+        phrase_history("The limit is", manifest, page_url="https://example.com/page")

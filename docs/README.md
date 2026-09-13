@@ -19,6 +19,7 @@
 ```text
 src/glossator/    corpus adapter, ingest, index, retrieval, answer, surface (what the tools and routes do), eval
   citing.py       section keys and citation links, shared by the surface and the snapshot tools
+  doc_paths.py    the docs.mistral.ai path a tool argument names, in any form a model writes it
   history.py      phrase and section history over the stored snapshots (the snapshot diff;
                   surface/history.py only resolves the tool's argument forms onto it)
   changelog.py    the precomputed snapshot changelog and changes under a path

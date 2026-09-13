@@ -177,3 +177,37 @@ def test_under_a_folder_lists_pages_and_under_a_page_lists_sections(tmp_path: Pa
     rows = page["intervals"][0]["rows"]
     assert [row["level"] for row in rows] == ["section"]
     assert rows[0]["key"] == "a"
+
+
+@pytest.mark.parametrize(
+    "under",
+    [
+        "docs.mistral.ai/keep",
+        "https://docs.mistral.ai/keep/",
+        "/keep",
+        "keep",
+        "site:docs.mistral.ai/keep",
+    ],
+)
+def test_under_accepts_every_form_of_the_docs_location(tmp_path: Path, under: str) -> None:
+    manifest = _manifest(tmp_path)
+    out = tmp_path / "changelog"
+    build_changelog(manifest, out)
+
+    result = history_under(under, "2026-06-02", manifest, out)
+
+    assert result["under"] == "https://docs.mistral.ai/keep"
+
+
+def test_under_on_another_host_is_refused(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    out = tmp_path / "changelog"
+    build_changelog(manifest, out)
+
+    for under in (
+        "example.com/keep",
+        "https://example.com/keep",
+        "docs.mistral.ai.example.com/keep",
+    ):
+        with pytest.raises(ValueError, match="under must be on docs.mistral.ai"):
+            history_under(under, None, manifest, out)

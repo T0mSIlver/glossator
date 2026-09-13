@@ -21,6 +21,7 @@ from glossator.corpus.snapshots import (
 from glossator.corpus.snapshots import (
     SnapshotUnavailableError as SnapshotUnavailableError,
 )
+from glossator.doc_paths import split_docs_location
 from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 
@@ -170,13 +171,11 @@ def _target(page_url: str, section: str | None) -> tuple[str, str | None]:
     raw = page_url.strip()
     if not raw:
         raise ValueError("page_url must contain a documentation URL or page path")
-    parsed = urlsplit(raw if "://" in raw else f"{SITE_ORIGIN}/{raw.lstrip('/')}")
-    if parsed.netloc and parsed.netloc != "docs.mistral.ai":
-        raise ValueError("page_url must be on docs.mistral.ai")
-    key = section.strip() if section is not None else parsed.fragment
+    path, fragment = split_docs_location(raw, "page_url")
+    key = section.strip() if section is not None else fragment
     if section is not None and not key:
         raise ValueError("section must contain a key")
-    return f"{SITE_ORIGIN}{parsed.path.rstrip('/') or '/'}", key or None
+    return f"{SITE_ORIGIN}{path or '/'}", key or None
 
 
 def _selected(page: CorpusPage, key: str | None) -> tuple[str, str | None] | None:

@@ -22,6 +22,7 @@ from glossator.corpus.snapshots import (
     read_snapshot_manifest,
     snapshot_corpus_dir,
 )
+from glossator.doc_paths import split_docs_location
 from glossator.ingest.pages import CorpusPage, iter_page_paths, load_page
 from glossator.ingest.sections import parse_sections
 
@@ -410,10 +411,8 @@ def under_prefix(under: str) -> str:
     raw = under.strip()
     if not raw:
         raise ValueError("under must contain a documentation path")
-    parsed = urlsplit(raw if "://" in raw else f"{SITE_ORIGIN}/{raw.lstrip('/')}")
-    if parsed.netloc and parsed.netloc != "docs.mistral.ai":
-        raise ValueError("under must be on docs.mistral.ai")
-    return f"{SITE_ORIGIN}{parsed.path.rstrip('/') or ''}"
+    path, _fragment = split_docs_location(raw, "under")
+    return f"{SITE_ORIGIN}{path}"
 
 
 @lru_cache(maxsize=4)

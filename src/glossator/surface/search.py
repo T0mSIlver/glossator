@@ -87,7 +87,12 @@ async def search(surface: Surface, q: str, max_hits: int, under: str | None) -> 
     """The ``mistral_docs_search`` result: hits with keys and ``cite:`` lines, or
     the page listing when ``q`` is empty or ``under`` names no page."""
     pages = surface.pages
-    prefix = prefix_from(under) if under and under.strip() else None
+    try:
+        prefix = prefix_from(under) if under and under.strip() else None
+    except ValueError as exc:
+        raise bad_param(
+            f"{exc}.", f'{SEARCH}(q="question", under="/path") with a docs path.'
+        ) from exc
     if not q.strip():
         if prefix is None:
             raise bad_param(
