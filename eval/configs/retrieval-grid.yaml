@@ -28,7 +28,7 @@ weight_sets:
   # against, and it is also the heading-path-at-0.3 arm of that comparison.
   shipped: {}
 
-  # Vector-heavy: the brief's closeness 8 against bm25 0.3, testing D-012a's
+  # Vector-heavy: closeness 8 against bm25 0.3, testing D-012a's
   # observation that a paraphrased question ranks its own section 2nd or 3rd
   # under the shipped weights and 1st under vector-only ranking.
   vector-heavy:

@@ -83,6 +83,6 @@
     "dev-245"
   ],
   "run_dir": "eval/runs/consumer-eval-v2",
-  "scratch_root": "/home/dev/.local/share/glossator-mcp-eval",
+  "scratch_root": "~/.local/share/glossator-mcp-eval",
   "unanswerable_count": 7
 }

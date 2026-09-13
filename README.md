@@ -33,8 +33,8 @@ variant, the index counts and the embedding probe.
 | Tool | Purpose |
 |---|---|
 | `mistral_docs_search(q, max_hits=5, under)` | The sections that state something: one hit per section with its key, heading path, snippet and the link to cite. `under` keeps the hits to the pages under a URL, or lists those pages when `q` is empty. |
-| `mistral_docs_read_page(page_url, section)` | A whole page in reading order, or one section of a large page with its neighbours. |
-| `mistral_docs_history(text \| page_url + section \| under + since)` | When a phrase appeared, how a page or section changed across the dated snapshots, or what changed under a path between stored dates. Every change is a bound between two snapshot dates, never a day. |
+| `mistral_docs_read_page(page_url, section, lang="python")` | A whole page in reading order, or one section of a large page with its neighbours. |
+| `mistral_docs_history(text [+ page_url \| under] \| page_url + section \| under + since)` | When a phrase appeared, how a page or section changed across the dated snapshots, or what changed under a path between stored dates. Every change is a bound between two snapshot dates, never a day. |
 
 ## Why an MCP server, and what decided its shape
 
@@ -44,7 +44,8 @@ coding agent can search an SDK checkout for a parameter name, but product facts
 often live elsewhere.
 
 This gap appears in `eval/mined.jsonl`. Of its 85 real questions, 54 came from
-GitHub issues opened by SDK users (`DECISIONS.md` D-038, D-039). The server
+public GitHub issues, 40 on the SDK repositories and 14 on the documentation
+and cookbook (`DECISIONS.md` D-038, D-039). The server
 provides documentation from a pinned commit and prints, beside every section,
 the link a reader opens. Snapshot search also shows when a fact changed.
 
@@ -106,15 +107,14 @@ lists each Mistral dependency, its version and known defects.
 ## Evaluation in five lines
 
 Every number below names its model; the runs and the judge study are in
-[`docs/evaluation.md`](docs/evaluation.md).
+[`docs/evaluation.md`](docs/evaluation.md), and each directory under
+`eval/runs/` stores its inputs, model calls, records, metrics and figures.
 
-- The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration.
-- Medium 3.5 replay changed correctness by -2, 0, +4 and -2 points. Fabricated quotes per answer fell by about half on all four sets.
+- The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration. Medium 3.5 replay changed correctness by -2, 0, +4 and -2 points; fabricated quotes per answer fell by about half on all four sets.
 - Sonnet scored 0.77 with the retrieval tools and 0.78 with server-side generation, which took three times as long. The run predates the three-tool cut.
 - Across 575 answers, generation caused 77 of 164 failures. Retrieval misses were 1% to 3% on well-written questions; no context misses occurred.
 - The demo itself, measured where it runs: Medium 3.5 at high reasoning through the Work Connector and the Skill scored 0.60 on thirty questions, 0.80 on the five that need the history tool and 0.20 on the five the documentation cannot answer, where it fills the gap; GLM 5.3 judged (D-049a).
 - Tool results are most of a session's tokens, so a read prints one language tab, no repeated sample and no pasted output beyond its head: 36% fewer characters per read on the same thirty questions, correctness 0.62 against 0.60, inside the noise of two runs (D-050, D-050a).
-- Each directory under `eval/runs/` stores its inputs, model calls, records, metrics and figures.
 
 ## Five-minute start
 

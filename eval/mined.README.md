@@ -65,7 +65,7 @@ read with a windowed extractor rather than by opening whole files: each match pr
 characters around the hit, and the excerpt in `.agent-runs/stumbles.jsonl` is trimmed from
 that window to the part that shows the failure.
 
-`/home/dev/.claude/projects/` was listed (159 directories) and the five whose paths or
+`~/.claude/projects/` was listed (159 directories) and the five whose paths or
 first lines mention Mistral were searched. None held a usable stumble against a Mistral
 product: the matches were either an unrelated application that merely depends on the SDK,
 or a repository-setup session. Nothing from them is in this dataset.
