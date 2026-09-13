@@ -43,7 +43,8 @@ page, history) where the agent does its own retrieval and writes the answer
 development questions the shipped path scores 0.93 judged correctness with
 Ministral 3 14B generating and GLM 5.3 judging; on 85 questions mined from real
 GitHub issues it scores 0.76 under the same models, and the failure analysis
-puts the gap on the 14B generator, not on retrieval. Medium 3.5, the
+puts the gap on the prompt and the strictness of the reference answers, not on
+retrieval or on the generator's capacity. Medium 3.5, the
 product's default answer model, was measured on the single pass by replaying
 the recorded prompts (D-017b): correctness is unchanged within the interval and
 the answers are cleaner. Small 4, the default reranker, has never been run: the
