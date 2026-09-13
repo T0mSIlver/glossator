@@ -44,7 +44,8 @@ coding agent can search an SDK checkout for a parameter name, but product facts
 often live elsewhere.
 
 This gap appears in `eval/mined.jsonl`. Of its 85 real questions, 54 came from
-GitHub issues opened by SDK users (`DECISIONS.md` D-038, D-039). The server
+public GitHub issues, 40 on the SDK repositories and 14 on the documentation
+and cookbook (`DECISIONS.md` D-038, D-039). The server
 provides documentation from a pinned commit and prints, beside every section,
 the link a reader opens. Snapshot search also shows when a fact changed.
 
