@@ -13,14 +13,10 @@ import pytest
 import yaml
 
 from glossator.eval.datasets import read_jsonl
-from glossator.eval.retrieval_grid import (
-    RUN_KIND,
-    GridRun,
-    GridSpec,
-    expand,
-    recompute,
-    select,
-)
+from glossator.eval.retrieval_grid.grid import expand, select
+from glossator.eval.retrieval_grid.metrics import recompute
+from glossator.eval.retrieval_grid.models import RUN_KIND, GridSpec
+from glossator.eval.retrieval_grid.run import GridRun
 from glossator.eval.retrieval_report import render_readme, write_report
 from glossator.retrieval.config import RetrievalConfig
 from glossator.retrieval.engine import Hit, SearchTrace

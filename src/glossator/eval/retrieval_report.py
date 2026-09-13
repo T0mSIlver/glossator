@@ -31,8 +31,8 @@ def rebuild_by_kind(kind: str, run_dir: Path) -> dict[str, Any]:
     from glossator.eval.calibrate_floors import RUN_KIND as FLOOR_KIND
     from glossator.eval.calibrate_floors import recompute as recompute_floors
     from glossator.eval.calibrate_floors import write_report as write_floor_report
-    from glossator.eval.retrieval_grid import RUN_KIND as GRID_KIND
-    from glossator.eval.retrieval_grid import recompute as recompute_grid
+    from glossator.eval.retrieval_grid.metrics import recompute as recompute_grid
+    from glossator.eval.retrieval_grid.models import RUN_KIND as GRID_KIND
 
     config = json.loads((run_dir / "config.json").read_text())
     if kind == GRID_KIND:
