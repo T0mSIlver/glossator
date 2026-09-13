@@ -52,7 +52,7 @@ source tree at commit `00d542f`, counting `wc -l` over the Python files under `s
 | Ingest and index (`ingest/`, `index/`): sections, chunks with heading metadata, embeddings, Vespa schema | 1,973 | `Pipeline`, `Document`, `MistralEmbedder`, migrations and `DOCUMENT_PER_CHUNK` as is; the splitter replaced |
 | Retrieval (`retrieval/`): hybrid query, weights, filters, reranker, page navigation, embedding probe | 1,835 | `VespaSearchQuery`, `exclude_ids`, `extra_yql_filter`, `NavigableIndex` as is; `VectorRetriever` and `LLMReRanker` replaced |
 | Answer and citations (`answer/`, `citing.py`) | 3,860 | none; the package has no answer, citation or groundedness type (D-016) |
-| Time axis (`history.py`, `changelog.py`): eight snapshots, section identity across dates, the changelog | 899 | none; reads the snapshot corpora as files (D-048) |
+| Time axis (`history.py`, `changelog.py`): eight snapshots, section identity across dates, the changelog | 876 | none; reads the snapshot corpora as files (D-048) |
 | Containment (`surface/containing.py`): one language tab, no repeated sample, outputs cut | 387 | none (D-050) |
 | Tool behaviour (`surface/`, without `containing.py`): search, page reads, history forms, `cite:` lines, budgets, typed errors, the parameter guard | 1,411 | none; FastMCP as the starter uses it is the entrypoint's |
 | MCP server and API (`entrypoints/`): configuration, tool registration, routes, bearer auth | 754 | FastMCP as the starter uses it; the starter's seven tools replaced by three (D-044) |
