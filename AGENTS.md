@@ -12,11 +12,15 @@ src/glossator/
   retrieval/             retriever over Vespa, reranker, query rewriting
   answer/                context assembly, grounded generation, citation verification, search loop
   surface/               what the three MCP tools and the HTTP routes do and print: search, page reads,
-                         history forms and rendering, typed errors, the parameter guard
+                         history forms and rendering, typed errors, the parameter guard;
+                         its pages.py is page sizes, section keys and paths the tools read
+                         without the index, unrelated to ingest/pages.py (the corpus file reader)
   eval/                  datasets, retrieval metrics, answer judge, experiment grid, reports
   citing.py              section keys and citation links, shared by the surface and the snapshot tools
-  history.py             phrase and section history over the stored snapshots
+  history.py             phrase and section history over the stored snapshots (the snapshot diff;
+                         surface/history.py only resolves the tool's argument forms onto it)
   changelog.py           the precomputed snapshot changelog and changes under a path
+  clients.py             the chat and embedding Mistral clients every model call is built on
 src/entrypoints/         api (FastAPI) and mcp_server (FastMCP): configuration, routes and tool
                          registration over glossator.surface; CLIs are python -m glossator.{corpus,ingest,retrieval,answer}
 corpus/                  vendored normalized corpus + manifest + upstream LICENSE
