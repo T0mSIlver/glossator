@@ -1652,6 +1652,43 @@ The same census on the 57 reads the demo run actually made (420,322 characters):
 
 ---
 
+## D-049b · The demo on the shipped server: 0.60 on the thirty, 0.80 on the history rows and 0.40 on the unanswerable ones
+
+**Status:** recorded · 2026-09-13 · `eval/runs/2026-09-13-1306-demo-medium35-shipped/` (the thirty questions of `eval/demo.jsonl` again, `mistral-medium-3-5` at `reasoning_effort=high`, Connector `mistral_docs_ca30`, on the server redeployed from `main` with the history forms of D-051 and the vendored snapshots of D-052; the Connector's tool schema was byte-identical before and after the redeploy; judged by GLM 5.3 under judge prompt v2, scored by the consumer `score` command) beside D-049a and D-050a
+
+| | D-049a | D-050a | D-049b |
+|---|---:|---:|---:|
+| correctness | 0.60 | 0.62 | 0.60 |
+| history rows (5) | 0.80 | 0.90 | 0.80 |
+| unanswerable rows (5) | 0.20 | 0.30 | 0.40 |
+| single-page rows (14) | 0.68 | 0.71 | 0.64 |
+| cross-page rows (3) | 0.67 | 0.17 | 0.67 |
+| API-reference rows (3) | 0.50 | 0.67 | 0.33 |
+| links resolve | 0.95 | 0.97 | 0.96 |
+| on gold | 0.76 | 0.76 | 0.72 |
+| tool calls per question | 5.2 | 5.8 | 5.4 |
+| tool calls, total (search / read / history) | 155 (87/57/11) | 175 (95/59/21) | 163 (82/63/18) |
+| characters per `read_page` result | 7,374 | 4,735 | 5,410 |
+| characters per `history` result | 486 | 2,182 | 395 |
+| characters per tool result, all tools | 4,828 | 3,884 | 4,309 |
+| characters per question | 24,944 | 22,654 | 23,411 |
+| input tokens per question, mean | 7,599 | 7,287 | 7,358 |
+| input tokens per question, median | 6,926 | 4,876 | 4,950 |
+| output tokens per question | 1,143 | 1,113 | 1,098 |
+| cost of the run, USD | 0.60 | 0.58 | 0.58 |
+
+**Facts.**
+- 15 correct, 6 partial, 9 wrong. Against D-050a nine verdicts moved, five up and four down; the overall number sits between the two earlier runs, inside the noise of thirty questions. 30 of 30 answered, no error rows, no 429; 220,742 input and 32,955 output tokens.
+- **History rows: four correct, one wrong, and the wrong one has the bound.** On `hist-001` the tool printed the change between 2026-08-15 and 2026-09-01, and the model's own reasoning wrote "between August 15, 2026 and September 1, 2026" before the answer named 1 September, the first stored date with the phrase, as the day. The `(absent at …)` bound D-051a added was on the page it read. `hist-004`, partial in D-050a, is now correct.
+- **Nine of the eighteen history calls were refused, and every one of those rows still reached an answer.** Four wrote `under` as a host and path without a scheme (`docs.mistral.ai/studio/search`, `docs.mistral.ai`), which the server reads as a path and prefixes a second time (`https://docs.mistral.ai/docs.mistral.ai/studio/search`); one passed a page URL without a scheme and got the unknown-page reply; one named a path with no stored page; three combined forms (`text` with `section`, `page_url` with `under`, `since` without `under`). A host-qualified path is the model saying the same path, so five of the nine refusals are the server's parsing, not the model's call. Not changed here.
+- History results average 395 characters, back to D-049a's size, since D-051 turned a folder-wide `under` into a list of pages; D-050a's two folder dumps made it 2,182. Reads average 5,410 characters, above D-050a and a quarter below D-049a.
+- **Unanswerable rows: two declined, three over-reached.** The Code Interpreter execution-time question and the Search Toolkit evaluation question, the one D-049a recorded as invented from `CacheMetrics`, are now answered as not documented, the second after nineteen calls. The 128-tool Vibe CLI ceiling and web search with a JSON response format are still asserted. The handoff model list is the reference defect D-049a recorded: the model cited the Agents FAQ's two supported models and the judge, which sees no served passages, graded it wrong.
+- One `read_page` on the migration guides came back as "Tool response … was blocked: prompt injection pattern detected", Work's own filter on the tool result; the model went on without it.
+
+**Reading.** Two days of server changes, containment, the scoped history forms and the vendored snapshots, leave the demo where it was: 0.60 to 0.62 on thirty questions, the session's weight between the two earlier runs, the history rows carried by the tool. The one history miss is the write-up turning an interval into a day, which D-048 and D-051a already print against. The server-side lever the run shows is parsing: an `under` or `page_url` written without the scheme is the path the model means, and accepting it removes five of nine refusals. The weak cell stays the unanswerable one, three of five.
+
+---
+
 ## D-051 · The history tool accepts the calls the model makes: `text` takes a page or a path, and `under` on a folder lists pages
 
 **Status:** decided by Tom · 2026-09-12 · `src/glossator/history.py`, `src/glossator/changelog.py`, `src/entrypoints/mcp_server.py`, `src/entrypoints/api.py`, `skills/mistral-docs/SKILL.md` (rule 4), `docs/mcp.md`; evidence: `eval/runs/2026-09-12-1211-demo-medium35-contained/` (D-050a), the five history rows of `eval/demo.jsonl` · revises D-048 point 2 (exactly one of `text`, `page_url`, `under`) and point 5 (`under` lists sections)

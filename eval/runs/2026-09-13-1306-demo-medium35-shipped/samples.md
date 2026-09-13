@@ -9,7 +9,7 @@ Can I set instructions on a conversation when the agent already carries its own 
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 Yes, you can set **Custom Instructions** on a conversation, but when an **Agent** is active, **its instructions take precedence** over your Custom Instructions.
 
@@ -30,7 +30,7 @@ How many model calls does the LLM reranker make, and how should I keep its cost 
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 The Mistral LLM reranker makes **1 LLM call per chunk** it evaluates. To keep its cost down, you should:
 
@@ -47,7 +47,7 @@ What is the maximum number of MCP tools the Vibe CLI can hold at once? It crashe
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 The maximum number of MCP tools the Vibe CLI can hold at once is **128**. This is a documented limit for tools per request in the function calling system.
 
@@ -61,7 +61,7 @@ What does agentic search require of the index, and which navigation tools does i
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Agentic Search requires the index to be a **`NavigableIndex`** with the schema migration set to **`IndexingMode.DOCUMENT_PER_CHUNK`** so that chunks carry source offsets and can be traversed in order.
 [Navigation tools](https://docs.mistral.ai/studio/search/agentic-search#navigation-tools)
@@ -87,7 +87,7 @@ Since when does Mistral's documentation have a model page for Z.ai GLM 5.2?
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 The model page for **Z.ai GLM 5.2** was added to Mistral's documentation **between August 1, 2026, and August 15, 2026** (first appearing in the snapshot interval after 2026-08-01).
 
@@ -101,7 +101,7 @@ How do I connect an agent to a remote MCP server?
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 To connect an agent to a **remote MCP server**, Mistral supports two main transports in its workflows: **Server-Sent Events (SSE)** and **Streamable HTTP**. Here’s how to do it in each case, with code examples and key details.
 
@@ -262,7 +262,7 @@ Creating an agent with `tool_choice: 'required'` fails with `Can't create an age
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 To make an agent **always search the web**, you cannot use `tool_choice: "required"` with built-in tools like `web_search` — this combination is explicitly blocked and returns the error you saw.
 
@@ -305,7 +305,7 @@ Mistral announced a model called Devstral 2 but the API lists `devstral-2512`, `
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 The model **Devstral 2** is exposed under the API identifiers:
 `devstral-2512`, `devstral-latest`, and `devstral-medium-latest`.
@@ -320,7 +320,7 @@ What is the difference between a Connector and an MCP server in the Vibe CLI, an
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: correct)
 
 Here’s the difference between a **Connector** and an **MCP server** in the Vibe CLI, and who sets each up:
 
@@ -371,7 +371,7 @@ Can an agent combine the built-in web search tool with a JSON response format?
 
 ### A0: not run
 
-### A1 (judge: not judged)
+### A1 (judge: wrong)
 
 Yes, an agent can combine the built-in **`web_search`** tool with a **JSON response format**.
 

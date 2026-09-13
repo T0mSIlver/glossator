@@ -30,6 +30,14 @@ characters per read 7,374 to 4,735, median input tokens per question 6,926 to
 carries a size table beside its cells: tokens per question and characters per
 tool result.
 
+On the server redeployed from `main` on 13 September, with the scoped history
+forms (D-051) and the vendored snapshots (D-052), the same thirty questions score
+0.60: 0.80 on the history rows, 0.40 on the unanswerable rows, 0.64 on
+single-page rows. Characters per read 5,410, per history result 395, per tool
+result 4,309; median input tokens per question 4,950; 0.58 USD for the run. Nine
+of eighteen history calls were refused, five of them because a path was written
+without its scheme (`2026-09-13-1306-demo-medium35-shipped`, D-049b).
+
 ## In one paragraph
 
 The pipeline that ships is: section-aware chunks of the docs repo at a pinned

@@ -6,7 +6,7 @@
       "cite_rejected": 0.0,
       "cite_verified": 0.0,
       "clamps": 0.0,
-      "correctness": null,
+      "correctness": 0.6,
       "errors": 0,
       "latency_p50": 18.551632030052133,
       "links_on_gold": 0.72,
@@ -20,7 +20,7 @@
     }
   },
   "correctness_cost": {
-    "work-proxy-mistral-medium-3-5-high / A1": null
+    "work-proxy-mistral-medium-3-5-high / A1": 16913.133333333335
   },
   "fragments": {
     "fragment_links": 0,
@@ -29,6 +29,6 @@
     "seed": 0,
     "share_found": null
   },
-  "judged": 0,
+  "judged": 30,
   "records": 30
 }

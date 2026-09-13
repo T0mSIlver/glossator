@@ -21,7 +21,7 @@ subcommands read this directory unchanged.
 
 | cell | n | correctness | refusal | links resolve | on gold | mcp called | rerank asked | cite verified | tool calls | bad params | p50 s |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| work-proxy-mistral-medium-3-5-high / A1 | 30 | -- | 0.83 | 0.96 | 0.72 | 1.00 | 0.00 | 0.00 | 5.43 | 0.00 | 18.55 |
+| work-proxy-mistral-medium-3-5-high / A1 | 30 | 0.60 | 0.83 | 0.96 | 0.72 | 1.00 | 0.00 | 0.00 | 5.43 | 0.00 | 18.55 |
 
 ## Size
 
