@@ -48,6 +48,7 @@
     "text absent": 11
   },
   "found": 49,
+  "fragment_field": "fragment_url",
   "html_eligible": 58,
   "kind": "fragment_resolvability",
   "sample_requested": 60,

@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from glossator.answer.context import AssembledContext, Source
 from glossator.answer.llm import TokenUsage
+from glossator.paragraphs import paragraphs, without_list_marker
 
 logger = structlog.get_logger(__name__)
 
@@ -260,10 +261,23 @@ def fragment_link(url: str, anchor: str | None, quote: str) -> str:
     rendered page carries neither, and that is the same form the verifier's
     second chance accepts, so a quote that verified here is a span the directive
     can find there.
+
+    A browser matches each directive term inside one block, so a quote that runs
+    over a paragraph or list-item boundary is sent as a `start,end` range whose
+    start words come from its first block and end words from its last (D-036c).
     """
-    text, _positions = _searchable(quote, drop_emphasis=True)
-    if not text:
+    fragment = f"{url}#{anchor}:~:" if anchor else f"{url}#:~:"
+    # Inside a code fence a leading "- " is literal text, but dropping it only
+    # shortens a term that still matches inside the one <pre> block.
+    blocks = [_fragment_text(without_list_marker(block)) for block in paragraphs(quote)]
+    blocks = [text for text in blocks if text]
+    if not blocks:
         return f"{url}#{anchor}" if anchor else url
+    if len(blocks) > 1:
+        start = " ".join(blocks[0].split(" ")[:FRAGMENT_EDGE_WORDS])
+        end = " ".join(blocks[-1].split(" ")[-FRAGMENT_EDGE_WORDS:])
+        return f"{fragment}text={_encode_fragment_text(start)},{_encode_fragment_text(end)}"
+    text = blocks[0]
     directive = _encode_fragment_text(text)
     if len(text) > FRAGMENT_MAX_CHARS:
         words = text.split(" ")
@@ -272,8 +286,12 @@ def fragment_link(url: str, anchor: str | None, quote: str) -> str:
                 _encode_fragment_text(" ".join(words[:FRAGMENT_EDGE_WORDS])),
                 _encode_fragment_text(" ".join(words[-FRAGMENT_EDGE_WORDS:])),
             )
-    fragment = f"{url}#{anchor}:~:" if anchor else f"{url}#:~:"
     return f"{fragment}text={directive}"
+
+
+def _fragment_text(text: str) -> str:
+    searchable, _positions = _searchable(text, drop_emphasis=True)
+    return searchable
 
 
 def _searchable(text: str, *, drop_emphasis: bool = False) -> tuple[str, list[int]]:

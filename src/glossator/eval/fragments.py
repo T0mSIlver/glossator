@@ -11,34 +11,21 @@ import sys
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlsplit
 
 import httpx
 
 from glossator.answer.citations import fragment_link, matched_source_quote
 from glossator.eval.answer_eval.judge import source_texts
 from glossator.eval.answer_eval.models import QuestionRecord
+from glossator.eval.page_text import FragmentText, fragment_found, parse_fragment_url, visible_text
 
 DEFAULT_SAMPLE = 60
 DEFAULT_SEED = 0
-_DIRECTIVE = ":~:text="
-_WHITESPACE = re.compile(r"\s+")
 _TAB_LABEL = re.compile(
     r"(?m)^\*\*(?:Python|TypeScript|JavaScript|cURL|Bash|Shell|JSON|Go|Java|Rust|Ruby|PHP|C#|Output)\*\*\s*$"
 )
-
-
-@dataclass(frozen=True, slots=True)
-class FragmentText:
-    start: str
-    end: str | None = None
-
-    @property
-    def json_value(self) -> str | dict[str, str]:
-        return self.start if self.end is None else {"start": self.start, "end": self.end}
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,44 +45,6 @@ class CitationCheck:
 class PageResponse:
     status_code: int
     content: bytes
-
-
-class _VisibleText(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
-        self.parts: list[str] = []
-        self._hidden = 0
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        del attrs
-        if tag.casefold() in {"script", "style"}:
-            self._hidden += 1
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag.casefold() in {"script", "style"} and self._hidden:
-            self._hidden -= 1
-
-    def handle_data(self, data: str) -> None:
-        if not self._hidden:
-            self.parts.append(data)
-
-
-def visible_text(html: str) -> str:
-    parser = _VisibleText()
-    parser.feed(html)
-    parser.close()
-    return _WHITESPACE.sub(" ", "".join(parser.parts)).strip()
-
-
-def parse_fragment_url(url: str) -> tuple[str | None, FragmentText]:
-    fragment = urlsplit(url).fragment
-    anchor, separator, directive = fragment.partition(_DIRECTIVE)
-    if not separator:
-        raise ValueError(f"URL has no text fragment directive: {url}")
-    values = directive.split(",", 1)
-    start = unquote(values[0])
-    end = unquote(values[1]) if len(values) == 2 else None
-    return anchor or None, FragmentText(start=start, end=end)
 
 
 class PageCache:
@@ -181,22 +130,6 @@ def collect(run_dir: Path, *, fragment_field: str = "fragment_url") -> list[Cita
     return checks
 
 
-def _contains(page_text: str, fragment: FragmentText) -> tuple[bool, str | None]:
-    page = _WHITESPACE.sub(" ", page_text).casefold()
-    start = _WHITESPACE.sub(" ", fragment.start).strip().casefold()
-    first = page.find(start)
-    if first < 0:
-        return False, "text absent"
-    if fragment.end is None:
-        return True, None
-    end = _WHITESPACE.sub(" ", fragment.end).strip().casefold()
-    if page.find(end) < 0:
-        return False, "text absent"
-    if page.find(end, first + len(start)) < 0:
-        return False, "range order"
-    return True, None
-
-
 def _from_tab(check: CitationCheck) -> bool:
     source_match = matched_source_quote(check.quote, check.source_text, min_quote_chars=1)
     if source_match is None:
@@ -262,9 +195,13 @@ def render_readme(metrics: Mapping[str, Any]) -> str:
 
 The check sampled {metrics["checked"]} verified citations from `records.jsonl` with
 seed {metrics["seed"]}, reading the links stored under `{metrics["fragment_field"]}`.
-It fetched each cited documentation page once, reduced the HTML to visible text, and
-searched for the decoded text fragment without regard to case or whitespace runs.
-Range directives pass only when both ends occur in order.
+It fetched each cited documentation page once, reduced the HTML to its visible text
+block by block (paragraphs, list items, cells, headings, code blocks), and searched
+for the decoded text fragment inside one block, without regard to case or whitespace
+runs: a browser does not match a phrase across a block boundary (D-036c). A range
+directive passes when each end sits inside one block and the end follows the start.
+A miss that the page's text would contain with its blocks joined is counted as
+`across blocks`.
 
 {metrics["found"]} of {metrics["checked"]} sampled fragments were present
 ({_percent(metrics["share_found"])}). {metrics["tab_panel_excluded"]} absent fragment(s)
@@ -313,7 +250,7 @@ def check_run(
     output_dir = run_dir / "fragments"
     output_dir.mkdir(parents=True, exist_ok=True)
     cache = PageCache(output_dir / "pages", fetch=fetch)
-    page_text: dict[str, str] = {}
+    page_text: dict[str, list[str]] = {}
     rows: list[dict[str, Any]] = []
     for citation in chosen:
         failure: str | None = None
@@ -330,7 +267,7 @@ def check_run(
                 failure = "page fetch"
         found = False
         if failure is None and text is not None:
-            found, failure = _contains(text, citation.fragment)
+            found, failure = fragment_found(text, citation.fragment)
         tab_panel = bool(failure in {"text absent", "range order"} and _from_tab(citation))
         rows.append(
             {
@@ -436,6 +373,7 @@ __all__ = [
     "PageResponse",
     "check_run",
     "collect",
+    "fragment_found",
     "parse_fragment_url",
     "refragment",
     "render_readme",

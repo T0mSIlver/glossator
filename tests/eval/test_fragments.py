@@ -6,11 +6,11 @@ from pathlib import Path
 from glossator.answer.citations import Citation, Trace, TracedSource
 from glossator.answer.llm import TokenUsage
 from glossator.eval.answer_eval.models import QuestionRecord
-from glossator.eval.fragments import (
-    PageResponse,
-    check_run,
+from glossator.eval.fragments import PageResponse, check_run, refragment
+from glossator.eval.page_text import (
+    FragmentText,
+    fragment_found,
     parse_fragment_url,
-    refragment,
     visible_text,
 )
 
@@ -78,7 +78,53 @@ def test_visible_text_drops_scripts_styles_tags_and_decodes_entities() -> None:
         "<script>also hidden</script>"
     )
 
-    assert body == "One visible & useful"
+    assert body == ["One visible & useful"]
+
+
+RERANKER_HTML = (
+    "<h3 id='llm-reranker'>LLM Reranker</h3>"
+    "<ul><li>After initial retrieval to <code>improve</code> quality</li></ul>"
+    "<p><strong>Cost optimization</strong>:</p>\n"
+    "<p>LLM reranking is expensive (1 LLM call per chunk). Reduce cost by:</p>"
+)
+
+
+def test_visible_text_cuts_the_page_at_block_boundaries() -> None:
+    assert visible_text(RERANKER_HTML) == [
+        "LLM Reranker",
+        "After initial retrieval to improve quality",
+        "Cost optimization:",
+        "LLM reranking is expensive (1 LLM call per chunk). Reduce cost by:",
+    ]
+
+
+def test_a_plain_fragment_across_two_paragraphs_is_not_found() -> None:
+    blocks = visible_text(RERANKER_HTML)
+
+    assert fragment_found(blocks, FragmentText("Cost optimization: LLM")) == (
+        False,
+        "across blocks",
+    )
+    assert fragment_found([" ".join(blocks)], FragmentText("Cost optimization: LLM")) == (
+        True,
+        None,
+    )
+    assert fragment_found(blocks, FragmentText("LLM reranking is expensive")) == (True, None)
+    assert fragment_found(blocks, FragmentText("no such words")) == (False, "text absent")
+
+
+def test_a_range_may_span_blocks_when_each_end_sits_in_one() -> None:
+    blocks = visible_text(RERANKER_HTML)
+
+    assert fragment_found(blocks, FragmentText("Cost optimization:", "LLM")) == (True, None)
+    assert fragment_found(blocks, FragmentText("Reduce cost by", "Cost optimization")) == (
+        False,
+        "range order",
+    )
+    assert fragment_found(blocks, FragmentText("LLM Reranker", "quality Cost")) == (
+        False,
+        "across blocks",
+    )
 
 
 def test_check_writes_results_and_fetches_each_page_once(tmp_path: Path) -> None:

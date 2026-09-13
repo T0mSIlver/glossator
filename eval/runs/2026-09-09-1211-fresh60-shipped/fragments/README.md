@@ -1,9 +1,14 @@
 # Citation fragment resolvability
 
 The check sampled 60 verified citations from `records.jsonl` with
-seed 0. It fetched each cited documentation page once, reduced the
-HTML to visible text, and searched for the decoded text fragment without regard to
-case or whitespace runs. Range directives pass only when both ends occur in order.
+seed 0, reading the links stored under `fragment_url`.
+It fetched each cited documentation page once, reduced the HTML to its visible text
+block by block (paragraphs, list items, cells, headings, code blocks), and searched
+for the decoded text fragment inside one block, without regard to case or whitespace
+runs: a browser does not match a phrase across a block boundary (D-036c). A range
+directive passes when each end sits inside one block and the end follows the start.
+A miss that the page's text would contain with its blocks joined is counted as
+`across blocks`.
 
 49 of 60 sampled fragments were present
 (81.7%). 2 absent fragment(s)

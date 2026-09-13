@@ -200,8 +200,10 @@ tools plus `verify_quotes`, links resolving 0.92 instead of 0.35. GPT luna at
 low effort never called the server in 60 cells because it has its own web
 search and nothing in the prompt named the server. D-040b.
 
-**Citations.** Text-fragment links resolve on the live page for 0.86 of
-citations the HTML can contain. D-036b.
+**Citations.** Text-fragment links resolve on the live page for 0.88 of
+citations the HTML can contain on the mined run and 0.84 on the fresh slice,
+with every term matched inside one rendered block as a browser does. D-036b,
+D-036c.
 
 **Spend.** 7.04 EUR on the console as of 9 September; the recorded ledger is a
 lower bound (2.81 USD across priced chat calls) because reranker calls before

@@ -25,6 +25,7 @@ from dataclasses import dataclass
 
 from glossator.answer.citations import _encode_fragment_text, normalize
 from glossator.ingest.sections import Section
+from glossator.paragraphs import paragraphs, without_list_marker
 
 FRAGMENT_MIN_DISTANCE = 1_500
 """Characters between where the anchor link lands and the cited text before a
@@ -39,6 +40,10 @@ _HEADING_LINE = re.compile(r"^#.*$", re.M)
 _MARKUP = re.compile(r"[*`>\[\]]|\(https?://[^)]*\)|\{#[^}]*\}")
 _CALLOUT = re.compile(r"^(Tip|Note|Info|Warning|Caution|Danger)\s+")
 _SENTENCE = re.compile(r"[A-Z][^.!?\n]{30,}?[.!?](?=\s|$)")
+_UNPUNCTUATED = re.compile(r"[A-Z][^.!?\n]{30,}$")
+"""A prose paragraph that stops without a full stop, like the one introducing a
+code sample. Not applied to list items, most of which are fragments of a line
+(``Successful Response (application/json, ...)``) rather than prose."""
 
 
 def slugify(text: str) -> str:
@@ -110,15 +115,23 @@ def page_search_text(body: str) -> str:
 def first_sentence(text: str) -> str | None:
     """The first prose sentence of a chunk or section body, as the rendered page
     shows it: no code fences, no table rows, no heading line, no markup, no
-    callout label."""
-    text = _FENCE.sub(" ", text)
+    callout label.
+
+    The sentence is taken inside one paragraph. A browser matches a text
+    directive within one block, so a phrase that joins a bold label to the
+    paragraph below it (D-036c) exists nowhere the browser looks."""
+    text = _FENCE.sub("\n\n", text)
     text = _TABLE_ROW.sub(" ", text)
     text = _HEADING_LINE.sub(" ", text)
-    text = normalize(_MARKUP.sub("", text))
-    for match in _SENTENCE.finditer(text):
-        sentence = _CALLOUT.sub("", match.group(0)).strip()
-        if len(sentence) >= 30:
-            return sentence
+    for paragraph in paragraphs(text):
+        cleaned = normalize(_MARKUP.sub("", paragraph))
+        matches = list(_SENTENCE.finditer(cleaned))
+        if not matches and without_list_marker(paragraph) == paragraph.lstrip("\n"):
+            matches = list(_UNPUNCTUATED.finditer(cleaned))
+        for match in matches:
+            sentence = _CALLOUT.sub("", match.group(0)).strip()
+            if len(sentence) >= 30:
+                return sentence
     return None
 
 

@@ -385,6 +385,25 @@ def test_a_long_quote_with_too_few_words_is_sent_whole() -> None:
     assert link == f"{PAGE}#:~:text=" + quote.replace(" ", "%20")
 
 
+def test_a_quote_across_two_paragraphs_uses_a_range_with_one_end_in_each() -> None:
+    quote = "**Cost optimization**:\n\nLLM reranking is expensive (1 LLM call per chunk)."
+
+    link = fragment_link(PAGE, "llm-reranker", quote)
+
+    # The two paragraphs render as two <p>; a plain directive joining them never matches.
+    assert link == (
+        f"{PAGE}#llm-reranker:~:text=Cost%20optimization%3A,%281%20LLM%20call%20per%20chunk%29."
+    )
+
+
+def test_a_quote_across_list_items_takes_its_ends_from_the_first_and_last_item() -> None:
+    quote = 'These include:\n- "auto": the model decides.\n- "none": no tool.'
+
+    link = fragment_link(PAGE, None, quote)
+
+    assert link == f"{PAGE}#:~:text=These%20include%3A,%22none%22%3A%20no%20tool."
+
+
 def test_an_empty_quote_degrades_to_the_plain_link() -> None:
     assert fragment_link(PAGE, "tools", "  *`_`*  ") == f"{PAGE}#tools"
     assert fragment_link(PAGE, None, " \n ") == PAGE

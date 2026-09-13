@@ -9,9 +9,9 @@
     },
     "cross_page": {
       "checked": 5,
-      "found": 3,
+      "found": 4,
       "html_eligible": 5,
-      "share_found_among_html_eligible": 0.6,
+      "share_found_among_html_eligible": 0.8,
       "tab_panel_excluded": 0
     },
     "single_page": {
@@ -31,14 +31,15 @@
   },
   "checked": 60,
   "failures": {
-    "text absent": 10
+    "text absent": 9
   },
-  "found": 50,
+  "found": 51,
+  "fragment_field": "fragment_url",
   "html_eligible": 58,
   "kind": "fragment_resolvability",
   "sample_requested": 60,
   "seed": 0,
-  "share_found": 0.8333333333333334,
-  "share_found_among_html_eligible": 0.8620689655172413,
+  "share_found": 0.85,
+  "share_found_among_html_eligible": 0.8793103448275862,
   "tab_panel_excluded": 2
 }

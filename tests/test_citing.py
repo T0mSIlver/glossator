@@ -10,6 +10,7 @@ from glossator.citing import (
     unique_phrase,
 )
 from glossator.ingest.sections import parse_sections
+from glossator.paragraphs import paragraphs, without_list_marker
 
 URL = "https://docs.mistral.ai/studio/batch-processing"
 
@@ -173,3 +174,80 @@ def test_citation_link_stays_plain_when_no_short_phrase_is_unique() -> None:
         URL, "prepare-batch-file", landing=0, text_start=9_000, text=repeated, haystack=hay
     )
     assert link == f"{URL}#prepare-batch-file"
+
+
+RERANKER_URL = "https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers"
+
+RERANKER_SECTION = """**When to use**:
+- Semantic relevance judgments beyond vector similarity
+- Lower throughput tolerance (LLM calls are slower)
+
+**Cost optimization**:
+
+LLM reranking is expensive (1 LLM call per chunk). Reduce cost by:
+
+```python
+# 1. Get many results from retriever (fast)
+query_engine = QueryEngine(retriever=vector_retriever)
+```
+"""
+
+
+def test_first_sentence_never_joins_a_label_to_the_paragraph_below() -> None:
+    text = RERANKER_SECTION[RERANKER_SECTION.index("**Cost optimization**") :]
+    assert first_sentence(text) == "LLM reranking is expensive (1 LLM call per chunk)."
+
+
+def test_the_reranker_cost_link_takes_its_phrase_from_one_paragraph() -> None:
+    body = "# Rerankers\n\n## LLM Reranker {#llm-reranker}\n\n" + RERANKER_SECTION
+    cost = RERANKER_SECTION[RERANKER_SECTION.index("**Cost optimization**") :]
+    link = citation_link(
+        RERANKER_URL,
+        "llm-reranker",
+        landing=0,
+        text_start=5_000,
+        text=cost,
+        haystack=page_search_text(body),
+    )
+    assert link == f"{RERANKER_URL}#llm-reranker:~:text=LLM%20reranking%20is"
+
+
+def test_first_sentence_never_runs_from_one_list_item_into_the_next() -> None:
+    # Joined, the lines read as one sentence starting at "When"; on the page each
+    # item is its own <li>, and only the last one holds a sentence.
+    bullets = (
+        "**When to use**:\n- Semantic relevance judgments beyond vector similarity\n"
+        "- Lower throughput tolerance (LLM calls are slower)."
+    )
+    assert first_sentence(bullets) == "Lower throughput tolerance (LLM calls are slower)."
+    numbered = "1. Chunks are sorted by LLM score\n2. The top results are returned to the caller."
+    assert first_sentence(numbered) == "The top results are returned to the caller."
+
+
+def test_paragraphs_split_at_blank_lines_and_list_items_but_not_bold_labels() -> None:
+    assert paragraphs("**Bold** label\nstill the same paragraph\n\n- one\n* two\n3. three") == [
+        "**Bold** label\nstill the same paragraph",
+        "- one\n",
+        "* two\n",
+        "3. three",
+    ]
+
+
+def test_a_list_marker_is_not_text_on_the_page() -> None:
+    assert without_list_marker("- `model` (string, required)") == "`model` (string, required)"
+    assert without_list_marker("\n12. twelfth") == "twelfth"
+    assert without_list_marker("**Bold** stays") == "**Bold** stays"
+
+
+def test_a_prose_paragraph_without_a_full_stop_is_still_the_first_sentence() -> None:
+    # The function-calling page introduces its code tabs this way; skipping the
+    # paragraph would move the link forty lines down to the output list.
+    text = (
+        "We can now provide the output from the tools to our model, and in return the model "
+        "can produce a final response\n\n**Python**\n\n```python\nmessages.append(result)\n```"
+        "\n\n- **The status of your transaction with ID T1001 is Paid.**"
+    )
+    assert first_sentence(text) == (
+        "We can now provide the output from the tools to our model, and in return the model "
+        "can produce a final response"
+    )

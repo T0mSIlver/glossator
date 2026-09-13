@@ -1752,3 +1752,39 @@ Each cell reads Ministral 3 14B → Medium 3.5 through the earlier OpenAI-compat
 - The evaluations did not lose the call. Since D-023b the engine and the answer model share one recorder, so the reranker calls in committed runs are in `calls.jsonl`. What left them out is each record's `cost_usd`, which came from the answer and feeds the cost columns. On `2026-09-09-2305-mined-v2-shipped`, the records add up to 0.0347 USD. The answer-scoped ledger adds up to 0.0953 USD, of which 0.0607 USD is rerank calls. On `2026-09-09-2300-loop-grid-shipped` the records add up to 0.0542 USD, against 0.1052 USD in the ledger, of which 0.0510 USD is rerank calls.
 
 **Decision.** Strategies now search through `AnswerRun.search`. It reads the search trace, adds the rerank call's cost and tokens to the answer's `cost_usd` and `usage`, and records a `rerank` step in the trace. With that, `make ask`, `POST /ask` and records written from today include the reranker. The fresh-clone question now prints `$0.0014` and `3 steps`. Committed runs keep the numbers they were recorded with. For those runs, the ledger is the complete figure, and `answer_eval recost` rebuilds record costs from it. A cost column from a run made before today gives the generation spend, not the answer's total. Records written from today also count the rerank tokens in `usage`, so their `reference_usd` covers those tokens too.
+
+---
+
+## D-036c · A text fragment is taken from one rendered block
+
+**Status:** decided · 2026-09-13 · `src/glossator/paragraphs.py`, `src/glossator/citing.py`, `src/glossator/answer/citations.py`, `src/glossator/eval/page_text.py`; runs `2026-09-09-1253-mined-shipped` and `2026-09-09-1211-fresh60-shipped` (60-citation samples, seed 0, cached page fetches, nothing fetched live); every chunk of the vendored corpus
+
+| run | links | check | found in sample | tab-panel exclusions | found among citations the HTML can contain |
+|---|---|---|---|---|---|
+| mined-shipped | source-span links (D-036b) | whole page | 50 of 60 | 2 | 0.86 |
+| mined-shipped | source-span links (D-036b) | one block | 50 of 60 | 2 | 0.86 |
+| mined-shipped | block-bounded links | one block | 51 of 60 | 2 | 0.88 |
+| fresh60-shipped | source-span links (D-036b) | whole page | 49 of 60 | 2 | 0.84 |
+| fresh60-shipped | source-span links (D-036b) | one block | 49 of 60 | 2 | 0.84 |
+| fresh60-shipped | block-bounded links | one block | 49 of 60 | 2 | 0.84 |
+
+**Facts.**
+- The `cite:` link printed for the LLM reranker's cost paragraph was `https://docs.mistral.ai/studio/search/search-toolkit/retrieval/rerankers#llm-reranker:~:text=Cost%20optimization%3A%20LLM`. Clicked, it scrolls nowhere and highlights nothing. Chrome's "copy link to highlight" on the same passage gives `…#llm-reranker:~:text=Cost%20optimization%3A,LLM`, the `start,end` form.
+- The source is `**Cost optimization**:` on a line of its own, a blank line, then `LLM reranking is expensive (1 LLM call per chunk). Reduce cost by:`. The live page renders two `<p>` elements. A browser matches a plain directive, and each end of a range, inside one block; "Cost optimization: LLM" exists in no single block.
+- `first_sentence` collapsed whitespace across the blank line before looking for a sentence, so `unique_phrase` picked words from both paragraphs. The resolvability check of D-036b searched the page's visible text joined into one string, so a link like this one counted as found.
+- The answer path has the same shape of defect: 24 of 564 verified quotes on the mined run and 8 of 177 on the fresh slice run over a paragraph or list-item boundary, and `fragment_link` sent them as one plain directive. On the old links the block check changes no verdict in either sample: the four sampled links that span blocks also carry a `- ` list marker or a `###` heading marker, which are not page text, and already counted as absent.
+- The previous `first_sentence` also ran sentences across code tabs: the `five-steps` section's "sentence" began at "We can now provide the output…", a paragraph with no full stop, and ended in a list item forty lines below. The phrase it picked sat in the first paragraph, so the link was right by chance.
+
+**Decision.**
+1. Markdown is cut into blocks where the page starts one (`glossator.paragraphs`): at blank lines and before every `-`, `*` or `1.` list item.
+2. `first_sentence` takes its sentence from one block: the first block holding a sentence of 30 characters or more, or a prose block (not a list item) of 30 characters or more that ends without a full stop. `unique_phrase` still counts uniqueness over the whole page.
+3. `fragment_link` sends a quote that spans blocks as a `start,end` range, the start words from its first block and the end words from its last, with list markers dropped.
+4. The resolvability check reads the page as blocks (`p`, `li`, `td`, `th`, `h1`–`h6`, `pre`, `blockquote`, `div` and the containers around them) and passes a term only inside one block; a miss the joined text would have found is counted as `across blocks`. The consumer link check uses the same matcher. The reported number is the block one.
+
+**Measured.**
+- The reranker link is now `…/rerankers#llm-reranker:~:text=LLM%20reranking%20is`. The block parser, run on the cached rerankers HTML, finds `Cost optimization:` and `LLM reranking is expensive (1 LLM call per chunk). Reduce cost by:` as two blocks, rejects the old phrase as `across blocks` and finds the new one.
+- `refragment` changed 31 of 564 links on the mined run and 9 of 177 on the fresh slice. The one sampled citation among them that the HTML can hold now resolves (`Look for the following files:,embedded in all @tanstack packages:`); the others in the samples are API reference pages, whose vendored rendering does not match the live HTML (D-036b).
+- Over the 4,440 chunks, links with a fragment go from 310 (D-047c) to 331: 56 keep a fragment with a different phrase, 6 lose theirs because no single block yields a unique 3-to-8-word phrase (four of them in the full reasoning output example, one reading `Rendered Thinking Alright,` across a label and its text), and 27 gain one from a prose paragraph that ends in a colon before a code sample.
+- D-036b printed 0.85 for the fresh slice; 49 of 58 is 0.845, 0.84 at two places.
+
+The Brave observation of D-047c on the `five-steps` link is a different question: "We can now" sits inside one paragraph, the link is unchanged under this rule, and that entry stays open.

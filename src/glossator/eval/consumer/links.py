@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import random
-import urllib.parse
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -13,7 +12,8 @@ from urllib.parse import urlsplit
 import httpx
 
 from glossator.eval.consumer.models import ConsumerRecord
-from glossator.eval.fragments import PageCache, visible_text
+from glossator.eval.fragments import PageCache
+from glossator.eval.page_text import fragment_found, parse_fragment_url, visible_text
 
 DEFAULT_CORPUS = Path("corpus/mistral-docs")
 
@@ -41,8 +41,7 @@ def check_fragments(
 
     Page resolution is offline against the manifest. Fragment text is checked
     against the live page with cached fetches under the run directory, reusing
-    the fragment check's visible-text reduction;     tab-panel misses are reported
-    apart for the same reason as in the answer eval.
+    the fragment check's block-by-block match (D-036c).
     """
     candidates = sorted({url for record in records for url in record.links})
     chosen = (
@@ -72,15 +71,9 @@ def check_fragments(
             row["failure"] = "page fetch"
             rows.append(row)
             continue
-        text = visible_text(response.content.decode("utf-8", errors="replace")).casefold()
-        start, _, end = directive.partition(",")
-        start_text = urllib.parse.unquote(start).replace("\n", " ").casefold()
-        found = start_text in text
-        failure = None if found else "text absent"
-        if found and end:
-            end_text = urllib.parse.unquote(end).replace("\n", " ").casefold()
-            found = end_text in text[text.find(start_text) + len(start_text) :]
-            failure = None if found else "range order"
+        blocks = visible_text(response.content.decode("utf-8", errors="replace"))
+        _anchor, fragment = parse_fragment_url(url)
+        found, failure = fragment_found(blocks, fragment)
         row["found"] = found
         row["failure"] = failure
         rows.append(row)
