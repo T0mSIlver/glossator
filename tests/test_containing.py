@@ -3,7 +3,7 @@ output beyond its head."""
 
 import pytest
 
-from glossator.containing import contain
+from glossator.surface.containing import contain
 
 
 def group_page() -> str:

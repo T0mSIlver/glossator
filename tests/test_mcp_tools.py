@@ -9,7 +9,12 @@ from fastmcp.exceptions import ToolError
 from mistralai.search.toolkit.retrieval.errors import RetrieverException
 from mistralai.search.toolkit.search.errors import SourceNotFoundError
 
+from glossator import changelog as changelog_service
+from glossator import history as history_service
 from glossator.retrieval.engine import Hit
+from glossator.surface.pages import LARGE_PAGE_CHARS
+from glossator.surface.read import READ_TOP_K
+from glossator.surface.search import MAX_HITS, SCOPED_HITS
 
 TOOLS = {"mistral_docs_search", "mistral_docs_read_page", "mistral_docs_history"}
 PAGE = "https://docs.mistral.ai/page"
@@ -270,7 +275,7 @@ def test_search_clamps_max_hits_silently_to_the_ceiling(mcp_server: Any) -> None
     engine = FakeEngine()
     mcp_server._engine = engine
     _call(mcp_server, "mistral_docs_search", {"q": "alpha", "max_hits": 999})
-    assert engine.search_calls[0]["top_k"] == mcp_server.MAX_HITS * 3
+    assert engine.search_calls[0]["top_k"] == MAX_HITS * 3
 
 
 def test_search_snippet_drops_the_heading_line_the_path_already_shows(mcp_server: Any) -> None:
@@ -282,7 +287,7 @@ def test_search_snippet_drops_the_heading_line_the_path_already_shows(mcp_server
 
 def test_search_marks_a_hit_on_a_large_page_with_the_section_to_read(mcp_server: Any) -> None:
     mcp_server._engine = FakeEngine()
-    mcp_server._PAGE_SIZES[PAGE] = mcp_server.LARGE_PAGE_CHARS
+    mcp_server._PAGE_SIZES[PAGE] = LARGE_PAGE_CHARS
     text = _call(mcp_server, "mistral_docs_search", {"q": "alpha"})
     assert f'large page: mistral_docs_read_page(page_url="{PAGE}", section="a-section")' in text
     assert text.rstrip().endswith(
@@ -390,7 +395,7 @@ def test_under_with_words_keeps_only_hits_on_pages_under_it(mcp_server: Any) -> 
     assert f"[1] {embeddings} | section: the-models" in text
     assert "docs.mistral.ai/models" not in text.split("Results:")[0]
     assert "Results: 1 hits" in text
-    assert engine.search_calls[0]["top_k"] == mcp_server.SCOPED_HITS
+    assert engine.search_calls[0]["top_k"] == SCOPED_HITS
     text = _call(
         mcp_server,
         "mistral_docs_search",
@@ -579,8 +584,8 @@ def test_read_page_asks_the_index_for_the_whole_page_under_the_vespa_limit(mcp_s
     engine = RecordingEngine()
     mcp_server._engine = engine
     _call(mcp_server, "mistral_docs_read_page", {"page_url": PAGE})
-    assert calls == [mcp_server.READ_TOP_K]
-    assert mcp_server.READ_TOP_K <= 400
+    assert calls == [READ_TOP_K]
+    assert READ_TOP_K <= 400
 
 
 def test_history_requires_exactly_one_form(mcp_server: Any) -> None:
@@ -614,7 +619,7 @@ def test_history_text_prints_first_last_and_count(
             "snapshots_total": 8,
         }
 
-    monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
+    monkeypatch.setattr(history_service, "phrase_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"text": "a phrase"})
     assert f"first stored date with the phrase: 2026-06-15 | {PAGE} (absent at 2026-06-01)" in text
     assert f"last stored date with the phrase: 2026-09-07 | {PAGE}" in text
@@ -642,7 +647,7 @@ def test_history_section_renders_states_and_diffs(
             ],
         }
 
-    monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
+    monkeypatch.setattr(history_service, "section_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "a"})
     assert text.startswith(f"history page: {PAGE} | section: a\n")
     assert f"present at 2026-06-01 | {PAGE}#a" in text
@@ -665,7 +670,7 @@ def test_history_stops_at_its_budget_and_names_the_next_call(
             ],
         }
 
-    monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
+    monkeypatch.setattr(history_service, "section_history", fake)
     monkeypatch.setattr(mcp_server, "HISTORY_MAX_CHARS", 1200)
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE})
     assert "Results: 2 of 5 stored snapshots" in text
@@ -688,7 +693,7 @@ def test_history_collapses_unchanged_dates_and_bounds_moves(
             ]
         }
 
-    monkeypatch.setattr(mcp_server.history_service, "section_history", fake)
+    monkeypatch.setattr(history_service, "section_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"page_url": PAGE, "section": "b"})
 
     assert f"present at 2026-06-01, same through 2026-06-15 | {old}#a" in text
@@ -735,7 +740,7 @@ def test_history_under_renders_grouped_intervals(
             ],
         }
 
-    monkeypatch.setattr(mcp_server.changelog_service, "history_under", fake)
+    monkeypatch.setattr(changelog_service, "history_under", fake)
     text = _call(
         mcp_server,
         "mistral_docs_history",
@@ -771,7 +776,7 @@ def test_history_under_truncation_keeps_every_summary(
             "intervals": intervals,
         }
 
-    monkeypatch.setattr(mcp_server.changelog_service, "history_under", fake)
+    monkeypatch.setattr(changelog_service, "history_under", fake)
     monkeypatch.setattr(mcp_server, "HISTORY_MAX_CHARS", 500)
     text = _call(mcp_server, "mistral_docs_history", {"under": PAGE})
 
@@ -906,7 +911,7 @@ def test_history_under_renders_page_rows_without_cite_lines(
             ],
         }
 
-    monkeypatch.setattr(mcp_server.changelog_service, "history_under", fake)
+    monkeypatch.setattr(changelog_service, "history_under", fake)
     text = _call(mcp_server, "mistral_docs_history", {"under": "/vibe"})
 
     assert "between 2026-07-01 and 2026-07-15: 1 page changed, 1 page moved" in text
@@ -935,7 +940,7 @@ def test_history_text_scoped_to_a_page_names_it(
             "snapshots_total": 8,
         }
 
-    monkeypatch.setattr(mcp_server.history_service, "phrase_history", fake)
+    monkeypatch.setattr(history_service, "phrase_history", fake)
     text = _call(mcp_server, "mistral_docs_history", {"text": "a phrase", "page_url": PAGE})
 
     assert seen == {"page_url": PAGE, "under": None}
