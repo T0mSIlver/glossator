@@ -35,8 +35,10 @@ of 411 pages, or 97.08%
 12 pages name the section to read.
 
 Tools are marked read-only and safe to repeat. They are also marked as unable
-to access anything outside the documentation corpus. These annotations prevent
-unnecessary approval prompts (D-037b, D-037c). Unknown parameters return
+to access anything outside the documentation corpus. The annotations let Work
+classify every function as a read and let a headless client call the server at
+all (D-037b, D-037c); Work still asks before each call until the function is
+set to `Always allow`. Unknown parameters return
 `E_BAD_PARAM` with a likely replacement. Work's undeclared arguments beginning
 with an underscore are ignored.
 
@@ -70,8 +72,8 @@ Set `GLOSSATOR_MCP_TOKEN` on the server. MCP requests must then carry
 `Authorization: Bearer <token>`. A missing header returns HTTP 401. Work detects
 bearer authentication during registration.
 
-Pre-authorise all three functions to avoid approval prompts. The server has no
-write functions. `GET /health` needs no header. It reports the index variant,
+Toggle `Always allow` on all three functions, or Work asks before each call,
+read functions included. The server has no write functions. `GET /health` needs no header. It reports the index variant,
 page and chunk counts, embedding probe and registered tools. `GET /` and
 `/favicon.svg` are also public.
 
