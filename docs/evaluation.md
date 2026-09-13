@@ -59,21 +59,23 @@ D-042). [`failure-classes.md`](failure-classes.md) turns the attribution into
 four named classes of question the system still gets wrong, each with question
 ids, the cause, the fix and its cost.
 
-D-017b replaces only the answer-writing model while preserving each recorded
-prompt. The four Ministral 3 14B to Medium 3.5 correctness pairs are:
+D-017c replaces only the answer-writing model while preserving each recorded
+prompt, with Medium 3.5 reached through Mistral's API. Judged correctness is
+pending; the four Ministral 3 14B to Medium 3.5 pairs of fabricated quotes per
+answer are:
 
-- tuned 60: 0.93 to 0.91
-- fresh 60: 0.84 to 0.84
-- mined 85: 0.76 to 0.80
-- mined-v2 83: 0.64 to 0.62
+- tuned 60: 0.40 to 0.17
+- fresh 60: 0.53 to 0.18
+- mined 85: 0.59 to 0.18
+- mined-v2 83: 0.41 to 0.19
 
 The four replay runs are
-[`dev60-rerank`](../eval/runs/2026-09-10-1615-medium35-replay-dev60-rerank/),
-[`fresh60-shipped`](../eval/runs/2026-09-10-1615-medium35-replay-fresh60-shipped/),
-[`mined-shipped`](../eval/runs/2026-09-10-1615-medium35-replay-mined-shipped/)
-and [`mined-v2-shipped`](../eval/runs/2026-09-10-1615-medium35-replay-mined-v2-shipped/).
-Every change is within about 0.09, the sampling interval for these set sizes.
-Fabricated quotes per answer fell by about half on all four sets.
+[`dev60-rerank`](../eval/runs/2026-09-13-1148-medium35-api-replay-dev60-rerank/),
+[`fresh60-shipped`](../eval/runs/2026-09-13-1148-medium35-api-replay-fresh60-shipped/),
+[`mined-shipped`](../eval/runs/2026-09-13-1148-medium35-api-replay-mined-shipped/)
+and [`mined-v2-shipped`](../eval/runs/2026-09-13-1148-medium35-api-replay-mined-v2-shipped/).
+Quote verification is 0.90 to 0.92 and answers cost 0.0045 to 0.0061 USD per
+question at Medium 3.5's prices.
 
 The consumer run predates the three-tool MCP server. Its retrieval configuration
 included the retired citation-verification tool. Sonnet at low effort scored
@@ -117,8 +119,8 @@ make eval-answers dataset=tests/fixtures/answer-questions.jsonl \
 
 Three run directories compare answer strategies on the same 60 questions
 (D-033, D-033a, D-035). `ministral-14b-2512` generated the answers. `glm-5.3`
-judged them without seeing the strategy. D-017b reports Medium 3.5 replays of
-the recorded single-pass prompts.
+judged them without seeing the strategy. D-017c reports Medium 3.5 replays of
+the recorded single-pass prompts on Mistral's API.
 
 | Run directory | Retrieval | Strategy | Correctness | Groundedness | Correct refusal | Reference URL cited | Reference anchor cited | Median latency | Prompt tokens | USD per question at Medium 3.5 prices |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|

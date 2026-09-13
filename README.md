@@ -58,7 +58,7 @@ shaped the product:
 | Vector-heavy hybrid ranking inside Vespa | best exact-section retrieval on a 13-configuration grid over 294 questions | D-034 |
 | The agent writes the answer; nothing generates inside the server | with retrieval tools a capable agent scored 0.77, against 0.78 for server-side generation at three times the latency and with a second model | D-040b, D-044 |
 | No reranker on the agent path | it accounted for 91% of search latency and mainly improved which result ranked first, which an agent that reads several hits does not need | D-015b |
-| Medium 3.5 as the answer model | replay changed correctness by -2, 0, +4 and -2 points across four sets | D-017b |
+| Medium 3.5 as the answer model | replayed on Mistral's API, fabricated quotes per answer fell to 0.17 to 0.19 on four sets, less than half Ministral 3 14B's; judged correctness pending | D-017c |
 | Three tools, no ids | 97% of pages fit one read under 8,000 tokens; the Work session never used the other five tools | D-043, D-044 |
 | Every section has a key, and the link to cite is printed beside it | 1,823 of 4,016 headings have no anchor on the live site, so anchors alone collapse sibling sections and land a click far from the text; a text fragment is printed only when it moves the landing | D-047 |
 | Read-only tool annotations | without them Work asks for approval on every call and a headless consumer never calls at all | D-037b, D-037c |
@@ -82,8 +82,9 @@ The FastAPI `POST /ask` route implements retrieval-augmented generation. The
 repository keeps it as the measured baseline. On the same questions, Sonnet
 scored 0.77 with the retrieval tools and 0.78 with `answer`. The
 server-side answer took three times as long and required a second model
-(D-040b). Medium 3.5 also produced no significant correctness change when it
-replaced Ministral 3 14B (D-017b).
+(D-040b). Replayed on Mistral's API in place of Ministral 3 14B, Medium 3.5
+halved fabricated quotes on the same prompts; its judged correctness is pending
+(D-017c).
 
 The MCP server now provides the parts that calling agents lack: a pinned
 corpus, tested section anchors and dated history. Agents can reformulate a
@@ -109,7 +110,7 @@ Every number below names its model; the runs and the judge study are in
 [`docs/evaluation.md`](docs/evaluation.md).
 
 - The generated-answer baseline scores 0.93, 0.84 and 0.76 on the tuned, fresh and mined sets. Ministral 3 14B generated; GLM 5.3 judged without seeing the configuration.
-- Medium 3.5 replay changed correctness by -2, 0, +4 and -2 points. Fabricated quotes per answer fell by about half on all four sets.
+- Medium 3.5 replayed on Mistral's API: fabricated quotes per answer fell from 0.40 to 0.59 to 0.17 to 0.19 on all four sets, at 0.0045 to 0.0061 USD per question; judged correctness is pending (D-017c).
 - Sonnet scored 0.77 with the retrieval tools and 0.78 with server-side generation, which took three times as long. The run predates the three-tool cut.
 - Across 575 answers, generation caused 77 of 164 failures. Retrieval misses were 1% to 3% on well-written questions; no context misses occurred.
 - The demo itself, measured where it runs: Medium 3.5 at high reasoning through the Work Connector and the Skill scored 0.60 on thirty questions, 0.80 on the five that need the history tool and 0.20 on the five the documentation cannot answer, where it fills the gap; GLM 5.3 judged (D-049a).
@@ -134,8 +135,8 @@ override it with `host=` and `port=`. Run the stdio transport with
 
 Mistral Medium 3.5 is the generation default. The project API key had zero
 quota for Medium 3.5 and Small 4 until 12 September 2026 (D-017a, D-049), so
-the reported API runs use `ministral-14b-2512`, D-017b measures Medium 3.5 by
-replay, and the demo run of D-049a is the first on Medium 3.5 end to end. See
+the reported API runs use `ministral-14b-2512`, D-017c measures Medium 3.5 by
+replay on the API, and the demo run of D-049a is the first on Medium 3.5 end to end. See
 [`docs/api.md`](docs/api.md) for environment variables and local model servers.
 
 ## Deployment

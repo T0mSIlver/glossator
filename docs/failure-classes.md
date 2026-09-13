@@ -5,7 +5,7 @@ runs with question ids, with the cause, the fix, and what the fix costs. The
 evidence is the failure attribution of `eval/runs/2026-09-09-2350-failure-analysis-v2`
 (five answer runs, 575 answers, 177 failures classified from the records
 without a model, D-042) and the Medium 3.5 replay of the same questions
-(D-017b), which says which classes survive a stronger generator. Question ids
+on Mistral's API (D-017c), which says which classes survive a stronger generator. Question ids
 resolve in `eval/dev.jsonl`, `eval/dev-noisy.jsonl` and `eval/mined.jsonl`; the
 run directory named with each id holds the answer, its context, the judge's
 reason and the class.
@@ -52,8 +52,9 @@ an answer, not for the exact value or limit first, and a model answering a
 generated from the gold section (D-020a), so they enumerate what the section
 says rather than what the question needs; the human labels found the reader
 more lenient than the judge on every disagreement, and one reference in forty
-wrong (D-021b). The replay settled which of the two is not the cause: the
-generator. Medium 3.5 leaves 13 of the 20 mined partials partial (D-017b).
+wrong (D-021b). The replay on Mistral's API is the test of whether the
+generator is the cause; its judged verdicts, and so how many mined partials stay
+partial under Medium 3.5, are pending (D-017c).
 
 **What would fix it.** In the prompt: "state the exact value, limit or
 parameter before explaining; when the source names a version or a condition
@@ -164,10 +165,10 @@ set to confirm the 5-point loss is gone.
 answer has no verified citation, and the rule "no verified citation means
 insufficient evidence" turns it into a refusal. 35 of 177 failures, a third of
 them capability questions and a quarter API-reference questions. Under Medium
-3.5 it grows: 7 of 50 answerable tuned questions against 3 with Ministral 14B,
-because Medium writes one long quote where the 14B wrote several short ones
-(156 characters against 91) and one failed quote is then the whole citation
-list (D-017b).
+3.5 on Mistral's API it is 4 of 50 answerable tuned questions against 3 with
+Ministral 14B, and 2 of 50 fresh questions against 4: Medium writes one long
+quote where the 14B wrote several short ones (145 characters on the tuned set)
+and one failed quote is then the whole citation list (D-017c).
 
 **Examples.**
 

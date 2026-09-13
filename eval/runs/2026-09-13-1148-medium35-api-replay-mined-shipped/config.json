@@ -1,0 +1,193 @@
+{
+  "answer_config": {
+    "context_token_budget": 6000,
+    "loop_max_tokens": 800,
+    "max_attempts": 4,
+    "max_open_window": 5,
+    "max_tokens": 1600,
+    "max_tool_top_k": 10,
+    "min_quote_chars": 8,
+    "model": "mistral-medium-2604",
+    "open_result_chars": 1600,
+    "page_cap": 4,
+    "page_read_top_k": 40,
+    "picker_max_tokens": 300,
+    "prices": {
+      "ministral-14b-2512": {
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.15
+      },
+      "ministral-8b-2512": {
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.15
+      },
+      "mistral-embed-2312": {
+        "input_usd_per_mtok": 0.1,
+        "output_usd_per_mtok": 0.0
+      },
+      "mistral-medium-2604": {
+        "input_usd_per_mtok": 1.5,
+        "output_usd_per_mtok": 7.5
+      },
+      "mistral-small-2603": {
+        "input_usd_per_mtok": 0.15,
+        "output_usd_per_mtok": 0.6
+      }
+    },
+    "render_max_tokens": 200,
+    "request_timeout_ms": 180000,
+    "retry_base_seconds": 1.0,
+    "round_cap": 4,
+    "searches_per_round": 4,
+    "temperature": 0.2,
+    "tool_result_chars": 600,
+    "tool_top_k": 4,
+    "top_k": 8,
+    "translate_for_retrieval": true
+  },
+  "context_token_budget": 6000,
+  "dataset": "eval/mined.jsonl",
+  "dataset_sha256": "a276e09f853024f2647dad9d7f7c4c8c34e1754dafdf6a6dc4fbb994dfd5b2a2",
+  "judge_max_tokens": 1200,
+  "judge_model": null,
+  "judge_models": [],
+  "judge_prompt_hashes": {
+    "judge_citation": "d1565f592953cb68",
+    "judge_system": "3b300bf0bcd8ea7f",
+    "judge_user": "4e976b80283c7257"
+  },
+  "judge_prompt_version": "answer-judge/v2",
+  "judge_provider": null,
+  "judge_temperature": 0.0,
+  "judge_thinking": {
+    "zai:glm-5.3": "disabled",
+    "zai:glm-5.3-flash": "disabled"
+  },
+  "kind": "answer_eval",
+  "labels": null,
+  "limit": null,
+  "model": "mistral-medium-2604",
+  "name": "medium35-api-replay-mined-shipped",
+  "notes": [
+    "Generation replayed on mistral-medium-2604 from the recorded prompts of `2026-09-09-1253-mined-shipped`; retrieval, reranking and context are that run's, unchanged.",
+    "1 replayed answer(s) not scored because the source record ended in an error and has no trace: mined-006."
+  ],
+  "questions": [
+    "mined-001",
+    "mined-002",
+    "mined-003",
+    "mined-004",
+    "mined-005",
+    "mined-006",
+    "mined-007",
+    "mined-008",
+    "mined-009",
+    "mined-010",
+    "mined-011",
+    "mined-012",
+    "mined-013",
+    "mined-014",
+    "mined-015",
+    "mined-016",
+    "mined-017",
+    "mined-018",
+    "mined-019",
+    "mined-020",
+    "mined-021",
+    "mined-022",
+    "mined-023",
+    "mined-024",
+    "mined-025",
+    "mined-026",
+    "mined-027",
+    "mined-028",
+    "mined-029",
+    "mined-030",
+    "mined-031",
+    "mined-032",
+    "mined-033",
+    "mined-034",
+    "mined-035",
+    "mined-036",
+    "mined-037",
+    "mined-038",
+    "mined-039",
+    "mined-040",
+    "mined-041",
+    "mined-042",
+    "mined-043",
+    "mined-044",
+    "mined-045",
+    "mined-046",
+    "mined-047",
+    "mined-048",
+    "mined-049",
+    "mined-050",
+    "mined-051",
+    "mined-052",
+    "mined-053",
+    "mined-054",
+    "mined-055",
+    "mined-056",
+    "mined-057",
+    "mined-058",
+    "mined-059",
+    "mined-060",
+    "mined-061",
+    "mined-062",
+    "mined-063",
+    "mined-064",
+    "mined-065",
+    "mined-066",
+    "mined-067",
+    "mined-068",
+    "mined-069",
+    "mined-070",
+    "mined-071",
+    "mined-072",
+    "mined-073",
+    "mined-074",
+    "mined-075",
+    "mined-076",
+    "mined-077",
+    "mined-078",
+    "mined-079",
+    "mined-080",
+    "mined-081",
+    "mined-082",
+    "mined-083",
+    "mined-084",
+    "mined-085"
+  ],
+  "reference_pricing_model": "mistral-medium-2604",
+  "replay": {
+    "endpoint_model": [
+      "mistral-medium-2604"
+    ],
+    "prompts": "eval/replay/medium-3-5/prompts.jsonl",
+    "response_format": [
+      "json_schema"
+    ],
+    "results": "eval/replay/medium-3-5-api/results.jsonl",
+    "results_sha256": "23759dab5c1932bbab16df2096ed806ea5084baecef03dd242baa8b0ef50ff6e",
+    "skipped_no_trace": [
+      "mined-006"
+    ],
+    "source_model": "ministral-14b-2512",
+    "source_run": "2026-09-09-1253-mined-shipped"
+  },
+  "rerank": true,
+  "rerank_model": "ministral-14b-2512",
+  "resumed_records": 0,
+  "run_dir": "eval/runs/2026-09-09-1253-mined-shipped",
+  "seed": 0,
+  "strategies": [
+    "single_pass"
+  ],
+  "top_k": 8,
+  "translate_for_retrieval": true,
+  "unpriced_models": [
+    "glm-5.3"
+  ],
+  "variant": "sec1024"
+}
