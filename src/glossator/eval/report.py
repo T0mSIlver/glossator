@@ -15,11 +15,12 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from glossator.eval import loop_grid, perturb
+from glossator.eval import loop_grid
 from glossator.eval.answer_eval.rebuild import regenerate as regenerate_answer_eval
 from glossator.eval.charts import bar_chart
 from glossator.eval.failures.models import FAILURES_KIND
 from glossator.eval.failures.run_dir import regenerate as regenerate_failures
+from glossator.eval.perturb.run import render_figures as render_perturb_figures
 from glossator.eval.run_records import regenerate
 
 ANSWER_EVAL_KIND = "answer_eval"
@@ -81,7 +82,7 @@ def rebuild(run_dir: Path) -> dict[str, Any]:
         return loop_grid.regenerate(run_dir)
     if kind == PERTURB_KIND:
         metrics = regenerate(run_dir)
-        perturb.render_figures(metrics, run_dir / "figures")
+        render_perturb_figures(metrics, run_dir / "figures")
         return metrics
     if kind not in ("generate", "translate"):
         from glossator.eval.retrieval_report import rebuild_by_kind
