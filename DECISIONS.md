@@ -1736,3 +1736,15 @@ Each cell reads Ministral 3 14B → Medium 3.5 through the earlier OpenAI-compat
 - The ledger prices the four runs at 1.51 USD for 288 answers, 0.0045 to 0.0061 USD per question. Latency is one API call: 1.5 to 2.0 s at the median, against 2.6 to 3.9 s on the gateway.
 
 **Decision.** The API run is the reported Medium 3.5 number from now on; the documents cite D-017c. The gateway run of D-017b stays in the history as the first measurement and keeps its column in that entry only. Judge the four runs with `uv run python -m glossator.eval.answer_eval rejudge --run <dir> --judge-models zai:glm-5.3,zai:glm-5.3-flash` when the z.ai window allows, and fill the pending cells here.
+
+---
+
+## D-023d · The serving path's printed cost left out the reranker call
+
+**Status:** decided · 2026-09-13 · a fresh clone of `main` at `29b87ad` running the README's five-minute start; ledgers of `eval/runs/2026-09-09-2305-mined-v2-shipped` and `eval/runs/2026-09-09-2300-loop-grid-shipped`
+
+**Facts.**
+- Until today, `make ask` and `POST /ask` reported the generation calls only. The engine reranks through its own client, and nothing passed that call's cost back to the answer. On the fresh clone, `make ask` printed `$0.0006` and `POST /ask` returned `cost_usd` 0.00062. The log showed a `mistral-small-2603` rerank call at 0.000761 USD, which is more than the generation. The trace summary said `2 steps` and did not list the rerank.
+- The evaluations did not lose the call. Since D-023b the engine and the answer model share one recorder, so the reranker calls in committed runs are in `calls.jsonl`. What left them out is each record's `cost_usd`, which came from the answer and feeds the cost columns. On `2026-09-09-2305-mined-v2-shipped`, the records add up to 0.0347 USD. The answer-scoped ledger adds up to 0.0953 USD, of which 0.0607 USD is rerank calls. On `2026-09-09-2300-loop-grid-shipped` the records add up to 0.0542 USD, against 0.1052 USD in the ledger, of which 0.0510 USD is rerank calls.
+
+**Decision.** Strategies now search through `AnswerRun.search`. It reads the search trace, adds the rerank call's cost and tokens to the answer's `cost_usd` and `usage`, and records a `rerank` step in the trace. With that, `make ask`, `POST /ask` and records written from today include the reranker. The fresh-clone question now prints `$0.0014` and `3 steps`. Committed runs keep the numbers they were recorded with. For those runs, the ledger is the complete figure, and `answer_eval recost` rebuilds record costs from it. A cost column from a run made before today gives the generation spend, not the answer's total. Records written from today also count the rerank tokens in `usage`, so their `reference_usd` covers those tokens too.
