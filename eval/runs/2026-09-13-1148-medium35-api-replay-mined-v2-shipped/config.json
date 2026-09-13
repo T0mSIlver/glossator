@@ -59,8 +59,11 @@
   "dataset_sha256": "1e19ef8f8f12dc7e923c4e196bf3111c386c92e46992d2a3dac8b9600fdfecb2",
   "generation_server": "http://192.168.1.183:8080",
   "judge_max_tokens": 1200,
-  "judge_model": null,
-  "judge_models": [],
+  "judge_model": "zai:glm-5.3",
+  "judge_models": [
+    "zai:glm-5.3",
+    "zai:glm-5.3-flash"
+  ],
   "judge_prompt_hashes": {
     "judge_citation": "d1565f592953cb68",
     "judge_system": "3b300bf0bcd8ea7f",
@@ -70,7 +73,8 @@
   "judge_provider": null,
   "judge_temperature": 0.0,
   "judge_thinking": {
-    "zai:glm-5.3": "disabled"
+    "zai:glm-5.3": "disabled",
+    "zai:glm-5.3-flash": "disabled"
   },
   "kind": "answer_eval",
   "labels": null,
@@ -182,7 +186,7 @@
   },
   "rerank": true,
   "rerank_model": "llamacpp/ministral3-14b",
-  "resumed_records": 0,
+  "resumed_records": 83,
   "rewrite_for_retrieval": false,
   "run_dir": "eval/runs/2026-09-09-2305-mined-v2-shipped",
   "seed": 0,

@@ -53,8 +53,8 @@ generated from the gold section (D-020a), so they enumerate what the section
 says rather than what the question needs; the human labels found the reader
 more lenient than the judge on every disagreement, and one reference in forty
 wrong (D-021b). The replay on Mistral's API is the test of whether the
-generator is the cause; its judged verdicts, and so how many mined partials stay
-partial under Medium 3.5, are pending (D-017c).
+generator is the cause: 15 of the 14B's 20 mined partials stay partial under
+Medium 3.5, and the mined partial share rises from 0.24 to 0.36 (D-017c).
 
 **What would fix it.** In the prompt: "state the exact value, limit or
 parameter before explaining; when the source names a version or a condition

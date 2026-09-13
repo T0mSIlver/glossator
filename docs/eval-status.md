@@ -48,8 +48,8 @@ product's default answer model, shows it is the prompt and the strictness of
 the reference answers, not model capacity (D-017b): replaying the recorded
 prompts leaves correctness unchanged within the interval, and the answers are
 cleaner. The same prompts replayed on Mistral's API, now the reported Medium 3.5
-number, bring fabricated quotes per answer to 0.17 to 0.19; their judged
-correctness is pending (D-017c). Small 4, the default reranker, has never been run:
+number, bring fabricated quotes per answer to 0.17 to 0.19 and score 0.90,
+0.82, 0.73 and 0.65 judged correctness, inside the interval (D-017c). Small 4, the default reranker, has never been run:
 the key had no quota for Medium 3.5 or Small 4 until 12 September 2026 (D-017a,
 D-049).
 
@@ -217,8 +217,8 @@ credited.
   sent to `mistral-medium-2604` on `https://api.mistral.ai` and scored on
   identical retrieval and context. Fabricated quotes per answer fall from 0.40
   to 0.59 to 0.17 to 0.19, quote verification is 0.90 to 0.92, and 0.0045 to
-  0.0061 USD per question; judged correctness is pending until the z.ai window
-  allows. Still unmeasured: the search loop on Medium,
+  0.0061 USD per question; judged correctness is 0.90, 0.82, 0.73 and 0.65,
+  within 0.03 of the 14B on every set. Still unmeasured: the search loop on Medium,
   and Small 4 as the reranker. The key had no quota for either model until
   12 September 2026 (D-017a, D-049), so before the Work test check which model
   the deployed server is pointed at (`GLOSSATOR_MODEL`,

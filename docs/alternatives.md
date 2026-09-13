@@ -29,7 +29,7 @@ shaped the product:
 | Vector-heavy hybrid ranking inside Vespa | best exact-section retrieval on a 13-configuration grid over 294 questions | D-034 |
 | The agent writes the answer; nothing generates inside the server | with retrieval tools a capable agent scored 0.77, against 0.78 for server-side generation at three times the latency and with a second model | D-040b, D-044 |
 | No reranker on the agent path | it accounted for 91% of search latency and mainly improved which result ranked first, which an agent that reads several hits does not need | D-015b |
-| Medium 3.5 as the answer model | replayed on Mistral's API, fabricated quotes per answer fell to 0.17 to 0.19 on four sets, less than half Ministral 3 14B's; judged correctness pending | D-017c |
+| Medium 3.5 as the answer model | replayed on Mistral's API, fabricated quotes per answer fell to 0.17 to 0.19 on four sets, less than half Ministral 3 14B's; judged correctness 0.90, 0.82, 0.73 and 0.65, within 0.03 of the 14B | D-017c |
 | Three tools, no ids | 97% of pages fit one read under 8,000 tokens; the Work session never used the other five tools | D-043, D-044 |
 | Every section has a key, and the link to cite is printed beside it | 1,823 of 4,016 headings have no anchor on the live site, so anchors alone collapse sibling sections and land a click far from the text; a text fragment is printed only when it moves the landing | D-047 |
 | Read-only tool annotations | without them Work asks for approval on every call and a headless consumer never calls at all | D-037b, D-037c |
@@ -54,8 +54,8 @@ repository keeps it as the measured baseline. On the same questions, Sonnet
 scored 0.77 with the retrieval tools and 0.78 with `answer`. The
 server-side answer took three times as long and required a second model
 (D-040b). Replayed on Mistral's API in place of Ministral 3 14B, Medium 3.5
-halved fabricated quotes on the same prompts; its judged correctness is pending
-(D-017c).
+halved fabricated quotes on the same prompts, with judged correctness within
+0.03 of the 14B on every set (D-017c).
 
 The MCP server now provides the parts that calling agents lack: a pinned
 corpus, tested section anchors and dated history. Agents can reformulate a

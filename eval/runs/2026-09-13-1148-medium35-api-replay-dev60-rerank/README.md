@@ -21,7 +21,7 @@ answer and the cited passages verbatim. It sees no URL, page identifier, or stra
 - Generation model: `mistral-medium-2604`
 - Generation server: the Mistral API (`https://api.mistral.ai`)
 - Answer-config overrides: none (the shipped configuration)
-- Judge models: none (--skip-judge); primary first (answer-judge/v2)
+- Judge models: `zai:glm-5.3`, `zai:glm-5.3-flash`; primary first (answer-judge/v2)
 - Index variant: `sec1024`, top_k 8, rerank True (ministral-14b-2512), context budget 6000 tokens
 - Search loop caps: round_cap 4, searches_per_round 4, tool_result_chars 600, response_format unknown
 - Non-English questions rendered in English for retrieval: unknown
@@ -39,7 +39,7 @@ columns were computed with.
 
 ## Results
 
-The judge was skipped in this run, so only the deterministic tables below are filled. 0 answer(s) ended in an error and are recorded with it.
+60 of 60 answers were judged by the primary judge `zai:glm-5.3`. 0 answer(s) ended in an error and are recorded with it.
 
 ### Citations against the gold sources
 
@@ -121,19 +121,19 @@ The primary judge's verdicts (D-021), reported beside the deterministic numbers 
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `mistral-medium-2604` | -- | -- | -- | -- | -- | -- | **--** |
+| `single_pass` | `mistral-medium-2604` | 1.00 | 0.75 | 0.75 | 0.95 | 0.95 | 1.00 | **0.90** |
 
 **groundedness** -- claims supported by the cited passages
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `mistral-medium-2604` | -- | -- | -- | -- | -- | -- | **--** |
+| `single_pass` | `mistral-medium-2604` | 0.90 | 0.85 | 0.70 | 0.80 | 1.00 | 0.80 | **0.85** |
 
 **citation_relevance** -- citations that support their sentence
 
 | strategy | model | single_page | cross_page | api_reference | capability | post_cutoff | unanswerable | all |
 |---|---|---|---|---|---|---|---|---|
-| `single_pass` | `mistral-medium-2604` | -- | -- | -- | -- | -- | -- | **--** |
+| `single_pass` | `mistral-medium-2604` | 1.00 | 0.94 | 0.88 | 1.00 | 1.00 | 1.00 | **0.97** |
 
 ### Effort
 
@@ -201,18 +201,20 @@ Correctness is ordinal: wrong is 0, partial is 0.5, and correct is 1. Kappa uses
 
 | first judge | second judge | answers | quadratic-weighted kappa | exact agreement |
 |---|---|---:|---:|---:|
-| -- | -- | 0 | -- | -- |
+| `zai:glm-5.3` | `zai:glm-5.3-flash` | 60 | 0.78 | 0.88 |
 
 ### Krippendorff's alpha
 
 | raters | ordinal alpha | pairwise exact agreement |
 |---|---:|---:|
-| configured judges | -- | -- |
+| configured judges | 0.71 | 0.88 |
 
 ### Judge means
 
 | judge | answers | mean correctness | human-labeled answers |
 |---|---:|---:|---:|
+| `zai:glm-5.3` | 60 | 0.90 | -- |
+| `zai:glm-5.3-flash` | 60 | 0.93 | -- |
 
 ## Cost and latency
 
@@ -223,7 +225,7 @@ The run made 60 answers over 60 questions:
 answer latency was 1.5 s, 95th
 percentile 3.1 s.
 
-Nothing was judged in this run.
+Judging spent 203211 prompt and 17873 completion tokens over 120 call(s) (1790 of them reasoning tokens, with thinking disabled), at a mean of 7.0 s per judgement and 0 verdict(s) that did not validate. The z.ai coding plan bills nothing against the Mistral budget (D-020); the same judging on mistral-medium-2604 would have cost 0.4389 USD.
 
 ## Winner per metric
 
@@ -232,6 +234,9 @@ Nothing was judged in this run.
 - `citation_verification_rate`: **single_pass**
 - `unverified_citations_per_answer`: **single_pass**
 - `refusal_correct`: **single_pass**
+- `correctness`: **single_pass**
+- `groundedness`: **single_pass**
+- `citation_relevance`: **single_pass**
 - `latency_p50_s`: **single_pass**
 - `usd`: **single_pass**
 - `reference_usd`: **single_pass**

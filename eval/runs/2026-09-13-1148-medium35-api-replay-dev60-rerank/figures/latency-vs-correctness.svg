@@ -8,6 +8,6 @@
 <text class="v" x="58" y="300" text-anchor="end">0</text>
 <text class="v" x="58" y="52" text-anchor="end">1.00</text>
 <text class="v" x="696" y="312" text-anchor="end">1.7</text>
-<circle cx="613.6" cy="296.0" r="6" fill="#3b6fd4"/>
-<text class="v" x="623.6" y="300.0">single_pass (1.5, 0.00)</text>
+<circle cx="613.6" cy="67.4" r="6" fill="#3b6fd4"/>
+<text class="v" x="623.6" y="71.4">single_pass (1.5, 0.90)</text>
 </svg>

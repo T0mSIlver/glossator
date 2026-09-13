@@ -60,14 +60,16 @@ four named classes of question the system still gets wrong, each with question
 ids, the cause, the fix and its cost.
 
 D-017c replaces only the answer-writing model while preserving each recorded
-prompt, with Medium 3.5 reached through Mistral's API. Judged correctness is
-pending; the four Ministral 3 14B to Medium 3.5 pairs of fabricated quotes per
-answer are:
+prompt, with Medium 3.5 reached through Mistral's API. The four Ministral 3 14B
+to Medium 3.5 pairs of judged correctness and of fabricated quotes per answer
+are:
 
-- tuned 60: 0.40 to 0.17
-- fresh 60: 0.53 to 0.18
-- mined 85: 0.59 to 0.18
-- mined-v2 83: 0.41 to 0.19
+- tuned 60: correctness 0.93 to 0.90, fabricated quotes 0.40 to 0.17
+- fresh 60: correctness 0.84 to 0.82, fabricated quotes 0.53 to 0.18
+- mined 85: correctness 0.76 to 0.73, fabricated quotes 0.59 to 0.18
+- mined-v2 83: correctness 0.64 to 0.65, fabricated quotes 0.41 to 0.19
+
+Every correctness change is inside the ±0.09 interval these set sizes allow.
 
 The four replay runs are
 [`dev60-rerank`](../eval/runs/2026-09-13-1148-medium35-api-replay-dev60-rerank/),

@@ -1721,27 +1721,27 @@ the manifest row to that path and rebuilds the changelog in the same pull reques
 
 ## D-017c · Medium 3.5 replayed on Mistral's API: the D-017b prompts on `https://api.mistral.ai`
 
-**Status:** decided · 2026-09-13 · completions from `https://api.mistral.ai/v1`, model `mistral-medium-2604`, on 2026-09-13 (the key's Medium 3.5 quota opened on 12 September, D-049); `eval/replay/medium-3-5-api/results.jsonl`; runs `2026-09-13-1148-medium35-api-replay-{dev60-rerank,fresh60-shipped,mined-shipped,mined-v2-shipped}`; judging by GLM 5.3 with GLM 5.3 Flash second is pending: the z.ai token window was full when the runs were imported, so the judged cells read "pending"
+**Status:** decided · 2026-09-13 · completions from `https://api.mistral.ai/v1`, model `mistral-medium-2604`, on 2026-09-13 (the key's Medium 3.5 quota opened on 12 September, D-049); `eval/replay/medium-3-5-api/results.jsonl`; runs `2026-09-13-1148-medium35-api-replay-{dev60-rerank,fresh60-shipped,mined-shipped,mined-v2-shipped}`; judged on 2026-09-13 by GLM 5.3 with GLM 5.3 Flash second, no judge failures
 
 **How.** The 288 requests of D-017b (`eval/replay/medium-3-5/prompts.jsonl`, temperature 0.2, 1,600 completion tokens) were sent unchanged with `run_replay.py`. All 288 came back on the first attempt with `finish_reason` `stop`, zero errors, and the API accepted `json_schema` output on every row, so no fallback mode ran; every completion parses as the answer schema. The import rebuilt each answer's sources as in D-017b, and `check` on the four new runs reproduces every verdict and chunk id: 60 of 60, 60 of 60, 83 of 83 and 83 of 83, with no rebuild notes. Retrieval, reranking and context are byte-identical across all three columns.
 
 | set | correctness | partial | wrong | groundedness | citation relevance | refusal correct | gold URL cited | quote verification | fabricated quotes per answer | output tokens | USD per question |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| tuned 60 | 0.93 → 0.91 → pending | 0.12 → 0.15 → pending | 0.02 → 0.02 → pending | 0.82 → 0.81 → pending | 0.93 → 0.98 → pending | 0.92 → 0.83 → 0.87 | 0.82 → 0.74 → 0.82 | 0.86 → 0.87 → 0.92 | 0.40 → 0.23 → 0.17 | 312 → 205 → 202 | — → 0.0046 → 0.0045 |
-| fresh 60 | 0.84 → 0.84 → pending | 0.18 → 0.12 → pending | 0.07 → 0.10 → pending | 0.83 → 0.80 → pending | 0.98 → 0.96 → pending | 0.87 → 0.83 → 0.88 | 0.84 → 0.78 → 0.88 | 0.85 → 0.85 → 0.90 | 0.53 → 0.30 → 0.18 | 422 → 241 → 218 | — → 0.0051 → 0.0049 |
-| mined 85 | 0.76 → 0.80 → pending | 0.24 → 0.26 → pending | 0.12 → 0.07 → pending | 0.88 → 0.89 → pending | 0.96 → 0.95 → pending | 0.92 → 0.94 → 0.93 | 0.86 → 0.85 → 0.81 | 0.85 → 0.92 → 0.92 | 0.59 → 0.17 → 0.18 | 530 → 321 → 300 | — → 0.0062 → 0.0061 |
-| mined-v2 83 | 0.64 → 0.62 → pending | 0.25 → 0.33 → pending | 0.23 → 0.22 → pending | 0.71 → 0.77 → pending | 0.93 → 0.95 → pending | 0.78 → 0.82 → 0.84 | 0.57 → 0.63 → 0.63 | 0.83 → 0.89 → 0.90 | 0.41 → 0.22 → 0.19 | 387 → 231 → 226 | — → 0.0053 → 0.0053 |
+| tuned 60 | 0.93 → 0.91 → 0.90 | 0.12 → 0.15 → 0.10 | 0.02 → 0.02 → 0.05 | 0.82 → 0.81 → 0.85 | 0.93 → 0.98 → 0.97 | 0.92 → 0.83 → 0.87 | 0.82 → 0.74 → 0.82 | 0.86 → 0.87 → 0.92 | 0.40 → 0.23 → 0.17 | 312 → 205 → 202 | — → 0.0046 → 0.0045 |
+| fresh 60 | 0.84 → 0.84 → 0.82 | 0.18 → 0.12 → 0.15 | 0.07 → 0.10 → 0.10 | 0.83 → 0.80 → 0.87 | 0.98 → 0.96 → 0.96 | 0.87 → 0.83 → 0.88 | 0.84 → 0.78 → 0.88 | 0.85 → 0.85 → 0.90 | 0.53 → 0.30 → 0.18 | 422 → 241 → 218 | — → 0.0051 → 0.0049 |
+| mined 85 | 0.76 → 0.80 → 0.73 | 0.24 → 0.26 → 0.36 | 0.12 → 0.07 → 0.10 | 0.88 → 0.89 → 0.90 | 0.96 → 0.95 → 0.91 | 0.92 → 0.94 → 0.93 | 0.86 → 0.85 → 0.81 | 0.85 → 0.92 → 0.92 | 0.59 → 0.17 → 0.18 | 530 → 321 → 300 | — → 0.0062 → 0.0061 |
+| mined-v2 83 | 0.64 → 0.62 → 0.65 | 0.25 → 0.33 → 0.34 | 0.23 → 0.22 → 0.18 | 0.71 → 0.77 → 0.83 | 0.93 → 0.95 → 0.96 | 0.78 → 0.82 → 0.84 | 0.57 → 0.63 → 0.63 | 0.83 → 0.89 → 0.90 | 0.41 → 0.22 → 0.19 | 387 → 231 → 226 | — → 0.0053 → 0.0053 |
 
 Each cell reads Ministral 3 14B → Medium 3.5 through the earlier OpenAI-compatible endpoint (D-017b) → Medium 3.5 through Mistral's API. USD is at Medium 3.5's published prices; the 14B column was priced at its own and is not comparable.
 
 **Facts.**
-- Correctness is not yet known: whether it stays inside the ±0.09 interval of both other columns waits for the judge. Everything the code measures without a model is in.
+- Judged correctness stays inside the ±0.09 interval of both other columns: −3, −2, −3 and +1 points against the 14B, −1, −2, −7 and +3 against the gateway run. Flash reads 0.93, 0.82, 0.86 and 0.68. The mined set is the one that leans down: paired per question against the 14B, Medium is better on 8 and worse on 17, and 15 of the 14B's 20 partial answers stay partial (13 on the gateway), so the partial share rises to 0.36 while wrong answers stay at 0.10. The "one parameter short of the reference" shape survives the swap again.
 - Fabricated quotes per answer are 0.17 to 0.19 on every set, at or below the gateway run's 0.17 to 0.30 and less than half the 14B's on each set. Quote verification is 0.90 to 0.92.
 - The refusal gap D-017b traced to one long failed quote narrows on the tuned and fresh sets: an answerable question left with no verified citation and refused happens 4 times of 50 on the tuned set (3 for the 14B, 7 on the gateway) and 2 of 50 on the fresh set (4 and 5); correct refusals are 0.87, 0.88, 0.93 and 0.84, against 0.83, 0.83, 0.94 and 0.82 on the gateway, and the gold URL is cited as often as the 14B cited it on the tuned set (0.82) and more often on the fresh set (0.88). Mean quote length is shorter on three sets (145 against 156 characters on the tuned set, 146 against 160, 165 against 186) and longer on mined-v2 (162 against 155).
 - Output tokens are 202 to 300 per answer, within 10% of the gateway run on each set.
 - The ledger prices the four runs at 1.51 USD for 288 answers, 0.0045 to 0.0061 USD per question. Latency is one API call: 1.5 to 2.0 s at the median, against 2.6 to 3.9 s on the gateway.
 
-**Decision.** The API run is the reported Medium 3.5 number from now on; the documents cite D-017c. The gateway run of D-017b stays in the history as the first measurement and keeps its column in that entry only. Judge the four runs with `uv run python -m glossator.eval.answer_eval rejudge --run <dir> --judge-models zai:glm-5.3,zai:glm-5.3-flash` when the z.ai window allows, and fill the pending cells here.
+**Decision.** The API run is the reported Medium 3.5 number from now on; the documents cite D-017c. The gateway run of D-017b stays in the history as the first measurement and keeps its column in that entry only. The judged cells above were filled from `rejudge --judge-models zai:glm-5.3,zai:glm-5.3-flash` on the four runs.
 
 ---
 
