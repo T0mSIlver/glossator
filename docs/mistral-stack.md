@@ -45,7 +45,7 @@ OpenAI-compatible provider instead of the SDK
 `src/glossator/ingest/pipeline.py:18,298-320`;
 `src/glossator/retrieval/probe.py:27-35`;
 `src/examples/workflows/search/activities.py:19-32,46-62`;
-`src/glossator/eval/providers.py:28-41,441-463`).
+`src/glossator/eval/providers/wire.py:13-42`).
 
 Two SDK behaviours required explicit handling. Connection failures can escape as
 `httpx.TransportError`, while `NoResponseError` is a plain `Exception`; neither
@@ -135,7 +135,7 @@ model map associates it with `mistral-medium-2312`, not the shipped
 The corpus-size analysis therefore loads Medium 3.5's Tekken tokenizer separately
 from `mistralai/Mistral-Medium-3.5-128B` with
 `MistralTokenizer.from_hf_hub`; those measurements are not mixed into serving
-budgets (`src/glossator/eval/corpus_stats.py:1-15,49-54,69-89`).
+budgets (`src/glossator/eval/corpus_stats/__init__.py:1-15`; `src/glossator/eval/corpus_stats/tokens.py:9-14,21-47`).
 
 ## Copier starter template
 
