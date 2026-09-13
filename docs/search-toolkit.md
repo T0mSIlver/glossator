@@ -591,7 +591,7 @@ hand-patched limit lives outside the repository, and any redeploy through
 **What we did.** Ingestion feeds and removes one small document before it is
 allowed to delete anything
 (`src/glossator/ingest/pipeline.py`, `_verify_index_writable`), and aborts on the first rejected
-write instead of continuing through 411 pages. The README states the 80% limit.
+write instead of continuing through 411 pages. `deploy/README.md` states the 80% limit.
 
 **Cost.** The `sec1024` schema was left holding zero documents. Two reranked grid
 rows and one floor calibration ran against the empty schema, scored zero, and
