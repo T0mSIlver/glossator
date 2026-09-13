@@ -13,8 +13,8 @@ reason and the class.
 This is its own page rather than a section of `evaluation.md` because that
 page tells the evaluation story dataset by dataset and this one is organised by
 what to fix next; each class needs its run beside every number, which is more
-than a section carries. `evaluation.md` and the README's "Read next" list
-point here.
+than a section carries. `evaluation.md` and the documentation index in
+[`README.md`](README.md) point here.
 
 Sizes, over the 177 classified failures: exact-value shortfalls 55, false
 refusals 35, missed refusals 34, retrieval misses 26, answers citing the wrong

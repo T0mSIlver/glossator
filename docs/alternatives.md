@@ -4,10 +4,12 @@ An MCP server with section search beat three alternatives: a one-million-token c
 
 ## Why an MCP server
 
-Agents inside Mistral Work, Le Chat, scheduled tasks and chat bots have no
-filesystem or `grep`. They can reach external systems through Connectors. A
-coding agent can search an SDK checkout for a parameter name, but product facts
-often live elsewhere.
+The agent a user already works with, in Work, the Vibe CLI, Claude Code or a
+bot, can query the documentation mid-task through an MCP server, at a pinned
+commit and with the link to cite. The other options are a separate RAG system,
+or a copy of the docs uploaded into every agent and every chat, where Work keeps
+an uploaded file in that one chat's context. A coding agent can search an SDK
+checkout for a parameter name, but product facts often live elsewhere.
 
 This gap appears in `eval/mined.jsonl`. Of its 85 real questions, 54 came from
 public GitHub issues, 40 on the SDK repositories and 14 on the documentation

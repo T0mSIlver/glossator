@@ -26,7 +26,7 @@ src/entrypoints/         api (FastAPI) and mcp_server (FastMCP): configuration, 
                          registration over glossator.surface; CLIs are python -m glossator.{corpus,ingest,retrieval,answer}
 corpus/                  vendored normalized corpus + manifest + upstream LICENSE
 eval/                    datasets, committed run directories, corpus-stats, replay exports
-docs/                    architecture, evaluation, retrieval, corpus, stack notes
+docs/                    architecture, evaluation, retrieval, corpus, stack notes; docs/README.md indexes them
 skills/                  the mistral-docs workspace Skill for Mistral Work
 deploy/                  image, compose, deploy script, Cloudflare tunnel templates
 tests/                   offline tests; tests that need Vespa or an API key skip when unconfigured

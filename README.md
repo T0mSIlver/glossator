@@ -1,14 +1,26 @@
 # glossator
 
 glossator is a Model Context Protocol (MCP) server that gives agents Mistral's documentation: 411 pages from a pinned [docs.mistral.ai](https://docs.mistral.ai) commit.
-It is for agents with no filesystem or `grep`, such as those in Mistral Work, Le Chat and chat bots. The agent searches sections, reads pages and compares dated snapshots through three read-only tools, then writes the answer and cites the links the tools print.
+The agent you already use, in Work, the Vibe CLI, Claude Code, or a bot, queries the documentation mid-task instead of going through a separate RAG system or a copy of the docs uploaded into every agent and every chat.
+It searches sections, reads pages and compares dated snapshots through three read-only tools, then writes the answer and cites the link each tool prints beside the text.
 
 ## Try it
 
 The deployed server is `https://glossator.tomvaucourt.com/mcp` (Streamable HTTP; the bearer token is supplied on request).
+It announces itself as `mistral-docs` and its tools as `mistral_docs_*`.
 
 ```bash
 claude mcp add --transport http mistral-docs https://glossator.tomvaucourt.com/mcp --header "Authorization: Bearer <token>"
+```
+
+In the Vibe CLI, append a server to `config.toml`; `name` becomes the prefix of the tool names ([MCP servers](https://docs.mistral.ai/vibe/code/cli/mcp-servers#add)):
+
+```toml
+[[mcp_servers]]
+name = "mistral_docs"
+transport = "streamable-http"
+url = "https://glossator.tomvaucourt.com/mcp"
+headers = { "Authorization" = "Bearer <token>" }
 ```
 
 In Mistral Work, add that URL as a `Custom MCP Connector` under `Connectors` and pre-authorise the three read functions; [`docs/mcp.md`](docs/mcp.md) has the full setup, the workspace Skill, the health endpoint and other clients.
@@ -59,42 +71,4 @@ curl -s -X POST http://127.0.0.1:8080/ask -H 'content-type: application/json' \
 claude mcp add --transport http mistral-docs http://127.0.0.1:8000/mcp
 ```
 
-## Deployment
-
-`deploy/` puts the server on a Linux host behind a Cloudflare tunnel in one command (`make deploy HOST=<ssh-host>`); modes, checks and manual steps are in [`deploy/README.md`](deploy/README.md).
-
-## Repository layout
-
-```text
-src/glossator/    corpus adapter, ingest, index, retrieval, answer, surface (what the tools and routes do), eval
-  citing.py       section keys and citation links, shared by the surface and the snapshot tools
-  history.py      phrase and section history over the stored snapshots (the snapshot diff;
-                  surface/history.py only resolves the tool's argument forms onto it)
-  changelog.py    the precomputed snapshot changelog and changes under a path
-  clients.py      the chat and embedding Mistral clients every model call is built on
-  surface/pages.py  page sizes, section keys and paths the tools read without the index;
-                  ingest/pages.py is the unrelated reader of the vendored corpus files
-src/entrypoints/  FastAPI and MCP servers over glossator.surface (CLIs are python -m glossator.{corpus,ingest,retrieval,answer})
-corpus/           vendored corpus, manifest, license, notice
-eval/             datasets, committed run directories, corpus stats, replay exports
-docs/             architecture, evaluation, retrieval, corpus, stack notes
-skills/           the mistral-docs workspace Skill for Mistral Work
-deploy/           image, compose file, deploy script, tunnel templates
-tests/            offline tests and optional backend integration tests
-```
-
-## Read next
-
-- [`docs/alternatives.md`](docs/alternatives.md): the decisions that shaped the product and the alternatives measured against it.
-- [`docs/evaluation.md`](docs/evaluation.md): the evaluation story, dataset by dataset, with every run linked; [`docs/eval-status.md`](docs/eval-status.md) is the stage-by-stage table.
-- [`docs/failure-classes.md`](docs/failure-classes.md): the four classes of question still answered wrong, with causes, fixes and costs.
-- [`docs/mcp.md`](docs/mcp.md): the tool contract and the Mistral Work setup.
-- [`docs/architecture.md`](docs/architecture.md): the pipeline in ten lines.
-- [`docs/upstream.md`](docs/upstream.md): the defects found in Mistral's packages and documentation, ranked, with where each fix goes.
-- [`docs/search-toolkit.md`](docs/search-toolkit.md): the Mistral Search Toolkit kept, wrapped, replaced, skipped.
-- [`docs/mistral-stack.md`](docs/mistral-stack.md): every Mistral component with its version, defects and constraints.
-- [`docs/api.md`](docs/api.md): the HTTP routes, environment variables, local model servers and running locally.
-- [`docs/retrieval.md`](docs/retrieval.md): index variants, the retrieval grid, ingestion guards.
-- [`docs/corpus.md`](docs/corpus.md): where the corpus comes from and how it is checked.
-- [`deploy/README.md`](deploy/README.md): deployment, the tunnel, Connector registration; the refresh gate is D-045.
-- [`DECISIONS.md`](DECISIONS.md): every choice with the facts that decided it; append an entry when a change reverses one.
+Everything else, including the repository layout and deployment, is indexed in [`docs/README.md`](docs/README.md).
