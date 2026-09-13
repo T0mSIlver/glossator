@@ -1,6 +1,6 @@
 """Quote-verification tests for `glossator.answer.cite`, on fixtures.
 
-Covers the brief's list: a quote that verifies, one that verifies after
+Covers the full list: a quote that verifies, one that verifies after
 emphasis normalization, one fabricated, one across a chunk boundary, a marker
 with no quote, and duplicate sources collapsing to one entry; plus the clamps
 and the malformed-input shape.

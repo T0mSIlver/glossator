@@ -145,8 +145,7 @@ extension is generated and thrown away, and its seams do not reach Vespa);
 - Lexical-heavy weights: lose everywhere. D-034.
 - The toolkit's reranker, RRF, `QueryEngine`, query extension, semantic cache:
   see the toolkit section. D-013, D-014, D-015.
-- A rehosted docs mirror with generated anchors: the brief asks for links back
-  to the documentation. D-036.
+- A rehosted docs mirror with generated anchors: the product links to the live documentation pages, not to a mirror. D-036.
 - Copying the Vespa data volume to deploy: ZooKeeper rejects its own copied
   state; rebuild from the embedding cache takes four minutes. D-037d.
 - A French index: deferred, since rendering the question in English closes
@@ -201,7 +200,7 @@ citations the HTML can contain. D-036b.
 
 **Spend.** 7.04 EUR on the console as of 9 September; the recorded ledger is a
 lower bound (2.81 USD across priced chat calls) because reranker calls before
-D-023b and all embeddings are not in it. The promised 20 USD are not yet
+D-023b and all embeddings are not in it. The further 20 USD are not yet
 credited.
 
 ## What is not measured, and matters for shipping

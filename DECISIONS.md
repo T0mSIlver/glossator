@@ -74,7 +74,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 
 **Decision.** Generate a synthetic document (and per-model cards) from `src/schema/models/models/*.ts` and `AVAILABLE_FEATURES` in `src/schema/models/schema.ts`, so questions of the form "which models support function calling" are answerable from one chunk and cite `/models/<slug>`.
 
-**Facts.** Capabilities live only in 66 TypeScript files (`capabilities.features`: `function-calling` on 36 models, `structured-outputs` on 31, `document-qna` on 34, …) rendered by React on `/models`. No MDX table or JSON export exists. The hand-written table on `/studio/conversations/function-calling` is labelled non-exhaustive. The example question in the assignment brief ("What models support function calling?") targets exactly this data.
+**Facts.** Capabilities live only in 66 TypeScript files (`capabilities.features`: `function-calling` on 36 models, `structured-outputs` on 31, `document-qna` on 34, …) rendered by React on `/models`. No MDX table or JSON export exists. The hand-written table on `/studio/conversations/function-calling` is labelled non-exhaustive. The example question "What models support function calling?" targets exactly this data.
 
 ---
 
@@ -87,7 +87,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 - Dates: 87 from 2024, 32 from 2025, 16 from 2026. Most predate the current SDK (`mistralai` 2.x), the Agents/Conversations API, and the Search Toolkit.
 - Rendering requires notebook-to-markdown conversion including outputs.
 
-**Reasoning.** The brief weighs answer quality over breadth. Old notebooks describe superseded APIs and would compete with current reference pages for the same query, which is the failure mode the eval must catch, not introduce. Include later only with a `source_type` field so they can be down-weighted, and only if real questions need them.
+**Reasoning.** Answer quality outranks corpus breadth. Old notebooks describe superseded APIs and would compete with current reference pages for the same query, which is the failure mode the eval must catch, not introduce. Include later only with a `source_type` field so they can be down-weighted, and only if real questions need them.
 
 ---
 
@@ -182,7 +182,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 
 **Status:** decided by Tom · 2026-09-08
 
-**Facts.** Prices (USD per M tokens, input/output, pricing page 2026-09-08): Mistral Medium 3.5 1.50/7.50; Mistral Large 3 0.50/1.50; Mistral Small 4 0.15/0.60; Ministral 3 8B 0.15/0.15; `mistral-embed` 0.10 input. Budget: 20 USD.
+**Facts.** Prices (USD per M tokens, input/output, pricing page 2026-09-08): Mistral Medium 3.5 1.50/7.50; Mistral Large 3 0.50/1.50; Mistral Small 4 0.15/0.60; Ministral 3 8B 0.15/0.15; `mistral-embed` 0.10 input. Spend ceiling: 20 USD.
 
 **Decision.** Generation on Mistral Medium 3.5. Cheaper Mistral models may serve reranking, dataset generation, and judging; each such use is recorded with its cost.
 
@@ -223,7 +223,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 **Facts.**
 - The value of the dev set is in tricky and cross-page questions. A small model is unlikely to write those reliably; even GLM will need care.
 - Endpoint `https://api.z.ai/api/coding/paas/v4/chat/completions` accepts `glm-5.3-flash` and `glm-5.3`; `glm-5.3-air` is unknown there (probe 2026-09-08). `glm-5.3` honours `thinking: {"type": "disabled"}`; `glm-5.3-flash` ignored it and spent 122 reasoning tokens on a one-word reply. Reasoning level must be set and checked per call, and usage recorded.
-- Cost to the Mistral budget: zero. The README discloses that dataset generation and judging used a non-Mistral model; every model in the serving path stays Mistral (D-017).
+- Cost on the Mistral side: zero. The README discloses that dataset generation and judging used a non-Mistral model; every model in the serving path stays Mistral (D-017).
 
 ---
 
@@ -235,7 +235,7 @@ Status values: **decided** (settled), **default** (inherited from the starter te
 
 The listwise reranker (D-015) is part of the serving path, so its shipped configuration and reported numbers use a Mistral model; GLM may be used only while iterating on the reranker prompt.
 
-**Facts.** Judge cost on Mistral Medium 3.5 would be about 3.60 USD for 600 judgements (D-017 prices), a fifth of the budget, for a component that never ships.
+**Facts.** Judge cost on Mistral Medium 3.5 would be about 3.60 USD for 600 judgements (D-017 prices), a fifth of the 20 USD, for a component that never ships.
 
 ---
 
@@ -739,7 +739,7 @@ Every chunk now carries the anchor of the nearest anchored heading above it, so 
 
 **Decision.** Every verified citation carries a second link, `url#anchor:~:text=<quote>` (URL Fragment Text Directives), built from the quote the verifier already checked; the canonical `url#anchor` stays beside it. Chromium, Safari 16 and Firefox 131 and later scroll to and highlight the span; other browsers land on the anchor or the page. Quotes over 120 characters use the `start,end` form.
 
-**Facts.** Most headings on docs.mistral.ai have no anchor (D-003a), so a citation often lands on a section top or the page top even when the engine holds the exact sentence. The verified quote is, by construction, a span of the page; on three citations checked by hand the stripped quote occurs exactly once in the vendored page. Rehosting the documentation with generated anchors was rejected: the brief asks for links back to the documentation pages, and a mirror would break that.
+**Facts.** Most headings on docs.mistral.ai have no anchor (D-003a), so a citation often lands on a section top or the page top even when the engine holds the exact sentence. The verified quote is, by construction, a span of the page; on three citations checked by hand the stripped quote occurs exactly once in the vendored page. Rehosting the documentation with generated anchors was rejected: the product links to the live documentation pages, and a mirror would break that.
 
 ---
 
@@ -871,7 +871,7 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 - Context was injected into the prompt because models could not call tools. A consumer model that can call `search`, `open`, `read` and `grep` (D-029) can gather the same context itself, so an `ask` tool that runs a second model inside the server costs a nested generation and adds nothing a capable consumer could not do.
 - What the consumer cannot do is verify its own citations: checking that a quoted span exists in the chunk it names needs both texts, which only the server has. The verifier (D-027) already does this for the server's own answers.
 - Mistral Work decides on its own when to call a Connector; custom instructions "don't change how tools execute", Skills take precedence over custom instructions when active, and activation is the model's decision (`vibe/work/custom-instructions`, `vibe/work/skills`). There is no hook that forces a tool call per message.
-- Consumers without a model of their own (a support widget, a batch script, a Slack bot) need an endpoint that returns a finished, cited answer; that is what the assignment text describes and what `/ask` is.
+- Consumers without a model of their own (a support widget, a batch script, a Slack bot) need an endpoint that returns a finished, cited answer; that is what `/ask` is.
 
 **Decision.** The MCP surface gains a `cite` tool: the consumer sends its draft answer and the quotes it relied on; the server verifies each quote against the chunks it served, returns a fragment link for each quote that holds and a reason for each that does not, and never rewrites the answer. `ask` stays, for consumers without a model and as the path whose quality is measured (0.93 tuned, 0.84 fresh, 0.79 mined). A blind consumer evaluation with weak models at low reasoning (D-032) runs three arms per consumer, no tools, retrieval tools plus `cite`, and `ask`, and reports correctness, citation precision, whether the tool was called, and cost per correct answer; the README recommends whichever arm wins for capable consumers and keeps `ask` for the others. In Work the documented mechanism is a workspace Skill that triggers on Mistral product questions and instructs the model to search first, cite through `cite`, and never answer from memory.
 
@@ -882,7 +882,7 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 **Status:** decided · 2026-09-09 · snapshot evaluation and history tool; the docs repository history was fetched in full on 2026-09-09 (1,294 commits since 2023-12-22)
 
 **Facts.**
-- The corpus adapter (D-002) turns one commit of `mistralai/platform-docs-public` into the corpus, and the evaluation runs in minutes, so both can run at any commit. A pipeline tuned on one commit and never run on another has no evidence that it survives the next docs release; the assignment leaves "the level of depth" to the candidate and asks for retrieval evaluation, so depth on evaluation over time is in scope.
+- The corpus adapter (D-002) turns one commit of `mistralai/platform-docs-public` into the corpus, and the evaluation runs in minutes, so both can run at any commit. A pipeline tuned on one commit and never run on another has no evidence that it survives the next docs release; the product asks for retrieval evaluation, so depth on evaluation over time is in scope.
 - The repository has had three layouts: Docusaurus `docs/` until 20 October 2025 (27 to 87 Markdown files), a Next.js `src/app` tree until 28 May 2026 (267 to 373), and the current `src/content/<locale>/docs` tree since (1,256 to 1,419 files including French). The adapter reads the current layout only.
 - Between two snapshots a fortnight apart most chunks are unchanged, so embeddings cached by content hash make a new snapshot cost a fraction of a full ingestion (a full sec1024 ingestion is about 1,033 chunks).
 - Whether a question was answerable at an older snapshot must be decided on content, not on the page: sections move. The verifier's whitespace-normalized span search over the whole snapshot decides "present" (same page or moved) deterministically; a span found nowhere goes to a judged step (reference answer against the top five lexically retrieved pages of the snapshot: same fact, different value, or not stated), with a second judge and a human sample, and the tables report the two kinds of cells separately.
@@ -897,10 +897,10 @@ Real questions are found as well as generated ones (URL match 0.86) but answered
 
 **Facts.**
 - The search loop stops after 4 rounds with 4 searches per round and shows the model 600-character previews of search results (1,600 for `open`); none of the three values was ever varied. The final generation reads the full chunks of everything the loop collected, so a preview never truncates the answer's context; the risk is that the loop discards, or never reads, a chunk whose relevant sentence sat past the preview.
-- The Mistral credits stand at 7.04 of 10 EUR used on 2026-09-09 (console), the promised 20 USD are not yet credited, and every answer evaluation spends Ministral calls; the eval records store a cost of 0 for every call although token counts are recorded (18.8 million Ministral tokens across 5,515 recorded calls, about 2.8 USD at the published Ministral 3 rate), which is a recording bug to fix.
+- The Mistral credits stand at 7.04 of 10 EUR used on 2026-09-09 (console), a further 20 USD is not yet credited, and every answer evaluation spends Ministral calls; the eval records store a cost of 0 for every call although token counts are recorded (18.8 million Ministral tokens across 5,515 recorded calls, about 2.8 USD at the published Ministral 3 rate), which is a recording bug to fix.
 - Tom hosts Ministral 3 on his own GPU (llama.cpp, tool-calling template); the SDK client accepts a `server_url`, so chat calls can go there while embeddings stay on the API, which llama.cpp does not serve.
 
-**Decision.** Chat clients (answer model, reranker, translation) read an optional server URL from the environment; the grid over rounds (4, 6, 8), searches per round (4, 6) and preview size (600, 1,500, full) runs there on 60 questions, one axis at a time from the shipped point, with the GLM judge. Its numbers are relative comparisons between configurations on a quantized local model; every shipped figure keeps coming from the API. No further Mistral credits are spent before the promised credits arrive, except about 0.2 EUR of embeddings for the snapshots (D-041). Cost recording is fixed so every call carries its price, and the recorded totals are reconciled against the console.
+**Decision.** Chat clients (answer model, reranker, translation) read an optional server URL from the environment; the grid over rounds (4, 6, 8), searches per round (4, 6) and preview size (600, 1,500, full) runs there on 60 questions, one axis at a time from the shipped point, with the GLM judge. Its numbers are relative comparisons between configurations on a quantized local model; every shipped figure keeps coming from the API. No more Mistral credits are spent before the further 20 USD arrive, except about 0.2 EUR of embeddings for the snapshots (D-041). Cost recording is fixed so every call carries its price, and the recorded totals are reconciled against the console.
 
 ---
 
@@ -1316,7 +1316,7 @@ Each cell reads Ministral 3 14B → Medium 3.5. The mined-v2 source run was gene
 2. **Population.** Questions of the frozen sets labelled present in both snapshots (D-041 labels), answerable ones for retrieval, citation and correctness; unanswerable questions and cells labelled absent in both for refusal. A fact the documentation removed is never a regression of the pipeline; it goes to the changelog.
 3. **Signals and criterion.** Four signals per question: `retrieved` (a chunk of an accepted page reached the context), `cited` (a verified citation on an accepted page), `refused` (`insufficient_evidence`), `correct` (the primary judge's verdict on the three-point scale). For each signal, the questions that got worse are counted against those that got better. A signal regresses when the net loss exceeds `max(4, 5% of the paired population)`: 4 on sixty questions, 8 on a hundred and forty-five. With a flip rate of one in ten and no drift, the net loss has a standard deviation of about `sqrt(0.1 n)`: 2.4 on sixty, 3.8 on a hundred and forty-five. The floor of 4 is 1.6 standard deviations on sixty (about one spurious regression per signal in twenty no-change refreshes), and the 5% share is 2.1 on a hundred and forty-five, which is one reason to answer the mined set too (point 7). The verdict is `regression` if any signal regresses; `inconclusive` if more than 10% of questions have no answer, label or verdict on the candidate side while the baseline has one, or if fewer than twenty answerable questions were paired (an outage is not evidence of no regression, and a verdict on a handful is not a verdict); and `pass` otherwise. The gate exits 0, 1, 2 for those and 3 when it could not run, so the workflow can tell a regression from a crash. The thresholds are parameters of the command and constants in the module, so a change to them is a diff.
 4. **What happens on each verdict.** Pass: the workflow moves the served pointer, copies the candidate corpus over the vendored one exactly as it was evaluated (not a fresh build against the live OpenAPI and search index), advances the pinned commit in the code and the Makefile, commits the run and opens a pull request; merging it and running `make deploy` is what changes the served index. Regression or inconclusive: nothing moves; an issue is opened with the gate table and each question that got worse or better with its previous and current value. Every run uploads its records as an artifact either way.
-5. **Cost of one run**, at the published prices, evaluating the fresh sixty on both snapshots (120 answers) and labelling the fresh sixty plus the mined eighty-five: two ingestions on a cold runner, 2 × 1.2 M embedding tokens, 0.24 USD (cents once the embedding cache is restored on the runner, the named follow-up); the reranker on Mistral Small 4, 120 calls, 0.11 USD; generation on Mistral Medium 3.5, 120 calls, 0.70 USD; labelling and judging on GLM through z.ai, 0 USD against the Mistral budget. About **1.05 USD per run on the shipped model**, 0.40 USD with Ministral 3 14B generating, and about forty runner minutes. Weekly on Medium is 4.5 USD a month; the 20 USD of credits are nineteen runs.
+5. **Cost of one run**, at the published prices, evaluating the fresh sixty on both snapshots (120 answers) and labelling the fresh sixty plus the mined eighty-five: two ingestions on a cold runner, 2 × 1.2 M embedding tokens, 0.24 USD (cents once the embedding cache is restored on the runner, the named follow-up); the reranker on Mistral Small 4, 120 calls, 0.11 USD; generation on Mistral Medium 3.5, 120 calls, 0.70 USD; labelling and judging on GLM through z.ai, 0 USD on the Mistral side. About **1.05 USD per run on the shipped model**, 0.40 USD with Ministral 3 14B generating, and about forty runner minutes. Weekly on Medium is 4.5 USD a month; the 20 USD of credits are nineteen runs.
 6. **Cron: proposed off at v1.0, manual trigger on.** Two reasons, both facts today: the key's quota for Medium 3.5 and Small 4 is zero (D-017a), so a scheduled run would fail at the reranker until the account is provisioned; and a run is a real dollar against twenty. The README states the schedule is off, the cost of a run, and that turning it on is uncommenting two lines once the first manual run has passed on a provisioned key. Tom confirms or overturns.
 7. The mined set is labelled on every run but not yet answered, since no judged run on it exists at any snapshot; adding it to the answered set doubles the generation cost to about 1.9 USD per run and is the next extension of the gate.
 
