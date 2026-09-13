@@ -214,7 +214,7 @@ When Work asks for confirmation, it adds the undeclared
 allowed a retry. `_ParamGuard` now removes underscore-prefixed host metadata before
 validation; every tool also advertises read-only,
 non-destructive, idempotent and closed-world annotations (D-037b;
-`src/glossator/surface/params.py:61-80`; `src/entrypoints/mcp_server.py:129-154,194-208`).
+`src/glossator/surface/params.py:58-77`; `src/entrypoints/mcp_server.py:129-154,194-208`).
 
 ## Outdated Mistral material excluded or corrected
 
