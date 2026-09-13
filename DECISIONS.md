@@ -1623,7 +1623,7 @@ The same census on the 57 reads the demo run actually made (420,322 characters):
 
 ## D-050a · Containment measured: a read prints 36% fewer characters, correctness unchanged within the noise of two runs
 
-**Status:** recorded · 2026-09-12 · `src/glossator/containing.py` (GLM 5.3 on branch `agent/contain-reads`, one follow-up by hand for a tab label the docs print twice in a row), deployed at 13:55, the Connector's tool cache refreshed to the `lang` schema; `eval/runs/2026-09-12-1211-demo-medium35-contained/` (the thirty questions of `eval/demo.jsonl` again, same agent, same model and effort, judged by GLM 5.3) beside `2026-09-12-1102-demo-medium35` (D-049a); the runner's README now carries a size table, tokens per question and characters per tool result, on every run
+**Status:** recorded · 2026-09-12 · `src/glossator/surface/containing.py` (GLM 5.3 on branch `agent/contain-reads`, one follow-up by hand for a tab label the docs print twice in a row), deployed at 13:55, the Connector's tool cache refreshed to the `lang` schema; `eval/runs/2026-09-12-1211-demo-medium35-contained/` (the thirty questions of `eval/demo.jsonl` again, same agent, same model and effort, judged by GLM 5.3) beside `2026-09-12-1102-demo-medium35` (D-049a); the runner's README now carries a size table, tokens per question and characters per tool result, on every run
 
 | | D-049a | contained |
 |---|---:|---:|
@@ -1710,6 +1710,10 @@ no longer mounts a machine-local snapshot directory. A missing or unreadable
 snapshot is an upstream failure, not a bad argument. Both health endpoints
 report readable snapshots against manifest entries. `make snapshots` rebuilds
 the set, and a new date is committed with its manifest row and changelog.
+The `SNAPSHOTS_DIR` deployment variable named in D-045a and D-048 is gone: no
+script, compose file or environment example reads it, and the refresh
+workflow's accept step vendors the accepted corpus under its date, rewrites
+the manifest row to that path and rebuilds the changelog in the same pull request.
 
 ---
 
