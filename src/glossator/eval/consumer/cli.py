@@ -15,6 +15,12 @@ from dotenv import load_dotenv
 
 from glossator.eval.answer_eval.models import parse_judge_models
 from glossator.eval.answer_eval.prompts import JUDGE_PROMPT_HASHES, JUDGE_VERSION
+from glossator.eval.consumer.citation_check import (
+    load_checks,
+    render_summary,
+    run_citation_check,
+    summarize,
+)
 from glossator.eval.consumer.collect import MAX_PARALLEL, QUESTION_TIMEOUT_S, run_collection
 from glossator.eval.consumer.consumers import ARM_TOOLS, ARMS, VIBE_ARM_NAMES, consumer_spec
 from glossator.eval.consumer.defects import collect_defects, render_defects
@@ -116,6 +122,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     judge_parser.add_argument("--judge-models", default="zai:glm-5.3")
     judge_parser.add_argument("--rejudge", action="store_true")
     judge_parser.add_argument("--quota-ceiling", type=int, default=80)
+
+    cite_parser = sub.add_parser(
+        "cite-check", help="Judge whether each documentation link supports its claim (resumable)"
+    )
+    cite_parser.add_argument("--run", type=Path, required=True)
+    cite_parser.add_argument("--judge-model", default="zai:glm-5.3")
+    cite_parser.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    cite_parser.add_argument("--snapshots", type=Path, default=Path("corpus/snapshots"))
+    cite_parser.add_argument("--quota-ceiling", type=int, default=80)
 
     score_parser = sub.add_parser("score", help="Score a run deterministically")
     score_parser.add_argument("--run", type=Path, required=True)
@@ -227,6 +242,24 @@ async def _judge(args: argparse.Namespace) -> None:
     print(json.dumps(counts, indent=2, sort_keys=True))
 
 
+async def _cite_check(args: argparse.Namespace) -> None:
+    try:
+        judge = parse_judge_models(args.judge_model)[0]
+    except (ValueError, IndexError) as error:
+        raise SystemExit(str(error)) from error
+    counts = await run_citation_check(
+        args.run,
+        judge,
+        corpus_dir=args.corpus,
+        snapshots_dir=args.snapshots,
+        quota_ceiling=args.quota_ceiling,
+    )
+    records = load_records(args.run / "records.jsonl")
+    cells = summarize(records, load_checks(args.run / "citations.jsonl"))
+    (args.run / "citations.md").write_text(render_summary(cells, judge.identifier))
+    print(json.dumps({"counts": counts, "cells": cells}, indent=2, sort_keys=True))
+
+
 def _score(args: argparse.Namespace) -> None:
     run_dir: Path = args.run
     records = load_records(run_dir / "records.jsonl")
@@ -285,6 +318,8 @@ def main() -> None:
         asyncio.run(_run(args))
     elif args.command == "judge":
         asyncio.run(_judge(args))
+    elif args.command == "cite-check":
+        asyncio.run(_cite_check(args))
     elif args.command == "score":
         _score(args)
     else:

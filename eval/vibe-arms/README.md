@@ -84,9 +84,31 @@ Costs are Vibe's own session accounting at list price. \* See VA below.
 **Reading.** VB, VC, VD and Work are one result: 0.60–0.67 on 30 questions, inside the
 ±0.17 interval. On correctness, a shell over glossator's normalised pages is as good as
 the three tools, and the tools add nothing a shell agent could not get from the files.
-Where the tools do differ: the right page is linked more often (on gold 0.84 against
-0.68), and they read under half the tokens (48k against 110k per question). VD, given
-both, called the tools 104 times and the shell 45 times, and cost least.
+What the tools do buy is budget: under half the tokens (48k against 110k per question).
+VD, given both, called the tools 104 times and the shell 45 times, and cost least.
+
+**Citations: `on gold` overstated the tools' lead.** Every demo question lists exactly
+one gold page, and the documentation often states a fact twice (guide and API
+reference). `cite-check` (`citations.md`, `citations.jsonl`) resolves each link to the
+section its anchor names and has GLM 5.3 judge whether that passage states the claim
+the link is attached to. On the 20 answerable questions that are not history rows:
+
+| arm | on gold | answer has a supported link | supported or partial | supported link, not the gold page | gold page, section does not support |
+|---|---:|---:|---:|---:|---:|
+| V0 | 0.00 | 0.00 | 0.10 | 0 | 0 |
+| VA | 0.70 | 0.80 | 0.85 | 4 | 2 |
+| VB | 0.70 | 0.80 | 1.00 | 5 | 3 |
+| VC | 0.80 | 0.85 | 0.95 | 2 | 1 |
+| VD | 0.75 | 0.85 | 0.95 | 3 | 1 |
+
+The ten-point gap on the gold page becomes one question in twenty. Per link, the tools
+are more precise (67% of VC's links fully supported against 51% for VB; VB cites more
+pages loosely), and they land on a named section more often (0.78 against 0.66).
+History rows are excluded: the dates come from the snapshots, no page states them, and
+every arm's history citations score unsupported. Calibration: the five citations
+checked by hand before the run agree with the judge, and a random sample of fourteen
+verdicts reads right; one of the hand checks was the reviewer's error, not the
+judge's (`tool_choice: "none"` is defined on the chat endpoint page only).
 
 The raw repository is the one real gap, 0.42, and it is not the single-page rows (0.57,
 level with every other arm). It is:
@@ -106,8 +128,9 @@ level with every other arm). It is:
 2. VC > VB on badly worded questions: not measurable with this set; single-page rows tie.
 3. History: VC and VD at the shipped 0.80 or above, held (1.00). VB lower: wrong, VB
    got 5 of 5 with `ls` and a `for` loop over the dated directories, 4 to 13 calls. VA partial: worse, scored wrong.
-4. Links: held. Tools resolve best and land on the gold page most (0.84); VB 0.97
-   resolve but 0.68 on gold; VA lowest of the documentation arms.
+4. Links: held in direction, weaker than it first looked. Tools resolve best and are
+   most precise per link; by supporting passage rather than gold page, VC and VD lead
+   VA and VB by one question in twenty.
 5. Unanswerable, shell arms better: wrong. VB 0.20, VA 0.00; only VD matched Work's
    0.40. Every arm answered `mined2-055` with an invented 128-tool limit and
    `mined2-066` from the Agents FAQ (the known reference defect).
