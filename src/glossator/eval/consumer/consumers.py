@@ -5,18 +5,26 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-ARMS = ("A0", "A1", "A2")
+ARMS = ("A0", "A1", "A2", "V0", "VA", "VB", "VC", "VD")
 
 ARM_TOOLS: dict[str, str | None] = {
     "A0": None,
     "A1": "mistral_docs_search,mistral_docs_read_page",
     "A2": "mistral_docs_answer",
+    "V0": "vibe: bash in an empty directory",
+    "VA": "vibe: bash over the raw docs repository",
+    "VB": "vibe: bash over the normalised pages and snapshots",
+    "VC": "mistral_docs_search,mistral_docs_read_page,mistral_docs_history",
+    "VD": "vibe: bash over the normalised pages and snapshots, plus all three tools",
 }
 """The GLOSSATOR_MCP_TOOLS allowlist each arm's server runs. A0 never sees an
 MCP server at all; A1 talks to a server started with this allowlist. A2 named
 the answer tool while it was on the MCP surface (runs up to 2026-09-10); it is
 kept so recorded runs read back, and a new A2 cell needs the API's `POST /ask`
-instead (D-044)."""
+instead (D-044). The V arms run only with the vibe harness; their tools and
+environment are in `vibe_arms.py`."""
+
+VIBE_ARM_NAMES = ("V0", "VA", "VB", "VC", "VD")
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,7 +32,7 @@ class ConsumerSpec:
     """One weak consumer: harness, model, and low-reasoning setting."""
 
     name: str
-    harness: Literal["opencode", "codex", "claude"]
+    harness: Literal["opencode", "codex", "claude", "vibe"]
     model: str
     variant: str | None = None
     """The reasoning effort, named the way the harness names it: opencode's
@@ -62,6 +70,12 @@ CONSUMERS: tuple[ConsumerSpec, ...] = (
         harness="claude",
         model="haiku",
         variant="low",
+    ),
+    ConsumerSpec(
+        name="vibe-medium35-high",
+        harness="vibe",
+        model="mistral-medium-3.5",
+        variant="high",
     ),
 )
 """Every weak consumer. The muse consumer is first: it is the contributor-free

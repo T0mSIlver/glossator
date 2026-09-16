@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# The shell Vibe's bash tool runs, for the vibe arms: `$SHELL -c <command>`.
+# No network, no inherited environment (so no API key or MCP token), and a
+# filesystem holding the system binaries, a scratch /tmp and the arm's own
+# directory, read-only. Anything else on the machine, the evaluation sets
+# included, does not exist from inside.
+set -euo pipefail
+: "${GLOSSATOR_ARM_ENV:?GLOSSATOR_ARM_ENV must name the arm directory}"
+
+extra=()
+if [[ -x "${GLOSSATOR_ARM_FD:-}" ]]; then
+  extra+=(--ro-bind "$GLOSSATOR_ARM_FD" /opt/bin/fd)
+fi
+
+exec bwrap \
+  --unshare-all \
+  --die-with-parent \
+  --new-session \
+  --ro-bind /usr /usr \
+  --symlink usr/bin /bin \
+  --symlink usr/sbin /sbin \
+  --symlink usr/lib /lib \
+  --symlink usr/lib64 /lib64 \
+  --ro-bind /etc/alternatives /etc/alternatives \
+  --proc /proc \
+  --dev /dev \
+  --tmpfs /tmp \
+  --dir /opt/bin \
+  "${extra[@]}" \
+  --ro-bind "$GLOSSATOR_ARM_ENV" "$GLOSSATOR_ARM_ENV" \
+  --chdir "$GLOSSATOR_ARM_ENV" \
+  --clearenv \
+  --setenv PATH /opt/bin:/usr/local/bin:/usr/bin:/bin \
+  --setenv HOME /tmp \
+  --setenv LANG C.UTF-8 \
+  --setenv LC_CTYPE C.UTF-8 \
+  --setenv TERM dumb \
+  --setenv PAGER cat \
+  --setenv GIT_PAGER cat \
+  --setenv GIT_CONFIG_NOSYSTEM 1 \
+  /usr/bin/bash "$@"

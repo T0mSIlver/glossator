@@ -34,6 +34,13 @@ from glossator.eval.consumer.opencode import (
     write_opencode_config,
 )
 from glossator.eval.consumer.tools import TOKEN_ENV_VAR
+from glossator.eval.consumer.vibe import (
+    parse_vibe_events,
+    parse_vibe_session,
+    vibe_command,
+    write_vibe_home,
+)
+from glossator.eval.consumer.vibe_arms import VIBE_ARMS
 
 
 @dataclass(slots=True)
@@ -226,6 +233,63 @@ def collect_codex(
     return _collected(
         run, answer, calls, tokens, cost, timeout_s=timeout_s, failure=codex_failure(run.lines)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class VibeSetting:
+    """Where the vibe arms' directories and the sandbox shell live."""
+
+    environments_root: Path
+    sandbox_shell: Path
+    fd_path: Path | None
+
+
+def collect_vibe(
+    spec: ConsumerSpec,
+    prompt: str,
+    cell_dir: Path,
+    *,
+    arm: str,
+    setting: VibeSetting,
+    mcp_url: str | None,
+    token: str,
+    timeout_s: float,
+) -> CollectedAnswer:
+    """One question through headless Vibe, in the cell's own Vibe home.
+
+    The arm's directory is the working directory and, for the shell, the only
+    directory that exists: ``$SHELL`` is the sandbox wrapper, which reads the
+    directory from ``GLOSSATOR_ARM_ENV``.
+    """
+    vibe_arm = VIBE_ARMS[arm]
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    (cell_dir / "prompt.txt").write_text(prompt + "\n")
+    home = cell_dir / "vibe-home"
+    write_vibe_home(home, spec, vibe_arm, mcp_url=mcp_url, token_env=TOKEN_ENV_VAR)
+    workdir = vibe_arm.workdir(setting.environments_root).resolve()
+    environment = _harness_environment(token)
+    environment.update(
+        {
+            "VIBE_HOME": str(home.resolve()),
+            "SHELL": str(setting.sandbox_shell.resolve()),
+            "GLOSSATOR_ARM_ENV": str(workdir),
+        }
+    )
+    if setting.fd_path is not None:
+        environment["GLOSSATOR_ARM_FD"] = str(setting.fd_path)
+    run = _run_harness(
+        vibe_command(prompt, workdir),
+        cell_dir,
+        timeout_s=timeout_s,
+        cwd=workdir,
+        env=environment,
+    )
+    answer, calls = parse_vibe_events(run.lines)
+    tokens, cost, session_failure = parse_vibe_session(home)
+    failure = None
+    if not answer and not calls:
+        failure = session_failure or (run.stderr.strip()[-300:] or None)
+    return _collected(run, answer, calls, tokens, cost, timeout_s=timeout_s, failure=failure)
 
 
 COLLECTORS = {

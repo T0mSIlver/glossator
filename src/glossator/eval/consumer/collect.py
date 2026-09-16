@@ -11,7 +11,7 @@ import structlog
 
 from glossator.eval.consumer.answers import extract_links
 from glossator.eval.consumer.consumers import ConsumerSpec
-from glossator.eval.consumer.harness import COLLECTORS
+from glossator.eval.consumer.harness import COLLECTORS, VibeSetting, collect_vibe
 from glossator.eval.consumer.models import ConsumerRecord, append_record, load_records
 from glossator.eval.consumer.questions import prompt_for
 from glossator.eval.consumer.tools import is_server_tool, is_verify_tool
@@ -21,7 +21,8 @@ logger = structlog.get_logger(__name__)
 
 
 MAX_PARALLEL = 2
-"""At most two headless harness processes at once: opencode hangs at a third."""
+"""At most two headless harness processes at once: opencode hangs at a third.
+Vibe has no such limit; its runs pass their own parallelism."""
 
 QUESTION_TIMEOUT_S = 600.0
 
@@ -56,22 +57,37 @@ async def _collect_cell(
     timeout_s: float,
     semaphore: asyncio.Semaphore,
     append_lock: asyncio.Lock,
+    vibe_setting: VibeSetting | None = None,
 ) -> ConsumerRecord:
     key = (spec.name, arm, question.id)
     cell_dir = scratch_root / run_name / spec.name / arm / question.id
     prompt = prompt_for(question)
     mcp_url = mcp_urls.get(arm)
-    collect = COLLECTORS[spec.harness]
     async with semaphore:
-        collected = await asyncio.to_thread(
-            collect,
-            spec,
-            prompt,
-            cell_dir,
-            mcp_url=mcp_url,
-            token=token,
-            timeout_s=timeout_s,
-        )
+        if spec.harness == "vibe":
+            if vibe_setting is None:
+                raise ValueError("the vibe harness needs a VibeSetting")
+            collected = await asyncio.to_thread(
+                collect_vibe,
+                spec,
+                prompt,
+                cell_dir,
+                arm=arm,
+                setting=vibe_setting,
+                mcp_url=mcp_url,
+                token=token,
+                timeout_s=timeout_s,
+            )
+        else:
+            collected = await asyncio.to_thread(
+                COLLECTORS[spec.harness],
+                spec,
+                prompt,
+                cell_dir,
+                mcp_url=mcp_url,
+                token=token,
+                timeout_s=timeout_s,
+            )
     transcript = copy_transcript(
         run_dir,
         Path(collected.transcript),
@@ -117,6 +133,8 @@ async def run_collection(
     mcp_urls: Mapping[str, str],
     token: str,
     timeout_s: float,
+    vibe_setting: VibeSetting | None = None,
+    parallel: int = MAX_PARALLEL,
 ) -> list[ConsumerRecord]:
     """Every cell through its harness, skipping cells already recorded."""
     done = {(r.consumer, r.arm, r.question_id) for r in load_records(run_dir / "records.jsonl")}
@@ -128,7 +146,7 @@ async def run_collection(
         if (spec.name, arm, question.id) not in done
     ]
     logger.info("Consumer collection", pending=len(pending), recorded=len(done), run=str(run_dir))
-    semaphore = asyncio.Semaphore(MAX_PARALLEL)
+    semaphore = asyncio.Semaphore(parallel)
     append_lock = asyncio.Lock()
 
     # One coroutine per cell would open every question at once; bound the
@@ -146,6 +164,7 @@ async def run_collection(
             timeout_s=timeout_s,
             semaphore=semaphore,
             append_lock=append_lock,
+            vibe_setting=vibe_setting,
         )
 
     return list(
