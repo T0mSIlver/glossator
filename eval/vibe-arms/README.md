@@ -145,8 +145,10 @@ Interval on correctness about ±0.12.
   snapshot grid it did not have, absence, and turn limits.
 - **Citations separate them, and in an order.** Answers carrying a link whose section
   states the claim: tools 0.92, files 0.83, raw repository 0.62. The raw repository
-  links a heading anchor the site does not have on 35% of its links (it slugifies
-  headings the site leaves unanchored) and hits the turn cap on 7 of 60. Glossator's
+  links an anchor the site does not have on 35% of its links (34 links: 18 match no
+  heading at all, mostly invented API field anchors such as `#OCRRequest`; 12 slugify a
+  heading the site leaves unanchored; 4 slugify a heading whose explicit id differs,
+  `#server-errors-5xx` for `#server-errors`) and hits the turn cap on 7 of 60. Glossator's
   normalised pages close most of that gap; the tools close the rest.
 - **Budget separates them most.** Tools $1.81 and 53k input tokens a question; files
   $2.68 and 86k; raw repository $5.34 and 201k, at 2.6 times the latency.
