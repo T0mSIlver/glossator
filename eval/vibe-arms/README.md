@@ -63,6 +63,57 @@ uv run python -m glossator.eval.consumer score --run eval/runs/<run> --sample-co
    pages); VD mostly calls the tools and uses the shell rarely.
 7. V0, the control, answers little correctly and its links resolve poorly.
 
+## Results: `eval/runs/2026-09-16-2145-vibe-arms-demo`
+
+30 questions from `eval/demo.jsonl`, 150 cells, 0 collection errors, 150 judged
+(GLM 5.3, `answer-judge/v2`). Work is the shipped Work-proxy run on the same questions
+(`2026-09-13-1306-demo-medium35-shipped`): same model, Conversations API instead of
+Vibe, Skill as instructions.
+
+| arm | correctness | api ref (3) | cross page (3) | history (5) | single page (14) | unanswerable (5) | links resolve | on gold | cost, 30 q | input tok / q | calls / q | p50 s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| V0 no docs | 0.23 | 0.33 | 0.33 | 0.20 | 0.21 | 0.20 | 0.22 | 0.04 | $0.81 | 7.8k | 2.7 | 16 |
+| VA raw repo | 0.42 | 0.83 | 0.67 | 0.00* | 0.57 | 0.00 | 0.92 | 0.64 | $2.42 | 225k | 18.2 | 36 |
+| VB files | 0.62 | 0.67 | 0.83 | 1.00 | 0.57 | 0.20 | 0.97 | 0.68 | $1.48 | 110k | 11.7 | 17 |
+| VC tools | 0.63 | 0.83 | 0.83 | 1.00 | 0.57 | 0.20 | 0.98 | 0.84 | $1.37 | 48k | 5.1 | 15 |
+| VD files + tools | 0.67 | 0.83 | 0.67 | 1.00 | 0.61 | 0.40 | 0.98 | 0.76 | $0.95 | 53k | 5.3 | 14 |
+| Work (shipped) | 0.60 | 0.33 | 0.67 | 0.80 | 0.64 | 0.40 | 0.96 | 0.72 | | 7.4k | 5.4 | 19 |
+
+Costs are Vibe's own session accounting at list price. \* See VA below.
+
+**Reading.** VB, VC, VD and Work are one result: 0.60–0.67 on 30 questions, inside the
+±0.17 interval. On correctness, a shell over glossator's normalised pages is as good as
+the three tools, and the tools add nothing a shell agent could not get from the files.
+Where the tools do differ: the right page is linked more often (on gold 0.84 against
+0.68), and they read under half the tokens (48k against 110k per question). VD, given
+both, called the tools 104 times and the shell 45 times, and cost least.
+
+The raw repository is the one real gap, 0.42, and it is not the single-page rows (0.57,
+level with every other arm). It is:
+- **History, 0 of 5, mostly a scoring artifact.** VA answers from `git log` commit
+  dates. Four of its five intervals are compatible with, and narrower than, the
+  fortnightly snapshot interval in the gold (hist-003: 14–20 Aug inside 15 Aug–1 Sep),
+  and the judge scores every interval that is not the gold's as wrong. The fifth hit the
+  turn limit. A reference that accepted any interval inside the gold's would score VA
+  near the others. What the snapshots buy is the date grid the gold was written on,
+  not the ability to answer.
+- **Turn limit.** 4 VA cells (and 1 VB cell) hit the 40-turn cap with no answer.
+- **Unanswerable, 0 of 5.** Three of the five are turn-limit cells: VA kept searching
+  for what does not exist.
+
+**Predictions against results.**
+1. VB ≥ VC on exact values and API reference: not separable at n = 3.
+2. VC > VB on badly worded questions: not measurable with this set; single-page rows tie.
+3. History: VC and VD at the shipped 0.80 or above, held (1.00). VB lower: wrong, VB
+   got 5 of 5 with `ls` and a `for` loop over the dated directories, 4 to 13 calls. VA partial: worse, scored wrong.
+4. Links: held. Tools resolve best and land on the gold page most (0.84); VB 0.97
+   resolve but 0.68 on gold; VA lowest of the documentation arms.
+5. Unanswerable, shell arms better: wrong. VB 0.20, VA 0.00; only VD matched Work's
+   0.40. Every arm answered `mined2-055` with an invented 128-tool limit and
+   `mined2-066` from the Agents FAQ (the known reference defect).
+6. Cost: held for tokens (VA 4.7×, VB 2.3× VC); VD cheapest overall.
+7. V0 low: held, 0.23, links resolve 0.22.
+
 ## Known biases
 
 - VA's history answers use commit dates while the gold uses the fortnightly snapshot
