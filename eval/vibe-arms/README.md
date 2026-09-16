@@ -123,6 +123,41 @@ level with every other arm). It is:
 - **Unanswerable, 0 of 5.** Three of the five are turn-limit cells: VA kept searching
   for what does not exist.
 
+## Results: `eval/runs/2026-09-16-2300-vibe-arms-consumer60`
+
+The consumer evaluation's fixed 60 (40 mined stratified, 20 fresh, seed 0; 12
+unanswerable, no history rows), same arms, harness and model, run on the Vibe plan key.
+300 cells, 0 collection errors, 300 judged, 376 links checked by `cite-check`, 0 errors.
+Interval on correctness about ±0.12.
+
+| arm | correctness | api ref (14) | capability (5) | cross page (8) | post cutoff (3) | single page (18) | unanswerable (12) | answerable with a supported link (48) | links supported | anchor missing | cost, 60 q | input tok / q | stopped at the turn cap |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| V0 no docs | 0.23 | 0.43 | 0.20 | 0.06 | 0.17 | 0.22 | 0.17 | 0.00 | 0.00 | 0.05 | $1.09 | 7k | 0 |
+| VA raw repo | 0.60 | 0.71 | 0.20 | 0.75 | 0.83 | 0.61 | 0.46 | 0.62 | 0.56 | 0.35 | $5.34 | 201k | 7 |
+| VB files | 0.63 | 0.71 | 0.90 | 0.69 | 0.83 | 0.56 | 0.46 | 0.83 | 0.75 | 0.14 | $2.68 | 86k | 1 |
+| VC tools | 0.68 | 0.71 | 0.60 | 0.81 | 0.67 | 0.72 | 0.54 | **0.92** | **0.80** | 0.15 | **$1.81** | 53k | 0 |
+| VD files + tools | 0.64 | 0.75 | 0.60 | 0.75 | 0.83 | 0.64 | 0.42 | 0.90 | 0.69 | 0.13 | $2.32 | 85k | 1 |
+
+**Reading, both runs together.**
+- **Correctness does not separate the documentation arms.** 0.60–0.68 here, 0.62–0.67
+  on the demo set, every gap inside the interval. On ordinary questions even the raw
+  repository keeps up (0.60); its 0.42 on the demo set was history scored against a
+  snapshot grid it did not have, absence, and turn limits.
+- **Citations separate them, and in an order.** Answers carrying a link whose section
+  states the claim: tools 0.92, files 0.83, raw repository 0.62. The raw repository
+  links a heading anchor the site does not have on 35% of its links (it slugifies
+  headings the site leaves unanchored) and hits the turn cap on 7 of 60. Glossator's
+  normalised pages close most of that gap; the tools close the rest.
+- **Budget separates them most.** Tools $1.81 and 53k input tokens a question; files
+  $2.68 and 86k; raw repository $5.34 and 201k, at 2.6 times the latency.
+- **Given both, the agent does not get better.** VD is level with VC on correctness and
+  supported answers, reads more and costs more.
+- **Absence stays the weakest row on every surface** (0.42–0.54 on 12 unanswerables).
+
+So the corpus adapter is what makes a documentation corpus usable by an agent at all,
+and the three tools are what make it cheap and cite precisely; a shell over the same
+files gets most of the way on correctness and costs half as much again.
+
 **Predictions against results.**
 1. VB ≥ VC on exact values and API reference: not separable at n = 3.
 2. VC > VB on badly worded questions: not measurable with this set; single-page rows tie.
