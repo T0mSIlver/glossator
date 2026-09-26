@@ -73,7 +73,7 @@ Eight snapshots of the documentation repository, one every two weeks from 1 June
 
 ## Not measured
 
-A coding agent with a shell over the docs was measured after submission, five arms in the Vibe CLI (D-039a, [`eval/vibe-arms/`](../eval/vibe-arms/README.md)). Mistral Small 4 is the shipped reranker default and has never run in an evaluation; every reranker number names Ministral 3 14B. Neither mined set has been reviewed by hand row by row; their gold links are checked by a test. Whether a text-fragment link survives a click from Work is open (D-047c).
+A coding agent with a shell over the docs was measured after submission, five arms in the Vibe CLI (D-039a, [`eval/vibe-arms/`](../eval/vibe-arms/README.md)). Mistral Small 4, the shipped reranker default, ran for the first time in the 2026-09-26 refresh gate (D-045b); every earlier reranker number names Ministral 3 14B. Neither mined set has been reviewed by hand row by row; their gold links are checked by a test. Whether a text-fragment link survives a click from Work is open (D-047c).
 
 ## Reproduce
 

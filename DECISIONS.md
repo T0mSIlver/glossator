@@ -1858,3 +1858,25 @@ The Brave observation of D-047c on the `five-steps` link is a different question
 - D-039 says the 54 issue questions came from "people who had the SDK and still failed". 40 of the 54 were opened on SDK repositories (38 `client-python`, 2 `mistral-common`); whether their authors had the SDK checked out is not on record.
 
 **Decision.** The two documents now say what was done: agent-written from real excerpts, gold links tested, rows not reviewed by hand. The mined numbers are quoted as they are, with that provenance beside them.
+
+---
+
+## D-045b · The first refresh: nine releases of docs accepted, and the ingest now removes pages that left the corpus
+
+**Status:** decided · 2026-09-26 · run `2026-09-26-1038-refresh-eval-2026-09-26`, [workflow run](https://github.com/T0mSIlver/glossator/actions/runs/36236083834), PR #1; `glossator/ingest/pipeline.py`
+
+**Facts.**
+- Between the pinned commit `2e094f7` (2026-09-07) and the docs head `bee3023` (2026-09-24) upstream shipped nine releases, v1.8.7 to v1.11.0: 455 files changed, the Studio evaluations pages moved under `advanced-guides/`, and the llms.txt generation workflow was deleted. The corpus adapter built the head without change: 426 pages (25 added, 10 removed), no breadcrumb mismatch against the site's search index.
+- Before the refresh, the live check of the served corpus against docs.mistral.ai found 10 page URLs returning 404 and 56 anchors failing, all in Studio evaluations and the observability API. The server was citing links a reader could not open.
+- The gate (D-045) ran for the first time, on a GitHub runner, with Medium 3.5 generating and Small 4 reranking on Mistral's API and GLM 5.3 judging. Paired on 50 answerable and 10 refusal questions: retrieved 1.00 on both sides; cited 0.92 → 0.94 (2 worse, 3 better); refused 0.90 on both; correct 0.84 → 0.86 (2 worse, 4 better). Verdict pass. This is also the first evaluation in which Small 4, the shipped reranker default, reranked.
+- Cost: 0.69 USD in model calls (366 calls) plus about 0.24 USD of embeddings on a runner without the cache.
+- Two defects in the path from pass to served, both found on this run:
+  1. The workflow's last step failed. The repository does not let GitHub Actions open pull requests, so the accept branch was pushed and the PR was opened by hand. The verdict and the branch are the workflow's own.
+  2. After `make deploy`, search still returned the removed pages. Ingestion replaces a page's chunks but never deleted a page the corpus no longer has, so a refresh kept serving what the site had removed. The live index held 4,680 chunks where the corpus makes 4,592.
+- The offline suite failed on the accepted corpus in two ways the gate does not look at: three tests counted eight snapshots, and four datasets carried a gold link (`dev-027` and its variants) to a page that moved. The page moved whole, same anchor.
+
+**Decision.**
+1. The 2026-09-26 snapshot is served: 426 pages, 4,592 chunks, nine snapshots behind `history`. After the redeploy, all 426 URLs and 2,278 anchors resolve on the live site.
+2. Ingesting a served variant now ends by deleting every indexed page whose URL is not in the corpus, and only when every page indexed, so a page that failed is never mistaken for one that left. Snapshot variants hold several corpora in one schema and are left alone. The redeploy removed exactly the 10 pages.
+3. The `dev-027` gold link follows its page. The dataset READMEs record the new hash and the one every earlier run carries.
+4. Next, not done: the workflow runs the offline suite on the accepted tree before opening the PR, and the repository setting that lets Actions open pull requests is Tom's call.

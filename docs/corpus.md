@@ -15,7 +15,7 @@ make snapshots
 `make corpus-check` runs offline corpus tests and validates every URL and anchor
 against the live site. CI runs the live check weekly.
 
-The eight dated corpora used by the history tool live under
+The nine dated corpora used by the history tool live under
 `corpus/snapshots/`. `corpus/snapshots/2026-09-07` is byte-identical to
 `corpus/mistral-docs`, the served snapshot named in `eval/refresh/served.json`,
 and is kept under its date so the manifest addresses all eight the same way. To

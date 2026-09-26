@@ -65,7 +65,7 @@ five minutes do not include.
 `make setup-vespa` starts Vespa with its query API on `localhost:18080` and its
 config server on `localhost:19072`, deploys the schemas, then waits for the
 query API, which comes up a minute or so after the config server on a new
-container. `make ingest` splits the 411 pages into 4,440 section chunks and
+container. `make ingest` splits the 426 pages into 4,592 section chunks and
 embeds them with `mistral-embed`: about one million tokens, about 0.10 USD
 (D-011a). On the free tier the embedding API rate-limits the run, so it takes a
 few minutes; embeddings are cached under `~/.cache/glossator/embeddings`, or

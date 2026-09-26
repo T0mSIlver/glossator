@@ -1,6 +1,6 @@
 # Architecture in ten lines
 
-1. The repository vendors 411 normalized documentation pages at a pinned source commit.
+1. The repository vendors 426 normalized documentation pages at a pinned source commit.
 2. The corpus adapter converts the documentation MDX, OpenAPI file, and model data to Markdown.
 3. Ingestion splits at headings with a 600-token target; large code and table blocks stay intact.
 4. Mistral embeddings map each chunk to 1,024 dimensions (128 stays as a measured variant).

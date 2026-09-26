@@ -1,6 +1,6 @@
 # glossator
 
-glossator is a Model Context Protocol (MCP) server that gives agents Mistral's documentation: 411 pages from a pinned [docs.mistral.ai](https://docs.mistral.ai) commit.
+glossator is a Model Context Protocol (MCP) server that gives agents Mistral's documentation: 426 pages from a pinned [docs.mistral.ai](https://docs.mistral.ai) commit.
 The agent you already use, in Work, the Vibe CLI, or any MCP client, queries the documentation mid-task instead of going through a separate RAG system or a copy of the docs uploaded into every agent and every chat.
 It searches sections, reads pages and compares dated snapshots through three read-only tools, then writes the answer and cites the link each tool prints beside the text.
 
@@ -36,7 +36,7 @@ Any other MCP client, MCP Inspector for example, uses Streamable HTTP against th
 - Search returns section chunks with tested anchors and prints a `cite:` line beside every hit, because 1,823 of 4,016 headings have no anchor on the live site (D-034, D-047).
 - The agent writes the answer. Server-side generation stays as the measured baseline, scoring 0.78 against 0.77 at three times the latency (D-040b, D-044).
 - The three tools take no ids and carry read-only annotations. Without them a headless client never calls the server and Work cannot tell a read from a write (D-044, D-037b, D-037c).
-- Eight biweekly snapshots and a history tool answer when a fact changed (D-041, D-048).
+- Nine dated snapshots and a history tool answer when a fact changed (D-041, D-048). A newer docs commit is served only after a gate compares it with the served one on the frozen questions; the first refresh passed on 2026-09-26 (D-045, D-045b).
 - A coding agent with a shell over the same pages answers as correctly, but not as cheaply or precisely. In the Vibe CLI on Medium 3.5, sixty questions: correctness 0.60 on the raw docs repository, 0.63 on the normalised pages, 0.68 with the three tools, all inside the noise; answers with a link whose section states the claim 0.62, 0.83 and 0.92; cost 5.34, 2.68 and 1.81 USD (D-039a).
 
 Every choice is in `DECISIONS.md` with the run that decided it. The alternatives considered are in [`docs/alternatives.md`](docs/alternatives.md).
