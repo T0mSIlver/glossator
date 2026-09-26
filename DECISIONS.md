@@ -1829,3 +1829,32 @@ Each cell reads Ministral 3 14B → Medium 3.5 through the earlier OpenAI-compat
 - D-036b printed 0.85 for the fresh slice; 49 of 58 is 0.845, 0.84 at two places.
 
 The Brave observation of D-047c on the `five-steps` link is a different question: "We can now" sits inside one paragraph, the link is unchanged under this rule, and that entry stays open.
+
+---
+
+## D-039a · The grep question measured: a shell over the pages is as correct as the tools, not as cheap or as precise
+
+**Status:** decided · 2026-09-16, recorded in this file 2026-09-26 · `eval/vibe-arms/`, runs `2026-09-16-2145-vibe-arms-demo` and `2026-09-16-2300-vibe-arms-consumer60`
+
+**Facts.**
+- D-039 conceded exact-symbol questions to grep without measuring a grep arm, and `docs/evaluation.md` named that gap. The Vibe CLI, headless, on Medium 3.5 at high thinking, answered the same questions with the same answer and citation rules in five arms: no documentation, the raw docs repository with its history up to the pinned commit, the normalised pages and the eight snapshots as files, the three tools, and files plus tools. The shell runs in a sandbox with no network and no environment. Predictions were committed before the first scored run (`d9a2cf4`).
+- On the sixty-question consumer set (40 mined, 20 fresh, 12 unanswerable; about ±0.12), correctness is 0.23 with no documentation, then 0.60 on the raw repository, 0.63 on the files, 0.68 with the tools and 0.64 with both. The documentation arms are not separable on correctness.
+- They separate on citations. Answers with a link whose section states the claim, judged per link by `cite-check` on the 48 answerable questions: raw repository 0.62, files 0.83, tools 0.92, both 0.90. The raw repository links an anchor the site does not have on 35% of its links and stopped at the 40-turn cap on 7 of 60.
+- They separate most on budget: 201k, 86k and 53k input tokens per question; 5.34, 2.68 and 1.81 USD for the sixty at list price.
+- On the thirty demo questions the files and the tools tie again (0.62 and 0.63, ±0.17), and the raw repository's 0.42 comes from history scored against a snapshot grid it did not have, absence and turn limits, not from single-page questions (0.57 in every documentation arm).
+- Absence is the weakest row on every surface: 0.42 to 0.54 on the twelve unanswerable questions. Grepping and finding nothing did not make the shell arms refuse more often.
+
+**Decision.** D-039 stands, with its concession sharpened. The corpus adapter is what makes the documentation usable by an agent at all (normalised pages with front matter, URLs and anchors); the three tools add citation precision and cut the cost by a third against files and by two thirds against the raw repository. Offering both to one agent buys nothing. The next lever is absence, on every surface, not the shell.
+
+---
+
+## D-038c · Correction: neither mined set was reviewed by hand
+
+**Status:** decided · 2026-09-26 · `docs/evaluation.md`, `docs/eval-status.md`
+
+**Facts.**
+- D-038 made the mined numbers conditional on Tom validating the rows from the mining review file. That review was not done. The questions and gold links were written by an agent from real excerpts (GitHub issues and session transcripts), and a test validates every gold URL and anchor against the corpus on every run; no one read the 85 rows against their sources.
+- `docs/evaluation.md` said the rows were "each checked by hand", and `docs/eval-status.md` said "validated by Tom". Both overstated it.
+- D-039 says the 54 issue questions came from "people who had the SDK and still failed". 40 of the 54 were opened on SDK repositories (38 `client-python`, 2 `mistral-common`); whether their authors had the SDK checked out is not on record.
+
+**Decision.** The two documents now say what was done: agent-written from real excerpts, gold links tested, rows not reviewed by hand. The mined numbers are quoted as they are, with that provenance beside them.

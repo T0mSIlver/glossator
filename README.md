@@ -37,6 +37,7 @@ Any other MCP client, MCP Inspector for example, uses Streamable HTTP against th
 - The agent writes the answer. Server-side generation stays as the measured baseline, scoring 0.78 against 0.77 at three times the latency (D-040b, D-044).
 - The three tools take no ids and carry read-only annotations. Without them a headless client never calls the server and Work cannot tell a read from a write (D-044, D-037b, D-037c).
 - Eight biweekly snapshots and a history tool answer when a fact changed (D-041, D-048).
+- A coding agent with a shell over the same pages answers as correctly, but not as cheaply or precisely. In the Vibe CLI on Medium 3.5, sixty questions: correctness 0.60 on the raw docs repository, 0.63 on the normalised pages, 0.68 with the three tools, all inside the noise; answers with a link whose section states the claim 0.62, 0.83 and 0.92; cost 5.34, 2.68 and 1.81 USD (D-039a).
 
 Every choice is in `DECISIONS.md` with the run that decided it. The alternatives considered are in [`docs/alternatives.md`](docs/alternatives.md).
 

@@ -175,7 +175,7 @@ extension is generated and thrown away, and its seams do not reach Vespa);
 | `dev-fresh60.jsonl` | 60 | stratified slice of `dev.jsonl` never used for tuning | reporting |
 | `dev-fr.jsonl` | 36 | dev questions translated by GLM 5.3 | French |
 | `dev-noisy.jsonl` | 105 | dev questions degraded five ways | robustness |
-| `mined.jsonl` | 85 | GitHub issues and agent sessions, hand-traceable | reporting, validated by Tom |
+| `mined.jsonl` | 85 | GitHub issues and agent sessions, hand-traceable | reporting; gold links validated by test, rows not reviewed by hand |
 | `mined-v2.jsonl` | 84 | Vibe, client-ts, Stack Overflow, HN, consumer and Work sessions | reporting, not yet validated by hand; the 84th row was added after the runs below |
 | `labels/dev60-rerank-human.jsonl` | 40 | Tom's labels | judge calibration |
 | `snapshots/manifest.json` | 8 dates | biweekly commits since 1 June 2026 | time axis |

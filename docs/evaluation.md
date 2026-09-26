@@ -18,7 +18,7 @@ Nothing reported was tuned on. `dev.jsonl` tuned retrieval and the answer prompt
 |---|---:|---|---|
 | `dev.jsonl` | 294 | written by GLM 5.3 Flash from one page each, six question types | tuning only |
 | `dev-fresh60.jsonl` | 60 | a balanced slice of `dev.jsonl` never used for tuning | held-out reporting |
-| `mined.jsonl` | 85 | GitHub issues on the SDK and docs repositories, and agent transcripts, each checked by hand against the corpus | reporting on real questions |
+| `mined.jsonl` | 85 | GitHub issues on the SDK and docs repositories, and agent transcripts; questions and gold links written by an agent from the real excerpts, every gold link validated against the corpus by a test, the rows not reviewed by hand | reporting on real questions |
 | `demo.jsonl` | 30 | 25 mined questions on agents, MCP and the Vibe CLI, 5 written for the history tool | the Work measurement |
 
 Secondary sets, used once each: 36 French translations (D-008b), 105 badly worded rewrites (D-035b), 84 more mined questions not yet checked by hand (D-038b).
@@ -73,7 +73,7 @@ Eight snapshots of the documentation repository, one every two weeks from 1 June
 
 ## Not measured
 
-Mistral Small 4 is the shipped reranker default and has never run in an evaluation; every reranker number names Ministral 3 14B. No consumer arm had grep over the docs repository. The 84 second-pass mined questions are not checked by hand. Whether a text-fragment link survives a click from Work is open (D-047c).
+A coding agent with a shell over the docs was measured after submission, five arms in the Vibe CLI (D-039a, [`eval/vibe-arms/`](../eval/vibe-arms/README.md)). Mistral Small 4 is the shipped reranker default and has never run in an evaluation; every reranker number names Ministral 3 14B. Neither mined set has been reviewed by hand row by row; their gold links are checked by a test. Whether a text-fragment link survives a click from Work is open (D-047c).
 
 ## Reproduce
 

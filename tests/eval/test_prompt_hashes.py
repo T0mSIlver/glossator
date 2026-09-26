@@ -22,6 +22,12 @@ PINNED: dict[str, list[str]] = {
     "CAPABILITY_INSTRUCTIONS": [
         "e4432b33012475c8496c9187dc375fcf6b9626ccbb323af63444a802db5702da",
     ],
+    "CITATION_CHECK_VERSION": [
+        "68386d33b8ffb3dd6db3c178c522df915b662195e7b11e37dd81deaa6ddcc69b",
+    ],
+    "CITATION_SYSTEM": [
+        "3a648f60f0ffd0b5276328a702c94ca5772698f44b807cc3cc6d8a4f4ed89b4a",
+    ],
     "CLOSED_BOOK_INSTRUCTIONS": [
         "c6763315257df0c22b7372deacc4bd59f9590582bf365a98b0875a240929498e",
     ],
@@ -89,6 +95,9 @@ PINNED: dict[str, list[str]] = {
     ],
     "SYSTEM_PROMPT": [
         "257020c170449aad411ccbb15850c62248f09407c8a2106c89ac6c032b0c8270",
+    ],
+    "SYSTEM_PROMPT_ID": [
+        "d84aafab8327e6740740c9215c2c9f46638af92be0456fe3d633a667b544c49b",
     ],
     "UNANSWERABLE_INSTRUCTIONS": [
         "f7b884df810c1f1b6c10a61e1de84935840c20359d71567138fa47c275ff7644",
