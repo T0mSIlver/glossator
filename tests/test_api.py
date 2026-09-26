@@ -368,7 +368,7 @@ def test_health_reports_counts_and_corpus() -> None:
     assert corpus["pages"] > 0
     assert corpus["source_commit"]
     assert corpus["kinds"]
-    assert body["snapshots"] == {"readable": 8, "total": 8}
+    assert body["snapshots"] == {"readable": 9, "total": 9}
     assert body["embedding_probe"]["status"] in {"not_run", "passed"}
 
 

@@ -857,7 +857,7 @@ def test_health_lists_pages_chunks_and_the_three_tools(
     assert body["status"] == "ok"
     assert body["chunks"] == 4430
     assert body["pages"] == len(mcp_server._PAGE_SIZES) > 0
-    assert body["snapshots"] == {"readable": 8, "total": 8}
+    assert body["snapshots"] == {"readable": 9, "total": 9}
     assert body["tools"] == [
         "mistral_docs_search",
         "mistral_docs_read_page",

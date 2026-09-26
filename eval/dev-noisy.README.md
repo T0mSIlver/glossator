@@ -4,7 +4,7 @@ Badly worded variants of development questions, for measuring the answer strateg
 
 - Questions: 105 of 120 attempted (api_reference 18, capability 17, cross_page 17, post_cutoff 19, single_page 17, unanswerable 17); languages: {'en': 105}
 - Noise kinds (`generator.noise`): typos 24, keywords 24, vague 24, chatty 18, wrong_term 15
-- sha256: `df892be3ea190383acf69b5df647781f6f093d7f2e76b1ea22ec724da7b3bd68`
+- sha256: `850c2fdf926586105dbb20ebbda23133ea02dcbeae1c52cc5e97d69160a71444` since 2026-09-26 (the `dev-027` gold link, D-045b); `df892be3…` before
 - Source: `eval/dev.jsonl` (sha256 `acf3c2e1...`), the 120-question stratified subset at seed 0, which `--limit 120 --seed 0` reproduces
 - Perturbation run (records, calls, README, figures): `2026-09-09-1222-dev-noisy`
 - Perturber: `glm-5.3` through the z.ai coding plan, thinking disabled, seed 0, prompts `perturb-v1`; typos are generated in code and need no model
