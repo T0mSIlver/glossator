@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Build the directories the vibe arms work in, outside the repository.
+#   empty/                    V0 and VC: nothing
+#   VA/platform-docs-public/  the docs repository reset to the corpus commit,
+#                             every later commit pruned, no remote
+#   VB/docs/                  corpus/mistral-docs as served (411 pages)
+#   VB/snapshots/<date>/      the eight dated corpora
+# Usage: eval/vibe-arms/build-environments <root>
+set -euo pipefail
+root="${1:?usage: build-environments <root>}"
+repo="$(cd "$(dirname "$0")/../.." && pwd)"
+commit=2e094f7bbe1395de4a738a3483def3573143d973
+
+mkdir -p "$root/empty"
+
+if [[ ! -d "$root/VA/platform-docs-public/.git" ]]; then
+  mkdir -p "$root/VA"
+  git clone -q --single-branch --branch main \
+    https://github.com/mistralai/platform-docs-public.git "$root/VA/platform-docs-public"
+fi
+docs="$root/VA/platform-docs-public"
+git -C "$docs" reset -q --hard "$commit"
+git -C "$docs" remote remove origin 2>/dev/null || true
+git -C "$docs" reflog expire --expire=now --all
+git -C "$docs" gc -q --prune=now
+latest="$(git -C "$docs" log --all -1 --format=%cI)"
+echo "VA: HEAD $(git -C "$docs" rev-parse --short HEAD), latest reachable commit $latest"
+
+rm -rf "$root/VB"
+mkdir -p "$root/VB/snapshots"
+cp -r "$repo/corpus/mistral-docs" "$root/VB/docs"
+for snapshot in "$repo"/corpus/snapshots/*/; do
+  cp -r "$snapshot" "$root/VB/snapshots/$(basename "$snapshot")"
+done
+echo "VB: $(find "$root/VB/docs" -name '*.md' | wc -l) pages, $(ls "$root/VB/snapshots" | wc -l) snapshots"

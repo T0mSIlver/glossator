@@ -15,9 +15,16 @@ from dotenv import load_dotenv
 
 from glossator.eval.answer_eval.models import parse_judge_models
 from glossator.eval.answer_eval.prompts import JUDGE_PROMPT_HASHES, JUDGE_VERSION
-from glossator.eval.consumer.collect import QUESTION_TIMEOUT_S, run_collection
-from glossator.eval.consumer.consumers import ARM_TOOLS, ARMS, consumer_spec
+from glossator.eval.consumer.citation_check import (
+    load_checks,
+    render_summary,
+    run_citation_check,
+    summarize,
+)
+from glossator.eval.consumer.collect import MAX_PARALLEL, QUESTION_TIMEOUT_S, run_collection
+from glossator.eval.consumer.consumers import ARM_TOOLS, ARMS, VIBE_ARM_NAMES, consumer_spec
 from glossator.eval.consumer.defects import collect_defects, render_defects
+from glossator.eval.consumer.harness import VibeSetting
 from glossator.eval.consumer.judge import run_judge
 from glossator.eval.consumer.links import DEFAULT_CORPUS, check_fragments, corpus_page_urls
 from glossator.eval.consumer.metrics import aggregate, cost_per_correct
@@ -38,6 +45,8 @@ from glossator.eval.consumer.run_dir import (
     resolve_run_directory,
 )
 from glossator.eval.consumer.tools import MCP_SERVER_NAME
+from glossator.eval.consumer.vibe_arms import VIBE_ARMS
+from glossator.eval.datasets import read_jsonl
 
 
 def _read_config(run_dir: Path) -> dict[str, Any]:
@@ -63,6 +72,29 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     run_parser.add_argument("--scratch-root", type=Path, required=True)
     run_parser.add_argument("--mcp-url-a1", default="http://127.0.0.1:8000/mcp")
     run_parser.add_argument("--mcp-url-a2", default="http://127.0.0.1:8001/mcp")
+    run_parser.add_argument(
+        "--mcp-url-v",
+        default="http://127.0.0.1:8000/mcp",
+        help="The server the vibe arms with tools (VC, VD) call: all three tools",
+    )
+    run_parser.add_argument(
+        "--questions-path",
+        type=Path,
+        help="Every row of this file instead of the mined and fresh draw (e.g. eval/demo.jsonl)",
+    )
+    run_parser.add_argument(
+        "--environments-root",
+        type=Path,
+        default=Path("eval/vibe-arms/environments"),
+        help="Directories the vibe arms work in (built by eval/vibe-arms/build-environments)",
+    )
+    run_parser.add_argument(
+        "--sandbox-shell", type=Path, default=Path("eval/vibe-arms/sandbox-shell")
+    )
+    run_parser.add_argument(
+        "--fd-path", type=Path, help="An fd binary to expose inside the sandbox"
+    )
+    run_parser.add_argument("--parallel", type=int, default=MAX_PARALLEL)
     run_parser.add_argument("--token-env", default="GLOSSATOR_MCP_TOKEN")
     run_parser.add_argument("--timeout-s", type=float, default=QUESTION_TIMEOUT_S)
     run_parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
@@ -91,6 +123,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     judge_parser.add_argument("--rejudge", action="store_true")
     judge_parser.add_argument("--quota-ceiling", type=int, default=80)
 
+    cite_parser = sub.add_parser(
+        "cite-check", help="Judge whether each documentation link supports its claim (resumable)"
+    )
+    cite_parser.add_argument("--run", type=Path, required=True)
+    cite_parser.add_argument("--judge-model", default="zai:glm-5.3")
+    cite_parser.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    cite_parser.add_argument("--snapshots", type=Path, default=Path("corpus/snapshots"))
+    cite_parser.add_argument("--quota-ceiling", type=int, default=80)
+
     score_parser = sub.add_parser("score", help="Score a run deterministically")
     score_parser.add_argument("--run", type=Path, required=True)
     score_parser.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
@@ -106,11 +147,29 @@ async def _run(args: argparse.Namespace) -> None:
         raise SystemExit(f"unknown arms {unknown_arms}; available: {list(ARMS)}")
     name = args.name or (datetime.now(UTC).strftime("%Y-%m-%d-%H%M") + "-consumer-eval")
     run_dir = resolve_run_directory(name, root=args.runs_root)
-    questions = build_question_set(args.mined, args.fresh, args.mined_path, args.fresh_path)
+    vibe_arms = [arm for arm in arms if arm in VIBE_ARM_NAMES]
+    if vibe_arms and any(spec.harness != "vibe" for spec in specs):
+        raise SystemExit(f"arms {vibe_arms} run only with vibe consumers")
+    if any(spec.harness == "vibe" for spec in specs) and set(arms) - set(VIBE_ARM_NAMES):
+        raise SystemExit(f"vibe consumers run only the arms {list(VIBE_ARM_NAMES)}")
+    if args.questions_path is not None:
+        questions = read_jsonl(args.questions_path)
+    else:
+        questions = build_question_set(args.mined, args.fresh, args.mined_path, args.fresh_path)
     token = os.environ.get(args.token_env, "")
-    if any(arm in ("A1", "A2") for arm in arms) and not token:
+    if any(arm in ("A1", "A2", "VC", "VD") for arm in arms) and not token:
         raise SystemExit(f"{args.token_env} is not set; the MCP arms need it")
-    mcp_urls = {"A1": args.mcp_url_a1, "A2": args.mcp_url_a2}
+    mcp_urls = {
+        "A1": args.mcp_url_a1,
+        "A2": args.mcp_url_a2,
+        "VC": args.mcp_url_v,
+        "VD": args.mcp_url_v,
+    }
+    vibe_setting = VibeSetting(
+        environments_root=args.environments_root,
+        sandbox_shell=args.sandbox_shell,
+        fd_path=args.fd_path,
+    )
     config = {
         "kind": "consumer_eval",
         "name": name,
@@ -124,6 +183,18 @@ async def _run(args: argparse.Namespace) -> None:
         "mcp_urls": {arm: mcp_urls[arm] for arm in arms if arm in mcp_urls},
         "mcp_server_name": MCP_SERVER_NAME,
         "scratch_root": str(args.scratch_root),
+        "questions_path": str(args.questions_path) if args.questions_path else None,
+        "vibe_arms": {
+            arm: {
+                "description": VIBE_ARMS[arm].description,
+                "shell": VIBE_ARMS[arm].shell,
+                "mcp": VIBE_ARMS[arm].mcp,
+                "environment": VIBE_ARMS[arm].environment,
+                "system_prompt": VIBE_ARMS[arm].system_prompt(),
+            }
+            for arm in vibe_arms
+        },
+        "parallel": args.parallel,
         "question_count": len(questions),
         "mined_count": args.mined,
         "fresh_count": args.fresh,
@@ -149,6 +220,8 @@ async def _run(args: argparse.Namespace) -> None:
         mcp_urls=mcp_urls,
         token=token,
         timeout_s=args.timeout_s,
+        vibe_setting=vibe_setting,
+        parallel=args.parallel,
     )
 
 
@@ -167,6 +240,24 @@ async def _judge(args: argparse.Namespace) -> None:
         config["judge_models"] = [judge.identifier for judge in judge_models]
         config_path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
     print(json.dumps(counts, indent=2, sort_keys=True))
+
+
+async def _cite_check(args: argparse.Namespace) -> None:
+    try:
+        judge = parse_judge_models(args.judge_model)[0]
+    except (ValueError, IndexError) as error:
+        raise SystemExit(str(error)) from error
+    counts = await run_citation_check(
+        args.run,
+        judge,
+        corpus_dir=args.corpus,
+        snapshots_dir=args.snapshots,
+        quota_ceiling=args.quota_ceiling,
+    )
+    records = load_records(args.run / "records.jsonl")
+    cells = summarize(records, load_checks(args.run / "citations.jsonl"))
+    (args.run / "citations.md").write_text(render_summary(cells, judge.identifier))
+    print(json.dumps({"counts": counts, "cells": cells}, indent=2, sort_keys=True))
 
 
 def _score(args: argparse.Namespace) -> None:
@@ -227,6 +318,8 @@ def main() -> None:
         asyncio.run(_run(args))
     elif args.command == "judge":
         asyncio.run(_judge(args))
+    elif args.command == "cite-check":
+        asyncio.run(_cite_check(args))
     elif args.command == "score":
         _score(args)
     else:
