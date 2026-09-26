@@ -151,6 +151,9 @@ services:
       - /app/corpus/mistral-docs
       - --variant
       - ${GLOSSATOR_VARIANT:-sec1024}
+      # The vendored corpus is the whole served index, so pages it no longer
+      # holds are deleted (D-045b).
+      - --prune
     volumes:
       # The operator's embedding cache, synced by deploy.sh. Every chunk found
       # here costs nothing to index; only new text reaches the embedding API.

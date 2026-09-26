@@ -73,9 +73,9 @@ wait-vespa-query:
 	@echo "Vespa query API up: http://localhost:$(VESPA_QUERY_PORT)"
 
 ## Ingest a corpus directory into one index variant
-## Usage: make ingest corpus=corpus/mistral-docs variant=sec1024 [verbose=1]
+## Usage: make ingest corpus=corpus/mistral-docs variant=sec1024 [prune=1] [verbose=1]
 ingest:
-	uv run python -m glossator.ingest --corpus $(corpus) --variant $(variant) $(if $(verbose),--verbose,)
+	uv run python -m glossator.ingest --corpus $(corpus) --variant $(variant) $(if $(prune),--prune,) $(if $(verbose),--verbose,)
 
 ## Search one index variant
 ## Usage: make search query="how do I stream a response" [variant=sec1024] [top_k=10]

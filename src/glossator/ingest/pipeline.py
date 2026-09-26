@@ -389,8 +389,13 @@ async def ingest_corpus(
     allow_partial: bool = False,
     snapshot: str | None = None,
     embedding_cache: Path | None = None,
+    prune: bool = False,
 ) -> IngestReport:
     """Index every page of ``corpus_dir`` into ``variant``'s schema.
+
+    ``prune`` declares the corpus to be the whole index: once every page is in,
+    indexed pages whose URL it does not hold are deleted. Off by default, since a
+    fixture or a subset ingested into a shared schema would delete everything else.
 
     Raises ``PartialIngestError`` if any page fails, unless ``allow_partial`` is set.
     """
@@ -399,6 +404,8 @@ async def ingest_corpus(
         raise ValueError("snapshot is required for the snap1024 variant")
     if snapshot is not None and resolved.name != "snap1024":
         raise ValueError("snapshot may only be used with the snap1024 variant")
+    if prune and snapshot is not None:
+        raise ValueError("prune cannot be used with a snapshot: the schema holds several")
     paths = list(iter_page_paths(corpus_dir))
     if not paths:
         raise CorpusError(f"{corpus_dir}: no markdown pages found")
@@ -457,7 +464,7 @@ async def ingest_corpus(
     failures = [str(path) for path in failed]
     embedder = getattr(pipeline, "embedder", None)
     removed: list[str] = []
-    if not failures and snapshot is None:
+    if prune and not failures:
         # Only after every page is in: a page that failed to index must not be
         # mistaken for one that left the corpus.
         removed = await _remove_pages_not_in_corpus(

@@ -1877,6 +1877,6 @@ The Brave observation of D-047c on the `five-steps` link is a different question
 
 **Decision.**
 1. The 2026-09-26 snapshot is served: 426 pages, 4,592 chunks, nine snapshots behind `history`. After the redeploy, all 426 URLs and 2,278 anchors resolve on the live site.
-2. Ingesting a served variant now ends by deleting every indexed page whose URL is not in the corpus, and only when every page indexed, so a page that failed is never mistaken for one that left. Snapshot variants hold several corpora in one schema and are left alone. The redeploy removed exactly the 10 pages.
+2. Ingesting with `--prune`, which the deployment passes for the served corpus, now ends by deleting every indexed page whose URL is not in the corpus, and only when every page indexed, so a page that failed is never mistaken for one that left. Pruning is off by default, because a fixture or a subset ingested into a shared schema would delete everything else (found in review by GLM 5.3), and it refuses a snapshot ingest. The redeploy removed exactly the 10 pages.
 3. The `dev-027` gold link follows its page. The dataset READMEs record the new hash and the one every earlier run carries.
 4. Next, not done: the workflow runs the offline suite on the accepted tree before opening the PR, and the repository setting that lets Actions open pull requests is Tom's call.

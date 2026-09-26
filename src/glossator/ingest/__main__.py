@@ -47,6 +47,11 @@ def _parse_args() -> argparse.Namespace:
         help=f"Pages processed at once (default: {DEFAULT_CONCURRENCY})",
     )
     parser.add_argument(
+        "--prune",
+        action="store_true",
+        help="Delete indexed pages this corpus does not hold; only when it is the whole index",
+    )
+    parser.add_argument(
         "--skip-probe",
         action="store_true",
         help="Index without checking the embedding model first (D-031)",
@@ -94,6 +99,7 @@ async def main() -> None:
             args.variant,
             concurrency=args.concurrency,
             snapshot=args.snapshot,
+            prune=args.prune,
         )
     except (IndexWritePreflightError, PartialIngestError) as exc:
         # Report what did land before failing: a partial index is still worth
