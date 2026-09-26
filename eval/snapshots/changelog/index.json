@@ -90,6 +90,19 @@
         "removed": 17
       },
       "file": "2026-09-01..2026-09-07.json"
+    },
+    {
+      "after": "2026-09-26",
+      "after_content_digest": "943426628b391f7d6383266ca7a7d72066fc8d3dfa8541f7e8948772c0b63a4d",
+      "before": "2026-09-07",
+      "before_content_digest": "f365183371dda33bc0207412aa1d61d8f0784228aded96cddebe13ab71c8046f",
+      "counts": {
+        "added": 68,
+        "changed": 120,
+        "moved": 24,
+        "removed": 53
+      },
+      "file": "2026-09-07..2026-09-26.json"
     }
   ]
 }

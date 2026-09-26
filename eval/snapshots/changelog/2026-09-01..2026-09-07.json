@@ -1774,7 +1774,7 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations#defining-a-schema",
+    "cite": "https://docs.mistral.ai/studio/search/search-toolkit/search-index/vespa/migrations#defining-a-schema:~:text=Use%20add_field%20in",
     "heading_path": [
       "Manage schema",
       "Define a schema",

@@ -21,7 +21,7 @@ VESPA_CONFIG_URL := $(or $(VESPA_CONFIG_URL),http://localhost:$(VESPA_CONFIG_POR
 VESPA_QUERY_WAIT := $(or $(VESPA_QUERY_WAIT),180)
 
 # Docs repo commit the vendored corpus is built from (DECISIONS.md D-001, D-009).
-CORPUS_REF := $(or $(REF),2e094f7bbe1395de4a738a3483def3573143d973)
+CORPUS_REF := $(or $(REF),bee3023d26c331c00fa6c24bc746ef4cf5e97031)
 CORPUS_DIR := $(or $(CORPUS_DIR),corpus/mistral-docs)
 
 ## Install dependencies

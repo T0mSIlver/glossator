@@ -1,0 +1,21 @@
+{
+  "changed_answers": 52,
+  "judge_skipped": false,
+  "per_snapshot": {
+    "2026-09-07": {
+      "absent_cells": 1,
+      "correctness_present": 0.847457627118644,
+      "present_cells": 59,
+      "refusal_rate_absent": 1.0,
+      "unscored_cells": 0
+    },
+    "2026-09-26": {
+      "absent_cells": 2,
+      "correctness_present": 0.8620689655172413,
+      "present_cells": 58,
+      "refusal_rate_absent": 1.0,
+      "unscored_cells": 0
+    }
+  },
+  "records": 120
+}

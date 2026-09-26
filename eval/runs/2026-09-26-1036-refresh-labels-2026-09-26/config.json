@@ -1,0 +1,23 @@
+{
+  "datasets": [
+    {
+      "path": "eval/dev-fresh60.jsonl",
+      "sha256": "c663126d79ebf3c0c8cc6000a73be2fd9281c0ae672ae4d42532f1fae8fa7fc0"
+    },
+    {
+      "path": "eval/mined.jsonl",
+      "sha256": "a276e09f853024f2647dad9d7f7c4c8c34e1754dafdf6a6dc4fbb994dfd5b2a2"
+    }
+  ],
+  "deterministic_only": false,
+  "judges": [
+    "glm-5.3",
+    "glm-5.3-flash"
+  ],
+  "kind": "snapshot_labels",
+  "name": "refresh-labels-2026-09-26",
+  "prompt_sha256": "eb1a8e3075de3636048122baf01e67ba54cc8f76ffdf53e73f468d5afe2eb832",
+  "seed": 0,
+  "snapshot_manifest": "/home/runner/.cache/glossator/snapshots/gate-manifest.json",
+  "snapshot_manifest_sha256": "92dbdaf0d73c08a370fada283cb7c1327629162d3044a570404997566412422a"
+}

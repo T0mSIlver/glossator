@@ -1,0 +1,127 @@
+{
+  "baseline": {
+    "run": "eval/runs/2026-09-26-1038-refresh-eval-2026-09-26",
+    "snapshot": "2026-09-07"
+  },
+  "candidate": {
+    "run": "eval/runs/2026-09-26-1038-refresh-eval-2026-09-26",
+    "snapshot": "2026-09-26"
+  },
+  "candidate_cells": 60,
+  "candidate_unscored": 0,
+  "candidate_unscored_share": 0.0,
+  "dropped_from_population": [],
+  "max_unscored_share": 0.1,
+  "min_paired": 20,
+  "net_loss_floor": 4,
+  "net_loss_share": 0.05,
+  "paired_answerable": 50,
+  "paired_refusal": 10,
+  "regressed_signals": [],
+  "signals": [
+    {
+      "baseline_mean": 1.0,
+      "better": [],
+      "candidate_mean": 1.0,
+      "net_loss": 0,
+      "population": 50,
+      "regressed": false,
+      "signal": "retrieved",
+      "threshold": 4,
+      "worse": []
+    },
+    {
+      "baseline_mean": 0.92,
+      "better": [
+        {
+          "after": true,
+          "before": false,
+          "question_id": "dev-072"
+        },
+        {
+          "after": true,
+          "before": false,
+          "question_id": "dev-076"
+        },
+        {
+          "after": true,
+          "before": false,
+          "question_id": "dev-262"
+        }
+      ],
+      "candidate_mean": 0.94,
+      "net_loss": -1,
+      "population": 50,
+      "regressed": false,
+      "signal": "cited",
+      "threshold": 4,
+      "worse": [
+        {
+          "after": false,
+          "before": true,
+          "question_id": "dev-040"
+        },
+        {
+          "after": false,
+          "before": true,
+          "question_id": "dev-061"
+        }
+      ]
+    },
+    {
+      "baseline_mean": 0.9,
+      "better": [],
+      "candidate_mean": 0.9,
+      "net_loss": 0,
+      "population": 10,
+      "regressed": false,
+      "signal": "refused",
+      "threshold": 4,
+      "worse": []
+    },
+    {
+      "baseline_mean": 0.84,
+      "better": [
+        {
+          "after": "correct",
+          "before": "partial",
+          "question_id": "dev-033"
+        },
+        {
+          "after": "correct",
+          "before": "partial",
+          "question_id": "dev-059"
+        },
+        {
+          "after": "correct",
+          "before": "partial",
+          "question_id": "dev-076"
+        },
+        {
+          "after": "partial",
+          "before": "wrong",
+          "question_id": "dev-151"
+        }
+      ],
+      "candidate_mean": 0.86,
+      "net_loss": -2,
+      "population": 50,
+      "regressed": false,
+      "signal": "correct",
+      "threshold": 4,
+      "worse": [
+        {
+          "after": "partial",
+          "before": "correct",
+          "question_id": "dev-061"
+        },
+        {
+          "after": "wrong",
+          "before": "partial",
+          "question_id": "dev-125"
+        }
+      ]
+    }
+  ],
+  "verdict": "pass"
+}
