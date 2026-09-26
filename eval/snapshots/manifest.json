@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T18:30:02.786650+00:00",
+  "generated_at": "2026-09-26T10:32:48.829579+00:00",
   "resolved_with": "git rev-list -1 --before=<date> HEAD",
   "snapshots": [
     {
@@ -96,6 +96,18 @@
       "openapi_snapshot_exact": true,
       "openapi_source": "openapi-public-doc.yaml",
       "pages": 411,
+      "status": "built"
+    },
+    {
+      "commit": "bee3023d26c331c00fa6c24bc746ef4cf5e97031",
+      "content_digest": "943426628b391f7d6383266ca7a7d72066fc8d3dfa8541f7e8948772c0b63a4d",
+      "corpus_dir": "corpus/snapshots/2026-09-26",
+      "date": "2026-09-26",
+      "error": null,
+      "models_snapshot_exact": true,
+      "openapi_snapshot_exact": true,
+      "openapi_source": "openapi-public-doc.yaml",
+      "pages": 426,
       "status": "built"
     }
   ],

@@ -7245,7 +7245,7 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion#pipeline",
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion#pipeline:~:text=Basic%20usage%20with",
     "heading_path": [
       "Ingestion",
       "Pipeline",
@@ -7260,7 +7260,7 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion#pipeline",
+    "cite": "https://docs.mistral.ai/studio-api/knowledge-rag/search-toolkit/ingestion#pipeline:~:text=Force%20specific%20file",
     "heading_path": [
       "Ingestion",
       "Pipeline",
@@ -8094,7 +8094,7 @@
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/ingestion#pipeline",
+    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/ingestion#pipeline:~:text=Force%20specific%20file",
     "heading_path": [
       "Ingestion",
       "Pipeline",
@@ -8153,7 +8153,7 @@
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/ingestion#pipeline",
+    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/ingestion#pipeline:~:text=Basic%20usage%20with",
     "heading_path": [
       "Ingestion",
       "Pipeline",
@@ -9680,7 +9680,7 @@
     "state": "added"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/migrations#defining-a-schema",
+    "cite": "https://docs.mistral.ai/studio-api/search-toolkit/vespa/migrations#defining-a-schema:~:text=Use%20add_field%20in",
     "heading_path": [
       "Manage schema",
       "Define a schema",

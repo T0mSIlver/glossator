@@ -3008,7 +3008,7 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=Prompt%20template%20%2D",
+    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=The%20standardized%20format",
     "heading_path": [
       "Observability integrations",
       "Individual level: what components can we observe?",
@@ -3119,7 +3119,7 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=Open%2Dsource%20%28github%29%20platform",
+    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=Check%20out%20the",
     "heading_path": [
       "Observability integrations",
       "Integrations",
@@ -3174,7 +3174,7 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=Models%20specs%20%2D",
+    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=The%20specific%20version",
     "heading_path": [
       "Observability integrations",
       "Individual level: what components can we observe?",
@@ -3213,7 +3213,7 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=Formatting%20%2D%20The",
+    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=The%20structure%20and",
     "heading_path": [
       "Observability integrations",
       "Individual level: what components can we observe?",
@@ -3282,7 +3282,7 @@
     "state": "removed"
   },
   {
-    "cite": "https://docs.mistral.ai/resources/observability-integrations",
+    "cite": "https://docs.mistral.ai/resources/observability-integrations#:~:text=At%20each%20step",
     "heading_path": [
       "Observability integrations",
       "What metrics do we observe?"

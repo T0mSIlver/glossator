@@ -1,8 +1,8 @@
 {
-  "accepted_at": "2026-09-09T19:49:00+00:00",
-  "commit": "2e094f7bbe1395de4a738a3483def3573143d973",
-  "gate": null,
-  "labels": "eval/runs/2026-09-09-1929-snapshot-labels/labels.jsonl",
-  "run": "eval/runs/2026-09-09-1949-snapshot-eval",
-  "snapshot": "2026-09-07"
+  "accepted_at": "2026-09-26T10:53:19.503385+00:00",
+  "commit": "bee3023d26c331c00fa6c24bc746ef4cf5e97031",
+  "gate": "eval/runs/2026-09-26-1038-refresh-eval-2026-09-26/gate",
+  "labels": "eval/runs/2026-09-26-1036-refresh-labels-2026-09-26/labels.jsonl",
+  "run": "eval/runs/2026-09-26-1038-refresh-eval-2026-09-26",
+  "snapshot": "2026-09-26"
 }

@@ -824,7 +824,7 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/models/best-practices/sampling#available-sampling-parameters",
+    "cite": "https://docs.mistral.ai/models/best-practices/sampling#available-sampling-parameters:~:text=use%20the%20Top",
     "heading_path": [
       "Sampling",
       "Available Sampling Parameters",
@@ -1540,7 +1540,7 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/document-processing/annotations#usage",
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/annotations#usage:~:text=using%20bbox_annotation_format%20set",
     "heading_path": [
       "Document Annotations",
       "Annotations",
@@ -1555,7 +1555,7 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/document-processing/annotations#usage",
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/annotations#usage:~:text=structures%20using%20document_annotation_format",
     "heading_path": [
       "Document Annotations",
       "Annotations",
@@ -1570,7 +1570,7 @@
     "state": "changed"
   },
   {
-    "cite": "https://docs.mistral.ai/studio-api/document-processing/annotations#usage",
+    "cite": "https://docs.mistral.ai/studio-api/document-processing/annotations#usage:~:text=using%20bbox_annotation_format%20and",
     "heading_path": [
       "Document Annotations",
       "Annotations",

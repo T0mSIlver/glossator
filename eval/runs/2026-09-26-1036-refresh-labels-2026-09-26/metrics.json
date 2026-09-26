@@ -1,0 +1,51 @@
+{
+  "agreement": {
+    "krippendorff_alpha_ordinal": 0.8212083737241261,
+    "pairwise": [
+      {
+        "first": "glm-5.3",
+        "items": 38,
+        "percentage_agreement": 0.9210526315789473,
+        "quadratic_weighted_kappa": 0.7723035952063915,
+        "second": "glm-5.3-flash"
+      }
+    ],
+    "per_judge": {
+      "glm-5.3": {
+        "items": 38,
+        "mean_correctness": 0.8421052631578947
+      },
+      "glm-5.3-flash": {
+        "items": 38,
+        "mean_correctness": 0.8026315789473685
+      }
+    },
+    "percentage_agreement": 0.9210526315789473
+  },
+  "cells": 290,
+  "deterministic_share": 0.8689655172413793,
+  "per_snapshot": {
+    "2026-09-07": {
+      "cells": 145,
+      "counts": {
+        "absent": 2,
+        "changed": 1,
+        "present": 127,
+        "present_rephrased": 15
+      },
+      "deterministic": 127,
+      "deterministic_share": 0.8758620689655172
+    },
+    "2026-09-26": {
+      "cells": 145,
+      "counts": {
+        "absent": 3,
+        "changed": 1,
+        "present": 125,
+        "present_rephrased": 16
+      },
+      "deterministic": 125,
+      "deterministic_share": 0.8620689655172413
+    }
+  }
+}
