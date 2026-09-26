@@ -71,7 +71,8 @@ def _summary(report: IngestReport) -> str:
     return (
         f"{report.variant}: indexed {report.chunks} chunks from {report.pages} page(s); "
         f"{report.embedding_tokens} embedding tokens (~${report.estimated_usd:.4f}); "
-        f"{report.embedded_chunks} embedded, {report.cached_chunks} from cache"
+        f"{report.embedded_chunks} embedded, {report.cached_chunks} from cache; "
+        f"{len(report.removed_pages)} page(s) no longer in the corpus removed"
     )
 
 

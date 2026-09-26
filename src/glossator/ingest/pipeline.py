@@ -26,6 +26,9 @@ from mistralai.search.toolkit.document import (
 )
 from mistralai.search.toolkit.embedding import Embedder, EmbeddingResult, MistralEmbedder
 from mistralai.search.toolkit.ingestion.pipelines import Pipeline
+from mistralai.search.toolkit.plugins.vespa.search.document_per_chunk_index import (
+    DocumentPerChunkSearchIndex,
+)
 from mistralai.search.toolkit.search.errors import IndexingError
 
 from glossator.clients import embedding_client
@@ -112,6 +115,7 @@ class IngestReport:
     failures: tuple[str, ...]
     embedded_chunks: int = 0
     cached_chunks: int = 0
+    removed_pages: tuple[str, ...] = ()
 
     @property
     def estimated_usd(self) -> float:
@@ -309,6 +313,38 @@ async def _verify_index_writable(index: WritableIndex, variant: IndexVariant) ->
         ) from exc
 
 
+async def _remove_pages_not_in_corpus(index: object, urls: set[str]) -> list[str]:
+    """Delete the chunks of every indexed page whose URL is not in the corpus.
+
+    Re-indexing replaces a page's chunks but never touches a page the corpus no
+    longer has, so without this a refresh keeps serving pages the site has removed
+    (D-045b). Snapshot variants hold several corpora in one schema and are left alone.
+    Returns the document ids removed.
+    """
+    if not isinstance(index, DocumentPerChunkSearchIndex):
+        return []
+    expected = {compute_id(url) for url in urls}
+    doctype = index.collection_name
+    indexed: set[str] = set()
+    continuation: str | None = None
+    while True:
+        page = await index._client.visit_by_selection(  # noqa: SLF001 - toolkit has no list API
+            doctype,
+            doctype,
+            field_set=f"{doctype}:document_id",
+            cluster=index.schema.content_cluster,
+            continuation=continuation,
+        )
+        indexed.update(str(doc.fields["document_id"]) for doc in page.documents)
+        continuation = page.continuation
+        if not continuation:
+            break
+    stale = sorted(indexed - expected)
+    for doc_id in stale:
+        await index.delete_document(doc_id)
+    return stale
+
+
 def build_pipeline(
     variant: IndexVariant,
     client: Mistral | None = None,
@@ -420,6 +456,15 @@ async def ingest_corpus(
         )
     failures = [str(path) for path in failed]
     embedder = getattr(pipeline, "embedder", None)
+    removed: list[str] = []
+    if not failures and snapshot is None:
+        # Only after every page is in: a page that failed to index must not be
+        # mistaken for one that left the corpus.
+        removed = await _remove_pages_not_in_corpus(
+            pipeline.stores[0], {load_page(path).url for path in paths}
+        )
+        if removed:
+            log.info("Removed pages that left the corpus", count=len(removed))
 
     report = IngestReport(
         variant=resolved.name,
@@ -429,6 +474,7 @@ async def ingest_corpus(
         embedded_chunks=int(getattr(embedder, "embedded_chunks", 0)),
         cached_chunks=int(getattr(embedder, "cached_chunks", 0)),
         failures=tuple(failures),
+        removed_pages=tuple(removed),
     )
     log.info(
         "Ingest complete",
