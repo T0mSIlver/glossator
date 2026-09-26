@@ -1880,3 +1880,13 @@ The Brave observation of D-047c on the `five-steps` link is a different question
 2. Ingesting with `--prune`, which the deployment passes for the served corpus, now ends by deleting every indexed page whose URL is not in the corpus, and only when every page indexed, so a page that failed is never mistaken for one that left. Pruning is off by default, because a fixture or a subset ingested into a shared schema would delete everything else (found in review by GLM 5.3), and it refuses a snapshot ingest. The redeploy removed exactly the 10 pages.
 3. The `dev-027` gold link follows its page. The dataset READMEs record the new hash and the one every earlier run carries.
 4. Next, not done: the workflow runs the offline suite on the accepted tree before opening the PR, and the repository setting that lets Actions open pull requests is Tom's call.
+
+---
+
+## D-045c · GitHub Actions may open the refresh pull request
+
+**Status:** decided · 2026-09-26 · repository setting "Allow GitHub Actions to create and approve pull requests"
+
+**Facts.** D-045b's workflow run passed the gate, pushed the accept branch, and failed at `gh pr create` because the repository did not allow Actions to open pull requests.
+
+**Decision.** Tom turned the setting on. Default workflow permissions stay read-only; `refresh.yml` declares the write permissions it needs. A passing refresh now opens its own pull request, and merging it and `make deploy` stay manual.
